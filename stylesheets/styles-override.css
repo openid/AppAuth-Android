@@ -1,0 +1,12 @@
+@media print, screen and (min-width: 960px) {
+	header {
+	  width: 300px;
+	}
+	section {
+	  width: 600px;
+	}
+	.wrapper {
+	  width:960px;
+	  margin:0 auto;
+	}
+}
