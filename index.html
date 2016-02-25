@@ -1,0 +1,276 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>AppAuth for Android by openid</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>AppAuth for Android</h1>
+        <p></p>
+
+        <p class="view"><a href="https://github.com/openid/AppAuth-Android">View the Project on GitHub <small>openid/AppAuth-Android</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/openid/AppAuth-Android/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/openid/AppAuth-Android/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/openid/AppAuth-Android">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p>AppAuth for Android is a client SDK for communicating with <a href="https://tools.ietf.org/html/rfc6749">OAuth 2.0</a> and <a href="http://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect</a> providers. It strives to
+directly map the requests and responses of those specifications, while following
+the idiomatic style of the implementation language. In addition to mapping the
+raw protocol flows, convenience methods are available to assist with common
+tasks like performing an action with fresh tokens.</p>
+
+<p>The library follows the best practices set out in <a href="https://tools.ietf.org/html/draft-ietf-oauth-native-apps">OAuth 2.0 for Native Apps</a>
+including using
+<a href="http://developer.android.com/tools/support-library/features.html#custom-tabs">Custom Tabs</a>
+for the auth request. For this reason,
+<code>WebView</code> is explicitly <em>not</em> supported due to usability and security reasons.</p>
+
+<p>The library also supports the <a href="https://tools.ietf.org/html/rfc7636">PKCE</a>
+extension to OAuth which was created to secure authorization codes in public
+clients when custom URI scheme redirects are used. The library is friendly to
+other extensions (standard or otherwise) with the ability to handle additional
+parameters in all protocol requests and responses.</p>
+
+<h2>
+<a id="specification" class="anchor" href="#specification" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Specification</h2>
+
+<h3>
+<a id="supported-android-versions" class="anchor" href="#supported-android-versions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Supported Android Versions</h3>
+
+<p>AppAuth supports Android API 16 (Jellybean) and above.</p>
+
+<p>When a Custom Tabs implementation is provided by a browser on the device (for
+example by
+<a href="https://developer.chrome.com/multidevice/android/customtabs">Chrome</a>), Custom
+Tabs are used for authorization requests. Otherwise, the default browser is used
+as a fallback.</p>
+
+<h3>
+<a id="authorization-server-support" class="anchor" href="#authorization-server-support" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Authorization Server Support</h3>
+
+<p>Both Custom URI Schemes (all supported versions of Android) and App Links
+(API 23+) can be used with the library.</p>
+
+<p>In general, AppAuth can work with any Authorization Server (AS) that supports
+<a href="https://tools.ietf.org/html/draft-ietf-oauth-native-apps">native apps</a>,
+either through custom URI scheme redirects, or App Links.
+AS's that assume all clients are web-based or require clients to maintain
+confidentiality of the client secrets may not work well.</p>
+
+<h2>
+<a id="building-the-project" class="anchor" href="#building-the-project" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Building the Project</h2>
+
+<h3>
+<a id="prerequisites" class="anchor" href="#prerequisites" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Prerequisites</h3>
+
+<p>The project requires the Android SDK for API level 23 (Marshmallow) to build,
+though the produced binaries only require API level 16 (Jellybean) to be
+used.</p>
+
+<h3>
+<a id="configure-the-demo-app" class="anchor" href="#configure-the-demo-app" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Configure the Demo App</h3>
+
+<p>Follow the instructions in <a href="app/README.md">app/README.md</a> to configure the
+demo app with your own OAuth client (you need to update 3 configuration points
+with your client info to try the demo).</p>
+
+<h3>
+<a id="building-from-the-command-line" class="anchor" href="#building-from-the-command-line" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Building from the Command line</h3>
+
+<p>AppAuth for Android uses Gradle as its build system. In order to build
+the library and app binaries, run <code>./gradlew assemble</code>.
+The library AAR files are output to <code>library/build/outputs/aar</code>, while the
+demo app is output to <code>app/build/outputs/apk</code>.
+In order to run the tests and code analysis, run <code>./gradlew check</code>.</p>
+
+<p>The build script attempts
+to guess the location of your SDK by looking at the values of $ANDROID_SDK_HOME
+and $ANDROID_HOME. If neither of these are defined or are not the SDK you
+wish to use, you must create a <code>local.properties</code> file in the project root.
+This file must define a property <code>sdk.dir</code> that points to your SDK root
+directory. For example:</p>
+
+<pre><code>sdk.dir=/path/to/android-sdk
+</code></pre>
+
+<h3>
+<a id="building-from-android-studio" class="anchor" href="#building-from-android-studio" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Building from Android Studio</h3>
+
+<p>In AndroidStudio, File -&gt; New -&gt; Import project. Select the root folder
+(the one with the <code>build.gradle</code> file).</p>
+
+<p>If you get an error like:
+<code>Error:Could not find com.android.support:customtabs:23.2.0.</code> then be sure you
+have installed the Android Support Library from the Android SDK Manager.
+Follow the Android Studio prompts to resolve the dependencies automatically.</p>
+
+<h2>
+<a id="auth-flow" class="anchor" href="#auth-flow" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Auth Flow</h2>
+
+<p>AppAuth supports both manual interaction with the Authorization Server
+where you need to perform your own token exchanges, as well as convenience
+methods that perform some of this logic for you. This example
+performs a manual exchange, and stores the result as an <code>AuthState</code> object.</p>
+
+<h3>
+<a id="tracking-authorization-state" class="anchor" href="#tracking-authorization-state" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tracking authorization state</h3>
+
+<p><code>AuthState</code> is a class that keeps track of the authorization and token
+requests and responses, and provides a convenience method to call an API with
+fresh tokens. This is the only object that you need to serialize to retain the
+authorization state of the session. Typically, one would do this by storing
+the authorization state in SharedPreferences or some other persistent store
+private to the app:</p>
+
+<div class="highlight highlight-source-java"><pre>@<span class="pl-smi">NonNull</span> <span class="pl-k">public</span> <span class="pl-smi">AuthState</span> readAuthState() {
+  <span class="pl-smi">SharedPreferences</span> authPrefs <span class="pl-k">=</span> getSharedPreferences(<span class="pl-s"><span class="pl-pds">"</span>auth<span class="pl-pds">"</span></span>, <span class="pl-c1">MODE_PRIVATE</span>);
+  <span class="pl-smi">String</span> stateJson <span class="pl-k">=</span> authPrefs<span class="pl-k">.</span>getString(<span class="pl-s"><span class="pl-pds">"</span>stateJson<span class="pl-pds">"</span></span>);
+  <span class="pl-smi">AuthState</span> state;
+  <span class="pl-k">if</span> (stateStr <span class="pl-k">!=</span> <span class="pl-c1">null</span>) {
+    <span class="pl-k">return</span> <span class="pl-smi">AuthState</span><span class="pl-k">.</span>fromJsonString(stateJson);
+  } <span class="pl-k">else</span> {
+    <span class="pl-k">return</span> <span class="pl-k">new</span> <span class="pl-smi">AuthState</span>();
+  }
+}
+
+<span class="pl-k">public</span> <span class="pl-k">void</span> writeAuthState(@<span class="pl-smi">NonNull</span> <span class="pl-smi">AuthState</span> state) {
+  <span class="pl-smi">SharedPreferences</span> authPrefs <span class="pl-k">=</span> getSharedPreferences(<span class="pl-s"><span class="pl-pds">"</span>auth<span class="pl-pds">"</span></span>, <span class="pl-c1">MODE_PRIVATE</span>);
+  authPrefs<span class="pl-k">.</span>edit()
+      .putString(<span class="pl-s"><span class="pl-pds">"</span>stateJson<span class="pl-pds">"</span></span>, state<span class="pl-k">.</span>toJsonString())
+      .apply();
+}</pre></div>
+
+<h3>
+<a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Configuration</h3>
+
+<p>You can configure AppAuth by specifying the endpoints directly:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-smi">AuthorizationServiceConfiguration</span> config <span class="pl-k">=</span>
+        <span class="pl-k">new</span> <span class="pl-smi">AuthorizationServiceConfiguration</span>(name, mAuthEndpoint, mTokenEndpoint);
+
+<span class="pl-c">// perform the auth request...</span></pre></div>
+
+<p>Or through discovery:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-smi">Uri</span> issuerUri <span class="pl-k">=</span> <span class="pl-smi">Uri</span><span class="pl-k">.</span>parse(<span class="pl-s"><span class="pl-pds">"</span>https://accounts.google.com<span class="pl-pds">"</span></span>);
+<span class="pl-smi">AuthorizationServiceConfiguration</span> config <span class="pl-k">=</span>
+    <span class="pl-smi">AuthorizationServiceConfiguration</span><span class="pl-k">.</span>fetchFromIssuer(
+        issuerUri,
+        <span class="pl-k">new</span> <span class="pl-smi">RetrieveConfigurationCallback</span>() {
+          <span class="pl-k">@Override</span> <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">onFetchConfigurationCompleted</span>(
+              <span class="pl-k">@Nullable</span> <span class="pl-smi">AuthorizationServiceConfiguration</span> <span class="pl-v">serviceConfiguration</span>,
+              <span class="pl-k">@Nullable</span> <span class="pl-smi">AuthorizationException</span> <span class="pl-v">ex</span>) {
+            <span class="pl-k">if</span> (ex <span class="pl-k">!=</span> <span class="pl-c1">null</span>) {
+                <span class="pl-smi">Log</span><span class="pl-k">.</span>w(<span class="pl-c1">TAG</span>, <span class="pl-s"><span class="pl-pds">"</span>Failed to retrieve configuration for <span class="pl-pds">"</span></span> <span class="pl-k">+</span> idp<span class="pl-k">.</span>name, ex);
+            } <span class="pl-k">else</span> {
+                <span class="pl-c">// service configuration retrieved, proceed to authorization...</span>
+            }
+          }
+      });</pre></div>
+
+<h3>
+<a id="authorizing" class="anchor" href="#authorizing" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Authorizing</h3>
+
+<p>After configuring or retrieving an authorization service configuration,
+an authorization request can be constructed for dispatch</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-smi">AuthorizationRequest</span> req <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-smi">AuthorizationRequest</span>.<span class="pl-smi">Builder</span>(
+    config,
+    clientId,
+    <span class="pl-smi">AuthorizationRequest</span><span class="pl-c1"><span class="pl-k">.</span>RESPONSE_TYPE_CODE</span>,
+    redirectUri);</pre></div>
+
+<p>Requests are dispatched with the help of <code>AuthorizationService</code>. As this
+will open a custom tab or browser instance to fulfill this request, the
+response is delivered via an intent to an activity of your choosing:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-smi">AuthorizationService</span> service <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-smi">AuthorizationService</span>(context);
+service<span class="pl-k">.</span>performAuthorizationRequest(
+    req,
+    <span class="pl-k">new</span> <span class="pl-smi">Intent</span>(context, <span class="pl-smi">MyAuthResultHandlerActivity</span><span class="pl-k">.</span>class));</pre></div>
+
+<h3>
+<a id="handling-the-redirect" class="anchor" href="#handling-the-redirect" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Handling the Redirect</h3>
+
+<p>The response is delivered to the specified handler, and can be extracted
+from the intent data:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">void</span> onCreate(<span class="pl-smi">Bundle</span> b) {
+  <span class="pl-c">// ...</span>
+  <span class="pl-smi">AuthorizationResponse</span> resp <span class="pl-k">=</span> <span class="pl-smi">AuthorizationResponse</span><span class="pl-k">.</span>fromIntent(getIntent());
+  <span class="pl-smi">AuthorizationException</span> ex <span class="pl-k">=</span> <span class="pl-smi">AuthorizationException</span><span class="pl-k">.</span>fromIntent(getIntent());
+  <span class="pl-k">if</span> (resp <span class="pl-k">!=</span> <span class="pl-c1">null</span>) {
+    <span class="pl-c">// authorization succeeded</span>
+  } <span class="pl-k">else</span> {
+    <span class="pl-c">// authorization failed, check ex for more details</span>
+  }
+  <span class="pl-c">// ...</span>
+}</pre></div>
+
+<p>Given the auth response, a token request can be created to exchange the
+authorization code:</p>
+
+<div class="highlight highlight-source-java"><pre>service<span class="pl-k">.</span>performTokenRequest(
+    resp<span class="pl-k">.</span>createTokenExchangeRequest(),
+    <span class="pl-k">new</span> <span class="pl-smi">AuthorizationService</span>.<span class="pl-smi">TokenResponseCallback</span>() {
+      <span class="pl-k">@Override</span> <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">onTokenRequestCompleted</span>(
+            <span class="pl-smi">TokenResponse</span> <span class="pl-v">resp</span>, <span class="pl-smi">AuthorizationException</span> <span class="pl-v">ex</span>) {
+          <span class="pl-k">if</span> (resp <span class="pl-k">!=</span> <span class="pl-c1">null</span>) {
+            <span class="pl-c">// exchange succeeded</span>
+          } <span class="pl-k">else</span> {
+            <span class="pl-c">// authorization failed, check ex for more details</span>
+          }
+        }
+    });</pre></div>
+
+<h3>
+<a id="making-api-calls" class="anchor" href="#making-api-calls" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Making API Calls</h3>
+
+<p>With an updated AuthState based on the token exchange, it is then possible to
+make requests using guaranteed fresh tokens at any future point:</p>
+
+<pre><code>AuthState state = readAuthState();
+state.performActionWithFreshTokens(service, new AuthStateAction() {
+  @Override public void execute(
+      String accessToken,
+      String idToken,
+      AuthorizationException ex) {
+    if (ex != null) {
+      // negotiation for fresh tokens failed, check ex for more details
+      return;
+    }
+
+    // use the access token to do something ...
+  }
+});
+</code></pre>
+
+<h2>
+<a id="api-documentation" class="anchor" href="#api-documentation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>API Documentation</h2>
+
+<p>Browse the <a href="http://openid.github.io/AppAuth-Android/docs/latest/">API documentation</a>.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/openid">openid</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
