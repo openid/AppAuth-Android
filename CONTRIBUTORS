@@ -1,0 +1,13 @@
+# People who have agreed to one of the CLAs and can contribute patches.
+# The AUTHORS file lists the copyright holders; this file
+# lists people. For example, Google employees are listed here
+# but not in AUTHORS, because Google holds the copyright.
+#
+# Names should be added to this file as:
+#     Name <email address>
+
+Iain McGinniss <iainmcgin@google.com>
+William Denniss <wdenniss@google.com>
+Steven Wright <stevewright@google.com>
+Alex Chau <alexchau@google.com>
+Benjamin Franz <bfranz@google.com>

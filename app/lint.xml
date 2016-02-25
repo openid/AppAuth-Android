@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- Check complains about fullBackupContent as only applying to v23, which is not an issue -->
+    <issue id="UnusedAttribute" severity="ignore" />
+
+</lint>

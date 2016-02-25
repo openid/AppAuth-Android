@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+    This contains the authorization service configuration details that are used to demonstrate
+    authentication. By default, all authorization services are disabled until you modify this file
+    to provide your own configuration details.
+    -->
+    <eat-comment/>
+
+    <bool name="google_enabled">false</bool>
+    <string name="google_client_id" translatable="false">YOUR_ID.apps.googleusercontent.com</string>
+    <!--
+    NOTE: This scheme is automatically provisioned by Google for Android OAuth2 clients, and is
+    the reverse form of the client ID registered above. Handling of this scheme is registered in an
+    intent filter in the app's manifest.
+    -->
+    <string name="google_auth_redirect_scheme" translatable="false">com.googleusercontent.apps.YOUR_ID</string>
+    <string name="google_auth_redirect_uri" translatable="false">com.googleusercontent.apps.YOUR_ID:/oauth2redirect</string>
+
+</resources>

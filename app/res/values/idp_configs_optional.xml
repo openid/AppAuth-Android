@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+    This file contains the OAuth2 configuration details that do not typically need to be changed
+    for the demo app to correctly interact with each IDP.
+    -->
+    <eat-comment/>
+
+    <string name="google_name">Google</string>
+    <string name="google_discovery_uri" translatable="false">https://accounts.google.com/.well-known/openid-configuration</string>
+    <string name="google_scope_string" translatable="false">openid profile email</string>
+
+</resources>
