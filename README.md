@@ -1,5 +1,7 @@
 # AppAuth for Android
 
+[![Build Status](https://www.bitrise.io/app/a09572dde99baf30.svg?token=DROliGDWTq1SbhaHTid9fw&branch=master)](https://www.bitrise.io/app/a09572dde99baf30)
+
 AppAuth for Android is a client SDK for communicating with [OAuth 2.0]
 (https://tools.ietf.org/html/rfc6749) and [OpenID Connect]
 (http://openid.net/specs/openid-connect-core-1_0.html) providers. It strives to
