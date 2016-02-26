@@ -1,6 +1,7 @@
 # AppAuth for Android
 
 [![Build Status](https://www.bitrise.io/app/a09572dde99baf30.svg?token=DROliGDWTq1SbhaHTid9fw&branch=master)](https://www.bitrise.io/app/a09572dde99baf30)
+[![Codacy Badge](https://api.codacy.com/project/badge/grade/321412eec811478085ec6c4c923ad8a1)](https://www.codacy.com/app/iainmcgin/AppAuth-Android)
 
 AppAuth for Android is a client SDK for communicating with [OAuth 2.0]
 (https://tools.ietf.org/html/rfc6749) and [OpenID Connect]
