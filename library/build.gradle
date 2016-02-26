@@ -1,6 +1,13 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.jfrog.bintray'
 apply plugin: 'checkstyle'
 apply plugin: 'jacoco'
+apply plugin: 'com.github.dcendents.android-maven'
+
+group = "net.openid"
+version = "0.1"
+def vName = version
+def vDate = "2016-02-25T18:15:00.000-0800"
 
 android {
     compileSdkVersion 23
@@ -10,7 +17,8 @@ android {
         minSdkVersion 16
         targetSdkVersion 23
         versionCode 1
-        versionName "0.1"
+        versionName vName
+        project.archivesBaseName = "appauth"
     }
 
     sourceSets {
@@ -112,4 +120,28 @@ afterEvaluate {
     androidJavadocs.classpath += files(android.libraryVariants.collect { variant ->
         variant.javaCompile.classpath.files
     })
+}
+
+bintray {
+    user = System.getenv("BINTRAY_USER")
+    key = System.getenv("BINTRAY_KEY")
+    pkg {
+        repo = "net.openid"
+        name = "appauth"
+        desc = "AppAuth for Android"
+        userOrg = "openid"
+        licenses = ["Apache-2.0"]
+        websiteUrl = "https://openid.github.io/AppAuth-Android/"
+        issueTrackerUrl = "https://github.com/openid/AppAuth-Android/issues"
+        vcsUrl = "https://github.com/openid/AppAuth-Android.git"
+        githubRepo = 'bintray/gradle-bintray-plugin'
+
+        version {
+            name = vName
+            desc = "AppAuth for Android"
+            released = vDate
+            vcsTag = vName
+        }
+    }
+    configurations = ["archives"]
 }
