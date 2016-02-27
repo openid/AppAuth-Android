@@ -18,8 +18,11 @@ import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
 import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
 import static net.openid.appauth.TestValues.TEST_STATE;
 import static net.openid.appauth.TestValues.getTestServiceConfig;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+
+import android.net.Uri;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,8 +30,10 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
@@ -56,8 +61,17 @@ public class AuthorizationRequestTest {
     private AuthorizationRequest.Builder mRequestBuilder;
     private AuthorizationRequest mRequest;
 
+    private AuthorizationRequest.Builder mMinimalRequestBuilder;
+
     @Before
     public void setUp() {
+
+        mMinimalRequestBuilder = new AuthorizationRequest.Builder(
+                getTestServiceConfig(),
+                TEST_CLIENT_ID,
+                AuthorizationRequest.RESPONSE_TYPE_CODE,
+                TEST_APP_REDIRECT_URI);
+
         mRequestBuilder = new AuthorizationRequest.Builder(
                 getTestServiceConfig(),
                 TEST_CLIENT_ID,
@@ -180,6 +194,78 @@ public class AuthorizationRequestTest {
                 .setScopes(Collections.<String>emptyList())
                 .build();
         assertNull(request.scope);
+    }
+
+    @Test
+    public void testToUri() throws Exception {
+        Uri uri = mRequest.toUri();
+
+        Uri authEndpoint = mRequest.configuration.authorizationEndpoint;
+        assertThat(uri.getScheme()).isEqualTo(authEndpoint.getScheme());
+        assertThat(uri.getAuthority()).isEqualTo(authEndpoint.getAuthority());
+        assertThat(uri.getPath()).isEqualTo(authEndpoint.getPath());
+        assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_REDIRECT_URI))
+                .isEqualTo(mRequest.redirectUri.toString());
+        assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_CLIENT_ID))
+                .isEqualTo(mRequest.clientId);
+        assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_RESPONSE_TYPE))
+                .isEqualTo(mRequest.responseType);
+        assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_STATE))
+                .isEqualTo(mRequest.state);
+        assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_SCOPE))
+                .isEqualTo(mRequest.scope);
+        assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_RESPONSE_MODE))
+                .isEqualTo(mRequest.responseMode);
+        assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_CODE_CHALLENGE))
+                .isEqualTo(mRequest.codeVerifierChallenge);
+        assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_CODE_CHALLENGE_METHOD))
+                .isEqualTo(mRequest.codeVerifierChallengeMethod);
+    }
+
+    @Test
+    public void testToUri_withMinimalConfiguration() throws Exception {
+        AuthorizationRequest req = mMinimalRequestBuilder.build();
+
+        Uri uri = req.toUri();
+        assertThat(uri.getQueryParameterNames())
+                .isEqualTo(new HashSet<>(Arrays.asList(
+                        AuthorizationRequest.PARAM_CLIENT_ID,
+                        AuthorizationRequest.PARAM_RESPONSE_TYPE,
+                        AuthorizationRequest.PARAM_REDIRECT_URI,
+                        AuthorizationRequest.PARAM_STATE,
+                        AuthorizationRequest.PARAM_CODE_CHALLENGE,
+                        AuthorizationRequest.PARAM_CODE_CHALLENGE_METHOD)));
+    }
+
+    @Test
+    public void testToUri_withNoState() throws Exception {
+        AuthorizationRequest req = mMinimalRequestBuilder.setState(null).build();
+        assertThat(req.toUri().getQueryParameterNames())
+                .doesNotContain(AuthorizationRequest.PARAM_STATE);
+    }
+
+    @Test
+    public void testToUri_withNoVerifier() throws Exception {
+        AuthorizationRequest req = mMinimalRequestBuilder.setCodeVerifier(null).build();
+        assertThat(req.toUri().getQueryParameterNames())
+                .doesNotContain(AuthorizationRequest.PARAM_CODE_CHALLENGE)
+                .doesNotContain(AuthorizationRequest.PARAM_CODE_CHALLENGE_METHOD);
+    }
+
+    @Test
+    public void testToUri_withAdditionalParameters() throws Exception {
+        Map<String, String> additionalParams = new HashMap<>();
+        additionalParams.put("my_param", "1234");
+        additionalParams.put("another_param", "5678");
+        AuthorizationRequest req = mMinimalRequestBuilder
+                .setAdditionalParameters(additionalParams)
+                .build();
+
+        Uri uri = req.toUri();
+        assertThat(uri.getQueryParameter("my_param"))
+                .isEqualTo("1234");
+        assertThat(uri.getQueryParameter("another_param"))
+                .isEqualTo("5678");
     }
 
     @Test

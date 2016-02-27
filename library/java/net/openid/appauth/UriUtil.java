@@ -37,6 +37,17 @@ class UriUtil {
         return Uri.parse(uri);
     }
 
+    public static void appendQueryParameterIfNotNull(
+            @NonNull Uri.Builder uriBuilder,
+            @NonNull String paramName,
+            @Nullable String value) {
+        if (value == null) {
+            return;
+        }
+
+        uriBuilder.appendQueryParameter(paramName, value);
+    }
+
     public static Map<String, String> extractAdditionalParameters(
             @NonNull Uri uri,
             @NonNull Set<String> ignore) {

@@ -20,6 +20,7 @@ import static net.openid.appauth.Preconditions.checkNotNull;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.Base64;
 
@@ -125,6 +126,30 @@ public class AuthorizationRequest {
      * by OAuth Public Clients" (RFC 7636), Section 4.4</a>
      */
     public static final String CODE_CHALLENGE_METHOD_PLAIN = "plain";
+
+    @VisibleForTesting
+    static final String PARAM_CLIENT_ID = "client_id";
+
+    @VisibleForTesting
+    static final String PARAM_CODE_CHALLENGE = "code_challenge";
+
+    @VisibleForTesting
+    static final String PARAM_CODE_CHALLENGE_METHOD = "code_challenge_method";
+
+    @VisibleForTesting
+    static final String PARAM_REDIRECT_URI = "redirect_uri";
+
+    @VisibleForTesting
+    static final String PARAM_RESPONSE_MODE = "response_mode";
+
+    @VisibleForTesting
+    static final String PARAM_RESPONSE_TYPE = "response_type";
+
+    @VisibleForTesting
+    static final String PARAM_SCOPE = "scope";
+
+    @VisibleForTesting
+    static final String PARAM_STATE = "state";
 
     private static final String KEY_CONFIGURATION = "configuration";
     private static final String KEY_CLIENT_ID = "clientId";
@@ -610,6 +635,32 @@ public class AuthorizationRequest {
     @Nullable
     public Set<String> getScopeSet() {
         return ScopeUtil.scopeStringToSet(scope);
+    }
+
+    /**
+     * Produces a request URI, that can be used to dispath the authorization request.
+     */
+    @NonNull
+    public Uri toUri() {
+        Uri.Builder uriBuilder = configuration.authorizationEndpoint.buildUpon()
+                .appendQueryParameter(PARAM_REDIRECT_URI, redirectUri.toString())
+                .appendQueryParameter(PARAM_CLIENT_ID, clientId)
+                .appendQueryParameter(PARAM_RESPONSE_TYPE, responseType);
+
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_STATE, state);
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_SCOPE, scope);
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_RESPONSE_MODE, responseMode);
+
+        if (codeVerifier != null) {
+            uriBuilder.appendQueryParameter(PARAM_CODE_CHALLENGE, codeVerifierChallenge)
+                    .appendQueryParameter(PARAM_CODE_CHALLENGE_METHOD, codeVerifierChallengeMethod);
+        }
+
+        for (Entry<String, String> entry : additionalParameters.entrySet()) {
+            uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
+        }
+
+        return uriBuilder.build();
     }
 
     /**

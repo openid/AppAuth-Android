@@ -224,38 +224,8 @@ public class AuthorizationService {
             @NonNull PendingIntent resultHandlerIntent,
             @NonNull CustomTabsIntent customTabsIntent) {
         checkNotDisposed();
-        Uri.Builder uriBuilder = request.configuration.authorizationEndpoint.buildUpon()
-                .appendQueryParameter(REDIRECT_URI, request.redirectUri.toString())
-                .appendQueryParameter(CLIENT_ID, request.clientId)
-                .appendQueryParameter(RESPONSE_TYPE, request.responseType);
-
-        if (request.state != null) {
-            uriBuilder.appendQueryParameter(STATE, request.state);
-        }
-
-        if (request.codeVerifier != null) {
-            uriBuilder
-                    .appendQueryParameter(CODE_CHALLENGE,
-                            request.codeVerifierChallenge)
-                    .appendQueryParameter(CODE_CHALLENGE_METHOD,
-                            request.codeVerifierChallengeMethod);
-        }
-
-        if (request.scope != null) {
-            uriBuilder.appendQueryParameter(SCOPE, request.scope);
-        }
-
-        if (request.responseMode != null) {
-            uriBuilder.appendQueryParameter(RESPONSE_MODE, request.responseMode);
-        }
-
-        for (String key : request.additionalParameters.keySet()) {
-            String value = request.additionalParameters.get(key);
-            uriBuilder.appendQueryParameter(key, value);
-        }
-        Uri requestUri = uriBuilder.build();
+        Uri requestUri = request.toUri();
         PendingIntentStore.getInstance().addPendingIntent(request, resultHandlerIntent);
-
         Intent intent = customTabsIntent.intent;
         intent.setData(requestUri);
         if (TextUtils.isEmpty(intent.getPackage())) {
