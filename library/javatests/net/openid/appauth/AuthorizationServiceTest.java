@@ -16,7 +16,6 @@ package net.openid.appauth;
 
 import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
 import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
-import static net.openid.appauth.TestValues.TEST_AUTH_CODE;
 import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
 import static net.openid.appauth.TestValues.TEST_IDP_TOKEN_ENDPOINT;
 import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
@@ -25,6 +24,7 @@ import static net.openid.appauth.TestValues.TEST_SCOPE;
 import static net.openid.appauth.TestValues.TEST_STATE;
 import static net.openid.appauth.TestValues.getTestAuthCodeExchangeRequest;
 import static net.openid.appauth.TestValues.getTestAuthRequestBuilder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -255,10 +255,8 @@ public class AuthorizationServiceTest {
         mService.performTokenRequest(request, mAuthCallback);
         mAuthCallback.waitForCallback();
         assertTokenResponse(mAuthCallback.response, request);
-        // mOutputStream contains the encoded query obtained via Uri.getEncodedQuery.
-        // Use an empty helper uri to easily query the parameters.
-        Uri uri = new Uri.Builder().encodedQuery(mOutputStream.toString()).build();
-        assertCodeForTokenUri(uri);
+        String postBody = mOutputStream.toString();
+        assertThat(postBody).isEqualTo(request.toUri().getEncodedQuery());
         assertEquals(TEST_IDP_TOKEN_ENDPOINT.toString(), mBuilder.mUri);
     }
 
@@ -301,15 +299,6 @@ public class AuthorizationServiceTest {
         assertEquals(TEST_REFRESH_TOKEN, response.refreshToken);
         assertEquals(AuthorizationResponse.TOKEN_TYPE_BEARER, response.tokenType);
         assertEquals(TEST_ID_TOKEN, response.idToken);
-    }
-
-    private void assertCodeForTokenUri(Uri uri) {
-        assertEquals(TEST_CLIENT_ID, uri.getQueryParameter(AuthorizationService.CLIENT_ID));
-        assertEquals(TEST_APP_REDIRECT_URI.toString(),
-                uri.getQueryParameter(AuthorizationService.REDIRECT_URI));
-        assertEquals(TEST_AUTH_CODE, uri.getQueryParameter(AuthorizationService.CODE));
-        assertEquals(AuthorizationService.GRANT_TYPE_AUTH_CODE,
-                uri.getQueryParameter(AuthorizationService.GRANT_TYPE));
     }
 
     private class InjectedUrlBuilder implements AuthorizationService.UrlBuilder {

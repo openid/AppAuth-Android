@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -59,6 +60,27 @@ public class TokenRequest {
     static final String KEY_REFRESH_TOKEN = "refreshToken";
     @VisibleForTesting
     static final String KEY_ADDITIONAL_PARAMETERS = "additionalParameters";
+
+    @VisibleForTesting
+    static final String PARAM_CLIENT_ID = "client_id";
+
+    @VisibleForTesting
+    static final String PARAM_CODE = "code";
+
+    @VisibleForTesting
+    static final String PARAM_CODE_VERIFIER = "code_verifier";
+
+    @VisibleForTesting
+    static final String PARAM_GRANT_TYPE = "grant_type";
+
+    @VisibleForTesting
+    static final String PARAM_REDIRECT_URI = "redirect_uri";
+
+    @VisibleForTesting
+    static final String PARAM_REFRESH_TOKEN = "refresh_token";
+
+    @VisibleForTesting
+    static final String PARAM_SCOPE = "scope";
 
     /**
      * The grant type used for exchanging an authorization code for one or more tokens.
@@ -388,7 +410,7 @@ public class TokenRequest {
                 return this;
             }
 
-            for (Map.Entry<String, String> entry : additionalParameters.entrySet()) {
+            for (Entry<String, String> entry : additionalParameters.entrySet()) {
                 Preconditions.checkMapEntryFullyDefined(entry,
                         "extra parameters must have non-null keys and non-null values");
                 // TODO: check that the key name does not conflict with any "core" field names.
@@ -477,6 +499,27 @@ public class TokenRequest {
     @Nullable
     public Set<String> getScopeSet() {
         return ScopeUtil.scopeStringToSet(scope);
+    }
+
+    /**
+     * Produces a request URI, that can be used to dispatch the token request.
+     */
+    @NonNull
+    public Uri toUri() {
+        Uri.Builder uriBuilder = configuration.tokenEndpoint.buildUpon()
+                .appendQueryParameter(PARAM_GRANT_TYPE, grantType)
+                .appendQueryParameter(PARAM_CLIENT_ID, clientId);
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_REDIRECT_URI, redirectUri);
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_CODE, authorizationCode);
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_REFRESH_TOKEN, refreshToken);
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_CODE_VERIFIER, codeVerifier);
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_SCOPE, scope);
+
+        for (Entry<String, String> param : additionalParameters.entrySet()) {
+            uriBuilder.appendQueryParameter(param.getKey(), param.getValue());
+        }
+
+        return uriBuilder.build();
     }
 
     /**
