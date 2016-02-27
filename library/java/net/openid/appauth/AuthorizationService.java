@@ -38,7 +38,6 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Map;
 
 /**
  * Dispatches requests to an OAuth2 authorization service. Note that instances of this class
@@ -126,28 +125,10 @@ public class AuthorizationService {
     static final String CODE = "code";
 
     @VisibleForTesting
-    static final String CODE_VERIFIER = "code_verifier";
-
-    @VisibleForTesting
-    static final String CODE_CHALLENGE = "code_challenge";
-
-    @VisibleForTesting
-    static final String CODE_CHALLENGE_METHOD = "code_challenge_method";
-
-    @VisibleForTesting
-    static final String REFRESH_TOKEN = "refresh_token";
-
-    @VisibleForTesting
     static final String GRANT_TYPE = "grant_type";
 
     @VisibleForTesting
     static final String GRANT_TYPE_AUTH_CODE = "authorization_code";
-
-    @VisibleForTesting
-    static final String GRANT_TYPE_REFRESH = "refresh_token";
-
-    @VisibleForTesting
-    static final String ACCESS_TOKEN = "access_token";
 
     @VisibleForTesting
     Context mContext;
@@ -250,33 +231,9 @@ public class AuthorizationService {
             @NonNull net.openid.appauth.TokenRequest request,
             @NonNull TokenResponseCallback callback) {
         checkNotDisposed();
-        Uri.Builder uri = request.configuration.tokenEndpoint.buildUpon();
-        uri.appendQueryParameter(GRANT_TYPE, request.grantType);
-        uri.appendQueryParameter(CLIENT_ID, request.clientId);
-
-        if (GRANT_TYPE_AUTH_CODE.equals(request.grantType)) {
-            uri.appendQueryParameter(CODE, request.authorizationCode);
-
-            if (request.redirectUri != null) {
-                uri.appendQueryParameter(REDIRECT_URI, request.redirectUri.toString());
-            }
-
-            if (request.codeVerifier != null) {
-                uri.appendQueryParameter(CODE_VERIFIER, request.codeVerifier);
-            }
-        }
-
-        if (GRANT_TYPE_REFRESH.equals(request.grantType)) {
-            uri.appendQueryParameter(REFRESH_TOKEN, request.refreshToken);
-        }
-
-        for (Map.Entry<String, String> additionalParam : request.additionalParameters.entrySet()) {
-            uri.appendQueryParameter(additionalParam.getKey(), additionalParam.getValue());
-        }
-
         Logger.debug("Initiating code exchange request to %s",
                 request.configuration.tokenEndpoint);
-        new TokenRequestTask(uri.build(), request, callback)
+        new TokenRequestTask(request.toUri(), request, callback)
                 .execute();
     }
 

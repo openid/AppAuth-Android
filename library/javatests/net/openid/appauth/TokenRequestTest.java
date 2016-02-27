@@ -14,9 +14,16 @@
 
 package net.openid.appauth;
 
+import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
 import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
+import static net.openid.appauth.TestValues.TEST_CODE_VERIFIER;
 import static net.openid.appauth.TestValues.getTestServiceConfig;
+import static org.assertj.android.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import android.net.Uri;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -32,6 +39,21 @@ public class TokenRequestTest {
     private static final String TEST_AUTHORIZATION_CODE = "ABCDEFGH";
     private static final String TEST_REFRESH_TOKEN = "IJKLMNOP";
 
+    private TokenRequest.Builder mMinimalBuilder;
+    private TokenRequest.Builder mAuthorizationCodeRequestBuilder;
+
+    @Before
+    public void setUp() {
+        mMinimalBuilder = new TokenRequest.Builder(
+                getTestServiceConfig(),
+                TEST_CLIENT_ID);
+
+        mAuthorizationCodeRequestBuilder = new TokenRequest.Builder(
+                getTestServiceConfig(),
+                TEST_CLIENT_ID)
+                .setAuthorizationCode(TEST_AUTHORIZATION_CODE)
+                .setRedirectUri(TEST_APP_REDIRECT_URI);
+    }
 
     @Test(expected = NullPointerException.class)
     public void testBuild_nullConfiguration() {
@@ -52,21 +74,21 @@ public class TokenRequestTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testBuild_emptyAuthorizationCode() {
-        new TokenRequest.Builder(getTestServiceConfig(), TEST_CLIENT_ID)
+        mMinimalBuilder
                 .setAuthorizationCode("")
                 .build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testBuild_emptyRefreshToken() {
-        new TokenRequest.Builder(getTestServiceConfig(), TEST_CLIENT_ID)
+        mMinimalBuilder
                 .setRefreshToken("")
                 .build();
     }
 
     @Test(expected = IllegalStateException.class)
     public void testBuild_noRedirectUriForAuthorizationCodeExchange() {
-        new TokenRequest.Builder(getTestServiceConfig(), TEST_CLIENT_ID)
+        mMinimalBuilder
                 .setAuthorizationCode(TEST_AUTHORIZATION_CODE)
                 .build();
     }
@@ -75,15 +97,84 @@ public class TokenRequestTest {
     public void testBuild_additionalParamWithNullValue() {
         Map<String, String> badMap = new HashMap<>();
         badMap.put("x", null);
-        new TokenRequest.Builder(getTestServiceConfig(), TEST_CLIENT_ID)
+        mMinimalBuilder
                 .setAdditionalParameters(badMap)
                 .build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testBuild_badScopeString() {
-        new TokenRequest.Builder(getTestServiceConfig(), TEST_CLIENT_ID)
+        mMinimalBuilder
                 .setScopes("")
                 .build();
+    }
+
+    @Test
+    public void testToUri_forCodeExchange() {
+        TokenRequest request = mAuthorizationCodeRequestBuilder.build();
+
+        Uri requestUri = request.toUri();
+        assertThat(requestUri)
+                .hasScheme(request.configuration.tokenEndpoint.getScheme())
+                .hasHost(request.configuration.tokenEndpoint.getHost());
+        requestUri.getAuthority();
+        assertThat(requestUri.getQueryParameter(TokenRequest.PARAM_GRANT_TYPE))
+                .isEqualTo(TokenRequest.GRANT_TYPE_AUTHORIZATION_CODE);
+        assertThat(requestUri.getQueryParameter(TokenRequest.PARAM_CLIENT_ID))
+                .isEqualTo(TEST_CLIENT_ID);
+        assertThat(requestUri.getQueryParameter(TokenRequest.PARAM_CODE))
+                .isEqualTo(TEST_AUTHORIZATION_CODE);
+        assertThat(requestUri.getQueryParameter(TokenRequest.PARAM_REDIRECT_URI))
+                .isEqualTo(TEST_APP_REDIRECT_URI.toString());
+    }
+
+    @Test
+    public void testToUri_forRefreshToken() {
+        TokenRequest request = mMinimalBuilder
+                .setRefreshToken(TEST_REFRESH_TOKEN)
+                .build();
+
+        Uri requestUri = request.toUri();
+        assertThat(requestUri.getQueryParameter(TokenRequest.PARAM_GRANT_TYPE))
+                .isEqualTo(TokenRequest.GRANT_TYPE_REFRESH_TOKEN);
+        assertThat(requestUri.getQueryParameter(TokenRequest.PARAM_CLIENT_ID))
+                .isEqualTo(TEST_CLIENT_ID);
+        assertThat(requestUri.getQueryParameter(TokenRequest.PARAM_REFRESH_TOKEN))
+                .isEqualTo(TEST_REFRESH_TOKEN);
+    }
+
+    @Test
+    public void testToUri_withCodeVerifier() {
+        TokenRequest request = mAuthorizationCodeRequestBuilder
+                .setCodeVerifier(TEST_CODE_VERIFIER)
+                .build();
+
+        assertThat(request.toUri().getQueryParameter(TokenRequest.PARAM_CODE_VERIFIER))
+                .isEqualTo(TEST_CODE_VERIFIER);
+    }
+
+    @Test
+    public void testToUri_withScope() {
+        TokenRequest request = mMinimalBuilder
+                .setRefreshToken(TEST_REFRESH_TOKEN)
+                .setScope("email profile")
+                .build();
+
+        assertThat(request.toUri().getQueryParameter(TokenRequest.PARAM_SCOPE))
+                .isEqualTo("email profile");
+    }
+
+    @Test
+    public void testToUri_withAdditionalParameters() {
+        Map<String, String> additionalParams = new HashMap<>();
+        additionalParams.put("p1", "v1");
+        additionalParams.put("p2", "v2");
+        TokenRequest request = mAuthorizationCodeRequestBuilder
+                .setAdditionalParameters(additionalParams)
+                .build();
+
+        Uri requestUri = request.toUri();
+        assertThat(requestUri.getQueryParameter("p1")).isEqualTo("v1");
+        assertThat(requestUri.getQueryParameter("p2")).isEqualTo("v2");
     }
 }

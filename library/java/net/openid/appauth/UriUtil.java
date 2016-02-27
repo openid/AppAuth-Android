@@ -40,12 +40,17 @@ class UriUtil {
     public static void appendQueryParameterIfNotNull(
             @NonNull Uri.Builder uriBuilder,
             @NonNull String paramName,
-            @Nullable String value) {
+            @Nullable Object value) {
         if (value == null) {
             return;
         }
 
-        uriBuilder.appendQueryParameter(paramName, value);
+        String valueStr = value.toString();
+        if (valueStr == null) {
+            return;
+        }
+
+        uriBuilder.appendQueryParameter(paramName, value.toString());
     }
 
     public static Map<String, String> extractAdditionalParameters(
