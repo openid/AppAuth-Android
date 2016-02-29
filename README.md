@@ -24,6 +24,27 @@ clients when custom URI scheme redirects are used. The library is friendly to
 other extensions (standard or otherwise) with the ability to handle additional
 parameters in all protocol requests and responses.
 
+## Download
+
+Download
+the latest JAR ([direct link](http://cli.re/Gxajn4) /
+[Bintray repository](https://bintray.com/openid/net.openid/appauth/view))
+or add a dependency using Gradle:
+
+```groovy
+compile 'net.openid:appauth:0.1.1'
+```
+
+Or Maven:
+
+```xml
+<dependency>
+  <groupId>net.openid</groupId>
+  <artifactId>appauth</artifactId>
+  <version>0.1.1</version>
+</dependency>
+```
+
 ## Specification
 
 ### Supported Android Versions
