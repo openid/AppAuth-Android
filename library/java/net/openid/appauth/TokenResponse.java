@@ -181,7 +181,7 @@ public class TokenResponse {
         private String mScope;
 
         @NonNull
-        Map<String, String> mAdditionalParameters;
+        private Map<String, String> mAdditionalParameters;
 
         /**
          * Creates a token response associated with the specified request.
@@ -195,16 +195,18 @@ public class TokenResponse {
          * Extracts token response fields from a JSON string.
          * @throws JSONException if the JSON is malformed or has incorrect value types for fields.
          */
-        @NonNull Builder fromJson(@NonNull String jsonStr) throws JSONException {
+        @NonNull
+        public Builder fromResponseJsonString(@NonNull String jsonStr) throws JSONException {
             checkNotEmpty(jsonStr, "json cannot be null or empty");
-            return fromJson(new JSONObject(jsonStr));
+            return fromResponseJson(new JSONObject(jsonStr));
         }
 
         /**
          * Extracts token response fields from a JSON object.
          * @throws JSONException if the JSON is malformed or has incorrect value types for fields.
          */
-        @NonNull Builder fromJson(@NonNull JSONObject json) throws JSONException {
+        @NonNull
+        public Builder fromResponseJson(@NonNull JSONObject json) throws JSONException {
             try {
                 setTokenType(JsonUtil.getString(json, KEY_TOKEN_TYPE));
                 setAccessToken(JsonUtil.getStringIfDefined(json, KEY_ACCESS_TOKEN));
@@ -500,16 +502,20 @@ public class TokenResponse {
             @Nullable TokenRequest request,
             @NonNull JSONObject json)
             throws JSONException {
-        if (request == null) {
+
+        TokenRequest extractedRequest;
+        if (request != null) {
+            extractedRequest = request;
+        } else {
             if (!json.has(KEY_REQUEST)) {
                 throw new IllegalArgumentException(
                         "token request not provided and not found in JSON");
             }
-            request = TokenRequest.fromJson(json.getJSONObject(KEY_REQUEST));
+            extractedRequest = TokenRequest.fromJson(json.getJSONObject(KEY_REQUEST));
         }
 
-        return new TokenResponse.Builder(request)
-                .fromJson(json)
+        return new TokenResponse.Builder(extractedRequest)
+                .fromResponseJson(json)
                 .build();
     }
 }

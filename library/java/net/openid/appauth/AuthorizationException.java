@@ -255,7 +255,7 @@ public final class AuthorizationException extends Exception {
         public static final AuthorizationException OTHER =
                 authEx(1008, null);
 
-        static final Map<String, AuthorizationException> STRING_TO_EXCEPTION =
+        private static final Map<String, AuthorizationException> STRING_TO_EXCEPTION =
                 exceptionMapByString(
                         INVALID_REQUEST,
                         UNAUTHORIZED_CLIENT,
@@ -341,7 +341,7 @@ public final class AuthorizationException extends Exception {
         public static final AuthorizationException OTHER =
                 tokenEx(2007, null);
 
-        static final Map<String, AuthorizationException> STRING_TO_EXCEPTION =
+        private static final Map<String, AuthorizationException> STRING_TO_EXCEPTION =
                 exceptionMapByString(
                         INVALID_REQUEST,
                         INVALID_CLIENT,

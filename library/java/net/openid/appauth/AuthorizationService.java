@@ -342,7 +342,7 @@ public class AuthorizationService {
 
             TokenResponse response;
             try {
-                response = new TokenResponse.Builder(mRequest).fromJson(json).build();
+                response = new TokenResponse.Builder(mRequest).fromResponseJson(json).build();
             } catch (JSONException jsonEx) {
                 mCallback.onTokenRequestCompleted(null,
                         AuthorizationException.fromTemplate(
