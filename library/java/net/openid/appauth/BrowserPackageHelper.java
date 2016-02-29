@@ -20,7 +20,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.support.annotation.VisibleForTesting;
-import android.text.TextUtils;
 
 import java.util.Iterator;
 import java.util.List;
