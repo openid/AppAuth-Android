@@ -215,8 +215,11 @@ public class AuthorizationResponse {
             mAdditionalParameters = new LinkedHashMap<>();
         }
 
+        /**
+         * Extracts authorization response parameters from the query portion of a redirect URI.
+         */
         @NonNull
-        Builder fromUri(@NonNull Uri uri) {
+        public Builder fromUri(@NonNull Uri uri) {
             return fromUri(uri, SystemClock.INSTANCE);
         }
 
