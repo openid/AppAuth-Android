@@ -221,7 +221,9 @@ public class TokenResponse {
                 // JSONException should only be thrown if a get() call is made for a key which
                 // cannot be found. As all calls are guarded by has() calls, this exception should
                 // therefore not be thrown.
-                throw new RuntimeException("JSONException thrown in violation of contract", ex);
+                throw new IllegalStateException(
+                        "JSONException thrown in violation of contract",
+                        ex);
             }
         }
 

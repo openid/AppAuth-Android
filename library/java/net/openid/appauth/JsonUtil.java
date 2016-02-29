@@ -49,7 +49,7 @@ final class JsonUtil {
         try {
             json.put(field, value);
         } catch (JSONException ex) {
-            throw new RuntimeException("JSONException thrown in violation of contract, ex");
+            throw new IllegalStateException("JSONException thrown in violation of contract, ex");
         }
     }
 
@@ -63,7 +63,7 @@ final class JsonUtil {
         try {
             json.put(field, value);
         } catch (JSONException ex) {
-            throw new RuntimeException("JSONException thrown in violation of contract", ex);
+            throw new IllegalStateException("JSONException thrown in violation of contract", ex);
         }
     }
 
@@ -77,7 +77,7 @@ final class JsonUtil {
         try {
             json.put(field, value);
         } catch (JSONException ex) {
-            throw new RuntimeException("JSONException thrown in violation of contract", ex);
+            throw new IllegalStateException("JSONException thrown in violation of contract", ex);
         }
     }
 
@@ -91,7 +91,7 @@ final class JsonUtil {
         try {
             json.put(field, value);
         } catch (JSONException ex) {
-            throw new RuntimeException("JSONException thrown in violation of contract", ex);
+            throw new IllegalStateException("JSONException thrown in violation of contract", ex);
         }
     }
 
@@ -107,7 +107,7 @@ final class JsonUtil {
         try {
             json.put(field, value);
         } catch (JSONException ex) {
-            throw new RuntimeException("JSONException thrown in violation of contract", ex);
+            throw new IllegalStateException("JSONException thrown in violation of contract", ex);
         }
     }
 
@@ -123,7 +123,7 @@ final class JsonUtil {
         try {
             json.put(field, value.toString());
         } catch (JSONException ex) {
-            throw new RuntimeException("JSONException thrown in violation of contract", ex);
+            throw new IllegalStateException("JSONException thrown in violation of contract", ex);
         }
     }
 
@@ -139,7 +139,7 @@ final class JsonUtil {
         try {
             json.put(field, value);
         } catch (JSONException ex) {
-            throw new RuntimeException("JSONException thrown in violation of contract", ex);
+            throw new IllegalStateException("JSONException thrown in violation of contract", ex);
         }
     }
 
@@ -155,7 +155,7 @@ final class JsonUtil {
         try {
             json.put(field, value);
         } catch (JSONException ex) {
-            throw new RuntimeException("JSONException thrown in violation of contract", ex);
+            throw new IllegalStateException("JSONException thrown in violation of contract", ex);
         }
     }
 
@@ -316,8 +316,8 @@ final class JsonUtil {
             return field.convert(json.getString(field.key));
         } catch (JSONException e) {
             // all appropriate steps are taken above to avoid a JSONException. If it is still
-            // thrown, indicating an implementation change, throw a RuntimeException
-            throw new RuntimeException("unexpected JSONException", e);
+            // thrown, indicating an implementation change, throw an exception
+            throw new IllegalStateException("unexpected JSONException", e);
         }
     }
 
@@ -339,8 +339,8 @@ final class JsonUtil {
             return values;
         } catch (JSONException e) {
             // all appropriate steps are taken above to avoid a JSONException. If it is still
-            // thrown, indicating an implementation change, throw a RuntimeException
-            throw new RuntimeException("unexpected JSONException", e);
+            // thrown, indicating an implementation change, throw an excpetion
+            throw new IllegalStateException("unexpected JSONException", e);
         }
     }
 

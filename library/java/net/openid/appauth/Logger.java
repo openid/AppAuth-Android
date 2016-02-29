@@ -138,7 +138,7 @@ class Logger {
      * Default {@link LogWrapper} implementation, using {@link android.util.Log} static methods.
      */
     private static final class AndroidLogWrapper implements LogWrapper {
-        static final AndroidLogWrapper INSTANCE = new AndroidLogWrapper();
+        private static final AndroidLogWrapper INSTANCE = new AndroidLogWrapper();
 
         private AndroidLogWrapper() {}
 
