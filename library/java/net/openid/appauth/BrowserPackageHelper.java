@@ -90,38 +90,26 @@ class BrowserPackageHelper {
             return mPackageNameToUse;
         }
 
-        // Get default VIEW intent handler for web URIs
         PackageManager pm = context.getPackageManager();
-        ResolveInfo defaultViewHandlerInfo =
-                pm.resolveActivity(BROWSER_INTENT, PackageManager.GET_RESOLVED_FILTER);
 
-        // if the default is not a full browser, ignore it
-        String defaultViewHandlerPackageName = null;
-        if (defaultViewHandlerInfo != null && isFullBrowser(defaultViewHandlerInfo)) {
-            defaultViewHandlerPackageName = defaultViewHandlerInfo.activityInfo.packageName;
-
-            // check whether the default handler has a warmup service and return if it does
-            if (hasWarmupService(pm, defaultViewHandlerPackageName)) {
-                mPackageNameToUse = defaultViewHandlerPackageName;
-                return mPackageNameToUse;
-            }
-        }
-
-        // If the default handler is not set / eligible, or does not have a warmup service, return
-        // the first handler eligible handler found which supports a warmup service (if available).
-        ResolveInfo alternateBrowser = null;
+        // retrieve a list of all the matching handlers for the browser intent.
+        // queryIntentActivities will ensure that these are priority ordered, with the default
+        // (if set) as the first entry. Ignoring any matches which are not "full" browsers,
+        // pick the first that supports custom tabs, or the first full browser otherwise.
+        ResolveInfo firstMatch = null;
         List<ResolveInfo> resolvedActivityList =
                 pm.queryIntentActivities(BROWSER_INTENT, PackageManager.GET_RESOLVED_FILTER);
+
         for (ResolveInfo info : resolvedActivityList) {
             // ignore handlers which are not browers
             if (!isFullBrowser(info)) {
                 continue;
             }
 
-            // we hold the first non-default  browser as the alternate browser to use, if we do
-            // not find any that support a warmup service
-            if (alternateBrowser == null) {
-                alternateBrowser = info;
+            // we hold the first non-default browser as the default browser to use, if we do
+            // not find any that support a warmup service.
+            if (firstMatch == null) {
+                firstMatch = info;
             }
 
             if (hasWarmupService(pm, info.activityInfo.packageName)) {
@@ -131,12 +119,10 @@ class BrowserPackageHelper {
             }
         }
 
-        // No handlers have a warmup service, so we return default browser, or an arbitrary
-        // browser if the default is not set / not eligible.
-        if (!TextUtils.isEmpty(defaultViewHandlerPackageName)) {
-            mPackageNameToUse = defaultViewHandlerPackageName;
-        } else if (alternateBrowser != null) {
-            mPackageNameToUse = alternateBrowser.activityInfo.packageName;
+        // No handlers have a warmup service, so we return the first match (typically the
+        // default browser), or null if there are no identifiable browsers.
+        if (firstMatch != null) {
+            mPackageNameToUse = firstMatch.activityInfo.packageName;
         } else {
             mPackageNameToUse = null;
         }

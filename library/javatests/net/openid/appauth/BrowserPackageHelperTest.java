@@ -86,73 +86,36 @@ public class BrowserPackageHelperTest {
     }
 
     @Test
-    public void testGetPackageNameToUse_withDefaultBrowser_warmUpSupportOnDefault() {
-        setDefaultBrowser(CHROME);
-        setBrowserList(FIREFOX, DOLPHIN, CHROME);
+    public void testGetPackageNameToUse_warmUpSupportOnFirstMatch() {
+        setBrowserList(CHROME, FIREFOX, DOLPHIN);
         setBrowsersWithWarmupSupport(CHROME, FIREFOX);
         checkPackageNameToUse(CHROME);
     }
 
     @Test
-    public void testGetPackageNameToUse_withDefaultBrowser_warmUpSupportOnAlternateBrowser() {
-        setDefaultBrowser(DOLPHIN);
-        setBrowserList(FIREFOX, DOLPHIN);
-        setBrowsersWithWarmupSupport(FIREFOX);
-        checkPackageNameToUse(FIREFOX);
-    }
-
-    @Test
-    public void testGetPackageNameToUse_withDefaultBrowser_warmUpSupportOnAlternateBrowsers() {
-        setDefaultBrowser(DOLPHIN);
-        setBrowserList(CHROME, DOLPHIN, FIREFOX);
-        setBrowsersWithWarmupSupport(CHROME, FIREFOX);
-        checkPackageNameToUseIsOneOf(FIREFOX, CHROME);
-    }
-
-    @Test
-    public void testGetPackageNameToUse_withDefaultBrowser_noWarmUpSupportOnAnyBrowser() {
-        setDefaultBrowser(CHROME);
-        setBrowserList(DOLPHIN, CHROME);
-        setBrowsersWithWarmupSupport(NO_BROWSERS);
-        checkPackageNameToUse(CHROME);
-    }
-
-
-    @Test
-    public void testGetPackageNameToUse_withNoDefaultBrowser_warmupSupportOnOneBrowser() {
-        setDefaultBrowser(null);
-        setBrowserList(FIREFOX, DOLPHIN);
-        setBrowsersWithWarmupSupport(FIREFOX);
-        checkPackageNameToUse(FIREFOX);
-    }
-
-    @Test
-    public void testGetPackageNameToUse_withNoDefaultBrowser_warmUpSupportOnMultipleBrowsers() {
-        setDefaultBrowser(null);
-        setBrowserList(CHROME, FIREFOX);
-        setBrowsersWithWarmupSupport(CHROME, FIREFOX);
-        checkPackageNameToUseIsOneOf(CHROME, FIREFOX);
-    }
-
-    @Test
-    public void testGetPackageNameToUse_withNoDefaultBrowser_singleBrowser_noWarmUpSupport() {
-        setDefaultBrowser(null);
-        setBrowserList(DOLPHIN);
-        setBrowsersWithWarmupSupport(NO_BROWSERS);
-        checkPackageNameToUseIsOneOf(DOLPHIN);
-    }
-
-    @Test
-    public void testGetPackageNameToUse_withNoDefaultBrowser_noWarmUpSupportOnAnyBrowser() {
-        setDefaultBrowser(null);
+    public void testGetPackageNameToUse_warmUpSupportOnAlternateBrowser() {
         setBrowserList(DOLPHIN, FIREFOX);
+        setBrowsersWithWarmupSupport(FIREFOX);
+        checkPackageNameToUse(FIREFOX);
+    }
+
+    @Test
+    public void testGetPackageNameToUse_warmUpSupportOnAlternateBrowsers() {
+        setBrowserList(DOLPHIN, CHROME, FIREFOX);
+        setBrowsersWithWarmupSupport(CHROME, FIREFOX);
+        // first in priority list always wins
+        checkPackageNameToUse(CHROME);
+    }
+
+    @Test
+    public void testGetPackageNameToUse_noWarmUpSupportOnAnyBrowser() {
+        setBrowserList(CHROME, DOLPHIN);
         setBrowsersWithWarmupSupport(NO_BROWSERS);
-        checkPackageNameToUseIsOneOf(DOLPHIN, FIREFOX);
+        checkPackageNameToUse(CHROME);
     }
 
     @Test
     public void testGetPackageNameToUse_noBrowsers() {
-        setDefaultBrowser(null);
         setBrowserList(NO_BROWSERS);
         setBrowsersWithWarmupSupport(NO_BROWSERS);
         assertNull(mHelper.getPackageNameToUse(mContext));
@@ -165,7 +128,6 @@ public class BrowserPackageHelperTest {
                         .withBrowserDefaults()
                         .addAuthority("www.example.com")
                         .build();
-        setDefaultBrowser(authorityRestrictedBrowser);
         setBrowserList(authorityRestrictedBrowser, CHROME);
         setBrowsersWithWarmupSupport(authorityRestrictedBrowser, CHROME);
         checkPackageNameToUse(CHROME);
@@ -180,7 +142,6 @@ public class BrowserPackageHelperTest {
                         .addScheme(SCHEME_HTTP)
                         .addScheme(SCHEME_HTTPS)
                         .build();
-        setDefaultBrowser(misconfiguredBrowser);
         setBrowserList(misconfiguredBrowser, CHROME);
         setBrowsersWithWarmupSupport(misconfiguredBrowser, CHROME);
         checkPackageNameToUse(CHROME);
@@ -194,19 +155,14 @@ public class BrowserPackageHelperTest {
                         .addCategory(Intent.CATEGORY_BROWSABLE)
                         .addScheme(SCHEME_HTTP)
                         .build();
-        setDefaultBrowser(DOLPHIN);
         setBrowserList(DOLPHIN, noHttpsBrowser);
         setBrowsersWithWarmupSupport(noHttpsBrowser);
         checkPackageNameToUse(DOLPHIN);
     }
 
-    private void setDefaultBrowser(ResolveInfo defaultBrowser) {
-        when(mPackageManager.resolveActivity(
-                BrowserPackageHelper.BROWSER_INTENT,
-                PackageManager.GET_RESOLVED_FILTER))
-                .thenReturn(defaultBrowser);
-    }
-
+    /**
+     * Browsers are expected to be in priority order, such that the default would be first.
+     */
     private void setBrowserList(ResolveInfo... browsers) {
         if (browsers == null) {
             return;
@@ -233,16 +189,6 @@ public class BrowserPackageHelperTest {
         String result = mHelper.getPackageNameToUse(mContext);
         assertEquals("returned package does not match expected package",
                 expected.activityInfo.packageName, result);
-    }
-
-    private void checkPackageNameToUseIsOneOf(ResolveInfo... possibleResults) {
-        String result = mHelper.getPackageNameToUse(mContext);
-        boolean matched = false;
-        for (ResolveInfo possibleResult : possibleResults) {
-            matched |= (possibleResult.activityInfo.packageName.equals(result));
-        }
-
-        assertTrue("returned package does not match any in possible set", matched);
     }
 
     private static class ResolveInfoBuilder {
