@@ -15,7 +15,10 @@
 package net.openid.appauth;
 
 import static net.openid.appauth.Preconditions.checkArgument;
+import static net.openid.appauth.Preconditions.checkMapEntryFullyDefined;
+import static net.openid.appauth.Preconditions.checkNotEmpty;
 import static net.openid.appauth.Preconditions.checkNotNull;
+import static net.openid.appauth.Preconditions.checkNullOrNotEmpty;
 
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -357,7 +360,7 @@ public class AuthorizationRequest {
          */
         public Builder setAuthorizationServiceConfiguration(
                 @NonNull AuthorizationServiceConfiguration configuration) {
-            mConfiguration = Preconditions.checkNotNull(configuration,
+            mConfiguration = checkNotNull(configuration,
                     "configuration cannot be null");
             return this;
         }
@@ -475,7 +478,7 @@ public class AuthorizationRequest {
         @NonNull
         public Builder setState(@Nullable String state) {
             if (state != null) {
-                Preconditions.checkArgument(!TextUtils.isEmpty(state),
+                checkArgument(!TextUtils.isEmpty(state),
                         "state cannot be empty if defined");
             }
             mState = state;
@@ -523,15 +526,15 @@ public class AuthorizationRequest {
                 @Nullable String codeVerifierChallengeMethod) {
             if (codeVerifier != null) {
                 CodeVerifierUtil.checkCodeVerifier(codeVerifier);
-                Preconditions.checkNotEmpty(codeVerifierChallenge,
+                checkNotEmpty(codeVerifierChallenge,
                         "code verifier challenge cannot be null or empty if verifier is set");
-                Preconditions.checkNotEmpty(codeVerifierChallengeMethod,
+                checkNotEmpty(codeVerifierChallengeMethod,
                         "code verifier challenge method cannot be null or empty if verifier "
                                 + "is set");
             } else {
-                Preconditions.checkArgument(codeVerifierChallenge == null,
+                checkArgument(codeVerifierChallenge == null,
                         "code verifier challenge must be null if verifier is null");
-                Preconditions.checkArgument(codeVerifierChallengeMethod == null,
+                checkArgument(codeVerifierChallengeMethod == null,
                         "code verifier challenge method must be null if verifier is null");
             }
 
@@ -552,7 +555,7 @@ public class AuthorizationRequest {
          */
         @NonNull
         public Builder setResponseMode(@Nullable String responseMode) {
-            Preconditions.checkNullOrNotEmpty(responseMode, "responseMode must not be empty");
+            checkNullOrNotEmpty(responseMode, "responseMode must not be empty");
             mResponseMode = responseMode;
             return this;
         }
@@ -570,7 +573,7 @@ public class AuthorizationRequest {
             checkNotNull(additionalParameters);
             mAdditionalParameters = new HashMap<>();
             for (Entry<String, String> entry : additionalParameters.entrySet()) {
-                Preconditions.checkMapEntryFullyDefined(entry,
+                checkMapEntryFullyDefined(entry,
                         "additional parameters must have non-null keys and non-null values");
                 // TODO: check that the key name does not conflict with any "core" field names.
                 mAdditionalParameters.put(entry.getKey(), entry.getValue());

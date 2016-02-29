@@ -19,6 +19,7 @@ import static net.openid.appauth.Preconditions.checkNotNull;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import net.openid.appauth.JsonUtil.BooleanField;
 import net.openid.appauth.JsonUtil.Field;
@@ -41,66 +42,132 @@ import java.util.List;
  */
 public class AuthorizationServiceDiscovery {
 
+    @VisibleForTesting
     static final StringField ISSUER = str("issuer");
+
+    @VisibleForTesting
     static final UriField AUTHORIZATION_ENDPOINT = uri("authorization_endpoint");
+
+    @VisibleForTesting
     static final UriField TOKEN_ENDPOINT = uri("token_endpoint");
+
+    @VisibleForTesting
     static final UriField USERINFO_ENDPOINT = uri("userinfo_endpoint");
+
+    @VisibleForTesting
     static final UriField JWKS_URI = uri("jwks_uri");
+
+    @VisibleForTesting
     static final UriField REGISTRATION_ENDPOINT = uri("registration_endpoint");
+
+    @VisibleForTesting
     static final StringListField SCOPES_SUPPORTED = strList("scopes_supported");
+
+    @VisibleForTesting
     static final StringListField RESPONSE_TYPES_SUPPORTED = strList("response_types_supported");
+
+    @VisibleForTesting
     static final StringListField RESPONSE_MODES_SUPPORTED = strList("response_modes_supported");
+
+    @VisibleForTesting
     static final StringListField GRANT_TYPES_SUPPORTED =
             strList("grant_types_supported", Arrays.asList("authorization_code", "implicit"));
+
+    @VisibleForTesting
     static final StringListField ACR_VALUES_SUPPORTED = strList("acr_values_supported");
+
+    @VisibleForTesting
     static final StringListField SUBJECT_TYPES_SUPPORTED = strList("subject_types_supported");
 
+    @VisibleForTesting
     static final StringListField ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED =
             strList("id_token_signing_alg_values_supported");
+
+    @VisibleForTesting
     static final StringListField ID_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED =
             strList("id_token_encryption_enc_values_supported");
+
+    @VisibleForTesting
     static final StringListField ID_TOKEN_ENCRYPTION_ENC_VALUES_SUPPORTED =
             strList("id_token_encryption_enc_values_supported");
 
+    @VisibleForTesting
     static final StringListField USERINFO_SIGNING_ALG_VALUES_SUPPORTED =
             strList("userinfo_signing_alg_values_supported");
+
+    @VisibleForTesting
     static final StringListField USERINFO_ENCRYPTION_ALG_VALUES_SUPPORTED =
             strList("userinfo_encryption_alg_values_supported");
+
+    @VisibleForTesting
     static final StringListField USERINFO_ENCRYPTION_ENC_VALUES_SUPPORTED =
             strList("userinfo_encryption_enc_values_supported");
 
+    @VisibleForTesting
     static final StringListField REQUEST_OBJECT_SIGNING_ALG_VALUES_SUPPORTED =
             strList("request_object_signing_alg_values_supported");
+
+    @VisibleForTesting
     static final StringListField REQUEST_OBJECT_ENCRYPTION_ALG_VALUES_SUPPORTED =
             strList("request_object_encryption_alg_values_supported");
+
+    @VisibleForTesting
     static final StringListField REQUEST_OBJECT_ENCRYPTION_ENC_VALUES_SUPPORTED =
             strList("request_object_encryption_enc_values_supported");
 
+    @VisibleForTesting
     static final StringListField TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED =
             strList("token_endpoint_auth_methods_supported",
                     Collections.singletonList("client_secret_basic"));
 
+    @VisibleForTesting
     static final StringListField TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED =
             strList("token_endpoint_auth_signing_alg_values_supported");
 
+    @VisibleForTesting
     static final StringListField DISPLAY_VALUES_SUPPORTED = strList("display_values_supported");
+
+    @VisibleForTesting
     static final StringListField CLAIM_TYPES_SUPPORTED =
             strList("claim_types_supported", Collections.singletonList("normal"));
+
+    @VisibleForTesting
     static final StringListField CLAIMS_SUPPORTED = strList("claims_supported");
+
+    @VisibleForTesting
     static final UriField SERVICE_DOCUMENTATION = uri("service_documentation");
+
+    @VisibleForTesting
     static final StringListField CLAIMS_LOCALES_SUPPORTED = strList("claims_locales_supported");
+
+    @VisibleForTesting
     static final StringListField UI_LOCALES_SUPPORTED = strList("ui_locales_supported");
+
+    @VisibleForTesting
     static final BooleanField CLAIMS_PARAMETER_SUPPORTED =
             bool("claims_parameter_supported", false);
+
+    @VisibleForTesting
     static final BooleanField REQUEST_PARAMETER_SUPPORTED =
             bool("request_parameter_supported", false);
+
+    @VisibleForTesting
     static final BooleanField REQUEST_URI_PARAMETER_SUPPORTED =
             bool("request_uri_parameter_supported", true);
+
+    @VisibleForTesting
     static final BooleanField REQUIRE_REQUEST_URI_REGISTRATION =
             bool("require_request_uri_registration", false);
+
+    @VisibleForTesting
     static final UriField OP_POLICY_URI = uri("op_policy_uri");
+
+    @VisibleForTesting
     static final UriField OP_TOS_URI = uri("op_tos_uri");
 
+    /**
+     * The fields which are marked as mandatory in the OpenID discovery spec.
+     */
     private static final List<String> MANDATORY_METADATA = Arrays.asList(
             ISSUER.key,
             AUTHORIZATION_ENDPOINT.key,
@@ -155,7 +222,7 @@ public class AuthorizationServiceDiscovery {
      * for the retrieval of a non-standard metadata value. Convenience methods are defined on this
      * class for all standard metadata values.
      */
-    <T> T get(Field<T> field) {
+    private <T> T get(Field<T> field) {
         return JsonUtil.get(docJson, field);
     }
 
@@ -164,7 +231,7 @@ public class AuthorizationServiceDiscovery {
      * for the retrieval of a non-standard metadata value. Convenience methods are defined on this
      * class for all standard metadata values.
      */
-    <T> List<T> get(JsonUtil.ListField<T> field) {
+    private <T> List<T> get(JsonUtil.ListField<T> field) {
         return JsonUtil.get(docJson, field);
     }
 

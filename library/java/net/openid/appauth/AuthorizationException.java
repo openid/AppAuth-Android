@@ -365,22 +365,27 @@ public final class AuthorizationException extends Exception {
         }
     }
 
-    static AuthorizationException generalEx(int code, @Nullable String errorDescription) {
+    private static AuthorizationException generalEx(int code, @Nullable String errorDescription) {
         return new AuthorizationException(
                 TYPE_GENERAL_ERROR, code, null, errorDescription, null, null);
     }
 
-    static AuthorizationException authEx(int code, @Nullable String error) {
+    private static AuthorizationException authEx(int code, @Nullable String error) {
         return new AuthorizationException(
                 TYPE_OAUTH_AUTHORIZATION_ERROR, code, error, null, null, null);
     }
 
-    static AuthorizationException tokenEx(int code, @Nullable String error) {
+    private static AuthorizationException tokenEx(int code, @Nullable String error) {
         return new AuthorizationException(
                 TYPE_OAUTH_TOKEN_ERROR, code, error, null, null, null);
     }
 
-    static AuthorizationException fromTemplate(
+    /**
+     * Creates an exception based on one of the existing values defined in
+     * {@link GeneralErrors}, {@link AuthorizationRequestErrors} or {@link TokenRequestErrors},
+     * providing a root cause.
+     */
+    public static AuthorizationException fromTemplate(
             @NonNull AuthorizationException ex,
             @Nullable Throwable rootCause) {
         return new AuthorizationException(
@@ -392,7 +397,12 @@ public final class AuthorizationException extends Exception {
                 rootCause);
     }
 
-    static AuthorizationException fromOAuthTemplate(
+    /**
+     * Creates an exception based on one of the existing values defined in
+     * {@link AuthorizationRequestErrors} or {@link TokenRequestErrors}, adding information
+     * retrieved from OAuth error response.
+     */
+    public static AuthorizationException fromOAuthTemplate(
             @NonNull AuthorizationException ex,
             @Nullable String errorOverride,
             @Nullable String errorDescriptionOverride,

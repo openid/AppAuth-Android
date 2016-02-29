@@ -35,8 +35,8 @@ import java.util.List;
  */
 class BrowserPackageHelper {
 
-    static final String SCHEME_HTTP = "http";
-    static final String SCHEME_HTTPS = "https";
+    private static final String SCHEME_HTTP = "http";
+    private static final String SCHEME_HTTPS = "https";
 
     /**
      * The service we expect to find on a web browser that indicates it supports custom tabs.

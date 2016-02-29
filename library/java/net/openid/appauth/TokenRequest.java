@@ -228,7 +228,7 @@ public class TokenRequest {
         private Uri mRedirectUri;
 
         @Nullable
-        String mScope;
+        private String mScope;
 
         @Nullable
         private String mAuthorizationCode;
