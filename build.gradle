@@ -73,13 +73,6 @@ def verifyLocalProperties = {
 }
 
 def generateKeystore(keystoreFile) {
-    def userNameOut = new ByteArrayOutputStream()
-    exec {
-        executable "git"
-        args "config", "--get", "user.name"
-        standardOutput = userNameOut
-    }
-    def userName = new String(userNameOut.toByteArray())
     exec {
         executable "keytool"
         args "-genkey",
@@ -90,7 +83,7 @@ def generateKeystore(keystoreFile) {
             "-validity", "10000",
             "-keypass", "appauth",
             "-storepass", "appauth",
-            "-dname", "CN=${userName}"
+            "-dname", "CN=appauth"
     }
 }
 
