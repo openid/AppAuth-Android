@@ -5,9 +5,7 @@ apply plugin: 'jacoco'
 apply plugin: 'com.github.dcendents.android-maven'
 
 group = "net.openid"
-version = "0.1"
-def vName = version
-def vDate = "2016-02-25T18:15:00.000-0800"
+version = rootProject.vName
 
 android {
     compileSdkVersion 23
@@ -16,8 +14,8 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 1
-        versionName vName
+        versionCode rootProject.vNum
+        versionName rootProject.vName
         project.archivesBaseName = "appauth"
     }
 
@@ -138,10 +136,10 @@ bintray {
         githubRepo = 'bintray/gradle-bintray-plugin'
 
         version {
-            name = vName
+            name = rootProject.vName
             desc = "AppAuth for Android"
-            released = vDate
-            vcsTag = vName
+            released = rootProject.vDate
+            vcsTag = rootProject.vName
         }
     }
     configurations = ["archives"]

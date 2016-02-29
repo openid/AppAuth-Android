@@ -17,8 +17,8 @@ android {
         applicationId "net.openid.appauthdemo"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 1
-        versionName "0.1"
+        versionCode rootProject.vNum
+        versionName rootProject.vName
     }
 
     sourceSets {
