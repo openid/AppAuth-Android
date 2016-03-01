@@ -15,18 +15,14 @@
 package net.openid.appauth;
 
 import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
-import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
-import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
 import static net.openid.appauth.TestValues.TEST_IDP_TOKEN_ENDPOINT;
 import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
 import static net.openid.appauth.TestValues.TEST_REFRESH_TOKEN;
-import static net.openid.appauth.TestValues.TEST_SCOPE;
 import static net.openid.appauth.TestValues.TEST_STATE;
 import static net.openid.appauth.TestValues.getTestAuthCodeExchangeRequest;
 import static net.openid.appauth.TestValues.getTestAuthRequestBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -36,11 +32,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.customtabs.CustomTabsClient;
 import android.support.customtabs.CustomTabsIntent;
@@ -68,8 +62,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -80,16 +72,6 @@ public class AuthorizationServiceTest {
 
     private static final int TEST_EXPIRES_IN = 3600;
     private static final String TEST_BROWSER_PACKAGE = "com.browser.test";
-    private static final ComponentName TEST_CUSTOM_TABS_COMPONENT =
-            new ComponentName(TEST_BROWSER_PACKAGE, ".CustomTabsService");
-
-    private static final Map<String, String> TEST_ADDITIONAL_PARAMS;
-
-    static {
-        TEST_ADDITIONAL_PARAMS = new HashMap<>();
-        TEST_ADDITIONAL_PARAMS.put("test_key1", "test_value1");
-        TEST_ADDITIONAL_PARAMS.put("test_key2", "test_value2");
-    }
 
     private static final String AUTH_CODE_EXCHANGE_RESPONSE_JSON = "{\n"
             + "  \"refresh_token\": \"" + TEST_REFRESH_TOKEN + "\",\n"
@@ -104,7 +86,6 @@ public class AuthorizationServiceTest {
     private AuthorizationService mService;
     private InjectedUrlBuilder mBuilder;
     private OutputStream mOutputStream;
-    private CustomTabsIntent.Builder mCustomTabsIntent;
     @Mock HttpURLConnection mHttpConnection;
     @Mock PendingIntent mPendingIntent;
     @Mock Context mContext;
@@ -114,7 +95,6 @@ public class AuthorizationServiceTest {
     @Before
     @SuppressWarnings("ResourceType")
     public void setUp() throws Exception {
-
         MockitoAnnotations.initMocks(this);
         PendingIntentStore.getInstance().clearPendingIntents();
         URLStreamHandler urlStreamHandler = new URLStreamHandler() {
@@ -131,8 +111,8 @@ public class AuthorizationServiceTest {
         when(mHttpConnection.getOutputStream()).thenReturn(mOutputStream);
         when(mContext.bindService(serviceIntentEq(), any(CustomTabsServiceConnection.class),
                 anyInt())).thenReturn(true);
-        mCustomTabsIntent = new CustomTabsIntent.Builder(null);
-        when(mBrowserHandler.createCustomTabsIntentBuilder()).thenReturn(mCustomTabsIntent);
+        when(mBrowserHandler.createCustomTabsIntentBuilder())
+                .thenReturn(new CustomTabsIntent.Builder());
         when(mBrowserHandler.getBrowserPackage()).thenReturn(TEST_BROWSER_PACKAGE);
     }
 
@@ -142,14 +122,14 @@ public class AuthorizationServiceTest {
     }
 
     @Test
-    public void testAuthorizationRequest() throws Exception {
+    public void testAuthorizationRequest_withSpecifiedState() throws Exception {
         AuthorizationRequest request = getTestAuthRequestBuilder()
-                .setScope(TEST_SCOPE)
                 .setState(TEST_STATE)
                 .build();
         mService.performAuthorizationRequest(request, mPendingIntent);
         Intent intent = captureAuthRequestIntent();
-        assertRequestIntent(intent, null, TEST_SCOPE, TEST_STATE);
+        assertRequestIntent(intent, null);
+        assertEquals(request.toUri().toString(), intent.getData().toString());
         assertEquals(mPendingIntent, PendingIntentStore.getInstance().getPendingIntent(TEST_STATE));
     }
 
@@ -158,40 +138,9 @@ public class AuthorizationServiceTest {
         AuthorizationRequest request = getTestAuthRequestBuilder().build();
         mService.performAuthorizationRequest(request, mPendingIntent);
         Intent intent = captureAuthRequestIntent();
-        assertRequestIntent(intent, null, TEST_SCOPE, request.state);
+        assertRequestIntent(intent, null);
         assertEquals(mPendingIntent,
                 PendingIntentStore.getInstance().getPendingIntent(request.state));
-    }
-
-    @Test
-    public void testAuthorizationRequest_withNoState() throws Exception {
-        AuthorizationRequest request = getTestAuthRequestBuilder()
-                .setState(null)
-                .build();
-        mService.performAuthorizationRequest(request, mPendingIntent);
-        assertFalse(captureAuthRequestUri()
-                .getQueryParameterNames()
-                .contains(AuthorizationService.STATE));
-        assertEquals(mPendingIntent, PendingIntentStore.getInstance().getPendingIntent(null));
-    }
-
-    @Test
-    public void testAuthorizationRequest_withNoResponseModeSpecified() throws Exception {
-        AuthorizationRequest request = getTestAuthRequestBuilder().build();
-        mService.performAuthorizationRequest(request, mPendingIntent);
-        assertFalse(captureAuthRequestUri()
-                .getQueryParameterNames()
-                .contains(AuthorizationService.RESPONSE_MODE));
-    }
-
-    @Test
-    public void testAuthorizationRequest_withResponseMode() throws Exception {
-        AuthorizationRequest request = getTestAuthRequestBuilder()
-                .setResponseMode(AuthorizationRequest.RESPONSE_MODE_QUERY)
-                .build();
-        mService.performAuthorizationRequest(request, mPendingIntent);
-        assertEquals(AuthorizationRequest.RESPONSE_MODE_QUERY,
-                captureAuthRequestUri().getQueryParameter(AuthorizationService.RESPONSE_MODE));
     }
 
     @Test
@@ -205,40 +154,6 @@ public class AuthorizationServiceTest {
                 customTabsIntent);
         Intent intent = captureAuthRequestIntent();
         assertColorMatch(intent, Color.GREEN);
-    }
-
-    @Test
-    public void testAuthorizationRequest_scopeEmpty() throws Exception {
-        AuthorizationRequest request = getTestAuthRequestBuilder()
-                .setScopes()
-                .build();
-        mService.performAuthorizationRequest(request, mPendingIntent);
-        Uri requestUri = captureAuthRequestUri();
-        assertFalse(requestUri.getQueryParameterNames().contains(AuthorizationService.SCOPE));
-    }
-
-    @Test
-    public void testAuthorizationRequest_scopeNull() throws Exception {
-        AuthorizationRequest request = getTestAuthRequestBuilder()
-                .setScope(null)
-                .build();
-        mService.performAuthorizationRequest(request, mPendingIntent);
-        assertFalse(captureAuthRequestUri()
-                .getQueryParameterNames()
-                .contains(AuthorizationService.SCOPE));
-    }
-
-    @Test
-    public void testAuthorizationRequest_additionalParams() throws Exception {
-        AuthorizationRequest request = getTestAuthRequestBuilder()
-                .setState(TEST_STATE)
-                .setAdditionalParameters(TEST_ADDITIONAL_PARAMS)
-                .build();
-        mService.performAuthorizationRequest(request, mPendingIntent);
-        Uri requestUri = captureAuthRequestUri();
-        for (String key : TEST_ADDITIONAL_PARAMS.keySet()) {
-            assertEquals(TEST_ADDITIONAL_PARAMS.get(key), requestUri.getQueryParameter(key));
-        }
     }
 
     @Test(expected = IllegalStateException.class)
@@ -288,10 +203,6 @@ public class AuthorizationServiceTest {
         return intentCaptor.getValue();
     }
 
-    private Uri captureAuthRequestUri() {
-        return captureAuthRequestIntent().getData();
-    }
-
     private void assertTokenResponse(TokenResponse response, TokenRequest expectedRequest) {
         assertNotNull(response);
         assertEquals(expectedRequest, response.request);
@@ -332,38 +243,15 @@ public class AuthorizationServiceTest {
         }
     }
 
-    private void assertRequestIntent(Intent intent, Integer color, String scope, String state) {
+    private void assertRequestIntent(Intent intent, Integer color) {
         assertEquals(Intent.ACTION_VIEW, intent.getAction());
         assertTrue((intent.getFlags() & Intent.FLAG_ACTIVITY_NO_HISTORY) > 0);
-        assertRequestUri(intent.getData(), scope, state);
         assertColorMatch(intent, color);
     }
 
     private void assertColorMatch(Intent intent, Integer expected) {
         int color = intent.getIntExtra(CustomTabsIntent.EXTRA_TOOLBAR_COLOR, Color.TRANSPARENT);
         assertTrue((expected == null) || ((expected == color) && (color != Color.TRANSPARENT)));
-    }
-
-    private void assertRequestUri(Uri uri, String scope, String state) {
-        assertEquals(TEST_CLIENT_ID, uri.getQueryParameter(AuthorizationService.CLIENT_ID));
-        assertEquals(TEST_APP_REDIRECT_URI.toString(),
-                uri.getQueryParameter(AuthorizationService.REDIRECT_URI));
-        assertEquals(AuthorizationRequest.RESPONSE_TYPE_CODE,
-                uri.getQueryParameter(AuthorizationService.RESPONSE_TYPE));
-
-        if (scope == null) {
-            assertFalse("scope parameter should not be defined",
-                        uri.getQueryParameterNames().contains(AuthorizationService.SCOPE));
-        } else {
-            assertEquals(scope, uri.getQueryParameter(AuthorizationService.SCOPE));
-        }
-
-        if (state == null) {
-            assertFalse("state parameter should not be defined",
-                        uri.getQueryParameterNames().contains(AuthorizationService.STATE));
-        } else {
-            assertEquals(state, uri.getQueryParameter(AuthorizationService.STATE));
-        }
     }
 
     /**

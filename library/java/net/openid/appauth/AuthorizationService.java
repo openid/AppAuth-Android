@@ -78,58 +78,6 @@ public class AuthorizationService {
      */
     public static final String SCOPE_ADDRESS = "address";
 
-    /**
-     * REQUIRED.  The client identifier issued to the client during the registration process
-     * described by Section 2.2.
-     */
-    @VisibleForTesting
-    static final String CLIENT_ID = "client_id";
-
-    /**
-     * REQUIRED. OpenID Connect requests MUST contain the openid scope value.
-     * If the openid scope value is not present, the behavior is entirely unspecified.
-     * Other scope values MAY be present. Scope values used that are not understood by an
-     * implementation SHOULD be ignored.
-     */
-    @VisibleForTesting
-    static final String SCOPE = "scope";
-
-    @VisibleForTesting
-    static final String RESPONSE_MODE = "response_mode";
-
-    /**
-     * REQUIRED. Response Type value that determines the authorization processing flow to be used,
-     * including what parameters are returned from the endpoints used.
-     * When using the Authorization Code Flow, this value is <code>code</code>.
-     */
-    @VisibleForTesting
-    static final String RESPONSE_TYPE = "response_type";
-
-    /**
-     * REQUIRED. Redirection URI to which the response will be sent. This URI MUST exactly
-     * match one of the Redirection URI values for the Client pre-registered at the OpenID Provider,
-     * with the matching performed as described in Section 6.2.1 of [RFC3986]
-     * (Simple String Comparison). When using this flow, the Redirection URI SHOULD use the
-     * https scheme; however, it MAY use the http scheme, provided that the Client Type is
-     * confidential, as defined in Section 2.1 of OAuth 2.0, and provided the OP allows the use
-     * of http Redirection URIs in this case. The Redirection URI MAY use an alternate scheme,
-     * such as one that is intended to identify a callback into a native application.
-     */
-    @VisibleForTesting
-    static final String REDIRECT_URI = "redirect_uri";
-
-    @VisibleForTesting
-    static final String STATE = "state";
-
-    @VisibleForTesting
-    static final String CODE = "code";
-
-    @VisibleForTesting
-    static final String GRANT_TYPE = "grant_type";
-
-    @VisibleForTesting
-    static final String GRANT_TYPE_AUTH_CODE = "authorization_code";
-
     @VisibleForTesting
     Context mContext;
 
