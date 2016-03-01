@@ -14,6 +14,7 @@
 
 package net.openid.appauth;
 
+import static net.openid.appauth.Preconditions.checkMapEntryFullyDefined;
 import static net.openid.appauth.Preconditions.checkNotEmpty;
 import static net.openid.appauth.Preconditions.checkNotNull;
 import static net.openid.appauth.Preconditions.checkNullOrNotEmpty;
@@ -411,7 +412,7 @@ public class TokenRequest {
             }
 
             for (Entry<String, String> entry : additionalParameters.entrySet()) {
-                Preconditions.checkMapEntryFullyDefined(entry,
+                checkMapEntryFullyDefined(entry,
                         "extra parameters must have non-null keys and non-null values");
                 // TODO: check that the key name does not conflict with any "core" field names.
                 mAdditionalParameters.put(entry.getKey(), entry.getValue());

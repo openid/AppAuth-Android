@@ -468,7 +468,7 @@ public class AuthorizationResponse {
     @NonNull
     public TokenRequest createTokenExchangeRequest(
             @NonNull Map<String, String> additionalExchangeParameters) {
-        Preconditions.checkNotNull(additionalExchangeParameters,
+        checkNotNull(additionalExchangeParameters,
                 "additionalExchangeParameters cannot be null");
 
         if (authorizationCode == null) {
@@ -571,7 +571,7 @@ public class AuthorizationResponse {
      */
     @Nullable
     public static AuthorizationResponse fromIntent(@NonNull Intent dataIntent) {
-        Preconditions.checkNotNull(dataIntent, "dataIntent must not be null");
+        checkNotNull(dataIntent, "dataIntent must not be null");
         if (!dataIntent.hasExtra(EXTRA_RESPONSE)) {
             return null;
         }
