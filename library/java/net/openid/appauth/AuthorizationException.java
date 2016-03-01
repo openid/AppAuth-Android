@@ -14,6 +14,9 @@
 
 package net.openid.appauth;
 
+import static net.openid.appauth.Preconditions.checkNotEmpty;
+import static net.openid.appauth.Preconditions.checkNotNull;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -422,7 +425,7 @@ public final class AuthorizationException extends Exception {
      * @throws JSONException if the JSON is malformed or missing required properties
      */
     public static AuthorizationException fromJson(@NonNull String jsonStr) throws JSONException {
-        Preconditions.checkNotEmpty(jsonStr, "jsonStr cannot be null or empty");
+        checkNotEmpty(jsonStr, "jsonStr cannot be null or empty");
         return fromJson(new JSONObject(jsonStr));
     }
 
@@ -432,7 +435,7 @@ public final class AuthorizationException extends Exception {
      * @throws JSONException if the JSON is malformed or missing required properties
      */
     public static AuthorizationException fromJson(@NonNull JSONObject json) throws JSONException {
-        Preconditions.checkNotNull(json, "json cannot be null");
+        checkNotNull(json, "json cannot be null");
         return new AuthorizationException(
                 json.getInt(KEY_TYPE),
                 json.getInt(KEY_CODE),
@@ -449,7 +452,7 @@ public final class AuthorizationException extends Exception {
      */
     @Nullable
     public static AuthorizationException fromIntent(Intent data) {
-        Preconditions.checkNotNull(data);
+        checkNotNull(data);
 
         if (!data.hasExtra(EXTRA_EXCEPTION)) {
             return null;

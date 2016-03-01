@@ -14,6 +14,10 @@
 
 package net.openid.appauth;
 
+import static net.openid.appauth.Preconditions.checkArgument;
+import static net.openid.appauth.Preconditions.checkNotEmpty;
+import static net.openid.appauth.Preconditions.checkNotNull;
+
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -73,7 +77,7 @@ public class AuthState {
      */
     public AuthState(@Nullable AuthorizationResponse authResponse,
             @Nullable Exception authError) {
-        Preconditions.checkArgument(authResponse != null ^ authError != null,
+        checkArgument(authResponse != null ^ authError != null,
                 "exactly one of authResponse or authError should be non-null");
         update(authResponse, authError);
     }
@@ -263,7 +267,7 @@ public class AuthState {
     public void update(
             @Nullable AuthorizationResponse authResponse,
             @Nullable Exception authError) {
-        Preconditions.checkArgument(authResponse != null ^ authError != null,
+        checkArgument(authResponse != null ^ authError != null,
                 "exactly one of authResponse or authError should be non-null");
         if (authError != null) {
             // TODO
@@ -288,7 +292,7 @@ public class AuthState {
     public void update(
             @Nullable TokenResponse tokenResponse,
             @Nullable Exception authError) {
-        Preconditions.checkArgument(tokenResponse != null ^ authError != null,
+        checkArgument(tokenResponse != null ^ authError != null,
                 "exactly one of authResponse or authError should be non-null");
 
         if (mAuthorizationExceptionCode != null) {
@@ -348,11 +352,11 @@ public class AuthState {
             @NonNull final Map<String, String> refreshTokenAdditionalParams,
             @NonNull final Clock clock,
             @NonNull final AuthStateAction action) {
-        Preconditions.checkNotNull(service, "service cannot be null");
-        Preconditions.checkNotNull(refreshTokenAdditionalParams,
+        checkNotNull(service, "service cannot be null");
+        checkNotNull(refreshTokenAdditionalParams,
                 "additional params cannot be null");
-        Preconditions.checkNotNull(clock, "clock cannot be null");
-        Preconditions.checkNotNull(action, "action cannot be null");
+        checkNotNull(clock, "clock cannot be null");
+        checkNotNull(action, "action cannot be null");
         if (mRefreshToken == null) {
             throw new IllegalStateException("No refresh token available");
         }
@@ -445,7 +449,7 @@ public class AuthState {
      * @throws JSONException if the JSON is malformed or missing required fields.
      */
     public static AuthState fromJson(@NonNull JSONObject json) throws JSONException {
-        Preconditions.checkNotNull(json, "json cannot be null");
+        checkNotNull(json, "json cannot be null");
 
         AuthState state = new AuthState();
         state.mRefreshToken = JsonUtil.getStringIfDefined(json, KEY_REFRESH_TOKEN);
@@ -469,7 +473,7 @@ public class AuthState {
      * @throws JSONException if the JSON is malformed or missing required fields.
      */
     public static AuthState fromJson(@NonNull String jsonStr) throws JSONException {
-        Preconditions.checkNotEmpty(jsonStr, "jsonStr cannot be null or empty");
+        checkNotEmpty(jsonStr, "jsonStr cannot be null or empty");
         return fromJson(new JSONObject(jsonStr));
     }
 
