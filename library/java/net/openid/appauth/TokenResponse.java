@@ -14,7 +14,8 @@
 
 package net.openid.appauth;
 
-import static net.openid.appauth.Preconditions.checkMapEntryFullyDefined;
+import static net.openid.appauth.AdditionalParamsProcessor.checkAdditionalParams;
+import static net.openid.appauth.AdditionalParamsProcessor.extractAdditionalParams;
 import static net.openid.appauth.Preconditions.checkNotEmpty;
 import static net.openid.appauth.Preconditions.checkNotNull;
 import static net.openid.appauth.Preconditions.checkNullOrNotEmpty;
@@ -30,7 +31,6 @@ import org.json.JSONObject;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -55,13 +55,14 @@ public class TokenResponse {
     static final String KEY_REQUEST = "request";
 
     @VisibleForTesting
+    static final String KEY_EXPIRES_AT = "expires_at";
+
+    // TODO: rename all KEY_* below to PARAM_*
+    @VisibleForTesting
     static final String KEY_TOKEN_TYPE = "token_type";
 
     @VisibleForTesting
     static final String KEY_ACCESS_TOKEN = "access_token";
-
-    @VisibleForTesting
-    static final String KEY_EXPIRES_AT = "expires_at";
 
     @VisibleForTesting
     static final String KEY_EXPIRES_IN = "expires_in";
@@ -78,10 +79,7 @@ public class TokenResponse {
     @VisibleForTesting
     static final String KEY_ADDITIONAL_PARAMETERS = "additionalParameters";
 
-
-    // KEY_EXPIRES_AT and KEY_ADDITIONAL_PARAMETERS are non-standard, so not included here
-    private static final Set<String> BUILT_IN_KEYS = new HashSet<>(Arrays.asList(
-            KEY_REQUEST,
+    private static final Set<String> BUILT_IN_PARAMS = new HashSet<>(Arrays.asList(
             KEY_TOKEN_TYPE,
             KEY_ACCESS_TOKEN,
             KEY_EXPIRES_IN,
@@ -218,6 +216,8 @@ public class TokenResponse {
                 }
                 setRefreshToken(JsonUtil.getStringIfDefined(json, KEY_REFRESH_TOKEN));
                 setIdToken(JsonUtil.getStringIfDefined(json, KEY_ID_TOKEN));
+                setAdditionalParameters(extractAdditionalParams(json, BUILT_IN_PARAMS));
+
                 return this;
             } catch (JSONException ex) {
                 // JSONException should only be thrown if a get() call is made for a key which
@@ -374,18 +374,7 @@ public class TokenResponse {
          */
         @NonNull
         public Builder setAdditionalParameters(@Nullable Map<String, String> additionalParameters) {
-            mAdditionalParameters = new LinkedHashMap<>();
-            if (additionalParameters == null) {
-                return this;
-            }
-
-            for (Map.Entry<String, String> entry : additionalParameters.entrySet()) {
-                checkMapEntryFullyDefined(entry,
-                        "extra parameters must have non-null keys and non-null values");
-                // TODO: check that the key name does not conflict with any "core" field names.
-                mAdditionalParameters.put(entry.getKey(), entry.getValue());
-            }
-
+            mAdditionalParameters = checkAdditionalParams(additionalParameters, BUILT_IN_PARAMS);
             return this;
         }
 

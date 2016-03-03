@@ -14,7 +14,7 @@
 
 package net.openid.appauth;
 
-import static net.openid.appauth.Preconditions.checkMapEntryFullyDefined;
+import static net.openid.appauth.AdditionalParamsProcessor.checkAdditionalParams;
 import static net.openid.appauth.Preconditions.checkNotEmpty;
 import static net.openid.appauth.Preconditions.checkNotNull;
 import static net.openid.appauth.Preconditions.checkNullOrNotEmpty;
@@ -30,6 +30,7 @@ import org.json.JSONObject;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -82,6 +83,16 @@ public class TokenRequest {
 
     @VisibleForTesting
     static final String PARAM_SCOPE = "scope";
+
+    private static final Set<String> BUILT_IN_PARAMS = Collections.unmodifiableSet(
+            new HashSet<>(Arrays.asList(
+                    PARAM_CLIENT_ID,
+                    PARAM_CODE,
+                    PARAM_CODE_VERIFIER,
+                    PARAM_GRANT_TYPE,
+                    PARAM_REDIRECT_URI,
+                    PARAM_REFRESH_TOKEN,
+                    PARAM_SCOPE)));
 
     /**
      * The grant type used for exchanging an authorization code for one or more tokens.
@@ -406,18 +417,7 @@ public class TokenRequest {
          */
         @NonNull
         public Builder setAdditionalParameters(@Nullable Map<String, String> additionalParameters) {
-            mAdditionalParameters = new LinkedHashMap<>();
-            if (additionalParameters == null) {
-                return this;
-            }
-
-            for (Entry<String, String> entry : additionalParameters.entrySet()) {
-                checkMapEntryFullyDefined(entry,
-                        "extra parameters must have non-null keys and non-null values");
-                // TODO: check that the key name does not conflict with any "core" field names.
-                mAdditionalParameters.put(entry.getKey(), entry.getValue());
-            }
-
+            mAdditionalParameters = checkAdditionalParams(additionalParameters, BUILT_IN_PARAMS);
             return this;
         }
 

@@ -29,6 +29,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -101,6 +102,13 @@ public class TokenRequestTest {
                 .setAdditionalParameters(badMap)
                 .build();
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilder_setAdditionalParams_withBuiltInParam() {
+        mMinimalBuilder.setAdditionalParameters(
+                Collections.singletonMap(TokenRequest.PARAM_SCOPE, "scope"));
+    }
+
 
     @Test(expected = IllegalArgumentException.class)
     public void testBuild_badScopeString() {

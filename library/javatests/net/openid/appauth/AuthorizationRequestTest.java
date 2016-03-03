@@ -172,6 +172,13 @@ public class AuthorizationRequestTest {
         mRequestBuilder.setResponseMode("");
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilder_setAdditionalParams_withBuiltInParam() {
+        Map<String, String> additionalParams = new HashMap<>();
+        additionalParams.put(AuthorizationRequest.PARAM_SCOPE, AuthorizationRequest.SCOPE_EMAIL);
+        mRequestBuilder.setAdditionalParameters(additionalParams);
+    }
+
     @Test
     public void testScopes_null() {
         AuthorizationRequest request = mRequestBuilder

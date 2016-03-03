@@ -14,8 +14,9 @@
 
 package net.openid.appauth;
 
+import static net.openid.appauth.AdditionalParamsProcessor.builtInParams;
+import static net.openid.appauth.AdditionalParamsProcessor.checkAdditionalParams;
 import static net.openid.appauth.Preconditions.checkArgument;
-import static net.openid.appauth.Preconditions.checkMapEntryFullyDefined;
 import static net.openid.appauth.Preconditions.checkNotEmpty;
 import static net.openid.appauth.Preconditions.checkNotNull;
 import static net.openid.appauth.Preconditions.checkNullOrNotEmpty;
@@ -153,6 +154,16 @@ public class AuthorizationRequest {
 
     @VisibleForTesting
     static final String PARAM_STATE = "state";
+
+    private static final Set<String> BUILT_IN_PARAMS = builtInParams(
+            PARAM_CLIENT_ID,
+            PARAM_CODE_CHALLENGE,
+            PARAM_CODE_CHALLENGE_METHOD,
+            PARAM_REDIRECT_URI,
+            PARAM_RESPONSE_MODE,
+            PARAM_RESPONSE_TYPE,
+            PARAM_SCOPE,
+            PARAM_STATE);
 
     private static final String KEY_CONFIGURATION = "configuration";
     private static final String KEY_CLIENT_ID = "clientId";
@@ -337,7 +348,7 @@ public class AuthorizationRequest {
         private String mResponseMode;
 
         @NonNull
-        private HashMap<String, String> mAdditionalParameters = new HashMap<>();
+        private Map<String, String> mAdditionalParameters = new HashMap<>();
 
         /**
          * Creates an authorization request builder with the specified mandatory properties.
@@ -569,15 +580,8 @@ public class AuthorizationRequest {
          * Framework" (RFC 6749), Section 3.1</a>
          */
         @NonNull
-        public Builder setAdditionalParameters(@NonNull Map<String, String> additionalParameters) {
-            checkNotNull(additionalParameters);
-            mAdditionalParameters = new HashMap<>();
-            for (Entry<String, String> entry : additionalParameters.entrySet()) {
-                checkMapEntryFullyDefined(entry,
-                        "additional parameters must have non-null keys and non-null values");
-                // TODO: check that the key name does not conflict with any "core" field names.
-                mAdditionalParameters.put(entry.getKey(), entry.getValue());
-            }
+        public Builder setAdditionalParameters(@Nullable Map<String, String> additionalParameters) {
+            mAdditionalParameters = checkAdditionalParams(additionalParameters, BUILT_IN_PARAMS);
             return this;
         }
 

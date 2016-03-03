@@ -14,8 +14,8 @@
 
 package net.openid.appauth;
 
-import static net.openid.appauth.Preconditions.checkArgument;
-import static net.openid.appauth.Preconditions.checkMapEntryFullyDefined;
+import static net.openid.appauth.AdditionalParamsProcessor.checkAdditionalParams;
+import static net.openid.appauth.AdditionalParamsProcessor.extractAdditionalParams;
 import static net.openid.appauth.Preconditions.checkNotNull;
 import static net.openid.appauth.Preconditions.checkNullOrNotEmpty;
 
@@ -61,6 +61,14 @@ public class AuthorizationResponse {
 
     @VisibleForTesting
     static final String KEY_REQUEST = "request";
+
+    @VisibleForTesting
+    static final String KEY_ADDITIONAL_PARAMETERS = "additional_parameters";
+
+    @VisibleForTesting
+    static final String KEY_EXPIRES_AT = "expires_at";
+
+    // TODO: rename all KEY_* below to PARAM_* - they are standard OAuth2 parameters
     @VisibleForTesting
     static final String KEY_STATE = "state";
     @VisibleForTesting
@@ -70,27 +78,21 @@ public class AuthorizationResponse {
     @VisibleForTesting
     static final String KEY_ACCESS_TOKEN = "access_token";
     @VisibleForTesting
-    static final String KEY_EXPIRES_AT = "expires_at";
-    @VisibleForTesting
     static final String KEY_EXPIRES_IN = "expires_in";
     @VisibleForTesting
     static final String KEY_ID_TOKEN = "id_token";
     @VisibleForTesting
     static final String KEY_SCOPE = "scope";
-    @VisibleForTesting
-    static final String KEY_ADDITIONAL_PARAMETERS = "additional_parameters";
 
-    // KEY_EXPIRES_AT and KEY_ADDITIONAL_PARAMETERS are non-standard, so not included here
-    private static final Set<String> BUILT_IN_KEYS = new HashSet<>(Arrays.asList(
-            KEY_REQUEST,
-            KEY_TOKEN_TYPE,
-            KEY_STATE,
-            KEY_AUTHORIZATION_CODE,
-            KEY_ACCESS_TOKEN,
-            KEY_EXPIRES_IN,
-            KEY_ID_TOKEN,
-            KEY_SCOPE
-    ));
+    private static final Set<String> BUILT_IN_PARAMS = Collections.unmodifiableSet(
+            new HashSet<>(Arrays.asList(
+                    KEY_TOKEN_TYPE,
+                    KEY_STATE,
+                    KEY_AUTHORIZATION_CODE,
+                    KEY_ACCESS_TOKEN,
+                    KEY_EXPIRES_IN,
+                    KEY_ID_TOKEN,
+                    KEY_SCOPE)));
 
     /**
      * The authorization request associated with this response.
@@ -233,8 +235,7 @@ public class AuthorizationResponse {
             setAccessTokenExpiresIn(UriUtil.getLongQueryParameter(uri, KEY_EXPIRES_IN), clock);
             setIdToken(uri.getQueryParameter(KEY_ID_TOKEN));
             setScope(uri.getQueryParameter(KEY_SCOPE));
-
-            setAdditionalParameters(UriUtil.extractAdditionalParameters(uri, BUILT_IN_KEYS));
+            setAdditionalParameters(extractAdditionalParams(uri, BUILT_IN_PARAMS));
             return this;
         }
 
@@ -375,19 +376,7 @@ public class AuthorizationResponse {
          */
         @NonNull
         public Builder setAdditionalParameters(@Nullable Map<String, String> additionalParameters) {
-            mAdditionalParameters = new LinkedHashMap<>();
-            if (additionalParameters == null) {
-                return this;
-            }
-
-            for (Map.Entry<String, String> entry : additionalParameters.entrySet()) {
-                checkMapEntryFullyDefined(entry,
-                        "Additional parameters must have non-null keys and non-null values");
-                checkArgument(!BUILT_IN_KEYS.contains(entry.getKey()),
-                        "Additional parameter keys must not conflict with built in keys");
-                mAdditionalParameters.put(entry.getKey(), entry.getValue());
-            }
-
+            mAdditionalParameters = checkAdditionalParams(additionalParameters, BUILT_IN_PARAMS);
             return this;
         }
 
