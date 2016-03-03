@@ -14,7 +14,6 @@
 
 package net.openid.appauth;
 
-import static net.openid.appauth.Preconditions.checkMapEntryFullyDefined;
 import static net.openid.appauth.Preconditions.checkNotNull;
 
 import android.net.Uri;
@@ -302,7 +301,8 @@ final class JsonUtil {
         checkNotNull(map);
         JSONObject json = new JSONObject();
         for (Map.Entry<String, String> entry : map.entrySet()) {
-            checkMapEntryFullyDefined(entry, "map entries must not have null keys or values");
+            checkNotNull(entry.getKey(), "map entries must not have null keys");
+            checkNotNull(entry.getValue(), "map entries must not have null values");
             JsonUtil.put(json, entry.getKey(), entry.getValue());
         }
         return json;

@@ -15,7 +15,6 @@
 package net.openid.appauth;
 
 import static net.openid.appauth.Preconditions.checkArgument;
-import static net.openid.appauth.Preconditions.checkMapEntryFullyDefined;
 import static net.openid.appauth.Preconditions.checkNotEmpty;
 import static net.openid.appauth.Preconditions.checkNotNull;
 import static net.openid.appauth.Preconditions.checkNullOrNotEmpty;
@@ -30,8 +29,6 @@ import org.junit.runner.RunWith;
 
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-
-import java.util.AbstractMap.SimpleEntry;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
@@ -118,23 +115,5 @@ public class PreconditionsTest {
     @Test(expected = IllegalArgumentException.class)
     public void testCheckNullOrNotEmpty_emptyString() {
         checkNullOrNotEmpty("", TEST_MSG);
-    }
-
-    @Test
-    public void testCheckMapEntryFullyDefined() {
-        SimpleEntry<String, String> entry = new SimpleEntry<>("a", "b");
-        assertSame(entry, checkMapEntryFullyDefined(entry, TEST_MSG));
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testCheckMapEntryFullyDefined_nullKey() {
-        SimpleEntry<String, String> entry = new SimpleEntry<>(null, "b");
-        checkMapEntryFullyDefined(entry, TEST_MSG);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testCheckMapEntryFullyDefined_nullValue() {
-        SimpleEntry<String, String> entry = new SimpleEntry<>("a", null);
-        checkMapEntryFullyDefined(entry, TEST_MSG);
     }
 }

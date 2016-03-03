@@ -18,10 +18,6 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-
 /**
  * Utility methods for extracting parameters from Uri objects.
  */
@@ -51,18 +47,6 @@ class UriUtil {
         }
 
         uriBuilder.appendQueryParameter(paramName, value.toString());
-    }
-
-    public static Map<String, String> extractAdditionalParameters(
-            @NonNull Uri uri,
-            @NonNull Set<String> ignore) {
-        LinkedHashMap<String, String> additionalParams = new LinkedHashMap<>();
-        for (String param : uri.getQueryParameterNames()) {
-            if (!ignore.contains(param)) {
-                additionalParams.put(param, uri.getQueryParameter(param));
-            }
-        }
-        return additionalParams;
     }
 
     public static Long getLongQueryParameter(@NonNull Uri uri, @NonNull String param) {

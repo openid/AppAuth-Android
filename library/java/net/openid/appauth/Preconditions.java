@@ -18,8 +18,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import java.util.Map;
-
 /**
  * Utility class for guava style pre-condition checks.
  */
@@ -101,15 +99,12 @@ final class Preconditions {
         }
     }
 
-    /**
-     * Ensures that the provided map entry has a non-null key and non-null value.
-     * @throws IllegalArgumentException if either the key or value is null.
-     */
-    public static <T, U, EntryT extends Map.Entry<T, U>> EntryT checkMapEntryFullyDefined(
-            EntryT entry,
-            @Nullable Object errorMessage) {
-        checkNotNull(entry.getKey(), errorMessage);
-        checkNotNull(entry.getValue(), errorMessage);
-        return entry;
+    public static void checkArgument(
+            boolean expression,
+            @NonNull String errorTemplate,
+            Object... params) {
+        if (!expression) {
+            throw new IllegalArgumentException(String.format(errorTemplate, params));
+        }
     }
 }

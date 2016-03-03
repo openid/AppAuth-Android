@@ -33,6 +33,8 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.Collections;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
 public class AuthorizationResponseTest {
@@ -88,6 +90,12 @@ public class AuthorizationResponseTest {
                 .fromUri(TEST_URI, mClock)
                 .build();
         checkExpectedFields(authResponse);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuild_setAdditionalParams_withBuiltInParam() {
+        mAuthorizationResponseBuilder.setAdditionalParameters(
+                Collections.singletonMap(AuthorizationResponse.KEY_SCOPE, "scope"));
     }
 
     @Test
