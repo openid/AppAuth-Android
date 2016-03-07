@@ -27,7 +27,7 @@ parameters in all protocol requests and responses.
 ## Download
 
 Download
-the latest JAR ([direct link](http://cli.re/Gxajn4) /
+the latest AAR ([direct link](http://cli.re/Gxajn4) /
 [Bintray repository](https://bintray.com/openid/net.openid/appauth/view))
 or add a dependency using Gradle:
 
@@ -242,7 +242,7 @@ service.performTokenRequest(
 With an updated AuthState based on the token exchange, it is then possible to
 make requests using guaranteed fresh tokens at any future point:
 
-```
+```java
 AuthState state = readAuthState();
 state.performActionWithFreshTokens(service, new AuthStateAction() {
   @Override public void execute(
