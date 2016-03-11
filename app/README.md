@@ -23,7 +23,7 @@ can be displayed by running:
 
 ```
 keytool -list -v -keystore appauth.keystore -storepass appauth | \
-   grep SHA256\: | \
+   grep SHA1\: | \
    awk '{print $2}'
 ```
 
@@ -37,6 +37,7 @@ Where `YOUR_CLIENT` is your client string provided by Google. This full string
 should be placed in the `google_client_id` string resource, and the reverse of
 it (i.e. `com.googleusercontent.apps.YOUR_CLIENT`) should be placed in
 both `google_auth_redirect_scheme` and `google_auth_redirect_uri`.
+After these values populated, set `google_enabled` to `true`.
 
 After this is done, recompile the app (`./gradlew assembleDebug`) and
 install it (`adb install -r -d app/build/outputs/apk/app-debug.apk`). A
