@@ -362,7 +362,7 @@ public class TokenRequest {
          */
         @NonNull
         public Builder setScopes(@Nullable Iterable<String> scopes) {
-            mScope = ScopeUtil.scopeIterableToString(scopes);
+            mScope = AsciiStringListUtil.iterableToString(scopes);
             return this;
         }
 
@@ -499,7 +499,7 @@ public class TokenRequest {
      */
     @Nullable
     public Set<String> getScopeSet() {
-        return ScopeUtil.scopeStringToSet(scope);
+        return AsciiStringListUtil.stringToSet(scope);
     }
 
     /**
@@ -579,7 +579,7 @@ public class TokenRequest {
                 .setAdditionalParameters(JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
 
         if (json.has(KEY_SCOPE)) {
-            builder.setScopes(ScopeUtil.scopeStringToSet(JsonUtil.getString(json, KEY_SCOPE)));
+            builder.setScopes(AsciiStringListUtil.stringToSet(JsonUtil.getString(json, KEY_SCOPE)));
         }
 
         return builder.build();

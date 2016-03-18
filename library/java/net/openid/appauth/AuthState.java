@@ -118,7 +118,7 @@ public class AuthState {
      */
     @Nullable
     public Set<String> getScopeSet() {
-        return ScopeUtil.scopeStringToSet(mScope);
+        return AsciiStringListUtil.stringToSet(mScope);
     }
 
     /**
