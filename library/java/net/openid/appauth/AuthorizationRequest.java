@@ -131,6 +131,70 @@ public class AuthorizationRequest {
      */
     public static final String CODE_CHALLENGE_METHOD_PLAIN = "plain";
 
+    /**
+     * All spec-defined values for the OpenID Connect 1.0 {@code prompt} parameter.
+     * @see Builder#setPrompt(String)
+     * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
+     * Connect Core 1.0", Section 3.1.2.1</a>
+     */
+    public static final class Prompt {
+
+        /**
+         * The Authorization Server <em>MUST NOT</em> display any authentication or consent user
+         * interface pages. An error is returned if an End-User is not already authenticated or the
+         * Client does not have pre-configured consent for the requested Claims or does not fulfill
+         * other conditions for processing the request. The error code will typically be
+         * {@code login_required}, {@code interaction_required}, or another code defined in
+         * <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthError">Section
+         * 3.1.2.6</a>. This can be used as a method to check for existing
+         * authentication and/or consent.
+         *
+         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
+         * Connect Core 1.0", Section 3.1.2.1</a>
+         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthError">"OpenID
+         * Connect Core 1.0", Section 3.1.2.6</a>
+         */
+        public static final String NONE = "none";
+
+        /**
+         * The Authorization Server <em>SHOULD</em> prompt the End-User for re-authentication. If
+         * it cannot re-authenticate the End-User, it <em>MUST</em> return an error, typically
+         * {@code login_required}.
+         *
+         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
+         * Connect Core 1.0", Section 3.1.2.1</a>
+         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthError">"OpenID
+         * Connect Core 1.0", Section 3.1.2.6</a>
+         */
+        public static final String LOGIN = "login";
+
+        /**
+         * The Authorization Server <em>SHOULD</em> prompt the End-User for consent before
+         * returning information to the Client. If it cannot obtain consent, it <em>MUST</em>
+         * return an error, typically {@code consent_required}.
+         *
+         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
+         * Connect Core 1.0", Section 3.1.2.1</a>
+         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthError">"OpenID
+         * Connect Core 1.0", Section 3.1.2.6</a>
+         */
+        public static final String CONSENT = "consent";
+
+        /**
+         * The Authorization Server <em>SHOULD</em> prompt the End-User to select a user account.
+         * This enables an End-User who has multiple accounts at the Authorization Server to select
+         * amongst the multiple accounts that they might have current sessions for. If it cannot
+         * obtain an account selection choice made by the End-User, it MUST return an error,
+         * typically {@code account_selection_required}.
+         *
+         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
+         * Connect Core 1.0", Section 3.1.2.1</a>
+         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthError">"OpenID
+         * Connect Core 1.0", Section 3.1.2.6</a>
+         */
+        public static final String SELECT_ACCOUNT = "select_account";
+    }
+
     @VisibleForTesting
     static final String PARAM_CLIENT_ID = "client_id";
 
@@ -139,6 +203,9 @@ public class AuthorizationRequest {
 
     @VisibleForTesting
     static final String PARAM_CODE_CHALLENGE_METHOD = "code_challenge_method";
+
+    @VisibleForTesting
+    static final String PARAM_PROMPT = "prompt";
 
     @VisibleForTesting
     static final String PARAM_REDIRECT_URI = "redirect_uri";
@@ -159,6 +226,7 @@ public class AuthorizationRequest {
             PARAM_CLIENT_ID,
             PARAM_CODE_CHALLENGE,
             PARAM_CODE_CHALLENGE_METHOD,
+            PARAM_PROMPT,
             PARAM_REDIRECT_URI,
             PARAM_RESPONSE_MODE,
             PARAM_RESPONSE_TYPE,
@@ -167,6 +235,7 @@ public class AuthorizationRequest {
 
     private static final String KEY_CONFIGURATION = "configuration";
     private static final String KEY_CLIENT_ID = "clientId";
+    private static final String KEY_PROMPT = "prompt";
     private static final String KEY_RESPONSE_TYPE = "responseType";
     private static final String KEY_REDIRECT_URI = "redirectUri";
     private static final String KEY_SCOPE = "scope";
@@ -201,6 +270,18 @@ public class AuthorizationRequest {
      */
     @NonNull
     public final String clientId;
+
+    /**
+     * The OpenID Connect 1.0 {@code prompt} parameter. This is a space delimited, case sensitive
+     * list of ASCII strings that specifies whether the Authorization Server prompts the End-User
+     * for re-authentication and consent.
+     *
+     * @see Prompt
+     * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
+     * Connect Core 1.0", Section 3.1.2.1</a>
+     */
+    @Nullable
+    public final String prompt;
 
     /**
      * The expected response type.
@@ -323,6 +404,9 @@ public class AuthorizationRequest {
         @NonNull
         private String mClientId;
 
+        @Nullable
+        private String mPrompt;
+
         @NonNull
         private String mResponseType;
 
@@ -389,6 +473,55 @@ public class AuthorizationRequest {
         public Builder setClientId(@NonNull String clientId) {
             checkArgument(!TextUtils.isEmpty(clientId), "client ID cannot be null or empty");
             mClientId = clientId;
+            return this;
+        }
+
+        /**
+         * Specifies the encoded OpenID Connect 1.0 {@code prompt} parameter, which is a
+         * space-delimited set of case sensitive ASCII prompt values. Replaces any previously
+         * specified prompt values.
+         *
+         * @see Prompt
+         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
+         * Connect Core 1.0", Section 3.1.2.1</a>
+         */
+        @NonNull
+        public Builder setPrompt(@Nullable String prompt) {
+            mPrompt = Preconditions.checkNullOrNotEmpty(prompt, "prompt must be null or non-empty");
+            return this;
+        }
+
+        /**
+         * Specifies the set of OpenID Connect 1.0 {@code prompt} parameter values, which are
+         * space-delimited, case sensitive ASCII prompt values. Replaces any previously
+         * specified prompt values.
+         *
+         * @see Prompt
+         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
+         * Connect Core 1.0", Section 3.1.2.1</a>
+         */
+        @NonNull
+        public Builder setPromptValues(@Nullable String... promptValues) {
+            if (promptValues == null) {
+                mPrompt = null;
+                return this;
+            }
+
+            return setPromptValues(Arrays.asList(promptValues));
+        }
+
+        /**
+         * Specifies the set of OpenID Connect 1.0 {@code prompt} parameter values, which are
+         * space-delimited, case sensitive ASCII prompt values. Replaces any previously
+         * specified prompt values.
+         *
+         * @see Prompt
+         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
+         * Connect Core 1.0", Section 3.1.2.1</a>
+         */
+        @NonNull
+        public Builder setPromptValues(@Nullable Iterable<String> promptValues) {
+            mPrompt = AsciiStringListUtil.iterableToString(promptValues);
             return this;
         }
 
@@ -469,7 +602,7 @@ public class AuthorizationRequest {
          */
         @NonNull
         public Builder setScopes(@Nullable Iterable<String> scopes) {
-            mScope = ScopeUtil.scopeIterableToString(scopes);
+            mScope = AsciiStringListUtil.iterableToString(scopes);
             return this;
         }
 
@@ -599,6 +732,7 @@ public class AuthorizationRequest {
                     mClientId,
                     mResponseType,
                     mRedirectUri,
+                    mPrompt,
                     mScope,
                     mState,
                     mCodeVerifier,
@@ -614,6 +748,7 @@ public class AuthorizationRequest {
             @NonNull String clientId,
             @NonNull String responseType,
             @NonNull Uri redirectUri,
+            @Nullable String prompt,
             @Nullable String scope,
             @Nullable String state,
             @Nullable String codeVerifier,
@@ -621,17 +756,21 @@ public class AuthorizationRequest {
             @Nullable String codeVerifierChallengeMethod,
             @Nullable String responseMode,
             @NonNull Map<String, String> additionalParameters) {
+        // mandatory fields
         this.configuration = configuration;
         this.clientId = clientId;
         this.responseType = responseType;
         this.redirectUri = redirectUri;
+        this.additionalParameters = additionalParameters;
+
+        // optional fields
+        this.prompt = prompt;
         this.scope = scope;
         this.state = state;
         this.codeVerifier = codeVerifier;
         this.codeVerifierChallenge = codeVerifierChallenge;
         this.codeVerifierChallengeMethod = codeVerifierChallengeMethod;
         this.responseMode = responseMode;
-        this.additionalParameters = additionalParameters;
     }
 
     /**
@@ -641,7 +780,16 @@ public class AuthorizationRequest {
      */
     @Nullable
     public Set<String> getScopeSet() {
-        return ScopeUtil.scopeStringToSet(scope);
+        return AsciiStringListUtil.stringToSet(scope);
+    }
+
+    /**
+     * Derives the set of prompt values from the consolidated, space-delimited prompt values in
+     * the {@link #prompt} field. If no prompt values were specified for this request, the method
+     * will return {@code null}.
+     */
+    public Set<String> getPromptValues() {
+        return AsciiStringListUtil.stringToSet(prompt);
     }
 
     /**
@@ -654,6 +802,7 @@ public class AuthorizationRequest {
                 .appendQueryParameter(PARAM_CLIENT_ID, clientId)
                 .appendQueryParameter(PARAM_RESPONSE_TYPE, responseType);
 
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_PROMPT, prompt);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_STATE, state);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_SCOPE, scope);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_RESPONSE_MODE, responseMode);
@@ -732,7 +881,7 @@ public class AuthorizationRequest {
                 .setAdditionalParameters(JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
 
         if (json.has(KEY_SCOPE)) {
-            builder.setScopes(ScopeUtil.scopeStringToSet(JsonUtil.getString(json, KEY_SCOPE)));
+            builder.setScopes(AsciiStringListUtil.stringToSet(JsonUtil.getString(json, KEY_SCOPE)));
         }
         return builder.build();
     }

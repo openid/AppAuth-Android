@@ -31,24 +31,24 @@ import java.util.Set;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
-public final class ScopeUtilTest {
+public final class AsciiStringListUtilTest {
 
     private static final List<String> SCOPES = Arrays.asList("email", "profile", "openid");
     private static final String SCOPE_STRING = "email profile openid";
 
     @Test
     public void testScopeIterableToString() throws Exception {
-        assertEquals(SCOPE_STRING, ScopeUtil.scopeIterableToString(SCOPES));
+        assertEquals(SCOPE_STRING, AsciiStringListUtil.iterableToString(SCOPES));
     }
 
     @Test
     public void testScopeIterableToString_nullIterable() throws Exception {
-        assertNull(ScopeUtil.scopeIterableToString(null));
+        assertNull(AsciiStringListUtil.iterableToString(null));
     }
 
     @Test
     public void testScopeStringToSet() throws Exception {
-        Set<String> result = ScopeUtil.scopeStringToSet("email profile email openid");
+        Set<String> result = AsciiStringListUtil.stringToSet("email profile email openid");
         assertNotNull(result);
         assertEquals(SCOPES.size(), result.size());
         assertTrue(result.contains("email"));

@@ -367,7 +367,7 @@ public class AuthorizationResponse {
          */
         @NonNull
         public Builder setScopes(@Nullable Iterable<String> scopes) {
-            mScope = ScopeUtil.scopeIterableToString(scopes);
+            mScope = AsciiStringListUtil.iterableToString(scopes);
             return this;
         }
 
@@ -439,7 +439,7 @@ public class AuthorizationResponse {
      */
     @Nullable
     public Set<String> getScopeSet() {
-        return ScopeUtil.scopeStringToSet(scope);
+        return AsciiStringListUtil.stringToSet(scope);
     }
 
     /**

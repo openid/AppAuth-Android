@@ -30,6 +30,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -180,6 +181,96 @@ public class AuthorizationRequestTest {
     }
 
     @Test
+    public void testPrompt() {
+        AuthorizationRequest req = mMinimalRequestBuilder
+                .setPrompt(AuthorizationRequest.Prompt.LOGIN)
+                .build();
+
+        assertThat(req.prompt).isEqualTo(AuthorizationRequest.Prompt.LOGIN);
+    }
+
+    @Test
+    public void testPrompt_isNullByDefault() {
+        AuthorizationRequest req = mMinimalRequestBuilder.build();
+        assertThat(req.prompt).isNull();
+    }
+
+    @Test
+    public void testPrompt_withNullValue() {
+        AuthorizationRequest req = mMinimalRequestBuilder
+                .setPrompt(null)
+                .build();
+
+        assertThat(req.prompt).isNull();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testPrompt_withEmptyString() {
+        mMinimalRequestBuilder.setPrompt("");
+    }
+
+    @Test
+    public void testPrompt_withVarargs() {
+        AuthorizationRequest req = mMinimalRequestBuilder
+                .setPromptValues(
+                        AuthorizationRequest.Prompt.LOGIN,
+                        AuthorizationRequest.Prompt.CONSENT)
+                .build();
+
+        assertThat(req.prompt).isEqualTo(
+                AuthorizationRequest.Prompt.LOGIN + " " + AuthorizationRequest.Prompt.CONSENT);
+    }
+
+    @Test
+    public void testPrompt_withNullVarargsArray() {
+        AuthorizationRequest req = mMinimalRequestBuilder
+                .setPromptValues((String[])null)
+                .build();
+
+        assertThat(req.prompt).isNull();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testPrompt_withNullStringInVarargs() {
+        mMinimalRequestBuilder.setPromptValues(AuthorizationRequest.Prompt.LOGIN, null).build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testPrompt_withEmptyStringInVarargs() {
+        mMinimalRequestBuilder.setPromptValues(AuthorizationRequest.Prompt.LOGIN, "").build();
+    }
+
+    @Test
+    public void testPrompt_withIterable() {
+        ArrayList<String> promptValues = new ArrayList<>();
+        promptValues.add(AuthorizationRequest.Prompt.SELECT_ACCOUNT);
+        promptValues.add(AuthorizationRequest.Prompt.CONSENT);
+        AuthorizationRequest req = mMinimalRequestBuilder
+                .setPromptValues(promptValues)
+                .build();
+
+        assertThat(req.prompt).isEqualTo(
+                AuthorizationRequest.Prompt.SELECT_ACCOUNT + " "
+                        + AuthorizationRequest.Prompt.CONSENT);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testPrompt_withIterableContainingNullValue() {
+        ArrayList<String> promptValues = new ArrayList<>();
+        promptValues.add(AuthorizationRequest.Prompt.SELECT_ACCOUNT);
+        promptValues.add(null);
+        mMinimalRequestBuilder.setPromptValues(promptValues).build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testPrompt_withIterableContainingEmptyValue() {
+        ArrayList<String> promptValues = new ArrayList<>();
+        promptValues.add(AuthorizationRequest.Prompt.SELECT_ACCOUNT);
+        promptValues.add("");
+        mMinimalRequestBuilder.setPromptValues(promptValues).build();
+    }
+
+    @Test
     public void testScopes_null() {
         AuthorizationRequest request = mRequestBuilder
                 .setScopes((Iterable<String>)null)
@@ -273,6 +364,17 @@ public class AuthorizationRequestTest {
                 .isEqualTo("1234");
         assertThat(uri.getQueryParameter("another_param"))
                 .isEqualTo("5678");
+    }
+
+    @Test
+    public void testToUri_withPrompt() throws Exception {
+        AuthorizationRequest req = mMinimalRequestBuilder
+                .setPrompt(AuthorizationRequest.Prompt.LOGIN)
+                .build();
+
+        Uri uri = req.toUri();
+        assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_PROMPT))
+                .isEqualTo(AuthorizationRequest.Prompt.LOGIN);
     }
 
     @Test

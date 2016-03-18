@@ -25,34 +25,35 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Convenience methods for building and parsing scope strings.
+ * Convenience methods for building and parsing space-delimited string lists, which are
+ * frequently used in OAuth2 and OpenID Connect parameters.
  */
-final class ScopeUtil {
+final class AsciiStringListUtil {
 
     /**
-     * Converts an iterable collection of scope strings into the consolidated, space-delimited
-     * scope string that is carried in authorization requests. If the provided iterable is
-     * {@code null}, or contains no elements, then {@code null} will be returned.
-     * If any individual scope element is null or empty, an exception will be thrown.
+     * Converts an iterable collection of strings into a consolidated, space-delimited
+     * format. If the provided iterable is {@code null}, or contains no elements, then
+     * {@code null} will be returned. If any individual scope element is null or empty, an
+     * exception will be thrown.
      */
     @Nullable
-    public static String scopeIterableToString(@Nullable Iterable<String> scopes) {
-        if (scopes == null) {
+    public static String iterableToString(@Nullable Iterable<String> strings) {
+        if (strings == null) {
             return null;
         }
 
-        Set<String> scopeSet = new LinkedHashSet<>();
-        for (String scope : scopes) {
-            checkArgument(!TextUtils.isEmpty(scope),
+        Set<String> stringSet = new LinkedHashSet<>();
+        for (String str : strings) {
+            checkArgument(!TextUtils.isEmpty(str),
                     "individual scopes cannot be null or empty");
-            scopeSet.add(scope);
+            stringSet.add(str);
         }
 
-        if (scopeSet.isEmpty()) {
+        if (stringSet.isEmpty()) {
             return null;
         }
 
-        return TextUtils.join(" ", scopeSet);
+        return TextUtils.join(" ", stringSet);
     }
 
     /**
@@ -60,13 +61,13 @@ final class ScopeUtil {
      * string is {@code null}, then {@code null} will be returned.
      */
     @Nullable
-    public static Set<String> scopeStringToSet(@Nullable String scopeStr) {
-        if (scopeStr == null) {
+    public static Set<String> stringToSet(@Nullable String spaceDelimitedStr) {
+        if (spaceDelimitedStr == null) {
             return null;
         }
-        List<String> scopes = Arrays.asList(TextUtils.split(scopeStr, " "));
-        LinkedHashSet<String> scopeSet = new LinkedHashSet<>(scopes.size());
-        scopeSet.addAll(scopes);
-        return scopeSet;
+        List<String> strings = Arrays.asList(TextUtils.split(spaceDelimitedStr, " "));
+        LinkedHashSet<String> stringSet = new LinkedHashSet<>(strings.size());
+        stringSet.addAll(strings);
+        return stringSet;
     }
 }
