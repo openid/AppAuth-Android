@@ -85,7 +85,7 @@ additional instances of `IdentityProvider`. Assuming an service named
 This may result in an addition to `idp_configs.xml` that looks like:
 
 ```
-<bool name="myauth_enabled">false</bool>
+<bool name="myauth_enabled">true</bool>
 <string name="myauth_client_id" translatable="false">YOUR_CLIENT_ID</string>
 ```
 
@@ -100,23 +100,47 @@ And an addition to `idp_configs_optional.xml` that looks like:
 ```
 
 With these properties defined, a new instance of IdentityProvider can be
-defined:
+defined in `IdentityProvider`:
 
 ```
 public static final MYAUTH = new IdentityProvider(
     "MyAuth", // name of the provider, for debug strings
     R.bool.myauth_enabled,
-    NOT_SPECIFIED, // provider is not OpenID Connect
+    NOT_SPECIFIED, // discovery document not provided
     R.string.myauth_auth_endpoint_uri,
     R.string.myauth_token_endpoint_uri,
     R.string.myauth_client_id,
     R.string.myauth_auth_redirect_uri,
     R.string.myauth_scope_string,
-    R.drawable.btn_myauth,
+    R.drawable.btn_myauth, // your button image asset
     R.string.myauth_name,
     android.R.color.black // text color on the button
 );
 ```
 
-And then added to the list of IDPs in the `IdentityProviders.PROVIDERS` list.
-When enabled, this IDP should be displayed in the app.
+And added to `IdentityProvider`'s static list of IDPs, e.g.:
+
+```
+public static final List<IdentityProvider> PROVIDERS = Arrays.asList(MYAUTH)
+```
+
+Finally you need to add a new intent-filter to the 
+`net.openid.appauth.RedirectUriReceiverActivity` activity section of 
+the `AndroidManifest.xml`
+
+```
+<!-- Callback from authentication screen -->
+<activity android:name="net.openid.appauth.RedirectUriReceiverActivity">
+
+    <!-- redirect URI for your new IDP -->
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="@string/your_idp_auth_redirect_scheme"/>
+    </intent-filter>
+</activity>
+```
+
+Make sure you've set `myauth_enabled` to true in the config, and your new IdP
+should show up in the list.

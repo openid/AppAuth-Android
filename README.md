@@ -202,6 +202,20 @@ service.performAuthorizationRequest(
 
 ### Handling the Redirect
 
+In the `AndroidManifest.xml`, declare the activity that receives the redirect
+URI intent, and the scheme of your OAuth client's redirect URI
+
+```
+<activity android:name="net.openid.appauth.RedirectUriReceiverActivity">
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="com.yourapp"/>
+    </intent-filter>
+</activity>
+```
+
 The response is delivered to the specified handler, and can be extracted
 from the intent data:
 
