@@ -132,6 +132,42 @@ public class AuthorizationRequest {
     public static final String CODE_CHALLENGE_METHOD_PLAIN = "plain";
 
     /**
+     * All spec-defined values for the OpenID Connect 1.0 {@code display} parameter.
+     * @see Builder#setDisplay(String)
+     * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
+     * Connect Core 1.0", Section 3.1.2.1</a>
+     */
+    public static final class Display {
+
+        /**
+         * The Authorization Server <em>SHOULD</em> display the authentication and consent UI
+         * consistent with a full User Agent page view. If the display parameter is not specified,
+         * this is the default display mode.
+         */
+        public static final String PAGE = "page";
+
+        /**
+         * The Authorization Server <em>SHOULD</em> display the authentication and consent UI
+         * consistent with a popup User Agent window. The popup User Agent window should be of an
+         * appropriate size for a login-focused dialog and should not obscure the entire window that
+         * it is popping up over.
+         */
+        public static final String POPUP = "popup";
+
+        /**
+         * The Authorization Server <em>SHOULD</em> display the authentication and consent UI
+         * consistent with a device that leverages a touch interface.
+         */
+        public static final String TOUCH = "touch";
+
+        /**
+         * The Authorization Server <em>SHOULD</em> display the authentication and consent UI
+         * consistent with a "feature phone" type display.
+         */
+        public static final String WAP = "wap";
+    }
+
+    /**
      * All spec-defined values for the OpenID Connect 1.0 {@code prompt} parameter.
      * @see Builder#setPrompt(String)
      * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
@@ -205,6 +241,9 @@ public class AuthorizationRequest {
     static final String PARAM_CODE_CHALLENGE_METHOD = "code_challenge_method";
 
     @VisibleForTesting
+    static final String PARAM_DISPLAY = "display";
+
+    @VisibleForTesting
     static final String PARAM_PROMPT = "prompt";
 
     @VisibleForTesting
@@ -226,6 +265,7 @@ public class AuthorizationRequest {
             PARAM_CLIENT_ID,
             PARAM_CODE_CHALLENGE,
             PARAM_CODE_CHALLENGE_METHOD,
+            PARAM_DISPLAY,
             PARAM_PROMPT,
             PARAM_REDIRECT_URI,
             PARAM_RESPONSE_MODE,
@@ -235,6 +275,7 @@ public class AuthorizationRequest {
 
     private static final String KEY_CONFIGURATION = "configuration";
     private static final String KEY_CLIENT_ID = "clientId";
+    private static final String KEY_DISPLAY = "prompt";
     private static final String KEY_PROMPT = "prompt";
     private static final String KEY_RESPONSE_TYPE = "responseType";
     private static final String KEY_REDIRECT_URI = "redirectUri";
@@ -270,6 +311,15 @@ public class AuthorizationRequest {
      */
     @NonNull
     public final String clientId;
+
+
+    /**
+     * The OpenID Connect 1.0 {@code display} parameter. This is a string that specifies how the
+     * Authorization Server displays the authentication and consent user interface pages to the
+     * End-User.
+     */
+    @Nullable
+    public final String display;
 
     /**
      * The OpenID Connect 1.0 {@code prompt} parameter. This is a space delimited, case sensitive
@@ -405,6 +455,9 @@ public class AuthorizationRequest {
         private String mClientId;
 
         @Nullable
+        private String mDisplay;
+
+        @Nullable
         private String mPrompt;
 
         @NonNull
@@ -473,6 +526,17 @@ public class AuthorizationRequest {
         public Builder setClientId(@NonNull String clientId) {
             checkArgument(!TextUtils.isEmpty(clientId), "client ID cannot be null or empty");
             mClientId = clientId;
+            return this;
+        }
+
+        /**
+         * Specifies the OpenID Connect 1.0 {@code display} parameter.
+         * @see Display
+         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
+         * Connect Core 1.0", Section 3.1.2.1</a>
+         */
+        public Builder setDisplay(@Nullable String display) {
+            mDisplay = checkNullOrNotEmpty(display, "display must be null or not empty");
             return this;
         }
 
@@ -732,6 +796,7 @@ public class AuthorizationRequest {
                     mClientId,
                     mResponseType,
                     mRedirectUri,
+                    mDisplay,
                     mPrompt,
                     mScope,
                     mState,
@@ -748,6 +813,7 @@ public class AuthorizationRequest {
             @NonNull String clientId,
             @NonNull String responseType,
             @NonNull Uri redirectUri,
+            @Nullable String display,
             @Nullable String prompt,
             @Nullable String scope,
             @Nullable String state,
@@ -764,6 +830,7 @@ public class AuthorizationRequest {
         this.additionalParameters = additionalParameters;
 
         // optional fields
+        this.display = display;
         this.prompt = prompt;
         this.scope = scope;
         this.state = state;
@@ -802,6 +869,7 @@ public class AuthorizationRequest {
                 .appendQueryParameter(PARAM_CLIENT_ID, clientId)
                 .appendQueryParameter(PARAM_RESPONSE_TYPE, responseType);
 
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_DISPLAY, display);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_PROMPT, prompt);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_STATE, state);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_SCOPE, scope);
@@ -829,6 +897,7 @@ public class AuthorizationRequest {
         JsonUtil.put(json, KEY_CLIENT_ID, clientId);
         JsonUtil.put(json, KEY_RESPONSE_TYPE, responseType);
         JsonUtil.put(json, KEY_REDIRECT_URI, redirectUri.toString());
+        JsonUtil.putIfNotNull(json, KEY_DISPLAY, display);
         JsonUtil.putIfNotNull(json, KEY_SCOPE, scope);
         JsonUtil.putIfNotNull(json, KEY_STATE, state);
         JsonUtil.putIfNotNull(json, KEY_CODE_VERIFIER, codeVerifier);
@@ -872,6 +941,7 @@ public class AuthorizationRequest {
                 JsonUtil.getString(json, KEY_CLIENT_ID),
                 JsonUtil.getString(json, KEY_RESPONSE_TYPE),
                 JsonUtil.getUri(json, KEY_REDIRECT_URI))
+                .setDisplay(JsonUtil.getStringIfDefined(json, KEY_DISPLAY))
                 .setState(JsonUtil.getStringIfDefined(json, KEY_STATE))
                 .setCodeVerifier(
                         JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER),
