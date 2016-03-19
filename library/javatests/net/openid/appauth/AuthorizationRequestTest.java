@@ -181,6 +181,35 @@ public class AuthorizationRequestTest {
     }
 
     @Test
+    public void testDisplay() {
+        AuthorizationRequest req = mMinimalRequestBuilder
+                .setDisplay(AuthorizationRequest.Display.TOUCH)
+                .build();
+
+        assertThat(req.display).isEqualTo(AuthorizationRequest.Display.TOUCH);
+    }
+
+    @Test
+    public void testDisplay_isNullByDefault() {
+        AuthorizationRequest req = mMinimalRequestBuilder.build();
+        assertThat(req.display).isNull();
+    }
+
+    @Test
+     public void testDisplay_withNullValue() {
+        AuthorizationRequest req = mMinimalRequestBuilder
+                .setDisplay(null)
+                .build();
+
+        assertThat(req.display).isNull();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDisplay_withEmptyValue() {
+        mMinimalRequestBuilder.setDisplay("").build();
+    }
+
+    @Test
     public void testPrompt() {
         AuthorizationRequest req = mMinimalRequestBuilder
                 .setPrompt(AuthorizationRequest.Prompt.LOGIN)
@@ -375,6 +404,17 @@ public class AuthorizationRequestTest {
         Uri uri = req.toUri();
         assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_PROMPT))
                 .isEqualTo(AuthorizationRequest.Prompt.LOGIN);
+    }
+
+    @Test
+    public void testToUri_withDisplay() throws Exception {
+        AuthorizationRequest req = mMinimalRequestBuilder
+                .setDisplay(AuthorizationRequest.Display.TOUCH)
+                .build();
+
+        Uri uri = req.toUri();
+        assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_DISPLAY))
+                .isEqualTo(AuthorizationRequest.Display.TOUCH);
     }
 
     @Test
