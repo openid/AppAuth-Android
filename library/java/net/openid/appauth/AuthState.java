@@ -172,7 +172,7 @@ public class AuthState {
             return null;
         }
 
-        if (mLastTokenResponse != null) {
+        if (mLastTokenResponse != null && mLastTokenResponse.accessToken != null) {
             return mLastTokenResponse.accessToken;
         }
 
@@ -193,11 +193,11 @@ public class AuthState {
             return null;
         }
 
-        if (mLastTokenResponse != null) {
+        if (mLastTokenResponse != null && mLastTokenResponse.accessToken != null) {
             return mLastTokenResponse.accessTokenExpirationTime;
         }
 
-        if (mLastAuthorizationResponse != null) {
+        if (mLastAuthorizationResponse != null && mLastAuthorizationResponse.accessToken != null) {
             return mLastAuthorizationResponse.accessTokenExpirationTime;
         }
 
@@ -213,7 +213,7 @@ public class AuthState {
             return null;
         }
 
-        if (mLastTokenResponse != null) {
+        if (mLastTokenResponse != null && mLastTokenResponse.idToken != null) {
             return mLastTokenResponse.idToken;
         }
 
@@ -234,7 +234,10 @@ public class AuthState {
     }
 
     /**
-     * Determines whether the access token is considered to have expired.
+     * Determines whether the access token is considered to have expired. If no refresh token
+     * has been acquired, then this method will always return {@code false}. A token refresh
+     * can be forced, regardless of the validity of any currently acquired access token, by
+     * calling {@link #setNeedsTokenRefresh(boolean) setNeedsTokenRefresh(true)}.
      */
     public boolean getNeedsTokenRefresh() {
         return getNeedsTokenRefresh(SystemClock.INSTANCE);
@@ -242,20 +245,27 @@ public class AuthState {
 
     @VisibleForTesting
     boolean getNeedsTokenRefresh(Clock clock) {
+        if (getRefreshToken() == null) {
+            return false;
+        }
+
         if (mNeedsTokenRefreshOverride) {
             return true;
         }
 
-        if (getAccessTokenExpirationTime() != null) {
-            return (getAccessTokenExpirationTime() + EXPIRY_TIME_TOLERANCE_MS)
-                    <= clock.getCurrentTimeMillis();
+        if (getAccessTokenExpirationTime() == null) {
+            // if there is no expiration but we have an access token, it is assumed
+            // to never expire.
+            return getAccessToken() == null;
         }
 
-        return false;
+        return getAccessTokenExpirationTime()
+                <= clock.getCurrentTimeMillis() + EXPIRY_TIME_TOLERANCE_MS;
     }
 
     /**
-     * Sets whether to force an access token refresh, irrespective of the expiration time.
+     * Sets whether to force an access token refresh, regardless of the current access token's
+     * expiration time.
      */
     public void setNeedsTokenRefresh(boolean needsTokenRefresh) {
         mNeedsTokenRefreshOverride = needsTokenRefresh;
@@ -281,7 +291,7 @@ public class AuthState {
         mRefreshToken = null;
         mAuthorizationExceptionCode = null;
 
-        // if the response's mScope is nil, it means that it equals that of the request
+        // if the response's mScope is null, it means that it equals that of the request
         // see: https://tools.ietf.org/html/rfc6749#section-5.1
         mScope = (authResponse.scope != null) ? authResponse.scope : authResponse.request.scope;
     }
@@ -300,9 +310,9 @@ public class AuthState {
             // obtained a new token and did the exchange without also calling
             // updateFromAuthorizationResponse. Attempt to handle this gracefully, but warn the
             // developer that this is unexpected.
-            Logger.warn("AuthState.updateFromTokenResponse should not be called in an error state"
-                    + "(%d), call updateFromAuthorizationResponse with the result of the fresh"
-                    + "authorization response first",
+            Logger.warn(
+                    "AuthState.update should not be called in an error state (%d), call update"
+                            + "with the result of the fresh authorization response first",
                     mAuthorizationExceptionCode);
             mAuthorizationExceptionCode = null;
         }
@@ -361,7 +371,7 @@ public class AuthState {
             throw new IllegalStateException("No refresh token available");
         }
 
-        if (!getNeedsTokenRefresh()) {
+        if (!getNeedsTokenRefresh(clock)) {
             action.execute(getAccessToken(), getIdToken(), null);
             return;
         }

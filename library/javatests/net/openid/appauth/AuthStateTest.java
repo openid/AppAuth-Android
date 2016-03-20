@@ -1,0 +1,454 @@
+/*
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package net.openid.appauth;
+
+import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
+import static net.openid.appauth.TestValues.TEST_AUTH_CODE;
+import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
+import static net.openid.appauth.TestValues.TEST_REFRESH_TOKEN;
+import static net.openid.appauth.TestValues.getMinimalAuthRequestBuilder;
+import static net.openid.appauth.TestValues.getTestAuthCodeExchangeResponse;
+import static net.openid.appauth.TestValues.getTestAuthCodeExchangeResponseBuilder;
+import static net.openid.appauth.TestValues.getTestAuthRequest;
+import static net.openid.appauth.TestValues.getTestAuthResponse;
+import static net.openid.appauth.TestValues.getTestAuthResponseBuilder;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+
+import java.util.Collections;
+
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest = Config.NONE)
+public class AuthStateTest {
+
+    private static final Long ONE_SECOND = 1000L;
+    private static final Long TWO_MINUTES = 120000L;
+
+    private TestClock mClock;
+
+    @Before
+    public void setUp() {
+        mClock = new TestClock(0L);
+    }
+
+    @Test
+    public void testInitialState() {
+        AuthState state = new AuthState();
+        assertThat(state.isAuthorized()).isFalse();
+
+        assertThat(state.getAccessToken()).isNull();
+        assertThat(state.getAccessTokenExpirationTime()).isNull();
+        assertThat(state.getIdToken()).isNull();
+        assertThat(state.getRefreshToken()).isNull();
+
+        assertThat(state.getLastAuthorizationResponse()).isNull();
+        assertThat(state.getLastTokenResponse()).isNull();
+
+        assertThat(state.getScope()).isNull();
+        assertThat(state.getScopeSet()).isNull();
+
+        assertThat(state.getNeedsTokenRefresh(mClock)).isFalse();
+    }
+
+    @Test
+    public void testInitialState_fromAuthorizationResponse() {
+        AuthorizationRequest authCodeRequest = getTestAuthRequest();
+        AuthorizationResponse resp = getTestAuthResponse();
+        AuthState state = new AuthState(resp, (Exception)null);
+
+        assertThat(state.getAccessToken()).isNull();
+        assertThat(state.getAccessTokenExpirationTime()).isNull();
+        assertThat(state.getIdToken()).isNull();
+        assertThat(state.getRefreshToken()).isNull();
+
+        assertThat(state.getLastAuthorizationResponse()).isSameAs(resp);
+        assertThat(state.getLastTokenResponse()).isNull();
+
+        assertThat(state.getScope()).isEqualTo(authCodeRequest.scope);
+        assertThat(state.getScopeSet()).isEqualTo(authCodeRequest.getScopeSet());
+
+        assertThat(state.getNeedsTokenRefresh(mClock)).isFalse();
+    }
+
+    @Test
+    public void testInitialState_fromAuthorizationResponse_withModifiedScope() {
+        AuthorizationRequest authCodeRequest = getTestAuthRequest();
+
+        // simulate a situation in which the response grants a subset of the requested scopes,
+        // perhaps due to policy or user preference
+        AuthorizationResponse resp = getTestAuthResponseBuilder()
+                .setScopes(AuthorizationRequest.SCOPE_OPENID)
+                .build();
+        AuthState state = new AuthState(resp, (Exception)null);
+
+        assertThat(state.getScope()).isEqualTo(resp.scope);
+        assertThat(state.getScopeSet()).isEqualTo(resp.getScopeSet());
+    }
+
+    @Test
+    public void testInitialState_fromAuthorizationResponseAndTokenResponse() {
+        AuthorizationResponse authResp = getTestAuthResponse();
+        TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
+        AuthState state = new AuthState(authResp, tokenResp);
+
+        assertThat(state.getAccessToken()).isNull();
+        assertThat(state.getAccessTokenExpirationTime()).isNull();
+        assertThat(state.getIdToken()).isNull();
+        assertThat(state.getRefreshToken()).isEqualTo(TEST_REFRESH_TOKEN);
+
+        assertThat(state.getLastAuthorizationResponse()).isSameAs(authResp);
+        assertThat(state.getLastTokenResponse()).isSameAs(tokenResp);
+
+        assertThat(state.getScope()).isEqualTo(authResp.request.scope);
+        assertThat(state.getScopeSet()).isEqualTo(authResp.request.getScopeSet());
+
+        // the refresh token has been acquired, but has not yet been used to fetch an access token
+        assertThat(state.getNeedsTokenRefresh(mClock)).isTrue();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor_withAuthResponseAndException() {
+        new AuthState(getTestAuthResponse(), new Exception());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUpdate_withAuthResponseAndException() {
+        AuthState state = new AuthState(getTestAuthResponse(), (Exception) null);
+        state.update(getTestAuthResponse(), new Exception());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUpdate_withTokenResponseAndException() {
+        AuthState state = new AuthState(getTestAuthResponse(), (Exception) null);
+        state.update(getTestAuthCodeExchangeResponse(), new Exception());
+    }
+
+    @Test
+    public void testGetAccessToken_fromAuthResponse() {
+        AuthorizationRequest authReq = getMinimalAuthRequestBuilder("code token")
+                .setScope(AuthorizationRequest.SCOPE_EMAIL)
+                .build();
+        AuthorizationResponse authResp = new AuthorizationResponse.Builder(authReq)
+                .setAuthorizationCode(TEST_AUTH_CODE)
+                .setAccessToken(TEST_ACCESS_TOKEN)
+                .setState(authReq.state)
+                .build();
+
+        TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
+        AuthState state = new AuthState(authResp, tokenResp);
+
+        // in this scenario, we have an access token in the authorization response but not
+        // in the token response. We expect the access token from the authorization response
+        // to be returned.
+        assertThat(state.getAccessToken()).isEqualTo(authResp.accessToken);
+    }
+
+    @Test
+    public void testGetAccessToken_fromTokenResponse() {
+        AuthorizationRequest authReq = getMinimalAuthRequestBuilder("code token")
+                .setScope(AuthorizationRequest.SCOPE_EMAIL)
+                .build();
+        AuthorizationResponse authResp = new AuthorizationResponse.Builder(authReq)
+                .setAuthorizationCode(TEST_AUTH_CODE)
+                .setAccessToken("older_token")
+                .setState(authReq.state)
+                .build();
+        TokenResponse tokenResp = getTestAuthCodeExchangeResponseBuilder()
+                .setAccessToken("newer_token")
+                .build();
+        AuthState state = new AuthState(authResp, tokenResp);
+
+        // in this scenario, we have an access token on both the authorization response and the
+        // token response. The value on the token response takes precedence.
+        assertThat(state.getAccessToken()).isEqualTo(tokenResp.accessToken);
+    }
+
+    @Test
+    public void testGetIdToken_fromAuthResponse() {
+        AuthorizationRequest authReq = getMinimalAuthRequestBuilder("code id_token")
+                .setScope(AuthorizationRequest.SCOPE_EMAIL)
+                .build();
+        AuthorizationResponse authResp = new AuthorizationResponse.Builder(authReq)
+                .setAuthorizationCode(TEST_AUTH_CODE)
+                .setIdToken(TEST_ID_TOKEN)
+                .setState(authReq.state)
+                .build();
+
+        TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
+        AuthState state = new AuthState(authResp, tokenResp);
+
+        // in this scenario, we have an ID token in the authorization response but not
+        // in the token response. We expect the ID token from the authorization response
+        // to be returned.
+        assertThat(state.getIdToken()).isEqualTo(authResp.idToken);
+    }
+
+    @Test
+    public void testGetIdToken_fromTokenResponse() {
+        AuthorizationRequest authReq = getMinimalAuthRequestBuilder("code id_token")
+                .setScope(AuthorizationRequest.SCOPE_EMAIL)
+                .build();
+        AuthorizationResponse authResp = new AuthorizationResponse.Builder(authReq)
+                .setAuthorizationCode(TEST_AUTH_CODE)
+                .setIdToken("older.token.value")
+                .setState(authReq.state)
+                .build();
+        TokenResponse tokenResp = getTestAuthCodeExchangeResponseBuilder()
+                .setIdToken("newer.token.value")
+                .build();
+        AuthState state = new AuthState(authResp, tokenResp);
+
+        // in this scenario, we have an ID token on both the authorization response and the
+        // token response. The value on the token response takes precedence.
+        assertThat(state.getIdToken()).isEqualTo(tokenResp.idToken);
+    }
+
+    @Test
+    public void testCreateTokenRefreshRequest() {
+        AuthorizationResponse authResp = getTestAuthResponse();
+        TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
+        AuthState state = new AuthState(authResp, tokenResp);
+
+        TokenRequest request = state.createTokenRefreshRequest();
+        assertThat(request.configuration.tokenEndpoint)
+                .isEqualTo(state.getAuthorizationServiceConfiguration().tokenEndpoint);
+        assertThat(request.clientId).isEqualTo(authResp.request.clientId);
+        assertThat(request.grantType).isEqualTo(TokenRequest.GRANT_TYPE_REFRESH_TOKEN);
+        assertThat(request.refreshToken).isEqualTo(state.getRefreshToken());
+    }
+
+    @Test
+    public void testGetNeedsTokenRefresh() {
+        AuthorizationRequest authReq = getMinimalAuthRequestBuilder("token code")
+                .setScope("my_scope")
+                .build();
+
+        AuthorizationResponse authResp = new AuthorizationResponse.Builder(authReq)
+                .setAccessToken(TEST_ACCESS_TOKEN)
+                .setAccessTokenExpirationTime(TWO_MINUTES)
+                .setAuthorizationCode(TEST_AUTH_CODE)
+                .setState(authReq.state)
+                .build();
+        TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
+        AuthState state = new AuthState(authResp, tokenResp);
+
+        // before the expiration time
+        mClock.currentTime.set(ONE_SECOND);
+        assertThat(state.getNeedsTokenRefresh(mClock)).isFalse();
+
+        // 1ms before the tolerance threshold
+        mClock.currentTime.set(TWO_MINUTES - AuthState.EXPIRY_TIME_TOLERANCE_MS - 1);
+        assertThat(state.getNeedsTokenRefresh(mClock)).isFalse();
+
+        // on the tolerance threshold
+        mClock.currentTime.set(TWO_MINUTES - AuthState.EXPIRY_TIME_TOLERANCE_MS);
+        assertThat(state.getNeedsTokenRefresh(mClock)).isTrue();
+
+        // past tolerance threshold
+        mClock.currentTime.set(TWO_MINUTES - AuthState.EXPIRY_TIME_TOLERANCE_MS + ONE_SECOND);
+        assertThat(state.getNeedsTokenRefresh(mClock)).isTrue();
+
+        // on token's actual expiration
+        mClock.currentTime.set(TWO_MINUTES);
+        assertThat(state.getNeedsTokenRefresh(mClock)).isTrue();
+
+        // past token's actual expiration
+        mClock.currentTime.set(TWO_MINUTES + ONE_SECOND);
+        assertThat(state.getNeedsTokenRefresh(mClock)).isTrue();
+    }
+
+    @Test
+    public void testSetNeedsTokenRefresh() {
+        AuthorizationRequest authReq = getMinimalAuthRequestBuilder("token code")
+                .setScope("my_scope")
+                .build();
+
+        AuthorizationResponse authResp = new AuthorizationResponse.Builder(authReq)
+                .setAccessToken(TEST_ACCESS_TOKEN)
+                .setAccessTokenExpirationTime(TWO_MINUTES)
+                .setAuthorizationCode(TEST_AUTH_CODE)
+                .setState(authReq.state)
+                .build();
+        TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
+        AuthState state = new AuthState(authResp, tokenResp);
+
+        // before the expiration time...
+        mClock.currentTime.set(ONE_SECOND);
+        assertThat(state.getNeedsTokenRefresh(mClock)).isFalse();
+
+        // ... force a refresh
+        state.setNeedsTokenRefresh(true);
+        assertThat(state.getNeedsTokenRefresh(mClock)).isTrue();
+    }
+
+    @Test
+    public void testSetNeedsTokenRefresh_hasNoEffectWithNoAccessToken() {
+        AuthState state = new AuthState(getTestAuthResponse(), (Exception) null);
+
+        // in this scenario, we do not yet have a refresh or access token. Attempting to force
+        // a token refresh is meaningless.
+        assertThat(state.getNeedsTokenRefresh()).isFalse();
+        state.setNeedsTokenRefresh(true);
+        assertThat(state.getNeedsTokenRefresh()).isFalse();
+    }
+
+    @Test
+    public void testPerformActionWithFreshTokens() {
+        AuthorizationRequest authReq = getMinimalAuthRequestBuilder("id_token token code")
+                .setScope("my_scope")
+                .build();
+
+        AuthorizationResponse authResp = new AuthorizationResponse.Builder(authReq)
+                .setAccessToken(TEST_ACCESS_TOKEN)
+                .setAccessTokenExpirationTime(TWO_MINUTES)
+                .setIdToken(TEST_ID_TOKEN)
+                .setAuthorizationCode(TEST_AUTH_CODE)
+                .setState(authReq.state)
+                .build();
+        TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
+        AuthState state = new AuthState(authResp, tokenResp);
+
+        AuthorizationService service = mock(AuthorizationService.class);
+        AuthState.AuthStateAction action = mock(AuthState.AuthStateAction.class);
+
+        // at this point in time, the access token will not be considered to be expired
+        mClock.currentTime.set(ONE_SECOND);
+        state.performActionWithFreshTokens(
+                service,
+                Collections.<String, String>emptyMap(),
+                mClock,
+                action);
+
+        // as the token has not expired, the service will not be used to refresh it
+        verifyZeroInteractions(service);
+
+        // the action should have been directly invoked
+        verify(action, times(1)).execute(
+                eq(TEST_ACCESS_TOKEN),
+                eq(TEST_ID_TOKEN),
+                isNull(AuthorizationException.class));
+    }
+
+    @Test
+    public void testPerformActionWithFreshTokens_afterTokenExpiration() {
+        AuthorizationRequest authReq = getMinimalAuthRequestBuilder("id_token token code")
+                .setScope("my_scope")
+                .build();
+
+        AuthorizationResponse authResp = new AuthorizationResponse.Builder(authReq)
+                .setAccessToken(TEST_ACCESS_TOKEN)
+                .setAccessTokenExpirationTime(TWO_MINUTES)
+                .setIdToken(TEST_ID_TOKEN)
+                .setAuthorizationCode(TEST_AUTH_CODE)
+                .setState(authReq.state)
+                .build();
+        TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
+        AuthState state = new AuthState(authResp, tokenResp);
+
+        AuthorizationService service = mock(AuthorizationService.class);
+        AuthState.AuthStateAction action = mock(AuthState.AuthStateAction.class);
+
+        // at this point in time, the access token will be considered to be expired
+        mClock.currentTime.set(TWO_MINUTES - AuthState.EXPIRY_TIME_TOLERANCE_MS + ONE_SECOND);
+        state.performActionWithFreshTokens(
+                service,
+                Collections.<String, String>emptyMap(),
+                mClock,
+                action);
+
+        // as the access token has expired, we expect a token refresh request
+        ArgumentCaptor<TokenRequest> requestCaptor = ArgumentCaptor.forClass(TokenRequest.class);
+        ArgumentCaptor<AuthorizationService.TokenResponseCallback> callbackCaptor =
+                ArgumentCaptor.forClass(AuthorizationService.TokenResponseCallback.class);
+        verify(service, times(1)).performTokenRequest(
+                requestCaptor.capture(),
+                callbackCaptor.capture());
+
+        assertThat(requestCaptor.getValue().refreshToken).isEqualTo(tokenResp.refreshToken);
+
+        // the action should not be executed until after the token refresh completes
+        verifyZeroInteractions(action);
+
+        String freshAccessToken = "fresh_access_token";
+        Long freshExpirationTime = mClock.currentTime.get() + TWO_MINUTES;
+        String freshIdToken = "fresh.id.token";
+
+        // simulate success on the token request, with fresh tokens in the result
+        TokenResponse freshResponse = new TokenResponse.Builder(requestCaptor.getValue())
+                .setTokenType(TokenResponse.TOKEN_TYPE_BEARER)
+                .setAccessToken(freshAccessToken)
+                .setAccessTokenExpirationTime(freshExpirationTime)
+                .setIdToken(freshIdToken)
+                .build();
+
+        callbackCaptor.getValue().onTokenRequestCompleted(freshResponse, null);
+
+        // the action should be invoked in response to the token request completion
+        verify(action, times(1)).execute(
+                eq(freshAccessToken),
+                eq(freshIdToken),
+                isNull(AuthorizationException.class));
+
+        // additionally, the auth state should be updated with the new token values
+        assertThat(state.getAccessToken()).isEqualTo(freshAccessToken);
+        assertThat(state.getAccessTokenExpirationTime()).isEqualTo(freshExpirationTime);
+        assertThat(state.getIdToken()).isEqualTo(freshIdToken);
+    }
+
+    @Test
+    public void testJsonSerialization() throws Exception {
+        AuthorizationRequest authReq = getMinimalAuthRequestBuilder("id_token token code")
+                .setScopes(
+                        AuthorizationRequest.SCOPE_OPENID,
+                        AuthorizationRequest.SCOPE_EMAIL,
+                        AuthorizationRequest.SCOPE_PROFILE)
+                .build();
+        AuthorizationResponse authResp = new AuthorizationResponse.Builder(authReq)
+                .setAccessToken(TEST_ACCESS_TOKEN)
+                .setIdToken(TEST_ID_TOKEN)
+                .setAuthorizationCode(TEST_AUTH_CODE)
+                .setState(authReq.state)
+                .build();
+
+        TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
+        AuthState state = new AuthState(authResp, tokenResp);
+
+        String json = state.toJsonString();
+        AuthState restoredState = AuthState.fromJson(json);
+
+        assertThat(restoredState.isAuthorized()).isEqualTo(state.isAuthorized());
+
+        assertThat(restoredState.getAccessToken()).isEqualTo(state.getAccessToken());
+        assertThat(restoredState.getAccessTokenExpirationTime())
+                .isEqualTo(state.getAccessTokenExpirationTime());
+        assertThat(restoredState.getIdToken()).isEqualTo(state.getIdToken());
+        assertThat(restoredState.getRefreshToken()).isEqualTo(state.getRefreshToken());
+        assertThat(restoredState.getScope()).isEqualTo(state.getScope());
+        assertThat(restoredState.getNeedsTokenRefresh(mClock))
+                .isEqualTo(restoredState.getNeedsTokenRefresh(mClock));
+    }
+}
