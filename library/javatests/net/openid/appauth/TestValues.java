@@ -34,6 +34,7 @@ class TestValues {
     public static final String TEST_CODE_VERIFIER = "0123456789_0123456789_0123456789_0123456789";
     public static final String TEST_AUTH_CODE = "zxcvbnmjk";
     public static final String TEST_ACCESS_TOKEN = "aaabbbccc";
+    public static final Long TEST_ACCESS_TOKEN_EXPIRATION_TIME = 120000L; // two minutes
     public static final String TEST_ID_TOKEN = "abc.def.ghi";
     public static final String TEST_REFRESH_TOKEN = "asdfghjkl";
 
@@ -43,12 +44,16 @@ class TestValues {
                 TEST_IDP_TOKEN_ENDPOINT);
     }
 
-    public static AuthorizationRequest.Builder getTestAuthRequestBuilder() {
+    public static AuthorizationRequest.Builder getMinimalAuthRequestBuilder(String responseType) {
         return new AuthorizationRequest.Builder(
                 getTestServiceConfig(),
                 TEST_CLIENT_ID,
-                AuthorizationRequest.RESPONSE_TYPE_CODE,
-                TEST_APP_REDIRECT_URI)
+                responseType,
+                TEST_APP_REDIRECT_URI);
+    }
+
+    public static AuthorizationRequest.Builder getTestAuthRequestBuilder() {
+        return getMinimalAuthRequestBuilder(AuthorizationRequest.RESPONSE_TYPE_CODE)
                 .setScopes(AuthorizationRequest.SCOPE_OPENID, AuthorizationRequest.SCOPE_EMAIL)
                 .setCodeVerifier(TEST_CODE_VERIFIER);
     }
@@ -57,8 +62,23 @@ class TestValues {
         return getTestAuthRequestBuilder().build();
     }
 
+    public static AuthorizationResponse.Builder getTestAuthResponseBuilder() {
+        AuthorizationRequest req = getTestAuthRequest();
+        return new AuthorizationResponse.Builder(req)
+                .setState(req.state)
+                .setAuthorizationCode(TEST_AUTH_CODE);
+    }
+
+    public static AuthorizationResponse getTestAuthResponse() {
+        return getTestAuthResponseBuilder().build();
+    }
+
+    public static TokenRequest.Builder getMinimalTokenRequestBuilder() {
+        return new TokenRequest.Builder(getTestServiceConfig(), TEST_CLIENT_ID);
+    }
+
     public static TokenRequest.Builder getTestAuthCodeExchangeRequestBuilder() {
-        return new TokenRequest.Builder(getTestServiceConfig(), TEST_CLIENT_ID)
+        return getMinimalTokenRequestBuilder()
                 .setAuthorizationCode(TEST_AUTH_CODE)
                 .setCodeVerifier(TEST_CODE_VERIFIER)
                 .setGrantType(TokenRequest.GRANT_TYPE_AUTHORIZATION_CODE)
@@ -67,5 +87,15 @@ class TestValues {
 
     public static TokenRequest getTestAuthCodeExchangeRequest() {
         return getTestAuthCodeExchangeRequestBuilder().build();
+    }
+
+    public static TokenResponse.Builder getTestAuthCodeExchangeResponseBuilder() {
+        return new TokenResponse.Builder(getTestAuthCodeExchangeRequest())
+                .setTokenType(TokenResponse.TOKEN_TYPE_BEARER)
+                .setRefreshToken(TEST_REFRESH_TOKEN);
+    }
+
+    public static TokenResponse getTestAuthCodeExchangeResponse() {
+        return getTestAuthCodeExchangeResponseBuilder().build();
     }
 }
