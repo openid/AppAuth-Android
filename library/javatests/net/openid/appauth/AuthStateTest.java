@@ -304,7 +304,7 @@ public class AuthStateTest {
         assertThat(request.configuration.tokenEndpoint)
                 .isEqualTo(state.getAuthorizationServiceConfiguration().tokenEndpoint);
         assertThat(request.clientId).isEqualTo(authResp.request.clientId);
-        assertThat(request.grantType).isEqualTo(TokenRequest.GRANT_TYPE_REFRESH_TOKEN);
+        assertThat(request.grantType).isEqualTo(GrantTypeValues.REFRESH_TOKEN);
         assertThat(request.refreshToken).isEqualTo(state.getRefreshToken());
     }
 

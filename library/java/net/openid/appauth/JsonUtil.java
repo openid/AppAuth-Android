@@ -287,11 +287,11 @@ final class JsonUtil {
     }
 
     @NonNull
-    public static JSONArray toJsonArray(@NonNull ArrayList<String> strings) {
-        checkNotNull(strings, "strings cannot be null");
+    public static JSONArray toJsonArray(@NonNull Iterable<?> objects) {
+        checkNotNull(objects, "objects cannot be null");
         JSONArray jsonArray = new JSONArray();
-        for (String str : strings) {
-            jsonArray.put(str);
+        for (Object str : objects) {
+            jsonArray.put(str.toString());
         }
         return jsonArray;
     }

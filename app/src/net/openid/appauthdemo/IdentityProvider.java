@@ -47,6 +47,7 @@ class IdentityProvider {
             R.string.google_discovery_uri,
             NOT_SPECIFIED, // auth endpoint is discovered
             NOT_SPECIFIED, // token endpoint is discovered
+            NOT_SPECIFIED, // dynamic registration not supported
             R.string.google_client_id,
             R.string.google_auth_redirect_uri,
             R.string.google_scope_string,
@@ -91,6 +92,9 @@ class IdentityProvider {
     private final int mTokenEndpointRes;
 
     @StringRes
+    private final int mRegistrationEndpointRes;
+
+    @StringRes
     private final int mClientIdRes;
 
     @StringRes
@@ -104,6 +108,7 @@ class IdentityProvider {
     private Uri mDiscoveryEndpoint;
     private Uri mAuthEndpoint;
     private Uri mTokenEndpoint;
+    private Uri mRegistrationEndpoint;
     private String mClientId;
     private Uri mRedirectUri;
     private String mScope;
@@ -114,6 +119,7 @@ class IdentityProvider {
             @StringRes int discoveryEndpointRes,
             @StringRes int authEndpointRes,
             @StringRes int tokenEndpointRes,
+            @StringRes int registrationEndpointRes,
             @StringRes int clientIdRes,
             @StringRes int redirectUriRes,
             @StringRes int scopeRes,
@@ -132,6 +138,7 @@ class IdentityProvider {
         this.mDiscoveryEndpointRes = discoveryEndpointRes;
         this.mAuthEndpointRes = authEndpointRes;
         this.mTokenEndpointRes = tokenEndpointRes;
+        this.mRegistrationEndpointRes = registrationEndpointRes;
         this.mClientIdRes = checkSpecified(clientIdRes, "clientIdRes");
         this.mRedirectUriRes = checkSpecified(redirectUriRes, "redirectUriRes");
         this.mScopeRes = checkSpecified(scopeRes, "scopeRes");
@@ -160,6 +167,9 @@ class IdentityProvider {
                 : null;
         mTokenEndpoint = isSpecified(mTokenEndpointRes)
                 ? getUriResource(res, mTokenEndpointRes, "tokenEndpointRes")
+                : null;
+        mRegistrationEndpoint = isSpecified(mRegistrationEndpointRes)
+                ? getUriResource(res, mRegistrationEndpointRes, "registrationEndpointRes")
                 : null;
         mClientId = res.getString(mClientIdRes);
         mRedirectUri = getUriResource(res, mRedirectUriRes, "mRedirectUriRes");
@@ -222,7 +232,8 @@ class IdentityProvider {
             AuthorizationServiceConfiguration.fetchFromUrl(mDiscoveryEndpoint, callback);
         } else {
             AuthorizationServiceConfiguration config =
-                    new AuthorizationServiceConfiguration(mAuthEndpoint, mTokenEndpoint);
+                    new AuthorizationServiceConfiguration(mAuthEndpoint, mTokenEndpoint,
+                            mRegistrationEndpoint);
             callback.onFetchConfigurationCompleted(config, null);
         }
     }

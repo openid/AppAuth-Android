@@ -66,20 +66,6 @@ public class AuthorizationRequest {
     public static final String RESPONSE_MODE_FRAGMENT = "fragment";
 
     /**
-     * For requesting an authorization code.
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.1.1"> "The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 3.1.1</a>
-     */
-    public static final String RESPONSE_TYPE_CODE = "code";
-
-    /**
-     * For requesting an access token via an implicit grant.
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.1.1"> "The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 3.1.1</a>
-     */
-    public static final String RESPONSE_TYPE_TOKEN = "token";
-
-    /**
      * A scope for OpenID based authorization.
      * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
      * Connect Core 1.0", Section 3.1.2.1</a>
@@ -292,7 +278,7 @@ public class AuthorizationRequest {
      * The service's {@link AuthorizationServiceConfiguration configuration}.
      * This configuration specifies how to connect to a particular OAuth provider.
      * Configurations may be
-     * {@link AuthorizationServiceConfiguration#AuthorizationServiceConfiguration(Uri, Uri)}
+     * {@link AuthorizationServiceConfiguration#AuthorizationServiceConfiguration(Uri, Uri, Uri)}
      * created manually}, or {@link AuthorizationServiceConfiguration#fetchFromUrl(Uri,
      * AuthorizationServiceConfiguration.RetrieveConfigurationCallback)} via an OpenID Connect
      * Discovery Document}.

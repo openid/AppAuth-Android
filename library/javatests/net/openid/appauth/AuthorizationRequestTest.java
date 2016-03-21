@@ -70,13 +70,13 @@ public class AuthorizationRequestTest {
         mMinimalRequestBuilder = new AuthorizationRequest.Builder(
                 getTestServiceConfig(),
                 TEST_CLIENT_ID,
-                AuthorizationRequest.RESPONSE_TYPE_CODE,
+                ResponseTypeValues.CODE,
                 TEST_APP_REDIRECT_URI);
 
         mRequestBuilder = new AuthorizationRequest.Builder(
                 getTestServiceConfig(),
                 TEST_CLIENT_ID,
-                AuthorizationRequest.RESPONSE_TYPE_CODE,
+                ResponseTypeValues.CODE,
                 TEST_APP_REDIRECT_URI)
                 .setState(TEST_STATE)
                 .setScopes(AuthorizationRequest.SCOPE_OPENID, AuthorizationRequest.SCOPE_EMAIL)
@@ -104,7 +104,7 @@ public class AuthorizationRequestTest {
         AuthorizationRequest request = new AuthorizationRequest.Builder(
                 getTestServiceConfig(),
                 TEST_CLIENT_ID,
-                AuthorizationRequest.RESPONSE_TYPE_CODE,
+                ResponseTypeValues.CODE,
                 TEST_APP_REDIRECT_URI)
                 .setCodeVerifier(new String(codeVerifier))
                 .build();
@@ -452,7 +452,7 @@ public class AuthorizationRequestTest {
         assertEquals("unexpected code verifier challenge method",
                 TEST_CODE_VERIFIER_CHALLENGE_METHOD, request.codeVerifierChallengeMethod);
         assertEquals("unexpected response type",
-                AuthorizationRequest.RESPONSE_TYPE_CODE,
+                ResponseTypeValues.CODE,
                 request.responseType);
         assertEquals("unexpected response mode",
                 AuthorizationRequest.RESPONSE_MODE_QUERY,

@@ -123,7 +123,7 @@ public class TokenRequestTest {
         Map<String, String> params = request.getRequestParameters();
         assertThat(params).containsEntry(
                 TokenRequest.PARAM_GRANT_TYPE,
-                TokenRequest.GRANT_TYPE_AUTHORIZATION_CODE);
+                GrantTypeValues.AUTHORIZATION_CODE);
         assertThat(params).containsEntry(
                 TokenRequest.PARAM_CLIENT_ID,
                 TEST_CLIENT_ID);
@@ -144,7 +144,7 @@ public class TokenRequestTest {
         Map<String, String> params = request.getRequestParameters();
         assertThat(params).containsEntry(
                 TokenRequest.PARAM_GRANT_TYPE,
-                TokenRequest.GRANT_TYPE_REFRESH_TOKEN);
+                GrantTypeValues.REFRESH_TOKEN);
         assertThat(params).containsEntry(
                 TokenRequest.PARAM_CLIENT_ID,
                 TEST_CLIENT_ID);

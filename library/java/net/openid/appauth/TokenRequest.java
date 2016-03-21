@@ -95,25 +95,11 @@ public class TokenRequest {
                     PARAM_REFRESH_TOKEN,
                     PARAM_SCOPE)));
 
-    /**
-     * The grant type used for exchanging an authorization code for one or more tokens.
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.3"> "The OAuth 2.0
-     * Authorization
-     * Framework" (RFC 6749), Section 4.1.3</a>
-     */
-    public static final String GRANT_TYPE_AUTHORIZATION_CODE = "authorization_code";
-
-    /**
-     * The grant type used when exchanging a refresh token for a new token.
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-6"> "The OAuth 2.0
-     * Authorization
-     * Framework" (RFC 6749), Section 6</a>
-     */
-    public static final String GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
 
     /**
      * The grant type used when requesting an access token using a username and password.
      * This grant type is not directly supported by this library.
+     *
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.3.2"> "The OAuth 2.0
      * Authorization Framework" (RFC 6749), Section 4.3.2</a>
      */
@@ -122,6 +108,7 @@ public class TokenRequest {
     /**
      * The grant type used when requesting an access token using client credentials, typically
      * TLS client certificates. This grant type is not directly supported by this library.
+     *
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.4.2"> "The OAuth 2.0
      * Authorization Framework" (RFC 6749), Section 4.4.2</a>
      */
@@ -132,7 +119,7 @@ public class TokenRequest {
      * This configuration specifies how to connect to a particular OAuth provider.
      * Configurations may be
      * {@link AuthorizationServiceConfiguration#AuthorizationServiceConfiguration(Uri,
-     * Uri) created manually}, or
+     * Uri, Uri) created manually}, or
      * {@link AuthorizationServiceConfiguration#fetchFromUrl(Uri,
      * AuthorizationServiceConfiguration.RetrieveConfigurationCallback)
      * via an OpenID Connect Discovery Document}.
@@ -328,7 +315,7 @@ public class TokenRequest {
         /**
          * Specifies the set of case-sensitive scopes. Replaces any previously specified set of
          * scopes. Individual scope strings cannot be null or empty.
-         *
+         * <p/>
          * <p>Scopes specified here are used to obtain a "down-scoped" access token, where the
          * set of scopes specified <em>must</em> be a subset of those already granted in
          * previous requests.
@@ -350,7 +337,7 @@ public class TokenRequest {
         /**
          * Specifies the set of case-sensitive scopes. Replaces any previously specified set of
          * scopes. Individual scope strings cannot be null or empty.
-         *
+         * <p/>
          * <p>Scopes specified here are used to obtain a "down-scoped" access token, where the
          * set of scopes specified <em>must</em> be a subset of those already granted in
          * previous requests.
@@ -370,7 +357,7 @@ public class TokenRequest {
         /**
          * Specifies the authorization code for the request. If provided, the authorization code
          * must not be empty.
-         *
+         * <p/>
          * <p>Specifying an authorization code normally implies that this is a request to exchange
          * this authorization code for one or more tokens. If this is not intended, the grant type
          * should be explicitly set.
@@ -385,7 +372,7 @@ public class TokenRequest {
         /**
          * Specifies the refresh token for the request. If a non-null value is provided, it must
          * not be empty.
-         *
+         * <p/>
          * <p>Specifying a refresh token normally implies that this is a request to exchange the
          * refresh token for a new token. If this is not intended, the grant type should be
          * explicit set.
@@ -429,20 +416,20 @@ public class TokenRequest {
         public TokenRequest build() {
             String grantType = inferGrantType();
 
-            if (GRANT_TYPE_AUTHORIZATION_CODE.equals(grantType)) {
+            if (GrantTypeValues.AUTHORIZATION_CODE.equals(grantType)) {
                 checkNotNull(mAuthorizationCode,
                         "authorization code must be specified for grant_type = "
-                                + GRANT_TYPE_AUTHORIZATION_CODE);
+                                + GrantTypeValues.AUTHORIZATION_CODE);
             }
 
-            if (GRANT_TYPE_REFRESH_TOKEN.equals(grantType)) {
+            if (GrantTypeValues.REFRESH_TOKEN.equals(grantType)) {
                 checkNotNull(mRefreshToken,
                         "refresh token must be specified for grant_type = "
-                                + GRANT_TYPE_REFRESH_TOKEN);
+                                + GrantTypeValues.REFRESH_TOKEN);
             }
 
 
-            if (grantType.equals(GRANT_TYPE_AUTHORIZATION_CODE) && mRedirectUri == null) {
+            if (grantType.equals(GrantTypeValues.AUTHORIZATION_CODE) && mRedirectUri == null) {
                 throw new IllegalStateException(
                         "no redirect URI specified on token request for code exchange");
             }
@@ -463,9 +450,9 @@ public class TokenRequest {
             if (mGrantType != null) {
                 return mGrantType;
             } else if (mAuthorizationCode != null) {
-                return GRANT_TYPE_AUTHORIZATION_CODE;
+                return GrantTypeValues.AUTHORIZATION_CODE;
             } else if (mRefreshToken != null) {
-                return GRANT_TYPE_REFRESH_TOKEN;
+                return GrantTypeValues.REFRESH_TOKEN;
             } else {
                 throw new IllegalStateException("grant type not specified and cannot be inferred");
             }
@@ -579,6 +566,7 @@ public class TokenRequest {
     /**
      * Reads a token request from a JSON string representation produced by the
      * {@link #toJson()} method or some other equivalent producer.
+     *
      * @throws JSONException if the provided JSON does not match the expected structure.
      */
     @NonNull
@@ -590,6 +578,7 @@ public class TokenRequest {
     /**
      * Reads a token request from a JSON representation produced by the
      * {@link #toJson()} method or some other equivalent producer.
+     *
      * @throws JSONException if the provided JSON does not match the expected structure.
      */
     @NonNull
