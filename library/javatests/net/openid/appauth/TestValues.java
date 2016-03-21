@@ -40,6 +40,9 @@ class TestValues {
     public static final String TEST_ID_TOKEN = "abc.def.ghi";
     public static final String TEST_REFRESH_TOKEN = "asdfghjkl";
 
+    public static final Long TEST_CLIENT_SECRET_EXPIRES_AT = 78L;
+    public static final String TEST_CLIENT_SECRET = "test_client_secret";
+
     public static AuthorizationServiceConfiguration getTestServiceConfig() {
         return new AuthorizationServiceConfiguration(
                 TEST_IDP_AUTH_ENDPOINT,
@@ -100,5 +103,13 @@ class TestValues {
 
     public static TokenResponse getTestAuthCodeExchangeResponse() {
         return getTestAuthCodeExchangeResponseBuilder().build();
+    }
+
+    public static RegistrationRequest.Builder getTestRegistrationRequestBuilder() {
+        return new RegistrationRequest.Builder(getTestServiceConfig(), TEST_APP_REDIRECT_URI);
+    }
+
+    public static RegistrationRequest getTestRegistrationRequest() {
+        return getTestRegistrationRequestBuilder().build();
     }
 }
