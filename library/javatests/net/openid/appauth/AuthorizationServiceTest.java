@@ -171,7 +171,7 @@ public class AuthorizationServiceTest {
         mAuthCallback.waitForCallback();
         assertTokenResponse(mAuthCallback.response, request);
         String postBody = mOutputStream.toString();
-        assertThat(postBody).isEqualTo(request.toUri().getEncodedQuery());
+        assertThat(postBody).isEqualTo(request.getFormUrlEncodedRequestBody());
         assertEquals(TEST_IDP_TOKEN_ENDPOINT.toString(), mBuilder.mUri);
     }
 

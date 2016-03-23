@@ -18,10 +18,7 @@ import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
 import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
 import static net.openid.appauth.TestValues.TEST_CODE_VERIFIER;
 import static net.openid.appauth.TestValues.getTestServiceConfig;
-import static org.assertj.android.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
-
-import android.net.Uri;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,11 +53,13 @@ public class TokenRequestTest {
                 .setRedirectUri(TEST_APP_REDIRECT_URI);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void testBuild_nullConfiguration() {
         new TokenRequest.Builder(null, TEST_CLIENT_ID).build();
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Test(expected = IllegalArgumentException.class)
     public void testBuild_nullClientId() {
         new TokenRequest.Builder(getTestServiceConfig(), null)
@@ -121,19 +120,19 @@ public class TokenRequestTest {
     public void testToUri_forCodeExchange() {
         TokenRequest request = mAuthorizationCodeRequestBuilder.build();
 
-        Uri requestUri = request.toUri();
-        assertThat(requestUri)
-                .hasScheme(request.configuration.tokenEndpoint.getScheme())
-                .hasHost(request.configuration.tokenEndpoint.getHost());
-        requestUri.getAuthority();
-        assertThat(requestUri.getQueryParameter(TokenRequest.PARAM_GRANT_TYPE))
-                .isEqualTo(TokenRequest.GRANT_TYPE_AUTHORIZATION_CODE);
-        assertThat(requestUri.getQueryParameter(TokenRequest.PARAM_CLIENT_ID))
-                .isEqualTo(TEST_CLIENT_ID);
-        assertThat(requestUri.getQueryParameter(TokenRequest.PARAM_CODE))
-                .isEqualTo(TEST_AUTHORIZATION_CODE);
-        assertThat(requestUri.getQueryParameter(TokenRequest.PARAM_REDIRECT_URI))
-                .isEqualTo(TEST_APP_REDIRECT_URI.toString());
+        Map<String, String> params = request.getRequestParameters();
+        assertThat(params).containsEntry(
+                TokenRequest.PARAM_GRANT_TYPE,
+                TokenRequest.GRANT_TYPE_AUTHORIZATION_CODE);
+        assertThat(params).containsEntry(
+                TokenRequest.PARAM_CLIENT_ID,
+                TEST_CLIENT_ID);
+        assertThat(params).containsEntry(
+                TokenRequest.PARAM_CODE,
+                TEST_AUTHORIZATION_CODE);
+        assertThat(params).containsEntry(
+                TokenRequest.PARAM_REDIRECT_URI,
+                TEST_APP_REDIRECT_URI.toString());
     }
 
     @Test
@@ -142,13 +141,16 @@ public class TokenRequestTest {
                 .setRefreshToken(TEST_REFRESH_TOKEN)
                 .build();
 
-        Uri requestUri = request.toUri();
-        assertThat(requestUri.getQueryParameter(TokenRequest.PARAM_GRANT_TYPE))
-                .isEqualTo(TokenRequest.GRANT_TYPE_REFRESH_TOKEN);
-        assertThat(requestUri.getQueryParameter(TokenRequest.PARAM_CLIENT_ID))
-                .isEqualTo(TEST_CLIENT_ID);
-        assertThat(requestUri.getQueryParameter(TokenRequest.PARAM_REFRESH_TOKEN))
-                .isEqualTo(TEST_REFRESH_TOKEN);
+        Map<String, String> params = request.getRequestParameters();
+        assertThat(params).containsEntry(
+                TokenRequest.PARAM_GRANT_TYPE,
+                TokenRequest.GRANT_TYPE_REFRESH_TOKEN);
+        assertThat(params).containsEntry(
+                TokenRequest.PARAM_CLIENT_ID,
+                TEST_CLIENT_ID);
+        assertThat(params).containsEntry(
+                TokenRequest.PARAM_REFRESH_TOKEN,
+                TEST_REFRESH_TOKEN);
     }
 
     @Test
@@ -157,8 +159,8 @@ public class TokenRequestTest {
                 .setCodeVerifier(TEST_CODE_VERIFIER)
                 .build();
 
-        assertThat(request.toUri().getQueryParameter(TokenRequest.PARAM_CODE_VERIFIER))
-                .isEqualTo(TEST_CODE_VERIFIER);
+        assertThat(request.getRequestParameters())
+                .containsEntry(TokenRequest.PARAM_CODE_VERIFIER, TEST_CODE_VERIFIER);
     }
 
     @Test
@@ -168,8 +170,8 @@ public class TokenRequestTest {
                 .setScope("email profile")
                 .build();
 
-        assertThat(request.toUri().getQueryParameter(TokenRequest.PARAM_SCOPE))
-                .isEqualTo("email profile");
+        assertThat(request.getRequestParameters())
+                .containsEntry(TokenRequest.PARAM_SCOPE, "email profile");
     }
 
     @Test
@@ -181,8 +183,8 @@ public class TokenRequestTest {
                 .setAdditionalParameters(additionalParams)
                 .build();
 
-        Uri requestUri = request.toUri();
-        assertThat(requestUri.getQueryParameter("p1")).isEqualTo("v1");
-        assertThat(requestUri.getQueryParameter("p2")).isEqualTo("v2");
+        Map<String, String> params = request.getRequestParameters();
+        assertThat(params).containsEntry("p1", "v1");
+        assertThat(params).containsEntry("p2", "v2");
     }
 }
