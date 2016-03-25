@@ -78,13 +78,15 @@ public class AuthStateTest {
     public void testInitialState_fromAuthorizationResponse() {
         AuthorizationRequest authCodeRequest = getTestAuthRequest();
         AuthorizationResponse resp = getTestAuthResponse();
-        AuthState state = new AuthState(resp, (Exception)null);
+        AuthState state = new AuthState(resp, null);
 
+        assertThat(state.isAuthorized()).isFalse();
         assertThat(state.getAccessToken()).isNull();
         assertThat(state.getAccessTokenExpirationTime()).isNull();
         assertThat(state.getIdToken()).isNull();
         assertThat(state.getRefreshToken()).isNull();
 
+        assertThat(state.getAuthorizationException()).isNull();
         assertThat(state.getLastAuthorizationResponse()).isSameAs(resp);
         assertThat(state.getLastTokenResponse()).isNull();
 
@@ -95,15 +97,35 @@ public class AuthStateTest {
     }
 
     @Test
-    public void testInitialState_fromAuthorizationResponse_withModifiedScope() {
-        AuthorizationRequest authCodeRequest = getTestAuthRequest();
+    public void testInitialState_fromAuthorizationException() {
+        AuthState state = new AuthState(
+                null,
+                AuthorizationException.AuthorizationRequestErrors.ACCESS_DENIED);
 
+        assertThat(state.isAuthorized()).isFalse();
+        assertThat(state.getAccessToken()).isNull();
+        assertThat(state.getAccessTokenExpirationTime()).isNull();
+        assertThat(state.getIdToken()).isNull();
+        assertThat(state.getRefreshToken()).isNull();
+
+        assertThat(state.getAuthorizationException()).isEqualTo(
+                AuthorizationException.AuthorizationRequestErrors.ACCESS_DENIED);
+        assertThat(state.getLastAuthorizationResponse()).isNull();
+        assertThat(state.getLastTokenResponse()).isNull();
+
+        assertThat(state.getScope()).isNull();
+        assertThat(state.getScopeSet()).isNull();
+        assertThat(state.getNeedsTokenRefresh(mClock)).isFalse();
+    }
+
+    @Test
+    public void testInitialState_fromAuthorizationResponse_withModifiedScope() {
         // simulate a situation in which the response grants a subset of the requested scopes,
         // perhaps due to policy or user preference
         AuthorizationResponse resp = getTestAuthResponseBuilder()
                 .setScopes(AuthorizationRequest.SCOPE_OPENID)
                 .build();
-        AuthState state = new AuthState(resp, (Exception)null);
+        AuthState state = new AuthState(resp, null);
 
         assertThat(state.getScope()).isEqualTo(resp.scope);
         assertThat(state.getScopeSet()).isEqualTo(resp.getScopeSet());
@@ -113,18 +135,22 @@ public class AuthStateTest {
     public void testInitialState_fromAuthorizationResponseAndTokenResponse() {
         AuthorizationResponse authResp = getTestAuthResponse();
         TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
-        AuthState state = new AuthState(authResp, tokenResp);
+        AuthState state = new AuthState(authResp, tokenResp, null);
 
         assertThat(state.getAccessToken()).isNull();
         assertThat(state.getAccessTokenExpirationTime()).isNull();
         assertThat(state.getIdToken()).isNull();
         assertThat(state.getRefreshToken()).isEqualTo(TEST_REFRESH_TOKEN);
 
+        assertThat(state.getAuthorizationException()).isNull();
         assertThat(state.getLastAuthorizationResponse()).isSameAs(authResp);
         assertThat(state.getLastTokenResponse()).isSameAs(tokenResp);
 
         assertThat(state.getScope()).isEqualTo(authResp.request.scope);
         assertThat(state.getScopeSet()).isEqualTo(authResp.request.getScopeSet());
+
+        // no access token or ID token have yet been retrieved
+        assertThat(state.isAuthorized()).isFalse();
 
         // the refresh token has been acquired, but has not yet been used to fetch an access token
         assertThat(state.getNeedsTokenRefresh(mClock)).isTrue();
@@ -132,19 +158,60 @@ public class AuthStateTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructor_withAuthResponseAndException() {
-        new AuthState(getTestAuthResponse(), new Exception());
+        new AuthState(getTestAuthResponse(),
+                AuthorizationException.AuthorizationRequestErrors.ACCESS_DENIED);
+    }
+
+    @Test
+    public void testUpdate_authResponseWithException_authErrorType() {
+        AuthState state = new AuthState();
+        state.update((AuthorizationResponse) null,
+                AuthorizationException.AuthorizationRequestErrors.ACCESS_DENIED);
+
+        assertThat(state.getAuthorizationException())
+                .isSameAs(AuthorizationException.AuthorizationRequestErrors.ACCESS_DENIED);
+    }
+
+    @Test
+    public void testUpdate_authResponseWithException_ignoredErrorType() {
+        AuthState state = new AuthState();
+        state.update((AuthorizationResponse) null,
+                AuthorizationException.GeneralErrors.USER_CANCELED_AUTH_FLOW);
+
+        assertThat(state.getAuthorizationException()).isNull();
+    }
+
+    @Test
+    public void testUpdate_tokenResponseWithException_tokenErrorType() {
+        AuthState state = new AuthState();
+        state.update((TokenResponse) null,
+                AuthorizationException.TokenRequestErrors.UNAUTHORIZED_CLIENT);
+
+        assertThat(state.getAuthorizationException())
+                .isSameAs(AuthorizationException.TokenRequestErrors.UNAUTHORIZED_CLIENT);
+    }
+
+    @Test
+    public void testUpdate_tokenResponseWithException_ignoredErrorType() {
+        AuthState state = new AuthState();
+        state.update((TokenResponse) null,
+                AuthorizationException.GeneralErrors.NETWORK_ERROR);
+
+        assertThat(state.getAuthorizationException()).isNull();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testUpdate_withAuthResponseAndException() {
-        AuthState state = new AuthState(getTestAuthResponse(), (Exception) null);
-        state.update(getTestAuthResponse(), new Exception());
+        AuthState state = new AuthState();
+        state.update(getTestAuthResponse(),
+                AuthorizationException.AuthorizationRequestErrors.ACCESS_DENIED);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testUpdate_withTokenResponseAndException() {
-        AuthState state = new AuthState(getTestAuthResponse(), (Exception) null);
-        state.update(getTestAuthCodeExchangeResponse(), new Exception());
+        AuthState state = new AuthState(getTestAuthResponse(), null);
+        state.update(getTestAuthCodeExchangeResponse(),
+                AuthorizationException.AuthorizationRequestErrors.ACCESS_DENIED);
     }
 
     @Test
@@ -159,7 +226,7 @@ public class AuthStateTest {
                 .build();
 
         TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
-        AuthState state = new AuthState(authResp, tokenResp);
+        AuthState state = new AuthState(authResp, tokenResp, null);
 
         // in this scenario, we have an access token in the authorization response but not
         // in the token response. We expect the access token from the authorization response
@@ -180,7 +247,7 @@ public class AuthStateTest {
         TokenResponse tokenResp = getTestAuthCodeExchangeResponseBuilder()
                 .setAccessToken("newer_token")
                 .build();
-        AuthState state = new AuthState(authResp, tokenResp);
+        AuthState state = new AuthState(authResp, tokenResp, null);
 
         // in this scenario, we have an access token on both the authorization response and the
         // token response. The value on the token response takes precedence.
@@ -199,7 +266,7 @@ public class AuthStateTest {
                 .build();
 
         TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
-        AuthState state = new AuthState(authResp, tokenResp);
+        AuthState state = new AuthState(authResp, tokenResp, null);
 
         // in this scenario, we have an ID token in the authorization response but not
         // in the token response. We expect the ID token from the authorization response
@@ -220,7 +287,7 @@ public class AuthStateTest {
         TokenResponse tokenResp = getTestAuthCodeExchangeResponseBuilder()
                 .setIdToken("newer.token.value")
                 .build();
-        AuthState state = new AuthState(authResp, tokenResp);
+        AuthState state = new AuthState(authResp, tokenResp, null);
 
         // in this scenario, we have an ID token on both the authorization response and the
         // token response. The value on the token response takes precedence.
@@ -231,7 +298,7 @@ public class AuthStateTest {
     public void testCreateTokenRefreshRequest() {
         AuthorizationResponse authResp = getTestAuthResponse();
         TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
-        AuthState state = new AuthState(authResp, tokenResp);
+        AuthState state = new AuthState(authResp, tokenResp, null);
 
         TokenRequest request = state.createTokenRefreshRequest();
         assertThat(request.configuration.tokenEndpoint)
@@ -254,7 +321,7 @@ public class AuthStateTest {
                 .setState(authReq.state)
                 .build();
         TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
-        AuthState state = new AuthState(authResp, tokenResp);
+        AuthState state = new AuthState(authResp, tokenResp, null);
 
         // before the expiration time
         mClock.currentTime.set(ONE_SECOND);
@@ -294,7 +361,7 @@ public class AuthStateTest {
                 .setState(authReq.state)
                 .build();
         TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
-        AuthState state = new AuthState(authResp, tokenResp);
+        AuthState state = new AuthState(authResp, tokenResp, null);
 
         // before the expiration time...
         mClock.currentTime.set(ONE_SECOND);
@@ -307,7 +374,7 @@ public class AuthStateTest {
 
     @Test
     public void testSetNeedsTokenRefresh_hasNoEffectWithNoAccessToken() {
-        AuthState state = new AuthState(getTestAuthResponse(), (Exception) null);
+        AuthState state = new AuthState(getTestAuthResponse(), null);
 
         // in this scenario, we do not yet have a refresh or access token. Attempting to force
         // a token refresh is meaningless.
@@ -330,7 +397,7 @@ public class AuthStateTest {
                 .setState(authReq.state)
                 .build();
         TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
-        AuthState state = new AuthState(authResp, tokenResp);
+        AuthState state = new AuthState(authResp, tokenResp, null);
 
         AuthorizationService service = mock(AuthorizationService.class);
         AuthState.AuthStateAction action = mock(AuthState.AuthStateAction.class);
@@ -367,7 +434,7 @@ public class AuthStateTest {
                 .setState(authReq.state)
                 .build();
         TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
-        AuthState state = new AuthState(authResp, tokenResp);
+        AuthState state = new AuthState(authResp, tokenResp, null);
 
         AuthorizationService service = mock(AuthorizationService.class);
         AuthState.AuthStateAction action = mock(AuthState.AuthStateAction.class);
@@ -435,7 +502,7 @@ public class AuthStateTest {
                 .build();
 
         TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
-        AuthState state = new AuthState(authResp, tokenResp);
+        AuthState state = new AuthState(authResp, tokenResp, null);
 
         String json = state.toJsonString();
         AuthState restoredState = AuthState.fromJson(json);
@@ -450,5 +517,16 @@ public class AuthStateTest {
         assertThat(restoredState.getScope()).isEqualTo(state.getScope());
         assertThat(restoredState.getNeedsTokenRefresh(mClock))
                 .isEqualTo(restoredState.getNeedsTokenRefresh(mClock));
+    }
+
+    @Test
+    public void testJsonSerialization_withException() throws Exception {
+        AuthState state = new AuthState(
+                null,
+                AuthorizationException.AuthorizationRequestErrors.INVALID_REQUEST);
+
+        AuthState restored = AuthState.fromJson(state.toJsonString());
+        assertThat(restored.getAuthorizationException())
+                .isEqualTo(state.getAuthorizationException());
     }
 }

@@ -63,7 +63,7 @@ public class AuthState {
     private TokenResponse mLastTokenResponse;
 
     @Nullable
-    private Long mAuthorizationExceptionCode;
+    private AuthorizationException mAuthorizationException;
 
     private boolean mNeedsTokenRefreshOverride;
 
@@ -76,7 +76,7 @@ public class AuthState {
      * Creates an {@link AuthState} based on an authorization exchange.
      */
     public AuthState(@Nullable AuthorizationResponse authResponse,
-            @Nullable Exception authError) {
+            @Nullable AuthorizationException authError) {
         checkArgument(authResponse != null ^ authError != null,
                 "exactly one of authResponse or authError should be non-null");
         update(authResponse, authError);
@@ -88,9 +88,10 @@ public class AuthState {
      */
     public AuthState(
             @NonNull AuthorizationResponse authResponse,
-            @NonNull TokenResponse tokenResponse) {
-        this(authResponse, (Exception) null);
-        update(tokenResponse, null);
+            @Nullable TokenResponse tokenResponse,
+            @Nullable AuthorizationException authException) {
+        this(authResponse, null);
+        update(tokenResponse, authException);
     }
 
     /**
@@ -168,7 +169,7 @@ public class AuthState {
      */
     @Nullable
     public String getAccessToken() {
-        if (mAuthorizationExceptionCode != null) {
+        if (mAuthorizationException != null) {
             return null;
         }
 
@@ -189,7 +190,7 @@ public class AuthState {
      */
     @Nullable
     public Long getAccessTokenExpirationTime() {
-        if (mAuthorizationExceptionCode != null) {
+        if (mAuthorizationException != null) {
             return null;
         }
 
@@ -209,7 +210,7 @@ public class AuthState {
      */
     @Nullable
     public String getIdToken() {
-        if (mAuthorizationExceptionCode != null) {
+        if (mAuthorizationException != null) {
             return null;
         }
 
@@ -229,8 +230,17 @@ public class AuthState {
      * from which at least either an access token or an ID token have been retrieved.
      */
     public boolean isAuthorized() {
-        return mAuthorizationExceptionCode == null
+        return mAuthorizationException == null
                 && (getAccessToken() != null || getIdToken() != null);
+    }
+
+    /**
+     * If the last response was an OAuth related failure, this returns the exception describing
+     * the failure.
+     */
+    @Nullable
+    public AuthorizationException getAuthorizationException() {
+        return mAuthorizationException;
     }
 
     /**
@@ -276,11 +286,13 @@ public class AuthState {
      */
     public void update(
             @Nullable AuthorizationResponse authResponse,
-            @Nullable Exception authError) {
-        checkArgument(authResponse != null ^ authError != null,
+            @Nullable AuthorizationException authException) {
+        checkArgument(authResponse != null ^ authException != null,
                 "exactly one of authResponse or authError should be non-null");
-        if (authError != null) {
-            // TODO
+        if (authException != null) {
+            if (authException.type == AuthorizationException.TYPE_OAUTH_AUTHORIZATION_ERROR) {
+                mAuthorizationException = authException;
+            }
             return;
         }
 
@@ -289,7 +301,7 @@ public class AuthState {
         mLastAuthorizationResponse = authResponse;
         mLastTokenResponse = null;
         mRefreshToken = null;
-        mAuthorizationExceptionCode = null;
+        mAuthorizationException = null;
 
         // if the response's mScope is null, it means that it equals that of the request
         // see: https://tools.ietf.org/html/rfc6749#section-5.1
@@ -301,24 +313,26 @@ public class AuthState {
      */
     public void update(
             @Nullable TokenResponse tokenResponse,
-            @Nullable Exception authError) {
-        checkArgument(tokenResponse != null ^ authError != null,
+            @Nullable AuthorizationException authException) {
+        checkArgument(tokenResponse != null ^ authException != null,
                 "exactly one of authResponse or authError should be non-null");
 
-        if (mAuthorizationExceptionCode != null) {
+        if (mAuthorizationException != null) {
             // Calling updateFromTokenResponse while in an error state probably means the developer
             // obtained a new token and did the exchange without also calling
             // updateFromAuthorizationResponse. Attempt to handle this gracefully, but warn the
             // developer that this is unexpected.
             Logger.warn(
-                    "AuthState.update should not be called in an error state (%d), call update"
+                    "AuthState.update should not be called in an error state (%s), call update"
                             + "with the result of the fresh authorization response first",
-                    mAuthorizationExceptionCode);
-            mAuthorizationExceptionCode = null;
+                    mAuthorizationException);
+            mAuthorizationException = null;
         }
 
-        if (authError != null) {
-            // TODO
+        if (authException != null) {
+            if (authException.type == AuthorizationException.TYPE_OAUTH_TOKEN_ERROR) {
+                mAuthorizationException = authException;
+            }
             return;
         }
 
@@ -431,7 +445,11 @@ public class AuthState {
         JSONObject json = new JSONObject();
         JsonUtil.putIfNotNull(json, KEY_REFRESH_TOKEN, mRefreshToken);
         JsonUtil.putIfNotNull(json, KEY_SCOPE, mScope);
-        JsonUtil.putIfNotNull(json, KEY_AUTHORIZATION_EXCEPTION, mAuthorizationExceptionCode);
+
+        if (mAuthorizationException != null) {
+            JsonUtil.put(json, KEY_AUTHORIZATION_EXCEPTION, mAuthorizationException.toJson());
+        }
+
         if (mLastAuthorizationResponse != null) {
             JsonUtil.put(
                     json,
@@ -464,8 +482,10 @@ public class AuthState {
         AuthState state = new AuthState();
         state.mRefreshToken = JsonUtil.getStringIfDefined(json, KEY_REFRESH_TOKEN);
         state.mScope = JsonUtil.getStringIfDefined(json, KEY_SCOPE);
-        state.mAuthorizationExceptionCode =
-                JsonUtil.getLongIfDefined(json, KEY_AUTHORIZATION_EXCEPTION);
+        if (json.has(KEY_AUTHORIZATION_EXCEPTION)) {
+            state.mAuthorizationException = AuthorizationException.fromJson(
+                    json.getJSONObject(KEY_AUTHORIZATION_EXCEPTION));
+        }
         if (json.has(KEY_LAST_AUTHORIZATION_RESPONSE)) {
             state.mLastAuthorizationResponse = AuthorizationResponse.fromJson(
                     json.getJSONObject(KEY_LAST_AUTHORIZATION_RESPONSE));
