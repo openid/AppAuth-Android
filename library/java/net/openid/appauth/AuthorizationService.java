@@ -176,13 +176,12 @@ public class AuthorizationService {
      * callback handler.
      */
     public void performTokenRequest(
-            @NonNull net.openid.appauth.TokenRequest request,
+            @NonNull TokenRequest request,
             @NonNull TokenResponseCallback callback) {
         checkNotDisposed();
         Logger.debug("Initiating code exchange request to %s",
                 request.configuration.tokenEndpoint);
-        new TokenRequestTask(request.toUri(), request, callback)
-                .execute();
+        new TokenRequestTask(request, callback).execute();
     }
 
     /**
@@ -206,32 +205,24 @@ public class AuthorizationService {
 
     private class TokenRequestTask
             extends AsyncTask<Void, Void, JSONObject> {
-        private Uri mRequestUri;
-        private net.openid.appauth.TokenRequest mRequest;
+        private TokenRequest mRequest;
         private TokenResponseCallback mCallback;
 
         private AuthorizationException mException;
 
-        TokenRequestTask(Uri requestUri,
-                         net.openid.appauth.TokenRequest request,
+        TokenRequestTask(TokenRequest request,
                          TokenResponseCallback callback) {
-            mRequestUri = requestUri;
             mRequest = request;
             mCallback = callback;
         }
 
         @Override
         protected JSONObject doInBackground(Void... voids) {
-            String queryData = mRequestUri.getEncodedQuery();
+            String queryData = mRequest.getFormUrlEncodedRequestBody();
             InputStream is = null;
             try {
-                /*
-                 * TODO: handle MalformedUrlException from url construction separately
-                 * this is usually indicative of programmer error rather than network error
-                 */
-                URL url = mUrlBuilder.buildUrlFromString(mRequestUri.getScheme()
-                        + "://" + mRequestUri.getHost()
-                        + mRequestUri.getPath());
+                URL url = mUrlBuilder.buildUrlFromString(
+                        mRequest.configuration.tokenEndpoint.toString());
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
 

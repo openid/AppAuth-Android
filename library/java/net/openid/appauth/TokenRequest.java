@@ -30,6 +30,7 @@ import org.json.JSONObject;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -503,24 +504,50 @@ public class TokenRequest {
     }
 
     /**
-     * Produces a request URI, that can be used to dispatch the token request.
+     * Produces the set of request parameters for this query, which can be further
+     * processed into a request body.
      */
+    @VisibleForTesting
     @NonNull
-    public Uri toUri() {
-        Uri.Builder uriBuilder = configuration.tokenEndpoint.buildUpon()
-                .appendQueryParameter(PARAM_GRANT_TYPE, grantType)
-                .appendQueryParameter(PARAM_CLIENT_ID, clientId);
-        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_REDIRECT_URI, redirectUri);
-        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_CODE, authorizationCode);
-        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_REFRESH_TOKEN, refreshToken);
-        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_CODE_VERIFIER, codeVerifier);
-        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_SCOPE, scope);
+    Map<String, String> getRequestParameters() {
+        Map<String, String> params = new HashMap<>();
+        params.put(PARAM_GRANT_TYPE, grantType);
+        params.put(PARAM_CLIENT_ID, clientId);
+        putIfNotNull(params, PARAM_REDIRECT_URI, redirectUri);
+        putIfNotNull(params, PARAM_CODE, authorizationCode);
+        putIfNotNull(params, PARAM_REFRESH_TOKEN, refreshToken);
+        putIfNotNull(params, PARAM_CODE_VERIFIER, codeVerifier);
+        putIfNotNull(params, PARAM_SCOPE, scope);
 
         for (Entry<String, String> param : additionalParameters.entrySet()) {
-            uriBuilder.appendQueryParameter(param.getKey(), param.getValue());
+            params.put(param.getKey(), param.getValue());
         }
 
-        return uriBuilder.build();
+        return params;
+    }
+
+    private void putIfNotNull(Map<String, String> map, String key, Object value) {
+        if (value != null) {
+            map.put(key, value.toString());
+        }
+    }
+
+    /**
+     * Produces the {@code application/x-www-form-urlencoded} request string that can be used to
+     * POST this request to the token endpoint.
+     */
+    @NonNull
+    public String getFormUrlEncodedRequestBody() {
+        Map<String, String> requestParams = getRequestParameters();
+
+        // use android.net.Uri to produce the url-encoded string by adding all
+        // parameters, then requesting the encoded query.
+        Uri.Builder encodingUri = new Uri.Builder();
+        for (Entry<String, String> param : requestParams.entrySet()) {
+            encodingUri.appendQueryParameter(param.getKey(), param.getValue());
+        }
+
+        return encodingUri.build().getEncodedQuery();
     }
 
     /**
