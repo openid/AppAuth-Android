@@ -35,7 +35,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowIntentFilterFixed;
 
@@ -43,8 +43,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, shadows = ShadowIntentFilterFixed.class)
+@RunWith(RobolectricGradleTestRunner.class)
+@Config(constants = BuildConfig.class, shadows = ShadowIntentFilterFixed.class)
 public class BrowserPackageHelperTest {
 
     private static final String SCHEME_HTTP = "http";

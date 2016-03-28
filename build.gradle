@@ -119,7 +119,12 @@ allprojects {
         jcenter()
 
         maven {
-          url "${androidSdkDir()}/extras/android/m2repository"
+            url "${androidSdkDir()}/extras/android/m2repository"
+        }
+
+        maven {
+            // required for Robolectric 3.1-SNAPSHOT, for v23 API support
+            url "https://oss.sonatype.org/content/repositories/snapshots"
         }
     }
 }
