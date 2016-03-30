@@ -187,6 +187,22 @@ public class AuthorizationService {
     }
 
     /**
+     * Sends a request to the authorization service to exchange a code granted as part of an
+     * authorization request for a token. The result of this request will be sent to the provided
+     * callback handler.
+     */
+    public void performTokenRequest(
+            @NonNull net.openid.appauth.TokenRequest request,
+            @NonNull TokenResponseCallback callback,
+            @Nullable ClientAuthentication clientAuthentication) {
+        checkNotDisposed();
+        Logger.debug("Initiating code exchange request to %s",
+                request.configuration.tokenEndpoint);
+        new TokenRequestTask(request, callback, clientAuthentication)
+                .execute();
+    }
+
+    /**
      * Sends a request to the authorization service to dynamically register a client.
      * The result of this request will be sent to the provided callback handler.
      */
@@ -222,34 +238,35 @@ public class AuthorizationService {
             extends AsyncTask<Void, Void, JSONObject> {
         private TokenRequest mRequest;
         private TokenResponseCallback mCallback;
+        private ClientAuthentication mClientAuthentication;
 
         private AuthorizationException mException;
 
         TokenRequestTask(TokenRequest request,
                          TokenResponseCallback callback) {
+            this(request, callback, null);
+        }
+
+        TokenRequestTask(net.openid.appauth.TokenRequest request,
+                         TokenResponseCallback callback,
+                         ClientAuthentication clientAuthentication) {
             mRequest = request;
             mCallback = callback;
+            if (clientAuthentication == null) {
+                clientAuthentication = new ClientAuthentication();
+            }
+            mClientAuthentication = clientAuthentication;
         }
 
         @Override
         protected JSONObject doInBackground(Void... voids) {
-            String queryData = mRequest.getFormUrlEncodedRequestBody();
             InputStream is = null;
             try {
                 URL url = mUrlBuilder.buildUrlFromString(
                         mRequest.configuration.tokenEndpoint.toString());
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
 
-                // required by some providers to ensure JSON response
-                conn.setRequestProperty("Accept", "application/json");
-
-                conn.setInstanceFollowRedirects(false);
-                conn.setDoOutput(true);
-                conn.setRequestProperty("Content-Length", String.valueOf(queryData.length()));
-                OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
-                wr.write(queryData);
-                wr.flush();
+                mClientAuthentication.apply(mRequest, conn);
 
                 is = conn.getInputStream();
                 String response = Utils.readInputStream(is);
