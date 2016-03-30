@@ -49,6 +49,7 @@ class IdentityProvider {
             NOT_SPECIFIED, // token endpoint is discovered
             NOT_SPECIFIED, // dynamic registration not supported
             R.string.google_client_id,
+            NOT_SPECIFIED, // client_secret not used
             R.string.google_auth_redirect_uri,
             R.string.google_scope_string,
             R.drawable.btn_google,
@@ -98,6 +99,9 @@ class IdentityProvider {
     private final int mClientIdRes;
 
     @StringRes
+    private final int mClientSecretRes;
+
+    @StringRes
     private final int mRedirectUriRes;
 
     @StringRes
@@ -110,6 +114,7 @@ class IdentityProvider {
     private Uri mTokenEndpoint;
     private Uri mRegistrationEndpoint;
     private String mClientId;
+    private String mClientSecret;
     private Uri mRedirectUri;
     private String mScope;
 
@@ -121,6 +126,7 @@ class IdentityProvider {
             @StringRes int tokenEndpointRes,
             @StringRes int registrationEndpointRes,
             @StringRes int clientIdRes,
+            @StringRes int clientSecretRes,
             @StringRes int redirectUriRes,
             @StringRes int scopeRes,
             @DrawableRes int buttonImageRes,
@@ -139,7 +145,8 @@ class IdentityProvider {
         this.mAuthEndpointRes = authEndpointRes;
         this.mTokenEndpointRes = tokenEndpointRes;
         this.mRegistrationEndpointRes = registrationEndpointRes;
-        this.mClientIdRes = checkSpecified(clientIdRes, "clientIdRes");
+        this.mClientIdRes = clientIdRes;
+        this.mClientSecretRes = clientSecretRes;
         this.mRedirectUriRes = checkSpecified(redirectUriRes, "redirectUriRes");
         this.mScopeRes = checkSpecified(scopeRes, "scopeRes");
         this.buttonImageRes = checkSpecified(buttonImageRes, "buttonImageRes");
@@ -171,7 +178,12 @@ class IdentityProvider {
         mRegistrationEndpoint = isSpecified(mRegistrationEndpointRes)
                 ? getUriResource(res, mRegistrationEndpointRes, "registrationEndpointRes")
                 : null;
-        mClientId = res.getString(mClientIdRes);
+        mClientId = isSpecified(mClientIdRes)
+                ? res.getString(mClientIdRes)
+                : null;
+        mClientSecret = isSpecified(mClientSecretRes)
+                ? res.getString(mClientSecretRes)
+                : null;
         mRedirectUri = getUriResource(res, mRedirectUriRes, "mRedirectUriRes");
         mScope = res.getString(mScopeRes);
 
@@ -207,10 +219,23 @@ class IdentityProvider {
         return mTokenEndpoint;
     }
 
-    @NonNull
     public String getClientId() {
         checkConfigurationRead();
         return mClientId;
+    }
+
+    @Nullable
+    public String getClientSecret() {
+        checkConfigurationRead();
+        return mClientSecret;
+    }
+
+    public void setClientId(String clientId) {
+        mClientId = clientId;
+    }
+
+    public void setClientSecret(String clientSecret) {
+        mClientSecret = clientSecret;
     }
 
     @NonNull
