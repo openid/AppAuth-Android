@@ -494,9 +494,8 @@ public class TokenRequest {
      * Produces the set of request parameters for this query, which can be further
      * processed into a request body.
      */
-    @VisibleForTesting
     @NonNull
-    Map<String, String> getRequestParameters() {
+    public Map<String, String> getRequestParameters() {
         Map<String, String> params = new HashMap<>();
         params.put(PARAM_GRANT_TYPE, grantType);
         params.put(PARAM_CLIENT_ID, clientId);
@@ -517,24 +516,6 @@ public class TokenRequest {
         if (value != null) {
             map.put(key, value.toString());
         }
-    }
-
-    /**
-     * Produces the {@code application/x-www-form-urlencoded} request string that can be used to
-     * POST this request to the token endpoint.
-     */
-    @NonNull
-    public String getFormUrlEncodedRequestBody() {
-        Map<String, String> requestParams = getRequestParameters();
-
-        // use android.net.Uri to produce the url-encoded string by adding all
-        // parameters, then requesting the encoded query.
-        Uri.Builder encodingUri = new Uri.Builder();
-        for (Entry<String, String> param : requestParams.entrySet()) {
-            encodingUri.appendQueryParameter(param.getKey(), param.getValue());
-        }
-
-        return encodingUri.build().getEncodedQuery();
     }
 
     /**
