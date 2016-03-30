@@ -105,9 +105,9 @@ public class RegistrationRequest {
          */
         public Builder(
                 @NonNull AuthorizationServiceConfiguration configuration,
-                @NonNull Uri redirectUri) {
+                @NonNull List<Uri> redirectUri) {
             setConfiguration(configuration);
-            setRedirectUri(redirectUri);
+            setRedirectUriValues(redirectUri);
         }
 
         /**
@@ -120,25 +120,15 @@ public class RegistrationRequest {
             return this;
         }
 
-        /**
-         * Specifies the client's redirect URI. Cannot be null or empty.
-         */
         @NonNull
-        public Builder setRedirectUri(@NonNull Uri redirectUri) {
-            return setRedirectUriValues(checkNotNull(redirectUri, "redirect URI cannot be null or empty"));
-        }
-
-        @NonNull
-        public Builder setRedirectUriValues(@Nullable Uri... redirectUriValues) {
+        public Builder setRedirectUriValues(@NonNull Uri... redirectUriValues) {
             return setRedirectUriValues(Arrays.asList(redirectUriValues));
         }
 
         @NonNull
-        public Builder setRedirectUriValues(@Nullable List<Uri> redirectUriValues) {
-            mRedirectUris.clear();
-            if (redirectUriValues != null) {
-                mRedirectUris.addAll(redirectUriValues);
-            }
+        public Builder setRedirectUriValues(@NonNull List<Uri> redirectUriValues) {
+            checkCollectionNotEmpty(redirectUriValues, "redirectUriValues cannot be null");
+            mRedirectUris = redirectUriValues;
             return this;
         }
 
