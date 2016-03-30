@@ -17,6 +17,14 @@ package net.openid.appauth;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Utility methods for extracting parameters from Uri objects.
@@ -55,5 +63,22 @@ class UriUtil {
             return Long.parseLong(valueStr);
         }
         return null;
+    }
+
+    public static String formUrlEncode(Map<String, String> parameters) {
+        if (parameters == null) {
+            return "";
+        }
+
+        List<String> queryParts = new ArrayList<>();
+        for (Map.Entry<String, String> param : parameters.entrySet()) {
+            try {
+                queryParts.add(param.getKey() + "=" + URLEncoder.encode(param.getValue(), "utf-8"));
+            } catch (UnsupportedEncodingException e) {
+                // Should not end up here
+                Logger.error("Could not utf-8 encode.");
+            }
+        }
+        return TextUtils.join("&", queryParts);
     }
 }
