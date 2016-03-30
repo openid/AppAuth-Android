@@ -39,6 +39,7 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map;
 
 
 /**
@@ -183,7 +184,23 @@ public class AuthorizationService {
         checkNotDisposed();
         Logger.debug("Initiating code exchange request to %s",
                 request.configuration.tokenEndpoint);
-        new TokenRequestTask(request, callback).execute();
+        new TokenRequestTask(request, NoClientAuthentication.INSTANCE, callback).execute();
+    }
+
+    /**
+     * Sends a request to the authorization service to exchange a code granted as part of an
+     * authorization request for a token. The result of this request will be sent to the provided
+     * callback handler.
+     */
+    public void performTokenRequest(
+            @NonNull TokenRequest request,
+            @NonNull ClientAuthentication clientAuthentication,
+            @NonNull TokenResponseCallback callback) {
+        checkNotDisposed();
+        Logger.debug("Initiating code exchange request to %s",
+                request.configuration.tokenEndpoint);
+        new TokenRequestTask(request, clientAuthentication, callback)
+                .execute();
     }
 
     /**
@@ -222,32 +239,49 @@ public class AuthorizationService {
             extends AsyncTask<Void, Void, JSONObject> {
         private TokenRequest mRequest;
         private TokenResponseCallback mCallback;
+        private ClientAuthentication mClientAuthentication;
 
         private AuthorizationException mException;
 
-        TokenRequestTask(TokenRequest request,
+        TokenRequestTask(TokenRequest request, @NonNull ClientAuthentication clientAuthentication,
                          TokenResponseCallback callback) {
             mRequest = request;
             mCallback = callback;
+            mClientAuthentication = clientAuthentication;
         }
 
         @Override
         protected JSONObject doInBackground(Void... voids) {
-            String queryData = mRequest.getFormUrlEncodedRequestBody();
             InputStream is = null;
             try {
                 URL url = mUrlBuilder.buildUrlFromString(
                         mRequest.configuration.tokenEndpoint.toString());
+
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
-
-                // required by some providers to ensure JSON response
-                conn.setRequestProperty("Accept", "application/json");
-
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 conn.setInstanceFollowRedirects(false);
                 conn.setDoOutput(true);
+
+                Map<String, String> headers = mClientAuthentication
+                        .getRequestHeaders(mRequest.clientId);
+                if (headers != null) {
+                    for (Map.Entry<String,String> header : headers.entrySet()) {
+                        conn.setRequestProperty(header.getKey(), header.getValue());
+                    }
+                }
+
+                Map<String, String> parameters = mRequest.getRequestParameters();
+                Map<String, String> clientAuthParams = mClientAuthentication
+                        .getRequestParameters(mRequest.clientId);
+                if (clientAuthParams != null) {
+                    parameters.putAll(clientAuthParams);
+                }
+
+                String queryData = UriUtil.formUrlEncode(parameters);
                 conn.setRequestProperty("Content-Length", String.valueOf(queryData.length()));
                 OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+
                 wr.write(queryData);
                 wr.flush();
 
