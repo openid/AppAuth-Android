@@ -55,6 +55,21 @@ final class JsonUtil {
     public static void put(
             @NonNull JSONObject json,
             @NonNull String field,
+            @NonNull Long value) {
+        checkNotNull(json, "json must not be null");
+        checkNotNull(field, "field must not be null");
+        checkNotNull(value, "value must not be null");
+
+        try {
+            json.put(field, value);
+        } catch (JSONException ex) {
+            throw new IllegalStateException("JSONException thrown in violation of contract, ex");
+        }
+    }
+
+    public static void put(
+            @NonNull JSONObject json,
+            @NonNull String field,
             @NonNull String value) {
         checkNotNull(json, "json must not be null");
         checkNotNull(field, "field must not be null");
@@ -192,6 +207,21 @@ final class JsonUtil {
         return value;
     }
 
+    public static List<String> getStringListIfDefined(@NonNull JSONObject json,
+                                                      @NonNull String field) throws JSONException {
+        checkNotNull(json, "json must not be null");
+        checkNotNull(field, "field must not be null");
+        if (!json.has(field)) {
+            return null;
+        }
+
+        JSONArray array = json.getJSONArray(field);
+        if (array == null) {
+            throw new JSONException("field \"" + field + "\" is mapped to a null value");
+        }
+        return toStringList(array);
+    }
+
     public static Uri getUri(
             @NonNull JSONObject json,
             @NonNull String field)
@@ -254,6 +284,20 @@ final class JsonUtil {
     }
 
     @NonNull
+    public static ArrayList<Uri> getUriList(
+            @NonNull JSONObject json,
+            @NonNull String field) throws JSONException {
+        checkNotNull(json, "json must not be null");
+        checkNotNull(field, "field must not be null");
+        if (!json.has(field)) {
+            throw new JSONException("field \"" + field + "\" not found in json object");
+        }
+
+        JSONArray array = json.getJSONArray(field);
+        return toUriList(array);
+    }
+
+    @NonNull
     public static Map<String, String> getStringMap(JSONObject json, String field)
             throws JSONException {
         LinkedHashMap<String, String> stringMap = new LinkedHashMap<>();
@@ -281,6 +325,18 @@ final class JsonUtil {
         if (jsonArray != null) {
             for (int i = 0; i < jsonArray.length(); i++) {
                 arrayList.add(checkNotNull(jsonArray.get(i)).toString());
+            }
+        }
+        return arrayList;
+    }
+
+    @NonNull
+    public static ArrayList<Uri> toUriList(@Nullable JSONArray jsonArray)
+            throws JSONException {
+        ArrayList<Uri> arrayList = new ArrayList<>();
+        if (jsonArray != null) {
+            for (int i = 0; i < jsonArray.length(); i++) {
+                arrayList.add(Uri.parse(checkNotNull(jsonArray.get(i)).toString()));
             }
         }
         return arrayList;
