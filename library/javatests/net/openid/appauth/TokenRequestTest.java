@@ -117,7 +117,7 @@ public class TokenRequestTest {
     }
 
     @Test
-    public void testToUri_forCodeExchange() {
+    public void testGetRequestParameters_forCodeExchange() {
         TokenRequest request = mAuthorizationCodeRequestBuilder.build();
 
         Map<String, String> params = request.getRequestParameters();
@@ -136,7 +136,7 @@ public class TokenRequestTest {
     }
 
     @Test
-    public void testToUri_forRefreshToken() {
+    public void testGetRequestParameters_forRefreshToken() {
         TokenRequest request = mMinimalBuilder
                 .setRefreshToken(TEST_REFRESH_TOKEN)
                 .build();
@@ -154,7 +154,7 @@ public class TokenRequestTest {
     }
 
     @Test
-    public void testToUri_withCodeVerifier() {
+    public void testGetRequestParameters_withCodeVerifier() {
         TokenRequest request = mAuthorizationCodeRequestBuilder
                 .setCodeVerifier(TEST_CODE_VERIFIER)
                 .build();
