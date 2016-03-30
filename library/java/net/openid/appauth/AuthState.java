@@ -381,13 +381,14 @@ public class AuthState {
                 "additional params cannot be null");
         checkNotNull(clock, "clock cannot be null");
         checkNotNull(action, "action cannot be null");
-        if (mRefreshToken == null) {
-            throw new IllegalStateException("No refresh token available");
-        }
 
         if (!getNeedsTokenRefresh(clock)) {
             action.execute(getAccessToken(), getIdToken(), null);
             return;
+        }
+
+        if (mRefreshToken == null) {
+            throw new IllegalStateException("No refresh token available");
         }
 
         service.performTokenRequest(createTokenRefreshRequest(refreshTokenAdditionalParams),
