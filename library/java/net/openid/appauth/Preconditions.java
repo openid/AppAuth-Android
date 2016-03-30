@@ -18,6 +18,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import java.util.Collection;
+
 /**
  * Utility class for guava style pre-condition checks.
  */
@@ -60,6 +62,16 @@ final class Preconditions {
     public static String checkNotEmpty(String str, @Nullable Object errorMessage) {
         checkArgument(!TextUtils.isEmpty(str), errorMessage);
         return str;
+    }
+
+    /**
+     * Ensures that a collection is not null or empty.
+     */
+    @NonNull
+    public static <T extends Collection<?>> T checkCollectionNotEmpty(T collection, @Nullable Object errorMessage) {
+        checkNotNull(collection, errorMessage);
+        checkArgument(!collection.isEmpty(), errorMessage);
+        return collection;
     }
 
     /**
