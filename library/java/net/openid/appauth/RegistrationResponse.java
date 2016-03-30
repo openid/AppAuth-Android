@@ -30,6 +30,9 @@ public class RegistrationResponse {
     static final String PARAM_REGISTRATION_CLIENT_URI = "registration_client_uri";
     static final String PARAM_CLIENT_ID_ISSUED_AT = "client_id_issued_at";
 
+    static final String KEY_REQUEST = "request";
+    static final String KEY_ADDITIONAL_PARAMETERS = "additionalParameters";
+
     private static final Set<String> BUILT_IN_PARAMS = new HashSet<>(Arrays.asList(
             PARAM_CLIENT_ID,
             PARAM_CLIENT_SECRET,
@@ -61,6 +64,7 @@ public class RegistrationResponse {
      */
     @NonNull
     public final Map<String, String> additionalParameters;
+
 
     /**
      * Thrown when a mandatory property is missing from the registration response.
@@ -269,6 +273,48 @@ public class RegistrationResponse {
             @NonNull JSONObject json)
             throws JSONException, MissingArgumentException {
         checkNotNull(request, "registration request cannot be null");
+        return new RegistrationResponse.Builder(request)
+                .fromResponseJson(json)
+                .build();
+    }
+
+    /**
+     * Converts the response to a JSON object for storage.
+     */
+    @NonNull
+    public JSONObject serialize() {
+        JSONObject json = new JSONObject();
+        JsonUtil.put(json, KEY_REQUEST, request.serialize());
+        JsonUtil.put(json, PARAM_CLIENT_ID, clientId);
+        JsonUtil.putIfNotNull(json, PARAM_CLIENT_ID_ISSUED_AT, clientIdIssuedAt);
+        JsonUtil.putIfNotNull(json, PARAM_CLIENT_SECRET, clientSecret);
+        JsonUtil.putIfNotNull(json, PARAM_CLIENT_SECRET_EXPIRES_AT, clientSecretExpiresAt);
+        JsonUtil.putIfNotNull(json, PARAM_REGISTRATION_ACCESS_TOKEN, registrationAccessToken);
+        JsonUtil.putIfNotNull(json, PARAM_REGISTRATION_CLIENT_URI, registrationClientUri);
+        JsonUtil.put(json, KEY_ADDITIONAL_PARAMETERS,
+                JsonUtil.mapToJsonObject(additionalParameters));
+        return json;
+    }
+
+    /**
+     * Reads a registration response from a JSON string, and associates it with the provided request.
+     *
+     * @throws JSONException if the JSON is malformed or missing required fields.
+     */
+    @NonNull
+    public static RegistrationResponse deserialize(@NonNull String jsonStr)
+            throws JSONException, MissingArgumentException {
+        checkNotEmpty(jsonStr, "jsonStr cannot be null or empty");
+        return deserialize(new JSONObject(jsonStr));
+    }
+
+    public static RegistrationResponse deserialize(@NonNull JSONObject json) throws JSONException, MissingArgumentException {
+        checkNotNull(json, "json cannot be null");
+        if (!json.has(KEY_REQUEST)) {
+            throw new IllegalArgumentException("registration request not found in JSON");
+        }
+        RegistrationRequest request = RegistrationRequest.deserialize(json.getJSONObject(KEY_REQUEST));
+
         return new RegistrationResponse.Builder(request)
                 .fromResponseJson(json)
                 .build();

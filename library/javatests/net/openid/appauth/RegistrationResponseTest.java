@@ -14,12 +14,14 @@ import org.robolectric.annotation.Config;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
 import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
 import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
 import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET_EXPIRES_AT;
+import static net.openid.appauth.TestValues.getTestRegistrationRequest;
 import static net.openid.appauth.TestValues.getTestServiceConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -46,16 +48,12 @@ public class RegistrationResponseTest {
     @Config(manifest = Config.NONE)
     public static class RegistrationResponseSingleTest {
         private RegistrationResponse.Builder mMinimalBuilder;
-        private RegistrationRequest mMinimalRegistrationRequest;
         private JSONObject mJson;
 
         @Before
         public void setUp() throws Exception {
             mJson = new JSONObject(TEST_JSON);
-            mMinimalRegistrationRequest = new RegistrationRequest.Builder(getTestServiceConfig(),
-                    TEST_APP_REDIRECT_URI)
-                    .build();
-            mMinimalBuilder = new RegistrationResponse.Builder(mMinimalRegistrationRequest);
+            mMinimalBuilder = new RegistrationResponse.Builder(getTestRegistrationRequest());
         }
 
         @Test(expected = IllegalArgumentException.class)
@@ -66,31 +64,69 @@ public class RegistrationResponseTest {
 
         @Test
         public void testFromJson() throws Exception {
-            RegistrationResponse response = RegistrationResponse.fromJson(mMinimalRegistrationRequest, mJson);
+            RegistrationResponse response = RegistrationResponse.fromJson(getTestRegistrationRequest(), mJson);
+            assertValues(response);
+        }
+
+        @Test
+        public void testSerialize() throws Exception {
+            JSONObject json = RegistrationResponse.fromJson(getTestRegistrationRequest(), mJson).serialize();
+
+            assertThat(json.get(RegistrationResponse.KEY_REQUEST).toString()).isEqualTo(getTestRegistrationRequest().serialize().toString());
+            assertThat(json.getLong(RegistrationResponse.PARAM_CLIENT_ID_ISSUED_AT)).isEqualTo(TEST_CLIENT_ID_ISSUED_AT);
+            assertThat(json.getString(RegistrationResponse.PARAM_CLIENT_SECRET)).isEqualTo(TEST_CLIENT_SECRET);
+            assertThat(json.getLong(RegistrationResponse.PARAM_CLIENT_SECRET_EXPIRES_AT)).isEqualTo(TEST_CLIENT_SECRET_EXPIRES_AT);
+            assertThat(json.getString(RegistrationResponse.PARAM_REGISTRATION_ACCESS_TOKEN)).isEqualTo(TEST_REGISTRATION_ACCESS_TOKEN);
+            assertThat(JsonUtil.getUri(json, RegistrationResponse.PARAM_REGISTRATION_CLIENT_URI)).isEqualTo(Uri.parse(TEST_REGISTRATION_CLIENT_URI));
+        }
+
+        @Test
+        public void testSerialize_withAdditionalParameters() throws Exception {
+            Map<String, String> additionalParameters = Collections.singletonMap("test1", "value1");
+            JSONObject json = mMinimalBuilder.setClientId(TEST_CLIENT_ID)
+                    .setAdditionalParameters(additionalParameters)
+                    .build().serialize();
+            assertThat(JsonUtil.getStringMap(json, RegistrationResponse.KEY_ADDITIONAL_PARAMETERS))
+                    .isEqualTo(additionalParameters);
+        }
+
+        @Test(expected = IllegalArgumentException.class)
+        public void testDeserialize_withoutRequest() throws Exception {
+            RegistrationResponse.deserialize(mJson);
+        }
+
+        @Test
+        public void testDeserialize() throws Exception {
+            mJson.put(RegistrationResponse.KEY_REQUEST, getTestRegistrationRequest().serialize());
+            RegistrationResponse response = RegistrationResponse.deserialize(mJson);
+            assertValues(response);
+        }
+
+        @Test
+        public void testHasExpired_withValidClientSecret() throws Exception {
+            RegistrationResponse response = RegistrationResponse.fromJson(getTestRegistrationRequest(), mJson);
+            assertThat(response.hasClientSecretExpired(new TestClock(TimeUnit.SECONDS.toMillis(TEST_CLIENT_SECRET_EXPIRES_AT - 1L)))).isFalse();
+        }
+
+        @Test
+        public void testHasExpired_withExpiredClientSecret() throws Exception {
+            RegistrationResponse response = RegistrationResponse.fromJson(getTestRegistrationRequest(), mJson);
+            assertThat(response.hasClientSecretExpired(new TestClock(TimeUnit.SECONDS.toMillis(TEST_CLIENT_SECRET_EXPIRES_AT + 1L)))).isTrue();
+        }
+
+        private void assertValues(RegistrationResponse response) {
             assertThat(response.clientId).isEqualTo(TEST_CLIENT_ID);
             assertThat(response.clientIdIssuedAt).isEqualTo(TEST_CLIENT_ID_ISSUED_AT);
             assertThat(response.clientSecret).isEqualTo(TEST_CLIENT_SECRET);
             assertThat(response.clientSecretExpiresAt).isEqualTo(TEST_CLIENT_SECRET_EXPIRES_AT);
             assertThat(response.registrationAccessToken).isEqualTo(TEST_REGISTRATION_ACCESS_TOKEN);
             assertThat(response.registrationClientUri).isEqualTo(Uri.parse(TEST_REGISTRATION_CLIENT_URI));
-            assertThat(response.additionalParameters.get("application_type")).isEqualTo(RegistrationRequest.APPLICATION_TYPE_NATIVE);
-        }
-
-        @Test
-        public void testHasExpired_withValidClientSecret() throws Exception {
-            RegistrationResponse response = RegistrationResponse.fromJson(mMinimalRegistrationRequest, mJson);
-            assertThat(response.hasClientSecretExpired(new TestClock(TimeUnit.SECONDS.toMillis(TEST_CLIENT_SECRET_EXPIRES_AT - 1L)))).isFalse();
-        }
-
-        @Test
-        public void testHasExpired_withExpiredClientSecret() throws Exception {
-            RegistrationResponse response = RegistrationResponse.fromJson(mMinimalRegistrationRequest, mJson);
-            assertThat(response.hasClientSecretExpired(new TestClock(TimeUnit.SECONDS.toMillis(TEST_CLIENT_SECRET_EXPIRES_AT + 1L)))).isTrue();
+            assertThat(response.additionalParameters.get(RegistrationRequest.PARAM_APPLICATION_TYPE)).isEqualTo(RegistrationRequest.APPLICATION_TYPE_NATIVE);
         }
     }
 
     @RunWith(ParameterizedRobolectricTestRunner.class)
-    @Config(manifest = Config.NONE)
+    @Config(manifest=Config.NONE)
     public static class RegistrationResponseParameterTest {
         private JSONObject mJson;
         private RegistrationRequest mMinimalRegistrationRequest;
@@ -99,7 +135,7 @@ public class RegistrationResponseTest {
         public void setUp() throws Exception {
             mJson = new JSONObject(TEST_JSON);
             mMinimalRegistrationRequest = new RegistrationRequest.Builder(getTestServiceConfig(),
-                    TEST_APP_REDIRECT_URI)
+                    Arrays.asList(TEST_APP_REDIRECT_URI))
                     .build();
         }
 

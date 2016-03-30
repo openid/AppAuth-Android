@@ -25,7 +25,9 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
@@ -46,13 +48,30 @@ public class RegistrationRequestTest {
         TEST_ADDITIONAL_PARAMS.put("test_key2", "test_value2");
     }
 
+    private static final String TEST_JSON = "{\n"
+            + " \"application_type\": \"" + RegistrationRequest.APPLICATION_TYPE_NATIVE + "\",\n"
+            + " \"redirect_uris\": [\"" + TEST_APP_REDIRECT_URI + "\"],\n"
+            + " \"subject_type\": \"" + RegistrationRequest.SUBJECT_TYPE_PAIRWISE + "\",\n"
+            + " \"response_types\": [\"" + ResponseTypeValues.ID_TOKEN + "\"],\n"
+            + " \"grant_types\": [\"" + GrantTypeValues.IMPLICIT + "\"]\n"
+            + "}";
+
     private RegistrationRequest.Builder mMinimalRequestBuilder;
+    private RegistrationRequest.Builder mMaximalRequestBuilder;
+    private JSONObject mJson;
+    private List<Uri> mRedirectUris;
 
     @Before
-    public void setUp() {
+    public void setUp() throws JSONException {
+        mRedirectUris = Arrays.asList(TEST_APP_REDIRECT_URI);
         mMinimalRequestBuilder = new RegistrationRequest.Builder(
-                getTestServiceConfig(),
-                TEST_APP_REDIRECT_URI);
+                getTestServiceConfig(), mRedirectUris);
+        mMaximalRequestBuilder = new RegistrationRequest.Builder(
+                getTestServiceConfig(), mRedirectUris)
+                .setResponseTypeValues(ResponseTypeValues.ID_TOKEN)
+                .setGrantTypeValues(GrantTypeValues.IMPLICIT)
+                .setSubjectType(RegistrationRequest.SUBJECT_TYPE_PAIRWISE);
+        mJson = new JSONObject(TEST_JSON);
     }
 
     @Test
@@ -62,7 +81,7 @@ public class RegistrationRequestTest {
 
     @Test(expected = NullPointerException.class)
     public void testBuild_nullConfiguration() {
-        new RegistrationRequest.Builder(null, TEST_APP_REDIRECT_URI).build();
+        new RegistrationRequest.Builder(null, mRedirectUris).build();
     }
 
     @Test(expected = NullPointerException.class)
@@ -110,14 +129,58 @@ public class RegistrationRequestTest {
 
     @Test
     public void testToJsonString() throws JSONException {
-        RegistrationRequest request = mMinimalRequestBuilder
-                .setResponseTypeValues(ResponseTypeValues.ID_TOKEN)
-                .setGrantTypeValues(GrantTypeValues.IMPLICIT)
-                .setSubjectType(RegistrationRequest.SUBJECT_TYPE_PAIRWISE)
-                .build();
+        RegistrationRequest request = mMaximalRequestBuilder.build();
         String jsonStr = request.toJsonString();
+        assertMaximalValuesInJson(request, new JSONObject(jsonStr));
+    }
 
-        JSONObject json = new JSONObject(jsonStr);
+    @Test
+    public void testSerialize() throws JSONException {
+        RegistrationRequest request = mMaximalRequestBuilder.build();
+        JSONObject json = request.serialize();
+        assertMaximalValuesInJson(request, json);
+        assertThat(json.getJSONObject(RegistrationRequest.KEY_CONFIGURATION).toString())
+                .isEqualTo(request.configuration.toJson().toString());
+    }
+
+    @Test
+    public void testSerialize_withAdditionalParameters() throws JSONException {
+        Map<String, String> additionalParameters = Collections.singletonMap("test1", "value1");
+        RegistrationRequest request = mMaximalRequestBuilder
+                .setAdditionalParameters(additionalParameters).build();
+        JSONObject json = request.serialize();
+        assertMaximalValuesInJson(request, json);
+        assertThat(JsonUtil.getStringMap(json, RegistrationRequest.KEY_ADDITIONAL_PARAMETERS))
+                .isEqualTo(additionalParameters);
+    }
+
+    @Test
+    public void testDeserialize() throws JSONException {
+        mJson.put(RegistrationRequest.KEY_CONFIGURATION, getTestServiceConfig().toJson());
+        RegistrationRequest request = RegistrationRequest.deserialize(mJson);
+        assertThat(request.configuration.toJsonString()).isEqualTo(getTestServiceConfig().toJsonString());
+        assertMaximalValuesInJson(request, mJson);
+    }
+
+    @Test
+    public void testDeserialize_withAdditionalParameters() throws JSONException {
+        mJson.put(RegistrationRequest.KEY_CONFIGURATION, getTestServiceConfig().toJson());
+        Map<String, String> additionalParameters = new HashMap<>();
+        additionalParameters.put("key1", "value1");
+        additionalParameters.put("key2", "value2");
+        mJson.put(RegistrationRequest.KEY_ADDITIONAL_PARAMETERS, JsonUtil.mapToJsonObject(additionalParameters));
+        RegistrationRequest request = RegistrationRequest.deserialize(mJson);
+        assertThat(request.additionalParameters).isEqualTo(additionalParameters);
+    }
+
+    private void assertValues(RegistrationRequest request) {
+        assertEquals("unexpected redirect URI", TEST_APP_REDIRECT_URI,
+                request.redirectUris.iterator().next());
+        assertEquals("unexpected application type", RegistrationRequest.APPLICATION_TYPE_NATIVE,
+                request.applicationType);
+    }
+
+    private void assertMaximalValuesInJson(RegistrationRequest request, JSONObject json) throws JSONException {
         assertThat(json.get(RegistrationRequest.PARAM_REDIRECT_URIS))
                 .isEqualTo(JsonUtil.toJsonArray(request.redirectUris));
         assertThat(json.get(RegistrationRequest.PARAM_APPLICATION_TYPE))
@@ -128,13 +191,5 @@ public class RegistrationRequestTest {
                 .isEqualTo(JsonUtil.toJsonArray(request.grantTypes));
         assertThat(json.get(RegistrationRequest.PARAM_SUBJECT_TYPE))
                 .isEqualTo(request.subjectType);
-    }
-
-
-    private void assertValues(RegistrationRequest request) {
-        assertEquals("unexpected redirect URI", TEST_APP_REDIRECT_URI,
-                request.redirectUris.iterator().next());
-        assertEquals("unexpected application tyoe", RegistrationRequest.APPLICATION_TYPE_NATIVE,
-                request.applicationType);
     }
 }

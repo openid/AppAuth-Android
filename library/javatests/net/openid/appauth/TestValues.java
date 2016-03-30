@@ -16,6 +16,9 @@ package net.openid.appauth;
 
 import android.net.Uri;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 /**
  * Contains common test values which are useful across all tests.
  */
@@ -106,7 +109,8 @@ class TestValues {
     }
 
     public static RegistrationRequest.Builder getTestRegistrationRequestBuilder() {
-        return new RegistrationRequest.Builder(getTestServiceConfig(), TEST_APP_REDIRECT_URI);
+        return new RegistrationRequest.Builder(getTestServiceConfig(),
+                Arrays.asList(TEST_APP_REDIRECT_URI));
     }
 
     public static RegistrationRequest getTestRegistrationRequest() {

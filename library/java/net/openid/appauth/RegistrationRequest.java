@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -15,7 +16,11 @@ import java.util.Set;
 
 import static net.openid.appauth.AdditionalParamsProcessor.builtInParams;
 import static net.openid.appauth.AdditionalParamsProcessor.checkAdditionalParams;
+import static net.openid.appauth.AdditionalParamsProcessor.extractAdditionalParams;
+import static net.openid.appauth.Preconditions.checkCollectionNotEmpty;
+import static net.openid.appauth.Preconditions.checkNotEmpty;
 import static net.openid.appauth.Preconditions.checkNotNull;
+import static net.openid.appauth.Preconditions.checkNullOrNotEmpty;
 
 public class RegistrationRequest {
     /**
@@ -36,6 +41,10 @@ public class RegistrationRequest {
             PARAM_APPLICATION_TYPE,
             PARAM_SUBJECT_TYPE
     );
+
+    static final String KEY_ADDITIONAL_PARAMETERS = "additionalParameters";
+    static final String KEY_CONFIGURATION = "configuration";
+
     public static final String SUBJECT_TYPE_PAIRWISE = "pairwise";
     public static final String SUBJECT_TYPE_PUBLIC = "public";
 
@@ -204,6 +213,23 @@ public class RegistrationRequest {
      */
     @NonNull
     public String toJsonString() {
+        JSONObject json = serializeParams();
+        for (Map.Entry<String, String> param : additionalParameters.entrySet()) {
+            JsonUtil.put(json, param.getKey(), param.getValue());
+        }
+        return json.toString();
+    }
+
+    @NonNull
+    public JSONObject serialize() {
+        JSONObject json = serializeParams();
+        JsonUtil.put(json, KEY_CONFIGURATION, configuration.toJson());
+        JsonUtil.put(json, KEY_ADDITIONAL_PARAMETERS,
+                JsonUtil.mapToJsonObject(additionalParameters));
+        return json;
+    }
+
+    private JSONObject serializeParams() {
         JSONObject json = new JSONObject();
         JsonUtil.put(json, PARAM_REDIRECT_URIS, JsonUtil.toJsonArray(redirectUris));
         JsonUtil.put(json, PARAM_APPLICATION_TYPE, applicationType);
@@ -215,11 +241,26 @@ public class RegistrationRequest {
             JsonUtil.put(json, PARAM_GRANT_TYPES, JsonUtil.toJsonArray(grantTypes));
         }
         JsonUtil.putIfNotNull(json, PARAM_SUBJECT_TYPE, subjectType);
+        return json;
+    }
 
-        for (Map.Entry<String, String> param : additionalParameters.entrySet()) {
-            JsonUtil.put(json, param.getKey(), param.getValue());
-        }
+    public static RegistrationRequest deserialize(@NonNull String jsonStr) throws JSONException {
+        checkNotEmpty(jsonStr, "jsonStr must not be empty or null");
+        return deserialize(new JSONObject(jsonStr));
+    }
 
-        return json.toString();
+    public static RegistrationRequest deserialize(@NonNull JSONObject json) throws JSONException {
+        checkNotNull(json, "json must not be null");
+        List<Uri> redirectUris = JsonUtil.getUriList(json, PARAM_REDIRECT_URIS);
+
+        Builder builder = new RegistrationRequest.Builder(
+                AuthorizationServiceConfiguration.fromJson(json.getJSONObject(KEY_CONFIGURATION)),
+                redirectUris)
+                .setSubjectType(JsonUtil.getStringIfDefined(json, PARAM_SUBJECT_TYPE))
+                .setResponseTypeValues(JsonUtil.getStringListIfDefined(json, PARAM_RESPONSE_TYPES))
+                .setGrantTypeValues(JsonUtil.getStringListIfDefined(json, PARAM_GRANT_TYPES))
+                .setAdditionalParameters(JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
+
+        return builder.build();
     }
 }
