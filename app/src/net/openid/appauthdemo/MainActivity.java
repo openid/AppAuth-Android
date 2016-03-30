@@ -33,12 +33,15 @@ import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
+import net.openid.appauth.ClientSecretBasic;
 import net.openid.appauth.RegistrationRequest;
 import net.openid.appauth.RegistrationResponse;
 import net.openid.appauth.ResponseTypeValues;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Demonstrates the usage of the AppAuth library to connect to a set of pre-configured
@@ -142,7 +145,8 @@ public class MainActivity extends AppCompatActivity {
                 TokenActivity.createPostAuthorizationIntent(
                         this,
                         authRequest,
-                        serviceConfig.discoveryDoc),
+                        serviceConfig.discoveryDoc,
+                        idp.getClientSecret()),
                 mAuthService.createCustomTabsIntentBuilder()
                         .setToolbarColor(getColorCompat(R.color.colorAccent))
                         .build());
@@ -151,9 +155,14 @@ public class MainActivity extends AppCompatActivity {
     private void makeRegistrationRequest(
             @NonNull AuthorizationServiceConfiguration serviceConfig,
             @NonNull final IdentityProvider idp) {
+
+        Map<String, String> additionalParams = new HashMap<>();
+        additionalParams.put("token_endpoint_auth_method", ClientSecretBasic.NAME);
+
         final RegistrationRequest registrationRequest = new RegistrationRequest.Builder(
                 serviceConfig,
                 Arrays.asList(idp.getRedirectUri()))
+                .setAdditionalParameters(additionalParams)
                 .build();
         Log.d(TAG, "Making registration request to " + serviceConfig.registrationEndpoint);
         mAuthService.performRegistrationRequest(
