@@ -55,21 +55,6 @@ final class JsonUtil {
     public static void put(
             @NonNull JSONObject json,
             @NonNull String field,
-            @NonNull Long value) {
-        checkNotNull(json, "json must not be null");
-        checkNotNull(field, "field must not be null");
-        checkNotNull(value, "value must not be null");
-
-        try {
-            json.put(field, value);
-        } catch (JSONException ex) {
-            throw new IllegalStateException("JSONException thrown in violation of contract, ex");
-        }
-    }
-
-    public static void put(
-            @NonNull JSONObject json,
-            @NonNull String field,
             @NonNull String value) {
         checkNotNull(json, "json must not be null");
         checkNotNull(field, "field must not be null");
@@ -346,8 +331,8 @@ final class JsonUtil {
     public static JSONArray toJsonArray(@NonNull Iterable<?> objects) {
         checkNotNull(objects, "objects cannot be null");
         JSONArray jsonArray = new JSONArray();
-        for (Object str : objects) {
-            jsonArray.put(str.toString());
+        for (Object obj : objects) {
+            jsonArray.put(obj.toString());
         }
         return jsonArray;
     }
