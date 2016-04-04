@@ -177,7 +177,7 @@ public class RegistrationResponse {
          * Framework" (RFC 6749), Section 4.1.1</a>
          */
         public Builder setClientId(@NonNull String clientId) {
-            checkArgument(!TextUtils.isEmpty(clientId), "client ID cannot be null or empty");
+            checkNotEmpty(clientId, "client ID cannot be null or empty");
             mClientId = clientId;
             return this;
         }
@@ -314,7 +314,8 @@ public class RegistrationResponse {
             setRegistrationAccessToken(JsonUtil.getStringIfDefined(json,
                     PARAM_REGISTRATION_ACCESS_TOKEN));
             if (json.has(PARAM_REGISTRATION_CLIENT_URI)) {
-                setRegistrationClientUri(Uri.parse(json.getString(PARAM_REGISTRATION_CLIENT_URI)));
+                setRegistrationClientUri(JsonUtil.getUriIfDefined(json,
+                        PARAM_REGISTRATION_CLIENT_URI));
             }
 
             setAdditionalParameters(extractAdditionalParams(json, BUILT_IN_PARAMS));
