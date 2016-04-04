@@ -115,14 +115,14 @@ public final class AuthorizationException extends Exception {
     public static final int TYPE_OAUTH_TOKEN_ERROR = 2;
 
     /**
-     * The error type for OAuth specific errors on the registration endpoint.
-     */
-    public static final int TYPE_OAUTH_REGISTRATION_ERROR = 3;
-
-    /**
      * The error type for authorization errors encountered out of band on the resource server.
      */
     public static final int TYPE_RESOURCE_SERVER_AUTHORIZATION_ERROR = 3;
+
+    /**
+     * The error type for OAuth specific errors on the registration endpoint.
+     */
+    public static final int TYPE_OAUTH_REGISTRATION_ERROR = 4;
 
     @VisibleForTesting
     static final String KEY_TYPE = "type";
@@ -383,32 +383,32 @@ public final class AuthorizationException extends Exception {
      * Error codes related to failed registration requests.
      */
     public static final class RegistrationRequestErrors {
-        // codes in this group should be between 3000-3999
+        // codes in this group should be between 4000-4999
 
         /**
          * An {@code invalid_request} OAuth2 error response.
          */
         public static final AuthorizationException INVALID_REQUEST =
-                registrationEx(3000, "invalid_request");
+                registrationEx(4000, "invalid_request");
 
         /**
          * An {@code invalid_client} OAuth2 error response.
          */
         public static final AuthorizationException INVALID_REDIRECT_URI =
-                registrationEx(3001, "invalid_redirect_uri");
+                registrationEx(4001, "invalid_redirect_uri");
 
         /**
          * An {@code invalid_grant} OAuth2 error response.
          */
         public static final AuthorizationException INVALID_CLIENT_METADATA =
-                registrationEx(3002, "invalid_client_metadata");
+                registrationEx(4002, "invalid_client_metadata");
 
         /**
          * An authorization error occurring on the client rather than the server. For example,
          * due to client misconfiguration. This error should be treated as unrecoverable.
          */
         public static final AuthorizationException CLIENT_ERROR =
-                registrationEx(3003, null);
+                registrationEx(4003, null);
 
         /**
          * Indicates an OAuth error as per RFC 6749, but the error code is not known to the
@@ -417,7 +417,7 @@ public final class AuthorizationException extends Exception {
          * the server.
          */
         public static final AuthorizationException OTHER =
-                registrationEx(3004, null);
+                registrationEx(4004, null);
 
         private static final Map<String, AuthorizationException> STRING_TO_EXCEPTION =
                 exceptionMapByString(
