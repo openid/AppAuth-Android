@@ -17,7 +17,6 @@ package net.openid.appauth;
 import android.net.Uri;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 /**
  * Contains common test values which are useful across all tests.

@@ -1,5 +1,14 @@
 package net.openid.appauth;
 
+import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
+import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
+import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
+import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET_EXPIRES_AT;
+import static net.openid.appauth.TestValues.getTestRegistrationRequest;
+import static net.openid.appauth.TestValues.getTestServiceConfig;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
+
 import android.net.Uri;
 
 import org.json.JSONObject;
@@ -17,21 +26,13 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
-import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
-import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
-import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET_EXPIRES_AT;
-import static net.openid.appauth.TestValues.getTestRegistrationRequest;
-import static net.openid.appauth.TestValues.getTestServiceConfig;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
-
 @RunWith(Enclosed.class)
 @Config(manifest = Config.NONE)
 public class RegistrationResponseTest {
     private static final Long TEST_CLIENT_ID_ISSUED_AT = 34L;
     private static final String TEST_REGISTRATION_ACCESS_TOKEN = "test_access_token";
-    private static final String TEST_REGISTRATION_CLIENT_URI = "https://test.openid.com/register?client_id=" + TEST_CLIENT_ID;
+    private static final String TEST_REGISTRATION_CLIENT_URI =
+            "https://test.openid.com/register?client_id=" + TEST_CLIENT_ID;
 
 
     private static final String TEST_JSON = "{\n"
@@ -64,20 +65,28 @@ public class RegistrationResponseTest {
 
         @Test
         public void testFromJson() throws Exception {
-            RegistrationResponse response = RegistrationResponse.fromJson(getTestRegistrationRequest(), mJson);
+            RegistrationResponse response = RegistrationResponse
+                    .fromJson(getTestRegistrationRequest(), mJson);
             assertValues(response);
         }
 
         @Test
         public void testSerialize() throws Exception {
-            JSONObject json = RegistrationResponse.fromJson(getTestRegistrationRequest(), mJson).serialize();
+            JSONObject json = RegistrationResponse.fromJson(getTestRegistrationRequest(), mJson)
+                    .serialize();
 
-            assertThat(json.get(RegistrationResponse.KEY_REQUEST).toString()).isEqualTo(getTestRegistrationRequest().serialize().toString());
-            assertThat(json.getLong(RegistrationResponse.PARAM_CLIENT_ID_ISSUED_AT)).isEqualTo(TEST_CLIENT_ID_ISSUED_AT);
-            assertThat(json.getString(RegistrationResponse.PARAM_CLIENT_SECRET)).isEqualTo(TEST_CLIENT_SECRET);
-            assertThat(json.getLong(RegistrationResponse.PARAM_CLIENT_SECRET_EXPIRES_AT)).isEqualTo(TEST_CLIENT_SECRET_EXPIRES_AT);
-            assertThat(json.getString(RegistrationResponse.PARAM_REGISTRATION_ACCESS_TOKEN)).isEqualTo(TEST_REGISTRATION_ACCESS_TOKEN);
-            assertThat(JsonUtil.getUri(json, RegistrationResponse.PARAM_REGISTRATION_CLIENT_URI)).isEqualTo(Uri.parse(TEST_REGISTRATION_CLIENT_URI));
+            assertThat(json.get(RegistrationResponse.KEY_REQUEST).toString())
+                    .isEqualTo(getTestRegistrationRequest().serialize().toString());
+            assertThat(json.getLong(RegistrationResponse.PARAM_CLIENT_ID_ISSUED_AT))
+                    .isEqualTo(TEST_CLIENT_ID_ISSUED_AT);
+            assertThat(json.getString(RegistrationResponse.PARAM_CLIENT_SECRET))
+                    .isEqualTo(TEST_CLIENT_SECRET);
+            assertThat(json.getLong(RegistrationResponse.PARAM_CLIENT_SECRET_EXPIRES_AT))
+                    .isEqualTo(TEST_CLIENT_SECRET_EXPIRES_AT);
+            assertThat(json.getString(RegistrationResponse.PARAM_REGISTRATION_ACCESS_TOKEN))
+                    .isEqualTo(TEST_REGISTRATION_ACCESS_TOKEN);
+            assertThat(JsonUtil.getUri(json, RegistrationResponse.PARAM_REGISTRATION_CLIENT_URI))
+                    .isEqualTo(Uri.parse(TEST_REGISTRATION_CLIENT_URI));
         }
 
         @Test
@@ -104,14 +113,18 @@ public class RegistrationResponseTest {
 
         @Test
         public void testHasExpired_withValidClientSecret() throws Exception {
-            RegistrationResponse response = RegistrationResponse.fromJson(getTestRegistrationRequest(), mJson);
-            assertThat(response.hasClientSecretExpired(new TestClock(TimeUnit.SECONDS.toMillis(TEST_CLIENT_SECRET_EXPIRES_AT - 1L)))).isFalse();
+            RegistrationResponse response = RegistrationResponse
+                    .fromJson(getTestRegistrationRequest(), mJson);
+            long now = TimeUnit.SECONDS.toMillis(TEST_CLIENT_SECRET_EXPIRES_AT - 1L);
+            assertThat(response.hasClientSecretExpired(new TestClock(now))).isFalse();
         }
 
         @Test
         public void testHasExpired_withExpiredClientSecret() throws Exception {
-            RegistrationResponse response = RegistrationResponse.fromJson(getTestRegistrationRequest(), mJson);
-            assertThat(response.hasClientSecretExpired(new TestClock(TimeUnit.SECONDS.toMillis(TEST_CLIENT_SECRET_EXPIRES_AT + 1L)))).isTrue();
+            RegistrationResponse response = RegistrationResponse
+                    .fromJson(getTestRegistrationRequest(), mJson);
+            long now = TimeUnit.SECONDS.toMillis(TEST_CLIENT_SECRET_EXPIRES_AT + 1L);
+            assertThat(response.hasClientSecretExpired(new TestClock(now))).isTrue();
         }
 
         private void assertValues(RegistrationResponse response) {
@@ -120,13 +133,16 @@ public class RegistrationResponseTest {
             assertThat(response.clientSecret).isEqualTo(TEST_CLIENT_SECRET);
             assertThat(response.clientSecretExpiresAt).isEqualTo(TEST_CLIENT_SECRET_EXPIRES_AT);
             assertThat(response.registrationAccessToken).isEqualTo(TEST_REGISTRATION_ACCESS_TOKEN);
-            assertThat(response.registrationClientUri).isEqualTo(Uri.parse(TEST_REGISTRATION_CLIENT_URI));
-            assertThat(response.additionalParameters.get(RegistrationRequest.PARAM_APPLICATION_TYPE)).isEqualTo(RegistrationRequest.APPLICATION_TYPE_NATIVE);
+            assertThat(response.registrationClientUri)
+                    .isEqualTo(Uri.parse(TEST_REGISTRATION_CLIENT_URI));
+            assertThat(response.additionalParameters)
+                    .containsEntry(RegistrationRequest.PARAM_APPLICATION_TYPE,
+                            RegistrationRequest.APPLICATION_TYPE_NATIVE);
         }
     }
 
     @RunWith(ParameterizedRobolectricTestRunner.class)
-    @Config(manifest=Config.NONE)
+    @Config(manifest = Config.NONE)
     public static class RegistrationResponseParameterTest {
         private JSONObject mJson;
         private RegistrationRequest mMinimalRegistrationRequest;
@@ -140,13 +156,13 @@ public class RegistrationResponseTest {
         }
 
         @Test
-        public void testBuilder_fromJSONWithMissingRequiredParameter() throws Exception {
-            mJson.remove(missingParameter);
+        public void testBuilder_fromJsonNWithMissingRequiredParameter() throws Exception {
+            mJson.remove(mMissingParameter);
             try {
                 RegistrationResponse.fromJson(mMinimalRegistrationRequest, mJson);
                 fail("Expected MissingArgumentException not thrown.");
             } catch (RegistrationResponse.MissingArgumentException e) {
-                assertThat(missingParameter).isEqualTo(e.getMissingField());
+                assertThat(mMissingParameter).isEqualTo(e.getMissingField());
             }
         }
 
@@ -159,10 +175,10 @@ public class RegistrationResponseTest {
             });
         }
 
-        private String missingParameter;
+        private String mMissingParameter;
 
         public RegistrationResponseParameterTest(String missingParameter) {
-            this.missingParameter = missingParameter;
+            mMissingParameter = missingParameter;
         }
     }
 }

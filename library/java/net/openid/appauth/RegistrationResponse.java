@@ -1,5 +1,11 @@
 package net.openid.appauth;
 
+import static net.openid.appauth.AdditionalParamsProcessor.checkAdditionalParams;
+import static net.openid.appauth.AdditionalParamsProcessor.extractAdditionalParams;
+import static net.openid.appauth.Preconditions.checkArgument;
+import static net.openid.appauth.Preconditions.checkNotEmpty;
+import static net.openid.appauth.Preconditions.checkNotNull;
+
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -15,12 +21,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
-import static net.openid.appauth.AdditionalParamsProcessor.checkAdditionalParams;
-import static net.openid.appauth.AdditionalParamsProcessor.extractAdditionalParams;
-import static net.openid.appauth.Preconditions.checkArgument;
-import static net.openid.appauth.Preconditions.checkNotEmpty;
-import static net.openid.appauth.Preconditions.checkNotNull;
 
 public class RegistrationResponse {
     static final String PARAM_CLIENT_ID = "client_id";
@@ -46,16 +46,62 @@ public class RegistrationResponse {
      */
     @NonNull
     public final RegistrationRequest request;
+
+    /**
+     * The registered client identifier.
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4"> "The OAuth 2.0 Authorization
+     * Framework" (RFC 6749), Section 4</a>
+     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.1"> "The OAuth 2.0
+     * Authorization
+     * Framework" (RFC 6749), Section 4.1.1</a>
+     */
     @NonNull
     public final String clientId;
+
+    /**
+     * Timestamp of when the client identifier was issued, if provided.
+     *
+     * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
+     * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+     */
     @Nullable
     public final Long clientIdIssuedAt;
+
+    /**
+     * The client secret, which is part of the client credentials, if provided.
+     *
+     * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
+     * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+     */
     @Nullable
     public final String clientSecret;
+
+    /**
+     * Timestamp of when the client credentials expires, if provided.
+     *
+     * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
+     * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+     */
     @Nullable
     public final Long clientSecretExpiresAt;
+
+    /**
+     * Client registration access token that can be used for subsequent operations upon the client
+     * registration.
+     *
+     * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
+     * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+     */
     @Nullable
     public final String registrationAccessToken;
+
+    /**
+     * Location of the client configuration endpoint, if provided.
+     *
+     * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
+     * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+     */
     @Nullable
     public final Uri registrationClientUri;
 
@@ -121,38 +167,79 @@ public class RegistrationResponse {
             return this;
         }
 
-
+        /**
+         * Specifies the client identifier.
+         *
+         * @see <a href="https://tools.ietf.org/html/rfc6749#section-4"> "The OAuth 2.0 Authorization
+         * Framework" (RFC 6749), Section 4</a>
+         * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.1"> "The OAuth 2.0
+         * Authorization
+         * Framework" (RFC 6749), Section 4.1.1</a>
+         */
         public Builder setClientId(@NonNull String clientId) {
             checkArgument(!TextUtils.isEmpty(clientId), "client ID cannot be null or empty");
             mClientId = clientId;
             return this;
         }
 
+        /**
+         * Specifies the timestamp for when the client identifier was issued.
+         *
+         * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
+         * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+         */
         public Builder setClientIdIssuedAt(@Nullable Long clientIdIssuedAt) {
             mClientIdIssuedAt = clientIdIssuedAt;
             return this;
         }
 
+        /**
+         * Specifies the client secret.
+         *
+         * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
+         * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+         */
         public Builder setClientSecret(@Nullable String clientSecret) {
             mClientSecret = clientSecret;
             return this;
         }
 
+        /**
+         * Specifies the expiration time of the client secret.
+         *
+         * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
+         * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+         */
         public Builder setClientSecretExpiresAt(@Nullable Long clientSecretExpiresAt) {
             mClientSecretExpiresAt = clientSecretExpiresAt;
             return this;
         }
 
+        /**
+         * Specifies the registration access token.
+         *
+         * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
+         * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+         */
         public Builder setRegistrationAccessToken(@Nullable String registrationAccessToken) {
             mRegistrationAccessToken = registrationAccessToken;
             return this;
         }
 
+        /**
+         * Specifies the client configuration endpoint.
+         *
+         * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
+         * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+         */
         public Builder setRegistrationClientUri(@Nullable Uri registrationClientUri) {
             mRegistrationClientUri = registrationClientUri;
             return this;
         }
 
+        /**
+         * Specifies the additional, non-standard parameters received as part of the response.
+         */
         public Builder setAdditionalParameters(Map<String, String> additionalParameters) {
             mAdditionalParameters = checkAdditionalParams(additionalParameters, BUILT_IN_PARAMS);
             return this;
@@ -177,9 +264,12 @@ public class RegistrationResponse {
          * Extracts registration response fields from a JSON string.
          *
          * @throws JSONException if the JSON is malformed or has incorrect value types for fields.
+         * @throws MissingArgumentException if the JSON is missing fields required by the
+         *                                  specification.
          */
         @NonNull
-        public Builder fromResponseJsonString(@NonNull String jsonStr) throws JSONException, MissingArgumentException {
+        public Builder fromResponseJsonString(@NonNull String jsonStr)
+                throws JSONException, MissingArgumentException {
             checkNotEmpty(jsonStr, "json cannot be null or empty");
             return fromResponseJson(new JSONObject(jsonStr));
         }
@@ -188,10 +278,12 @@ public class RegistrationResponse {
          * Extracts token response fields from a JSON object.
          *
          * @throws JSONException if the JSON is malformed or has incorrect value types for fields.
+         * @throws MissingArgumentException if the JSON is missing fields required by the
+         *                                  specification.
          */
         @NonNull
-        public Builder fromResponseJson(@NonNull JSONObject json) throws JSONException,
-                MissingArgumentException {
+        public Builder fromResponseJson(@NonNull JSONObject json)
+                throws JSONException, MissingArgumentException {
             setClientId(JsonUtil.getString(json, PARAM_CLIENT_ID));
             setClientIdIssuedAt(JsonUtil.getLongIfDefined(json, PARAM_CLIENT_ID_ISSUED_AT));
 
@@ -207,7 +299,8 @@ public class RegistrationResponse {
                 setClientSecretExpiresAt(json.getLong(PARAM_CLIENT_SECRET_EXPIRES_AT));
             }
 
-            if (json.has(PARAM_REGISTRATION_ACCESS_TOKEN) != json.has(PARAM_REGISTRATION_CLIENT_URI)) {
+            if (json.has(PARAM_REGISTRATION_ACCESS_TOKEN)
+                    != json.has(PARAM_REGISTRATION_CLIENT_URI)) {
                 /*
                  * From OpenID Connect Dynamic Client Registration, Section 3.2:
                  * "Implementations MUST either return both a Client Configuration Endpoint and a
@@ -249,23 +342,28 @@ public class RegistrationResponse {
     }
 
     /**
-     * Reads a registration response from a JSON string, and associates it with the provided request.
+     * Reads a registration response from a JSON string, and associates it with the provided
+     * request.
      *
-     * @throws JSONException if the JSON is malformed or missing required fields.
+     * @throws JSONException            if the JSON is malformed or missing required fields.
+     * @throws MissingArgumentException if the JSON is missing fields required by the
+     *                                  specification.
      */
     @NonNull
     public static RegistrationResponse fromJson(
-            @NonNull RegistrationRequest request,
-            @NonNull String jsonStr)
+            @NonNull RegistrationRequest request, @NonNull String jsonStr)
             throws JSONException, MissingArgumentException {
         checkNotEmpty(jsonStr, "jsonStr cannot be null or empty");
         return fromJson(request, new JSONObject(jsonStr));
     }
 
     /**
-     * Reads a registration response from a JSON object, and associates it with the provided request.
+     * Reads a registration response from a JSON object, and associates it with the provided
+     * request.
      *
-     * @throws JSONException if the JSON is malformed or missing required fields.
+     * @throws JSONException            if the JSON is malformed or missing required fields.
+     * @throws MissingArgumentException if the JSON is missing fields required by the
+     *                                  specification.
      */
     @NonNull
     public static RegistrationResponse fromJson(
@@ -297,9 +395,12 @@ public class RegistrationResponse {
     }
 
     /**
-     * Reads a registration response from a JSON string, and associates it with the provided request.
+     * Reads a registration response from a JSON string, and associates it with the provided
+     * request.
      *
      * @throws JSONException if the JSON is malformed or missing required fields.
+     * @throws MissingArgumentException if the JSON is missing fields required by the
+     *                                  specification.
      */
     @NonNull
     public static RegistrationResponse deserialize(@NonNull String jsonStr)
@@ -308,12 +409,20 @@ public class RegistrationResponse {
         return deserialize(new JSONObject(jsonStr));
     }
 
-    public static RegistrationResponse deserialize(@NonNull JSONObject json) throws JSONException, MissingArgumentException {
+    /**
+     *
+     * @throws JSONException if the JSON is malformed or missing required fields.
+     * @throws MissingArgumentException if the JSON is missing fields required by the
+     *                                  specification.
+     */
+    public static RegistrationResponse deserialize(@NonNull JSONObject json) throws JSONException,
+            MissingArgumentException {
         checkNotNull(json, "json cannot be null");
         if (!json.has(KEY_REQUEST)) {
             throw new IllegalArgumentException("registration request not found in JSON");
         }
-        RegistrationRequest request = RegistrationRequest.deserialize(json.getJSONObject(KEY_REQUEST));
+        RegistrationRequest request = RegistrationRequest.deserialize(
+                json.getJSONObject(KEY_REQUEST));
 
         return new RegistrationResponse.Builder(request)
                 .fromResponseJson(json)

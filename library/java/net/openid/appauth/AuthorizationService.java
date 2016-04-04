@@ -14,6 +14,8 @@
 
 package net.openid.appauth;
 
+import static net.openid.appauth.Preconditions.checkNotNull;
+
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -38,7 +40,6 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import static net.openid.appauth.Preconditions.checkNotNull;
 
 /**
  * Dispatches requests to an OAuth2 authorization service. Note that instances of this class
@@ -350,9 +351,9 @@ public class AuthorizationService {
             InputStream is = null;
             String postData = mRequest.toJsonString();
             try {
-                URL requestURL = mUrlBuilder.buildUrlFromString(
+                URL requestUrl = mUrlBuilder.buildUrlFromString(
                         mRequest.configuration.registrationEndpoint.toString());
-                HttpURLConnection conn = (HttpURLConnection) requestURL.openConnection();
+                HttpURLConnection conn = (HttpURLConnection) requestUrl.openConnection();
                 conn.setRequestMethod("POST");
 
                 // required by some providers to ensure JSON response
@@ -410,7 +411,8 @@ public class AuthorizationService {
 
             RegistrationResponse response;
             try {
-                response = new RegistrationResponse.Builder(mRequest).fromResponseJson(json).build();
+                response = new RegistrationResponse.Builder(mRequest)
+                        .fromResponseJson(json).build();
             } catch (JSONException jsonEx) {
                 mCallback.onRegistrationRequestCompleted(null,
                         AuthorizationException.fromTemplate(
@@ -438,13 +440,14 @@ public class AuthorizationService {
     public interface RegistrationResponseCallback {
         /**
          * Invoked when the request completes successfully or fails.
-         * <p/>
+         *
          * <p>Exactly one of {@code response} or {@code ex} will be non-null. If
          * {@code response} is {@code null}, a failure occurred during the request. This can
          * happen if a bad URI was provided, no connection to the server could be established, or
-         * the response JSON was incomplete or badly formatted.
+         * the response JSON was incomplete or badly formatted.</p>
          *
-         * @param response the retrieved registration response, if successful; {@code null} otherwise.
+         * @param response the retrieved registration response, if successful; {@code null}
+         *                 otherwise.
          * @param ex       a description of the failure, if one occurred: {@code null} otherwise.
          * @see AuthorizationException.RegistrationRequestErrors
          */

@@ -1,18 +1,10 @@
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package net.openid.appauth;
+
+import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
+import static net.openid.appauth.TestValues.TEST_APP_SCHEME;
+import static net.openid.appauth.TestValues.getTestServiceConfig;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 
 import android.net.Uri;
 
@@ -29,12 +21,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
-import static net.openid.appauth.TestValues.TEST_APP_SCHEME;
-import static net.openid.appauth.TestValues.getTestServiceConfig;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
@@ -158,7 +144,8 @@ public class RegistrationRequestTest {
     public void testDeserialize() throws JSONException {
         mJson.put(RegistrationRequest.KEY_CONFIGURATION, getTestServiceConfig().toJson());
         RegistrationRequest request = RegistrationRequest.deserialize(mJson);
-        assertThat(request.configuration.toJsonString()).isEqualTo(getTestServiceConfig().toJsonString());
+        assertThat(request.configuration.toJsonString())
+                .isEqualTo(getTestServiceConfig().toJsonString());
         assertMaximalValuesInJson(request, mJson);
     }
 
@@ -168,7 +155,8 @@ public class RegistrationRequestTest {
         Map<String, String> additionalParameters = new HashMap<>();
         additionalParameters.put("key1", "value1");
         additionalParameters.put("key2", "value2");
-        mJson.put(RegistrationRequest.KEY_ADDITIONAL_PARAMETERS, JsonUtil.mapToJsonObject(additionalParameters));
+        mJson.put(RegistrationRequest.KEY_ADDITIONAL_PARAMETERS,
+                JsonUtil.mapToJsonObject(additionalParameters));
         RegistrationRequest request = RegistrationRequest.deserialize(mJson);
         assertThat(request.additionalParameters).isEqualTo(additionalParameters);
     }
@@ -180,7 +168,8 @@ public class RegistrationRequestTest {
                 request.applicationType);
     }
 
-    private void assertMaximalValuesInJson(RegistrationRequest request, JSONObject json) throws JSONException {
+    private void assertMaximalValuesInJson(RegistrationRequest request, JSONObject json)
+            throws JSONException {
         assertThat(json.get(RegistrationRequest.PARAM_REDIRECT_URIS))
                 .isEqualTo(JsonUtil.toJsonArray(request.redirectUris));
         assertThat(json.get(RegistrationRequest.PARAM_APPLICATION_TYPE))

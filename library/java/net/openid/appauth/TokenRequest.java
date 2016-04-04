@@ -315,10 +315,10 @@ public class TokenRequest {
         /**
          * Specifies the set of case-sensitive scopes. Replaces any previously specified set of
          * scopes. Individual scope strings cannot be null or empty.
-         * <p/>
+         *
          * <p>Scopes specified here are used to obtain a "down-scoped" access token, where the
          * set of scopes specified <em>must</em> be a subset of those already granted in
-         * previous requests.
+         * previous requests.</p>
          *
          * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3"> "The OAuth 2.0
          * Authorization Framework" (RFC 6749), Section 3.3</a>
@@ -337,10 +337,10 @@ public class TokenRequest {
         /**
          * Specifies the set of case-sensitive scopes. Replaces any previously specified set of
          * scopes. Individual scope strings cannot be null or empty.
-         * <p/>
+         *
          * <p>Scopes specified here are used to obtain a "down-scoped" access token, where the
          * set of scopes specified <em>must</em> be a subset of those already granted in
-         * previous requests.
+         * previous requests.</p>
          *
          * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3"> "The OAuth 2.0
          * Authorization
@@ -357,10 +357,10 @@ public class TokenRequest {
         /**
          * Specifies the authorization code for the request. If provided, the authorization code
          * must not be empty.
-         * <p/>
+         *
          * <p>Specifying an authorization code normally implies that this is a request to exchange
          * this authorization code for one or more tokens. If this is not intended, the grant type
-         * should be explicitly set.
+         * should be explicitly set.</p>
          */
         @NonNull
         public Builder setAuthorizationCode(@Nullable String authorizationCode) {
@@ -372,10 +372,10 @@ public class TokenRequest {
         /**
          * Specifies the refresh token for the request. If a non-null value is provided, it must
          * not be empty.
-         * <p/>
+         *
          * <p>Specifying a refresh token normally implies that this is a request to exchange the
          * refresh token for a new token. If this is not intended, the grant type should be
-         * explicit set.
+         * explicit set.</p>
          */
         @NonNull
         public Builder setRefreshToken(@Nullable String refreshToken) {

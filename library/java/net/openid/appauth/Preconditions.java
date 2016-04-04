@@ -68,7 +68,8 @@ final class Preconditions {
      * Ensures that a collection is not null or empty.
      */
     @NonNull
-    public static <T extends Collection<?>> T checkCollectionNotEmpty(T collection, @Nullable Object errorMessage) {
+    public static <T extends Collection<?>> T checkCollectionNotEmpty(
+            T collection, @Nullable Object errorMessage) {
         checkNotNull(collection, errorMessage);
         checkArgument(!collection.isEmpty(), errorMessage);
         return collection;

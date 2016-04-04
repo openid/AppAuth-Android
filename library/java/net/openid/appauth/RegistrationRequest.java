@@ -1,5 +1,11 @@
 package net.openid.appauth;
 
+import static net.openid.appauth.AdditionalParamsProcessor.builtInParams;
+import static net.openid.appauth.AdditionalParamsProcessor.checkAdditionalParams;
+import static net.openid.appauth.Preconditions.checkCollectionNotEmpty;
+import static net.openid.appauth.Preconditions.checkNotEmpty;
+import static net.openid.appauth.Preconditions.checkNotNull;
+
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,14 +19,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static net.openid.appauth.AdditionalParamsProcessor.builtInParams;
-import static net.openid.appauth.AdditionalParamsProcessor.checkAdditionalParams;
-import static net.openid.appauth.AdditionalParamsProcessor.extractAdditionalParams;
-import static net.openid.appauth.Preconditions.checkCollectionNotEmpty;
-import static net.openid.appauth.Preconditions.checkNotEmpty;
-import static net.openid.appauth.Preconditions.checkNotNull;
-import static net.openid.appauth.Preconditions.checkNullOrNotEmpty;
 
 public class RegistrationRequest {
     /**
@@ -45,7 +43,20 @@ public class RegistrationRequest {
     static final String KEY_ADDITIONAL_PARAMETERS = "additionalParameters";
     static final String KEY_CONFIGURATION = "configuration";
 
+    /**
+     * Instructs the authorization server to generate a pairwise subject identifier.
+     *
+     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#SubjectIDTypes">
+     * "OpenID Connect Core 1.0", Section 8</a>
+     */
     public static final String SUBJECT_TYPE_PAIRWISE = "pairwise";
+
+    /**
+     * Instructs the authorization server to generate a public subject identifier.
+     *
+     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#SubjectIDTypes">
+     * "OpenID Connect Core 1.0", Section 8</a>
+     */
     public static final String SUBJECT_TYPE_PUBLIC = "public";
 
 
@@ -63,20 +74,45 @@ public class RegistrationRequest {
     public final AuthorizationServiceConfiguration configuration;
 
     /**
-     * The client's redirect URI.
+     * The client's redirect URI's.
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.1.2"> "The OAuth 2.0
+     * Authorization
+     * Framework" (RFC 6749), Section 3.1.2</a>
      */
     @NonNull
     public final List<Uri> redirectUris;
 
+    /**
+     * The application type to register, will always be 'native'.
+     */
     @NonNull
     public final String applicationType;
 
+    /**
+     * The response types to use.
+     *
+     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#Authentication">
+     * "OpenID Connect Core 1.0", Section 3</a>
+     */
     @Nullable
     public final List<String> responseTypes;
 
+    /**
+     * The grant types to use.
+     *
+     * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata">
+     * "OpenID Connect Dynamic Client Registration 1.0", Section 2</a>
+     */
     @Nullable
     public final List<String> grantTypes;
 
+    /**
+     * The subject type to use.
+     *
+     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#SubjectIDTypes">
+     * "OpenID Connect Core 1.0", Section 8</a>
+     */
     @Nullable
     public final String subjectType;
 
@@ -129,11 +165,23 @@ public class RegistrationRequest {
             return this;
         }
 
+        /**
+         * Specifies the redirect URI's.
+         *
+         * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.1.2"> "The OAuth 2.0
+         * Authorization Framework" (RFC 6749), Section 3.1.2</a>
+         */
         @NonNull
         public Builder setRedirectUriValues(@NonNull Uri... redirectUriValues) {
             return setRedirectUriValues(Arrays.asList(redirectUriValues));
         }
 
+        /**
+         * Specifies the redirect URI's.
+         *
+         * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.1.2"> "The OAuth 2.0
+         * Authorization Framework" (RFC 6749), Section 3.1.2</a>
+         */
         @NonNull
         public Builder setRedirectUriValues(@NonNull List<Uri> redirectUriValues) {
             checkCollectionNotEmpty(redirectUriValues, "redirectUriValues cannot be null");
@@ -141,28 +189,58 @@ public class RegistrationRequest {
             return this;
         }
 
+        /**
+         * Specifies the response types.
+         *
+         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#Authentication">
+         * "OpenID Connect Core 1.0", Section 3</a>
+         */
         @NonNull
         public Builder setResponseTypeValues(@Nullable String... responseTypeValues) {
             return setResponseTypeValues(Arrays.asList(responseTypeValues));
         }
 
+        /**
+         * Specifies the response types.
+         *
+         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#Authentication">
+         * "OpenID Connect Core 1.0", Section 3</a>
+         */
         @NonNull
         public Builder setResponseTypeValues(@Nullable List<String> responseTypeValues) {
             mResponseTypes = responseTypeValues;
             return this;
         }
 
+        /**
+         * Specifies the grant types.
+         *
+         * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata">
+          * "OpenID Connect Dynamic Client Registration 1.0", Section 2</a>
+         */
         @NonNull
         public Builder setGrantTypeValues(@Nullable String... grantTypeValues) {
             return setGrantTypeValues(Arrays.asList(grantTypeValues));
         }
 
+        /**
+         * Specifies the grant types.
+         *
+         * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata">
+         * "OpenID Connect Dynamic Client Registration 1.0", Section 2</a>
+         */
         @NonNull
         public Builder setGrantTypeValues(@Nullable List<String> grantTypeValues) {
             mGrantTypes = grantTypeValues;
             return this;
         }
 
+        /**
+         * Specifies the subject types.
+         *
+         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#SubjectIDTypes">
+          * "OpenID Connect Core 1.0", Section 8</a>l
+         */
         @NonNull
         public Builder setSubjectType(@Nullable String subjectType) {
             mSubjectType = subjectType;
@@ -179,12 +257,19 @@ public class RegistrationRequest {
             return this;
         }
 
+        /**
+         * Constructs the registration request. At a minimum the following fields must have been
+         * set:
+         * <ul> <li>The redirect URI's</li>
+         * </ul> Failure to specify any of these parameters will result in a runtime exception.
+         */
         @NonNull
         public RegistrationRequest build() {
             return new RegistrationRequest(
                     mConfiguration,
                     Collections.unmodifiableList(mRedirectUris),
-                    mResponseTypes == null ? mResponseTypes : Collections.unmodifiableList(mResponseTypes),
+                    mResponseTypes == null
+                            ? mResponseTypes : Collections.unmodifiableList(mResponseTypes),
                     mGrantTypes == null ? mGrantTypes : Collections.unmodifiableList(mGrantTypes),
                     mSubjectType,
                     Collections.unmodifiableMap(mAdditionalParameters));
@@ -220,6 +305,10 @@ public class RegistrationRequest {
         return json.toString();
     }
 
+    /**
+     * Converts the registration request to JSON for internal storage or transmission, e.g. between
+     * activities in intents.
+     */
     @NonNull
     public JSONObject serialize() {
         JSONObject json = serializeParams();
@@ -244,11 +333,23 @@ public class RegistrationRequest {
         return json;
     }
 
+    /**
+     * Reads a registration request from a JSON representation produced by the
+     * {@link #serialize()} method or some other equivalent producer.
+     *
+     * @throws JSONException if the provided JSON does not match the expected structure.
+     */
     public static RegistrationRequest deserialize(@NonNull String jsonStr) throws JSONException {
         checkNotEmpty(jsonStr, "jsonStr must not be empty or null");
         return deserialize(new JSONObject(jsonStr));
     }
 
+    /**
+     * Reads a registration request from a JSON representation produced by the
+     * {@link #serialize()} method or some other equivalent producer.
+     *
+     * @throws JSONException if the provided JSON does not match the expected structure.
+     */
     public static RegistrationRequest deserialize(@NonNull JSONObject json) throws JSONException {
         checkNotNull(json, "json must not be null");
         List<Uri> redirectUris = JsonUtil.getUriList(json, PARAM_REDIRECT_URIS);

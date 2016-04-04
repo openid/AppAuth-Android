@@ -33,8 +33,6 @@ import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
@@ -132,6 +130,7 @@ public class PreconditionsTest {
     public void testCheckCollectionNotEmpty_withEmptyList() {
         checkCollectionNotEmpty(new ArrayList<Object>(), TEST_MSG);
     }
+
     @Test
     public void testCheckCollectionNotEmpty() {
         checkCollectionNotEmpty(Arrays.asList("value1", "value2"), TEST_MSG);

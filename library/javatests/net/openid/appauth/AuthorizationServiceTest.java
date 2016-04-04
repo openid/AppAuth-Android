@@ -15,7 +15,6 @@
 package net.openid.appauth;
 
 import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
-import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
 import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
 import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
 import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET_EXPIRES_AT;
@@ -250,7 +249,8 @@ public class AuthorizationServiceTest {
         assertEquals(TEST_ID_TOKEN, response.idToken);
     }
 
-    private void assertRegistrationResponse(RegistrationResponse response, RegistrationRequest expectedRequest) {
+    private void assertRegistrationResponse(RegistrationResponse response,
+                                            RegistrationRequest expectedRequest) {
         assertThat(response).isNotNull();
         assertThat(response.request).isEqualTo(expectedRequest);
         assertThat(response.clientId).isEqualTo(TEST_CLIENT_ID);
