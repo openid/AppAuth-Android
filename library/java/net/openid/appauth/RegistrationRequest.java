@@ -22,7 +22,7 @@ import java.util.Set;
 
 public class RegistrationRequest {
     /**
-     * OpenID Conenct 'application_type'.
+     * OpenID Connect 'application_type'.
      */
     public static final String APPLICATION_TYPE_NATIVE = "native";
 
