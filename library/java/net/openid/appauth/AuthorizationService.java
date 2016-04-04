@@ -191,7 +191,7 @@ public class AuthorizationService {
      * The result of this request will be sent to the provided callback handler.
      */
     public void performRegistrationRequest(
-            @NonNull net.openid.appauth.RegistrationRequest request,
+            @NonNull RegistrationRequest request,
             @NonNull RegistrationResponseCallback callback) {
         checkNotDisposed();
         Logger.debug("Initiating dynamic client registration %s",
@@ -359,7 +359,6 @@ public class AuthorizationService {
                 // required by some providers to ensure JSON response
                 conn.setRequestProperty("Accept", "application/json");
 
-                conn.setInstanceFollowRedirects(false);
                 conn.setDoOutput(true);
                 conn.setRequestProperty("Content-Length", String.valueOf(postData.length()));
                 OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
