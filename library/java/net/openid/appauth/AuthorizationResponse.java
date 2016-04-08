@@ -522,7 +522,7 @@ public class AuthorizationResponse {
     public static AuthorizationResponse fromJson(@NonNull JSONObject json) throws JSONException {
         if (!json.has(KEY_REQUEST)) {
             throw new IllegalArgumentException(
-                "token request not provided and not found in JSON");
+                "authorization request not provided and not found in JSON");
         }
 
         AuthorizationRequest request =
