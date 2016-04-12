@@ -335,12 +335,12 @@ public class AuthorizationService {
 
     private class RegistrationRequestTask
             extends AsyncTask<Void, Void, JSONObject> {
-        private net.openid.appauth.RegistrationRequest mRequest;
+        private RegistrationRequest mRequest;
         private RegistrationResponseCallback mCallback;
 
         private AuthorizationException mException;
 
-        RegistrationRequestTask(net.openid.appauth.RegistrationRequest request,
+        RegistrationRequestTask(RegistrationRequest request,
                                 RegistrationResponseCallback callback) {
             mRequest = request;
             mCallback = callback;
