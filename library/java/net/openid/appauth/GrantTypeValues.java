@@ -1,5 +1,10 @@
 package net.openid.appauth;
 
+/**
+ * The grant type values defined by the <a href="https://tools.ietf.org/html/rfc6749">"The OAuth 2.0
+ * Authorization Framework" (RFC 6749)</a>, and used in {@link AuthorizationRequest authorization}
+ * and {@link RegistrationRequest dynamic client registration} requests.
+ */
 public class GrantTypeValues {
     /**
      * The grant type used for exchanging an authorization code for one or more tokens.
