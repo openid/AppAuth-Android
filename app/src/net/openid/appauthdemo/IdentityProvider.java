@@ -49,7 +49,6 @@ class IdentityProvider {
             NOT_SPECIFIED, // token endpoint is discovered
             NOT_SPECIFIED, // dynamic registration not supported
             R.string.google_client_id,
-            NOT_SPECIFIED, // client_secret not used
             R.string.google_auth_redirect_uri,
             R.string.google_scope_string,
             R.drawable.btn_google,
@@ -99,9 +98,6 @@ class IdentityProvider {
     private final int mClientIdRes;
 
     @StringRes
-    private final int mClientSecretRes;
-
-    @StringRes
     private final int mRedirectUriRes;
 
     @StringRes
@@ -126,7 +122,6 @@ class IdentityProvider {
             @StringRes int tokenEndpointRes,
             @StringRes int registrationEndpointRes,
             @StringRes int clientIdRes,
-            @StringRes int clientSecretRes,
             @StringRes int redirectUriRes,
             @StringRes int scopeRes,
             @DrawableRes int buttonImageRes,
@@ -146,7 +141,6 @@ class IdentityProvider {
         this.mTokenEndpointRes = tokenEndpointRes;
         this.mRegistrationEndpointRes = registrationEndpointRes;
         this.mClientIdRes = clientIdRes;
-        this.mClientSecretRes = clientSecretRes;
         this.mRedirectUriRes = checkSpecified(redirectUriRes, "redirectUriRes");
         this.mScopeRes = checkSpecified(scopeRes, "scopeRes");
         this.buttonImageRes = checkSpecified(buttonImageRes, "buttonImageRes");
@@ -180,9 +174,6 @@ class IdentityProvider {
                 : null;
         mClientId = isSpecified(mClientIdRes)
                 ? res.getString(mClientIdRes)
-                : null;
-        mClientSecret = isSpecified(mClientSecretRes)
-                ? res.getString(mClientSecretRes)
                 : null;
         mRedirectUri = getUriResource(res, mRedirectUriRes, "mRedirectUriRes");
         mScope = res.getString(mScopeRes);
@@ -226,7 +217,6 @@ class IdentityProvider {
 
     @Nullable
     public String getClientSecret() {
-        checkConfigurationRead();
         return mClientSecret;
     }
 
