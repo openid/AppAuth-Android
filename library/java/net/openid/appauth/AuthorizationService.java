@@ -356,9 +356,6 @@ public class AuthorizationService {
                 HttpURLConnection conn = (HttpURLConnection) requestUrl.openConnection();
                 conn.setRequestMethod("POST");
 
-                // required by some providers to ensure JSON response
-                conn.setRequestProperty("Accept", "application/json");
-
                 conn.setDoOutput(true);
                 conn.setRequestProperty("Content-Length", String.valueOf(postData.length()));
                 OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
