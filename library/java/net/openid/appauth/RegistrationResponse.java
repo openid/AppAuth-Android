@@ -2,7 +2,6 @@ package net.openid.appauth;
 
 import static net.openid.appauth.AdditionalParamsProcessor.checkAdditionalParams;
 import static net.openid.appauth.AdditionalParamsProcessor.extractAdditionalParams;
-import static net.openid.appauth.Preconditions.checkArgument;
 import static net.openid.appauth.Preconditions.checkNotEmpty;
 import static net.openid.appauth.Preconditions.checkNotNull;
 
@@ -10,7 +9,6 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import android.text.TextUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -313,10 +311,7 @@ public class RegistrationResponse {
 
             setRegistrationAccessToken(JsonUtil.getStringIfDefined(json,
                     PARAM_REGISTRATION_ACCESS_TOKEN));
-            if (json.has(PARAM_REGISTRATION_CLIENT_URI)) {
-                setRegistrationClientUri(JsonUtil.getUriIfDefined(json,
-                        PARAM_REGISTRATION_CLIENT_URI));
-            }
+            setRegistrationClientUri(JsonUtil.getUriIfDefined(json, PARAM_REGISTRATION_CLIENT_URI));
 
             setAdditionalParameters(extractAdditionalParams(json, BUILT_IN_PARAMS));
             return this;
