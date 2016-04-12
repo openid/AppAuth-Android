@@ -14,6 +14,7 @@
 
 package net.openid.appauth;
 
+import static net.openid.appauth.AuthorizationException.AuthorizationRequestErrors;
 import static net.openid.appauth.Preconditions.checkArgument;
 import static net.openid.appauth.Preconditions.checkNotEmpty;
 import static net.openid.appauth.Preconditions.checkNotNull;
@@ -388,7 +389,11 @@ public class AuthState {
         }
 
         if (mRefreshToken == null) {
-            throw new IllegalStateException("No refresh token available");
+            AuthorizationException ex = AuthorizationException.fromTemplate(
+                    AuthorizationRequestErrors.CLIENT_ERROR,
+                    new IllegalStateException("No refresh token available and token have expired"));
+            action.execute(null, null, ex);
+            return;
         }
 
         service.performTokenRequest(createTokenRefreshRequest(refreshTokenAdditionalParams),
