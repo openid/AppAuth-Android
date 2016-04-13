@@ -180,6 +180,9 @@ public class RegistrationResponseTest {
             }
         }
 
+        /**
+         * TODO .
+         */
         @ParameterizedRobolectricTestRunner.Parameters(name = "Missing parameter = {0}")
         public static Collection<Object[]> data() {
             return Arrays.asList(new Object[][]{
@@ -191,6 +194,9 @@ public class RegistrationResponseTest {
 
         private String mMissingParameter;
 
+        /**
+         * TODO .
+         */
         public RegistrationResponseParameterTest(String missingParameter) {
             mMissingParameter = missingParameter;
         }
