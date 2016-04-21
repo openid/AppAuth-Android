@@ -16,6 +16,8 @@ package net.openid.appauth;
 
 import android.net.Uri;
 
+import java.util.Arrays;
+
 /**
  * Contains common test values which are useful across all tests.
  */
@@ -30,6 +32,8 @@ class TestValues {
             Uri.parse("https://testidp.example.com/authorize");
     public static final Uri TEST_IDP_TOKEN_ENDPOINT =
             Uri.parse("https://testidp.example.com/token");
+    public static final Uri TEST_IDP_REGISTRATION_ENDPOINT =
+            Uri.parse("https://testidp.example.com/token");
 
     public static final String TEST_CODE_VERIFIER = "0123456789_0123456789_0123456789_0123456789";
     public static final String TEST_AUTH_CODE = "zxcvbnmjk";
@@ -38,10 +42,14 @@ class TestValues {
     public static final String TEST_ID_TOKEN = "abc.def.ghi";
     public static final String TEST_REFRESH_TOKEN = "asdfghjkl";
 
+    public static final Long TEST_CLIENT_SECRET_EXPIRES_AT = 78L;
+    public static final String TEST_CLIENT_SECRET = "test_client_secret";
+
     public static AuthorizationServiceConfiguration getTestServiceConfig() {
         return new AuthorizationServiceConfiguration(
                 TEST_IDP_AUTH_ENDPOINT,
-                TEST_IDP_TOKEN_ENDPOINT);
+                TEST_IDP_TOKEN_ENDPOINT,
+                TEST_IDP_REGISTRATION_ENDPOINT);
     }
 
     public static AuthorizationRequest.Builder getMinimalAuthRequestBuilder(String responseType) {
@@ -53,7 +61,7 @@ class TestValues {
     }
 
     public static AuthorizationRequest.Builder getTestAuthRequestBuilder() {
-        return getMinimalAuthRequestBuilder(AuthorizationRequest.RESPONSE_TYPE_CODE)
+        return getMinimalAuthRequestBuilder(ResponseTypeValues.CODE)
                 .setScopes(AuthorizationRequest.SCOPE_OPENID, AuthorizationRequest.SCOPE_EMAIL)
                 .setCodeVerifier(TEST_CODE_VERIFIER);
     }
@@ -81,7 +89,7 @@ class TestValues {
         return getMinimalTokenRequestBuilder()
                 .setAuthorizationCode(TEST_AUTH_CODE)
                 .setCodeVerifier(TEST_CODE_VERIFIER)
-                .setGrantType(TokenRequest.GRANT_TYPE_AUTHORIZATION_CODE)
+                .setGrantType(GrantTypeValues.AUTHORIZATION_CODE)
                 .setRedirectUri(TEST_APP_REDIRECT_URI);
     }
 
@@ -97,5 +105,14 @@ class TestValues {
 
     public static TokenResponse getTestAuthCodeExchangeResponse() {
         return getTestAuthCodeExchangeResponseBuilder().build();
+    }
+
+    public static RegistrationRequest.Builder getTestRegistrationRequestBuilder() {
+        return new RegistrationRequest.Builder(getTestServiceConfig(),
+                Arrays.asList(TEST_APP_REDIRECT_URI));
+    }
+
+    public static RegistrationRequest getTestRegistrationRequest() {
+        return getTestRegistrationRequestBuilder().build();
     }
 }

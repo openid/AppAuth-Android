@@ -437,7 +437,7 @@ public class AuthState {
         return new TokenRequest.Builder(
                 mLastAuthorizationResponse.request.configuration,
                 mLastAuthorizationResponse.request.clientId)
-                .setGrantType(TokenRequest.GRANT_TYPE_REFRESH_TOKEN)
+                .setGrantType(GrantTypeValues.REFRESH_TOKEN)
                 .setScope(mLastAuthorizationResponse.request.scope)
                 .setRefreshToken(mRefreshToken)
                 .setAdditionalParameters(additionalParameters)

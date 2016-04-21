@@ -119,6 +119,11 @@ public final class AuthorizationException extends Exception {
      */
     public static final int TYPE_RESOURCE_SERVER_AUTHORIZATION_ERROR = 3;
 
+    /**
+     * The error type for OAuth specific errors on the registration endpoint.
+     */
+    public static final int TYPE_OAUTH_REGISTRATION_ERROR = 4;
+
     @VisibleForTesting
     static final String KEY_TYPE = "type";
 
@@ -188,6 +193,12 @@ public final class AuthorizationException extends Exception {
          */
         public static final AuthorizationException TOKEN_RESPONSE_CONSTRUCTION_ERROR =
                 generalEx(6, "Token response construction error");
+
+        /**
+         * Indicates a problem parsing an OpenID Connect Registration Response.
+         */
+        public static final AuthorizationException INVALID_REGISTRATION_RESPONSE =
+                generalEx(7, "Invalid registration response");
     }
 
     /**
@@ -368,6 +379,67 @@ public final class AuthorizationException extends Exception {
         }
     }
 
+    /**
+     * Error codes related to failed registration requests.
+     */
+    public static final class RegistrationRequestErrors {
+        // codes in this group should be between 4000-4999
+
+        /**
+         * An {@code invalid_request} OAuth2 error response.
+         */
+        public static final AuthorizationException INVALID_REQUEST =
+                registrationEx(4000, "invalid_request");
+
+        /**
+         * An {@code invalid_client} OAuth2 error response.
+         */
+        public static final AuthorizationException INVALID_REDIRECT_URI =
+                registrationEx(4001, "invalid_redirect_uri");
+
+        /**
+         * An {@code invalid_grant} OAuth2 error response.
+         */
+        public static final AuthorizationException INVALID_CLIENT_METADATA =
+                registrationEx(4002, "invalid_client_metadata");
+
+        /**
+         * An authorization error occurring on the client rather than the server. For example,
+         * due to client misconfiguration. This error should be treated as unrecoverable.
+         */
+        public static final AuthorizationException CLIENT_ERROR =
+                registrationEx(4003, null);
+
+        /**
+         * Indicates an OAuth error as per RFC 6749, but the error code is not known to the
+         * AppAuth for Android library. It could be a custom error or code, or one from an
+         * OAuth extension. The {@link #error} field provides the exact error string returned by
+         * the server.
+         */
+        public static final AuthorizationException OTHER =
+                registrationEx(4004, null);
+
+        private static final Map<String, AuthorizationException> STRING_TO_EXCEPTION =
+                exceptionMapByString(
+                        INVALID_REQUEST,
+                        INVALID_REDIRECT_URI,
+                        INVALID_CLIENT_METADATA,
+                        CLIENT_ERROR,
+                        OTHER);
+
+        /**
+         * Returns the matching exception type for the provided OAuth2 error string, or
+         * {@link #OTHER} if unknown.
+         */
+        public static AuthorizationException byString(String error) {
+            AuthorizationException ex = STRING_TO_EXCEPTION.get(error);
+            if (ex != null) {
+                return ex;
+            }
+            return OTHER;
+        }
+    }
+
     private static AuthorizationException generalEx(int code, @Nullable String errorDescription) {
         return new AuthorizationException(
                 TYPE_GENERAL_ERROR, code, null, errorDescription, null, null);
@@ -381,6 +453,11 @@ public final class AuthorizationException extends Exception {
     private static AuthorizationException tokenEx(int code, @Nullable String error) {
         return new AuthorizationException(
                 TYPE_OAUTH_TOKEN_ERROR, code, error, null, null, null);
+    }
+
+    private static AuthorizationException registrationEx(int code, @Nullable String error) {
+        return new AuthorizationException(
+                TYPE_OAUTH_REGISTRATION_ERROR, code, error, null, null, null);
     }
 
     /**

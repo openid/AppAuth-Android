@@ -467,7 +467,7 @@ public class AuthorizationResponse {
         return new TokenRequest.Builder(
                 request.configuration,
                 request.clientId)
-                .setGrantType(TokenRequest.GRANT_TYPE_AUTHORIZATION_CODE)
+                .setGrantType(GrantTypeValues.AUTHORIZATION_CODE)
                 .setRedirectUri(request.redirectUri)
                 .setScope(request.scope)
                 .setCodeVerifier(request.codeVerifier)

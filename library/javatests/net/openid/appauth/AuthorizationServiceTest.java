@@ -15,12 +15,17 @@
 package net.openid.appauth;
 
 import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
+import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
+import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
+import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET_EXPIRES_AT;
+import static net.openid.appauth.TestValues.TEST_IDP_REGISTRATION_ENDPOINT;
 import static net.openid.appauth.TestValues.TEST_IDP_TOKEN_ENDPOINT;
 import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
 import static net.openid.appauth.TestValues.TEST_REFRESH_TOKEN;
 import static net.openid.appauth.TestValues.TEST_STATE;
 import static net.openid.appauth.TestValues.getTestAuthCodeExchangeRequest;
 import static net.openid.appauth.TestValues.getTestAuthRequestBuilder;
+import static net.openid.appauth.TestValues.getTestRegistrationRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -81,8 +86,16 @@ public class AuthorizationServiceTest {
             + "  \"token_type\": \"" + AuthorizationResponse.TOKEN_TYPE_BEARER + "\"\n"
             + "}";
 
+    private static final String REGISTRATION_RESPONSE_JSON = "{\n"
+            + " \"client_id\": \"" + TEST_CLIENT_ID + "\",\n"
+            + " \"client_secret\": \"" + TEST_CLIENT_SECRET + "\",\n"
+            + " \"client_secret_expires_at\": \"" + TEST_CLIENT_SECRET_EXPIRES_AT + "\",\n"
+            + " \"application_type\": " + RegistrationRequest.APPLICATION_TYPE_NATIVE + "\n"
+            + "}";
+
     private URL mUrl;
     private AuthorizationCallback mAuthCallback;
+    private RegistrationCallback mRegistrationCallback;
     private AuthorizationService mService;
     private InjectedUrlBuilder mBuilder;
     private OutputStream mOutputStream;
@@ -105,6 +118,7 @@ public class AuthorizationServiceTest {
         };
         mUrl = new URL("foo", "bar", -1, "/foobar", urlStreamHandler);
         mAuthCallback = new AuthorizationCallback();
+        mRegistrationCallback = new RegistrationCallback();
         mBuilder = new InjectedUrlBuilder();
         mService = new AuthorizationService(mContext, mBuilder, mBrowserHandler);
         mOutputStream = new ByteArrayOutputStream();
@@ -185,6 +199,29 @@ public class AuthorizationServiceTest {
         assertEquals(GeneralErrors.NETWORK_ERROR, mAuthCallback.error);
     }
 
+    @Test
+    public void testRegistrationRequest() throws Exception {
+        InputStream is = new ByteArrayInputStream(REGISTRATION_RESPONSE_JSON.getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(is);
+        RegistrationRequest request = getTestRegistrationRequest();
+        mService.performRegistrationRequest(request, mRegistrationCallback);
+        mRegistrationCallback.waitForCallback();
+        assertRegistrationResponse(mRegistrationCallback.response, request);
+        String postBody = mOutputStream.toString();
+        assertThat(postBody).isEqualTo(request.toJsonString());
+        assertEquals(TEST_IDP_REGISTRATION_ENDPOINT.toString(), mBuilder.mUri);
+    }
+
+    @Test
+    public void testRegistrationRequest_IoException() throws Exception {
+        Exception ex = new IOException();
+        when(mHttpConnection.getInputStream()).thenThrow(ex);
+        mService.performRegistrationRequest(getTestRegistrationRequest(), mRegistrationCallback);
+        mRegistrationCallback.waitForCallback();
+        assertNotNull(mRegistrationCallback.error);
+        assertEquals(GeneralErrors.NETWORK_ERROR, mRegistrationCallback.error);
+    }
+
     @Test(expected = IllegalStateException.class)
     public void testTokenRequest_afterDispose() throws Exception {
         mService.dispose();
@@ -212,6 +249,15 @@ public class AuthorizationServiceTest {
         assertEquals(TEST_ID_TOKEN, response.idToken);
     }
 
+    private void assertRegistrationResponse(RegistrationResponse response,
+                                            RegistrationRequest expectedRequest) {
+        assertThat(response).isNotNull();
+        assertThat(response.request).isEqualTo(expectedRequest);
+        assertThat(response.clientId).isEqualTo(TEST_CLIENT_ID);
+        assertThat(response.clientSecret).isEqualTo(TEST_CLIENT_SECRET);
+        assertThat(response.clientSecretExpiresAt).isEqualTo(TEST_CLIENT_SECRET_EXPIRES_AT);
+    }
+
     private class InjectedUrlBuilder implements AuthorizationService.UrlBuilder {
         public String mUri;
 
@@ -233,6 +279,28 @@ public class AuthorizationServiceTest {
                 @Nullable AuthorizationException ex) {
             assertTrue((tokenResponse == null) ^ (ex == null));
             this.response = tokenResponse;
+            this.error = ex;
+            mSemaphore.release();
+        }
+
+        public void waitForCallback() throws Exception {
+            assertTrue(mSemaphore.tryAcquire(CALLBACK_TIMEOUT_MILLIS,
+                    TimeUnit.MILLISECONDS));
+        }
+    }
+
+    private static class RegistrationCallback implements
+            AuthorizationService.RegistrationResponseCallback {
+        private Semaphore mSemaphore = new Semaphore(0);
+        public RegistrationResponse response;
+        public AuthorizationException error;
+
+        @Override
+        public void onRegistrationRequestCompleted(
+                @Nullable RegistrationResponse registrationResponse,
+                @Nullable AuthorizationException ex) {
+            assertTrue((registrationResponse == null) ^ (ex == null));
+            this.response = registrationResponse;
             this.error = ex;
             mSemaphore.release();
         }
