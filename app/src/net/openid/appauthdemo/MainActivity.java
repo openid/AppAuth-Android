@@ -39,9 +39,7 @@ import net.openid.appauth.RegistrationResponse;
 import net.openid.appauth.ResponseTypeValues;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Demonstrates the usage of the AppAuth library to connect to a set of pre-configured
@@ -156,14 +154,12 @@ public class MainActivity extends AppCompatActivity {
             @NonNull AuthorizationServiceConfiguration serviceConfig,
             @NonNull final IdentityProvider idp) {
 
-        Map<String, String> additionalParams = new HashMap<>();
-        additionalParams.put("token_endpoint_auth_method", ClientSecretBasic.NAME);
-
         final RegistrationRequest registrationRequest = new RegistrationRequest.Builder(
                 serviceConfig,
                 Arrays.asList(idp.getRedirectUri()))
-                .setAdditionalParameters(additionalParams)
+                .setTokenEndpointAuthenticationMethod(ClientSecretBasic.NAME)
                 .build();
+
         Log.d(TAG, "Making registration request to " + serviceConfig.registrationEndpoint);
         mAuthService.performRegistrationRequest(
                 registrationRequest,

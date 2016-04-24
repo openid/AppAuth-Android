@@ -45,13 +45,15 @@ public class RegistrationRequest {
     static final String PARAM_GRANT_TYPES = "grant_types";
     static final String PARAM_APPLICATION_TYPE = "application_type";
     static final String PARAM_SUBJECT_TYPE = "subject_type";
+    static final String PARAM_TOKEN_ENDPOINT_AUTHENTICATION_METHOD = "token_endpoint_auth_method";
 
     private static final Set<String> BUILT_IN_PARAMS = builtInParams(
             PARAM_REDIRECT_URIS,
             PARAM_RESPONSE_TYPES,
             PARAM_GRANT_TYPES,
             PARAM_APPLICATION_TYPE,
-            PARAM_SUBJECT_TYPE
+            PARAM_SUBJECT_TYPE,
+            PARAM_TOKEN_ENDPOINT_AUTHENTICATION_METHOD
     );
 
     static final String KEY_ADDITIONAL_PARAMETERS = "additionalParameters";
@@ -72,7 +74,6 @@ public class RegistrationRequest {
      * "OpenID Connect Core 1.0", Section 8</a>
      */
     public static final String SUBJECT_TYPE_PUBLIC = "public";
-
 
     /**
      * The service's {@link AuthorizationServiceConfiguration configuration}.
@@ -131,6 +132,15 @@ public class RegistrationRequest {
     public final String subjectType;
 
     /**
+     * The client authentication method to use at the token endpoint.
+     *
+     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">
+     * "OpenID Connect Core 1.0", Section 9</a>
+     */
+    @Nullable
+    private final String tokenEndpointAuthenticationMethod;
+
+    /**
      * Additional parameters to be passed as part of the request.
      */
     @NonNull
@@ -154,6 +164,9 @@ public class RegistrationRequest {
 
         @Nullable
         private String mSubjectType;
+
+        @Nullable
+        private String mTokenEndpointAuthenticationMethod;
 
         @NonNull
         private Map<String, String> mAdditionalParameters = Collections.emptyMap();
@@ -230,7 +243,7 @@ public class RegistrationRequest {
          * Specifies the grant types.
          *
          * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata">
-          * "OpenID Connect Dynamic Client Registration 1.0", Section 2</a>
+         * "OpenID Connect Dynamic Client Registration 1.0", Section 2</a>
          */
         @NonNull
         public Builder setGrantTypeValues(@Nullable String... grantTypeValues) {
@@ -253,11 +266,23 @@ public class RegistrationRequest {
          * Specifies the subject types.
          *
          * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#SubjectIDTypes">
-          * "OpenID Connect Core 1.0", Section 8</a>l
+         * "OpenID Connect Core 1.0", Section 8</a>l
          */
         @NonNull
         public Builder setSubjectType(@Nullable String subjectType) {
             mSubjectType = subjectType;
+            return this;
+        }
+
+        /**
+         * Specifies the client authentication method to use at the token endpoint.
+         *
+         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">
+         * "OpenID Connect Core 1.0", Section 9</a>
+         */
+        @NonNull
+        public Builder setTokenEndpointAuthenticationMethod(@Nullable String tokenEndpointAuthenticationMethod) {
+            this.mTokenEndpointAuthenticationMethod = tokenEndpointAuthenticationMethod;
             return this;
         }
 
@@ -286,6 +311,7 @@ public class RegistrationRequest {
                             ? mResponseTypes : Collections.unmodifiableList(mResponseTypes),
                     mGrantTypes == null ? mGrantTypes : Collections.unmodifiableList(mGrantTypes),
                     mSubjectType,
+                    mTokenEndpointAuthenticationMethod,
                     Collections.unmodifiableMap(mAdditionalParameters));
         }
     }
@@ -296,12 +322,14 @@ public class RegistrationRequest {
             @Nullable List<String> responseTypes,
             @Nullable List<String> grantTypes,
             @Nullable String subjectType,
+            @Nullable String tokenEndpointAuthenticationMethod,
             @NonNull Map<String, String> additionalParameters) {
         this.configuration = configuration;
         this.redirectUris = redirectUris;
         this.responseTypes = responseTypes;
         this.grantTypes = grantTypes;
         this.subjectType = subjectType;
+        this.tokenEndpointAuthenticationMethod = tokenEndpointAuthenticationMethod;
         this.additionalParameters = additionalParameters;
         this.applicationType = APPLICATION_TYPE_NATIVE;
     }
@@ -344,6 +372,7 @@ public class RegistrationRequest {
             JsonUtil.put(json, PARAM_GRANT_TYPES, JsonUtil.toJsonArray(grantTypes));
         }
         JsonUtil.putIfNotNull(json, PARAM_SUBJECT_TYPE, subjectType);
+        JsonUtil.putIfNotNull(json, PARAM_TOKEN_ENDPOINT_AUTHENTICATION_METHOD, tokenEndpointAuthenticationMethod);
         return json;
     }
 
