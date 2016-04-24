@@ -183,7 +183,7 @@ public class AuthorizationService {
         checkNotDisposed();
         Logger.debug("Initiating code exchange request to %s",
                 request.configuration.tokenEndpoint);
-        new TokenRequestTask(request, callback).execute();
+        new TokenRequestTask(request, callback, new ClientAuthentication()).execute();
     }
 
     /**
@@ -242,18 +242,10 @@ public class AuthorizationService {
 
         private AuthorizationException mException;
 
-        TokenRequestTask(TokenRequest request,
-                         TokenResponseCallback callback) {
-            this(request, callback, null);
-        }
-
         TokenRequestTask(TokenRequest request,TokenResponseCallback callback,
-                         ClientAuthentication clientAuthentication) {
+                         @NonNull ClientAuthentication clientAuthentication) {
             mRequest = request;
             mCallback = callback;
-            if (clientAuthentication == null) {
-                clientAuthentication = new ClientAuthentication();
-            }
             mClientAuthentication = clientAuthentication;
         }
 
