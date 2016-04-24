@@ -194,7 +194,7 @@ public class AuthorizationService {
     public void performTokenRequest(
             @NonNull net.openid.appauth.TokenRequest request,
             @NonNull TokenResponseCallback callback,
-            @Nullable ClientAuthentication clientAuthentication) {
+            @NonNull ClientAuthentication clientAuthentication) {
         checkNotDisposed();
         Logger.debug("Initiating code exchange request to %s",
                 request.configuration.tokenEndpoint);
@@ -247,8 +247,7 @@ public class AuthorizationService {
             this(request, callback, null);
         }
 
-        TokenRequestTask(net.openid.appauth.TokenRequest request,
-                         TokenResponseCallback callback,
+        TokenRequestTask(TokenRequest request,TokenResponseCallback callback,
                          ClientAuthentication clientAuthentication) {
             mRequest = request;
             mCallback = callback;
