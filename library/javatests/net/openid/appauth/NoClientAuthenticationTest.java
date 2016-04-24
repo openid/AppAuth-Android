@@ -39,6 +39,7 @@ public class NoClientAuthenticationTest {
 
     @Test
     public void testGetRequestParameters() {
-        assertThat(NoClientAuthentication.getInstance().getRequestParameters(TEST_CLIENT_ID)).isNull();
+        assertThat(NoClientAuthentication.getInstance().getRequestParameters(TEST_CLIENT_ID))
+                .isNull();
     }
 }

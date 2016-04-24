@@ -17,24 +17,38 @@ package net.openid.appauth;
 import java.util.Map;
 
 public class NoClientAuthentication implements ClientAuthentication {
+    /**
+     * Name of this authentication method.
+     */
     public static final String NAME = "none";
 
-    private static NoClientAuthentication instance = null;
+    private static NoClientAuthentication sInstance = null;
 
     private NoClientAuthentication() {}
 
+    /**
+     * Returns a default (singleton) instance of {@linke NoClientAuthentication}.
+     */
     public static NoClientAuthentication getInstance() {
-        if (instance == null) {
-            instance = new NoClientAuthentication();
+        if (sInstance == null) {
+            sInstance = new NoClientAuthentication();
         }
-        return instance;
+        return sInstance;
     }
 
+    /**
+     * {@inheritDoc}
+     * @return always null.
+     */
     @Override
     public Map<String, String> getRequestHeaders(String clientId) {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     * @return always null.
+     */
     @Override
     public Map<String, String> getRequestParameters(String clientId) {
         return null;

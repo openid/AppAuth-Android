@@ -14,11 +14,6 @@
 
 package net.openid.appauth;
 
-import android.support.annotation.Nullable;
-
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
 import java.util.Map;
 
 public interface ClientAuthentication {
@@ -26,11 +21,11 @@ public interface ClientAuthentication {
      * Constructs any extra parameters necessary to include in the request headers for the client
      * authentication.
      */
-    public Map<String, String> getRequestHeaders(String clientId);
+    Map<String, String> getRequestHeaders(String clientId);
 
     /**
      * Constructs any extra parameters necessary to include in the request body for the client
      * authentication.
      */
-    public Map<String, String> getRequestParameters(String clientId);
+    Map<String, String> getRequestParameters(String clientId);
 }

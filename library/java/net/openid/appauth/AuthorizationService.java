@@ -263,7 +263,8 @@ public class AuthorizationService {
                 conn.setInstanceFollowRedirects(false);
                 conn.setDoOutput(true);
 
-                Map<String, String> headers = mClientAuthentication.getRequestHeaders(mRequest.clientId);
+                Map<String, String> headers = mClientAuthentication
+                        .getRequestHeaders(mRequest.clientId);
                 if (headers != null) {
                     for (Map.Entry<String,String> header : headers.entrySet()) {
                         conn.setRequestProperty(header.getKey(), header.getValue());
@@ -271,7 +272,8 @@ public class AuthorizationService {
                 }
 
                 Map<String, String> parameters = mRequest.getRequestParameters();
-                Map<String, String> clientAuthParams = mClientAuthentication.getRequestParameters(mRequest.clientId);
+                Map<String, String> clientAuthParams = mClientAuthentication
+                        .getRequestParameters(mRequest.clientId);
                 if (clientAuthParams != null) {
                     parameters.putAll(clientAuthParams);
                 }

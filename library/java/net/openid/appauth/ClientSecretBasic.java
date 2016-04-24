@@ -19,7 +19,6 @@ import static net.openid.appauth.Preconditions.checkNotNull;
 import android.support.annotation.NonNull;
 import android.util.Base64;
 
-import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -39,19 +38,19 @@ public class ClientSecretBasic implements ClientAuthentication {
     public static final String NAME = "client_secret_basic";
 
     @NonNull
-    private String clientSecret;
+    private String mClientSecret;
 
     /**
      * Creates a {@link ClientAuthentication} which will use the client authentication method
      * 'client_secret_basic'.
      */
     public ClientSecretBasic(@NonNull String clientSecret) {
-        this.clientSecret = checkNotNull(clientSecret, "clientSecret cannot be null");
+        mClientSecret = checkNotNull(clientSecret, "mClientSecret cannot be null");
     }
 
     @Override
     public final Map<String, String> getRequestHeaders(String clientId) {
-        String credentials = clientId + ":" + clientSecret;
+        String credentials = clientId + ":" + mClientSecret;
         String basicAuth = Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
         return Collections.singletonMap("Authorization", "Basic " + basicAuth);
     }

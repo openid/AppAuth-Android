@@ -17,20 +17,14 @@ package net.openid.appauth;
 import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
 import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
 
 import android.util.Base64;
 
-import org.assertj.core.api.Assertions;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.net.HttpURLConnection;
 import java.util.Map;
 
 

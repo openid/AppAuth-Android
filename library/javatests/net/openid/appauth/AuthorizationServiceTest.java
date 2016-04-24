@@ -203,7 +203,8 @@ public class AuthorizationServiceTest {
         String postBody = mOutputStream.toString();
         assertTokenRequestBody(postBody, request.getRequestParameters());
         assertEquals(TEST_IDP_TOKEN_ENDPOINT.toString(), mBuilder.mUri);
-        verify(mHttpConnection).setRequestProperty("Authorization", csb.getRequestHeaders(TEST_CLIENT_ID).get("Authorization"));
+        verify(mHttpConnection).setRequestProperty("Authorization",
+                csb.getRequestHeaders(TEST_CLIENT_ID).get("Authorization"));
     }
 
     @Test
@@ -292,7 +293,8 @@ public class AuthorizationServiceTest {
         assertThat(response.clientSecretExpiresAt).isEqualTo(TEST_CLIENT_SECRET_EXPIRES_AT);
     }
 
-    private void assertTokenRequestBody(String requestBody, Map<String, String> expectedParameters) {
+    private void assertTokenRequestBody(
+            String requestBody, Map<String, String> expectedParameters) {
         Uri postBody = new Uri.Builder().encodedQuery(requestBody).build();
         for (Map.Entry<String, String> param : expectedParameters.entrySet()) {
             assertThat(postBody.getQueryParameter(param.getKey())).isEqualTo(param.getValue());

@@ -18,7 +18,6 @@ import static net.openid.appauth.Preconditions.checkNotNull;
 
 import android.support.annotation.NonNull;
 
-import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,21 +40,21 @@ public class ClientSecretPost implements ClientAuthentication {
     static final String PARAM_CLIENT_SECRET = "client_secret";
 
     @NonNull
-    private String clientSecret;
+    private String mClientSecret;
 
     /**
      * Creates a {@link ClientAuthentication} which will use the client authentication method
      * 'client_secret_post'.
      */
     public ClientSecretPost(@NonNull String clientSecret) {
-        this.clientSecret = checkNotNull(clientSecret, "clientSecret cannot be null");
+        mClientSecret = checkNotNull(clientSecret, "clientSecret cannot be null");
     }
 
     @Override
     public final Map<String, String> getRequestParameters(String clientId) {
         Map<String, String> additionalParameters = new HashMap<>();
         additionalParameters.put(PARAM_CLIENT_ID, clientId);
-        additionalParameters.put(PARAM_CLIENT_SECRET, clientSecret);
+        additionalParameters.put(PARAM_CLIENT_SECRET, mClientSecret);
         return additionalParameters;
     }
 

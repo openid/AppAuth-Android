@@ -14,28 +14,15 @@
 
 package net.openid.appauth;
 
-import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
-import static net.openid.appauth.TestValues.TEST_AUTH_CODE;
 import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
 import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
-import static net.openid.appauth.TestValues.getTestServiceConfig;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
-import android.net.Uri;
-
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.util.HashMap;
 import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
@@ -46,7 +33,8 @@ public class ClientSecretPostTest {
         ClientSecretPost csp = new ClientSecretPost(TEST_CLIENT_SECRET);
         Map<String, String> parameters = csp.getRequestParameters(TEST_CLIENT_ID);
         assertThat(parameters).containsEntry(ClientSecretPost.PARAM_CLIENT_ID, TEST_CLIENT_ID);
-        assertThat(parameters).containsEntry(ClientSecretPost.PARAM_CLIENT_SECRET, TEST_CLIENT_SECRET);
+        assertThat(parameters).containsEntry(
+                ClientSecretPost.PARAM_CLIENT_SECRET, TEST_CLIENT_SECRET);
     }
 
     @Test

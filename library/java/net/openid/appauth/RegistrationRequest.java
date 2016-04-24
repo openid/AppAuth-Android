@@ -138,7 +138,7 @@ public class RegistrationRequest {
      * "OpenID Connect Core 1.0", Section 9</a>
      */
     @Nullable
-    private final String tokenEndpointAuthenticationMethod;
+    public final String tokenEndpointAuthenticationMethod;
 
     /**
      * Additional parameters to be passed as part of the request.
@@ -281,7 +281,8 @@ public class RegistrationRequest {
          * "OpenID Connect Core 1.0", Section 9</a>
          */
         @NonNull
-        public Builder setTokenEndpointAuthenticationMethod(@Nullable String tokenEndpointAuthenticationMethod) {
+        public Builder setTokenEndpointAuthenticationMethod(
+                @Nullable String tokenEndpointAuthenticationMethod) {
             this.mTokenEndpointAuthenticationMethod = tokenEndpointAuthenticationMethod;
             return this;
         }
@@ -372,7 +373,8 @@ public class RegistrationRequest {
             JsonUtil.put(json, PARAM_GRANT_TYPES, JsonUtil.toJsonArray(grantTypes));
         }
         JsonUtil.putIfNotNull(json, PARAM_SUBJECT_TYPE, subjectType);
-        JsonUtil.putIfNotNull(json, PARAM_TOKEN_ENDPOINT_AUTHENTICATION_METHOD, tokenEndpointAuthenticationMethod);
+        JsonUtil.putIfNotNull(json, PARAM_TOKEN_ENDPOINT_AUTHENTICATION_METHOD,
+                tokenEndpointAuthenticationMethod);
         return json;
     }
 
