@@ -192,7 +192,7 @@ public class AuthorizationService {
      * callback handler.
      */
     public void performTokenRequest(
-            @NonNull net.openid.appauth.TokenRequest request,
+            @NonNull TokenRequest request,
             @NonNull TokenResponseCallback callback,
             @NonNull ClientAuthentication clientAuthentication) {
         checkNotDisposed();
