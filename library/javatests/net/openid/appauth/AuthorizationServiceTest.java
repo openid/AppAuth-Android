@@ -40,6 +40,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.customtabs.CustomTabsClient;
 import android.support.customtabs.CustomTabsIntent;
@@ -67,6 +68,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -190,6 +192,38 @@ public class AuthorizationServiceTest {
     }
 
     @Test
+    public void testTokenRequest_withBasicAuth() throws Exception {
+        ClientSecretBasic csb = new ClientSecretBasic(TEST_CLIENT_SECRET);
+        InputStream is = new ByteArrayInputStream(AUTH_CODE_EXCHANGE_RESPONSE_JSON.getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(is);
+        TokenRequest request = getTestAuthCodeExchangeRequest();
+        mService.performTokenRequest(request, mAuthCallback, csb);
+        mAuthCallback.waitForCallback();
+        assertTokenResponse(mAuthCallback.response, request);
+        String postBody = mOutputStream.toString();
+        assertTokenRequestBody(postBody, request.getRequestParameters());
+        assertEquals(TEST_IDP_TOKEN_ENDPOINT.toString(), mBuilder.mUri);
+        verify(mHttpConnection).setRequestProperty("Authorization", csb.getRequestHeaders(TEST_CLIENT_ID).get("Authorization"));
+    }
+
+    @Test
+    public void testTokenRequest_withPostAuth() throws Exception {
+        ClientSecretPost csp = new ClientSecretPost(TEST_CLIENT_SECRET);
+        InputStream is = new ByteArrayInputStream(AUTH_CODE_EXCHANGE_RESPONSE_JSON.getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(is);
+        TokenRequest request = getTestAuthCodeExchangeRequest();
+        mService.performTokenRequest(request, mAuthCallback, csp);
+        mAuthCallback.waitForCallback();
+        assertTokenResponse(mAuthCallback.response, request);
+
+        String postBody = mOutputStream.toString();
+        Map<String, String> expectedRequestBody = request.getRequestParameters();
+        expectedRequestBody.putAll(csp.getRequestParameters(TEST_CLIENT_ID));
+        assertTokenRequestBody(postBody, expectedRequestBody);
+        assertEquals(TEST_IDP_TOKEN_ENDPOINT.toString(), mBuilder.mUri);
+    }
+
+    @Test
     public void testTokenRequest_IoException() throws Exception {
         Exception ex = new IOException();
         when(mHttpConnection.getInputStream()).thenThrow(ex);
@@ -256,6 +290,13 @@ public class AuthorizationServiceTest {
         assertThat(response.clientId).isEqualTo(TEST_CLIENT_ID);
         assertThat(response.clientSecret).isEqualTo(TEST_CLIENT_SECRET);
         assertThat(response.clientSecretExpiresAt).isEqualTo(TEST_CLIENT_SECRET_EXPIRES_AT);
+    }
+
+    private void assertTokenRequestBody(String requestBody, Map<String, String> expectedParameters) {
+        Uri postBody = new Uri.Builder().encodedQuery(requestBody).build();
+        for (Map.Entry<String, String> param : expectedParameters.entrySet()) {
+            assertThat(postBody.getQueryParameter(param.getKey())).isEqualTo(param.getValue());
+        }
     }
 
     private class InjectedUrlBuilder implements AuthorizationService.UrlBuilder {

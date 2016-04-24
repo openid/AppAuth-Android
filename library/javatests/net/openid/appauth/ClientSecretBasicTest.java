@@ -16,10 +16,12 @@ package net.openid.appauth;
 
 import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
 import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
 import android.util.Base64;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,30 +31,29 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.net.HttpURLConnection;
+import java.util.Map;
 
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
 public class ClientSecretBasicTest {
-
-    @Mock
-    HttpURLConnection mHttpConnection;
-
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void testSetupRequestParameters() throws Exception {
+    public void testGetRequestHeaders() {
         ClientSecretBasic csb = new ClientSecretBasic(TEST_CLIENT_SECRET);
 
-        csb.setupRequestParameters(TEST_CLIENT_ID, mHttpConnection);
+        Map<String, String> headers = csb.getRequestHeaders(TEST_CLIENT_ID);
 
         String credentials = TEST_CLIENT_ID + ":" + TEST_CLIENT_SECRET;
         String authz = Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
         String expectedAuthzHeader = "Basic " + authz;
-        verify(mHttpConnection).setRequestProperty("Authorization", expectedAuthzHeader);
+        assertThat(headers.size()).isEqualTo(1);
+        assertThat(headers).containsEntry("Authorization", expectedAuthzHeader);
+    }
+
+    @Test
+    public void testGetRequestParameters() {
+        ClientSecretBasic csb = new ClientSecretBasic(TEST_CLIENT_SECRET);
+        assertThat(csb.getRequestParameters(TEST_CLIENT_ID)).isNull();
     }
 
     @Test(expected = NullPointerException.class)

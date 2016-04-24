@@ -39,6 +39,7 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map;
 
 
 /**
@@ -183,7 +184,7 @@ public class AuthorizationService {
         checkNotDisposed();
         Logger.debug("Initiating code exchange request to %s",
                 request.configuration.tokenEndpoint);
-        new TokenRequestTask(request, callback, new ClientAuthentication()).execute();
+        new TokenRequestTask(request, callback, NoClientAuthentication.getInstance()).execute();
     }
 
     /**
@@ -255,9 +256,32 @@ public class AuthorizationService {
             try {
                 URL url = mUrlBuilder.buildUrlFromString(
                         mRequest.configuration.tokenEndpoint.toString());
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-                mClientAuthentication.apply(mRequest, conn);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setInstanceFollowRedirects(false);
+                conn.setDoOutput(true);
+
+                Map<String, String> headers = mClientAuthentication.getRequestHeaders(mRequest.clientId);
+                if (headers != null) {
+                    for (Map.Entry<String,String> header : headers.entrySet()) {
+                        conn.setRequestProperty(header.getKey(), header.getValue());
+                    }
+                }
+
+                Map<String, String> parameters = mRequest.getRequestParameters();
+                Map<String, String> clientAuthParams = mClientAuthentication.getRequestParameters(mRequest.clientId);
+                if (clientAuthParams != null) {
+                    parameters.putAll(clientAuthParams);
+                }
+
+                String queryData = UriUtil.formUrlEncode(parameters);
+                conn.setRequestProperty("Content-Length", String.valueOf(queryData.length()));
+                OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+
+                wr.write(queryData);
+                wr.flush();
 
                 is = conn.getInputStream();
                 String response = Utils.readInputStream(is);

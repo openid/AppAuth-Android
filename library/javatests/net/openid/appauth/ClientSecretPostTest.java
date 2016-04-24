@@ -41,48 +41,18 @@ import java.util.Map;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
 public class ClientSecretPostTest {
-
-    private OutputStream mOutputStream;
-    @Mock
-    HttpURLConnection mHttpConnection;
-
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        mOutputStream = new ByteArrayOutputStream();
-        when(mHttpConnection.getOutputStream()).thenReturn(mOutputStream);
+    @Test
+    public void testGetRequestParameters() throws Exception {
+        ClientSecretPost csp = new ClientSecretPost(TEST_CLIENT_SECRET);
+        Map<String, String> parameters = csp.getRequestParameters(TEST_CLIENT_ID);
+        assertThat(parameters).containsEntry(ClientSecretPost.PARAM_CLIENT_ID, TEST_CLIENT_ID);
+        assertThat(parameters).containsEntry(ClientSecretPost.PARAM_CLIENT_SECRET, TEST_CLIENT_SECRET);
     }
 
     @Test
-    public void testSetupRequestParameters() throws Exception {
+    public void testGetRequestHeaders() throws Exception {
         ClientSecretPost csp = new ClientSecretPost(TEST_CLIENT_SECRET);
-
-        Map<String, String> additionalParams = csp.setupRequestParameters(TEST_CLIENT_ID,
-                mHttpConnection);
-        Map<String, String> expectedAdditionalParameters = new HashMap<>();
-        expectedAdditionalParameters.put(ClientSecretPost.PARAM_CLIENT_ID, TEST_CLIENT_ID);
-        expectedAdditionalParameters.put(ClientSecretPost.PARAM_CLIENT_SECRET, TEST_CLIENT_SECRET);
-        assertThat(additionalParams).isEqualTo(expectedAdditionalParameters);
-    }
-
-    @Test
-    public void testSetupRequestParameters_shouldIncludeAdditionalParameters() throws Exception {
-        ClientSecretPost csp = new ClientSecretPost(TEST_CLIENT_SECRET);
-
-        TokenRequest request = new TokenRequest.Builder(getTestServiceConfig(), TEST_CLIENT_ID)
-                .setGrantType(GrantTypeValues.AUTHORIZATION_CODE)
-                .setAuthorizationCode(TEST_AUTH_CODE)
-                .setRedirectUri(TEST_APP_REDIRECT_URI)
-                .build();
-
-        csp.apply(request, mHttpConnection);
-
-        Uri postBody = new Uri.Builder().encodedQuery(mOutputStream.toString()).build();
-        // Client authentication parameters
-        assertThat(postBody.getQueryParameter(ClientSecretPost.PARAM_CLIENT_ID))
-                .isEqualTo(TEST_CLIENT_ID);
-        assertThat(postBody.getQueryParameter(ClientSecretPost.PARAM_CLIENT_SECRET))
-                .isEqualTo(TEST_CLIENT_SECRET);
+        assertThat(csp.getRequestHeaders(TEST_CLIENT_ID)).isNull();
     }
 
     @Test(expected = NullPointerException.class)

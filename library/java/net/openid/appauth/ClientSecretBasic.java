@@ -20,6 +20,7 @@ import android.support.annotation.NonNull;
 import android.util.Base64;
 
 import java.net.HttpURLConnection;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -28,7 +29,7 @@ import java.util.Map;
  * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">
  * "OpenID Connect Core 1.0", Section 9</a>
  */
-public class ClientSecretBasic extends ClientAuthentication {
+public class ClientSecretBasic implements ClientAuthentication {
     /**
      * Name of this authentication method.
      *
@@ -37,21 +38,26 @@ public class ClientSecretBasic extends ClientAuthentication {
      */
     public static final String NAME = "client_secret_basic";
 
+    @NonNull
+    private String clientSecret;
+
     /**
      * Creates a {@link ClientAuthentication} which will use the client authentication method
      * 'client_secret_basic'.
      */
     public ClientSecretBasic(@NonNull String clientSecret) {
-        super(clientSecret);
-        checkNotNull(clientSecret, "clientSecret cannot be null");
+        this.clientSecret = checkNotNull(clientSecret, "clientSecret cannot be null");
     }
 
     @Override
-    protected final Map<String, String> setupRequestParameters(
-            String clientId, HttpURLConnection connection) {
-        String credentials = clientId + ":" + mClientSecret;
+    public final Map<String, String> getRequestHeaders(String clientId) {
+        String credentials = clientId + ":" + clientSecret;
         String basicAuth = Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
-        connection.setRequestProperty("Authorization", "Basic " + basicAuth);
-        return null; // No additional params to write in request body
+        return Collections.singletonMap("Authorization", "Basic " + basicAuth);
+    }
+
+    @Override
+    public final Map<String, String> getRequestParameters(String clientId) {
+        return null;
     }
 }
