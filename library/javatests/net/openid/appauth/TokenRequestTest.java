@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
+ * Copyright 2016 The AppAuth for Android Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -117,7 +117,7 @@ public class TokenRequestTest {
     }
 
     @Test
-    public void testToUri_forCodeExchange() {
+    public void testGetRequestParameters_forCodeExchange() {
         TokenRequest request = mAuthorizationCodeRequestBuilder.build();
 
         Map<String, String> params = request.getRequestParameters();
@@ -136,7 +136,7 @@ public class TokenRequestTest {
     }
 
     @Test
-    public void testToUri_forRefreshToken() {
+    public void testGetRequestParameters_forRefreshToken() {
         TokenRequest request = mMinimalBuilder
                 .setRefreshToken(TEST_REFRESH_TOKEN)
                 .build();
@@ -154,7 +154,7 @@ public class TokenRequestTest {
     }
 
     @Test
-    public void testToUri_withCodeVerifier() {
+    public void testGetRequestParameters_withCodeVerifier() {
         TokenRequest request = mAuthorizationCodeRequestBuilder
                 .setCodeVerifier(TEST_CODE_VERIFIER)
                 .build();

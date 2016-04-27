@@ -14,37 +14,32 @@
 
 package net.openid.appauth;
 
-import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
-import static net.openid.appauth.TestValues.TEST_AUTH_CODE;
-import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
-import static net.openid.appauth.TestValues.getTestServiceConfig;
 
-import org.junit.Before;
+import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.util.Collections;
-
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
-public class TokenResponseTest {
-
-    private TokenResponse.Builder mMinimalBuilder;
-
-    @Before
-    public void setUp() {
-        TokenRequest request = new TokenRequest.Builder(getTestServiceConfig(), TEST_CLIENT_ID)
-                .setAuthorizationCode(TEST_AUTH_CODE)
-                .setRedirectUri(TEST_APP_REDIRECT_URI)
-                .build();
-        mMinimalBuilder = new TokenResponse.Builder(request);
+public class NoClientAuthenticationTest {
+    @Test
+    public void testGetInstance() {
+        assertThat(NoClientAuthentication.INSTANCE)
+                .isSameAs(NoClientAuthentication.INSTANCE);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testBuilder_setAdditionalParams_withBuiltInParam() {
-        mMinimalBuilder.setAdditionalParameters(
-                Collections.singletonMap(TokenRequest.PARAM_SCOPE, "scope"));
+    @Test
+    public void testGetRequestHeaders() {
+        assertThat(NoClientAuthentication.INSTANCE.getRequestHeaders(TEST_CLIENT_ID)).isNull();
+    }
+
+    @Test
+    public void testGetRequestParameters() {
+        assertThat(NoClientAuthentication.INSTANCE.getRequestParameters(TEST_CLIENT_ID))
+                .isNull();
     }
 }

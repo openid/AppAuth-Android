@@ -46,6 +46,8 @@ import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceDiscovery;
+import net.openid.appauth.ClientAuthentication;
+import net.openid.appauth.ClientSecretBasic;
 import net.openid.appauth.TokenRequest;
 import net.openid.appauth.TokenResponse;
 
@@ -113,7 +115,12 @@ public class TokenActivity extends AppCompatActivity {
             if (response != null) {
                 Log.d(TAG, "Received AuthorizationResponse.");
                 showSnackbar(R.string.exchange_notification);
-                exchangeAuthorizationCode(response);
+                String clientSecret = getClientSecretFromIntent(getIntent());
+                if (clientSecret != null) {
+                    exchangeAuthorizationCode(response, new ClientSecretBasic(clientSecret));
+                } else {
+                    exchangeAuthorizationCode(response);
+                }
             } else {
                 Log.i(TAG, "Authorization failed: " + ex);
                 showSnackbar(R.string.authorization_failed);
@@ -253,13 +260,19 @@ public class TokenActivity extends AppCompatActivity {
         performTokenRequest(mAuthState.createTokenRefreshRequest());
     }
 
+    private void exchangeAuthorizationCode(AuthorizationResponse authorizationResponse,
+                                           ClientAuthentication clientAuth) {
+        performTokenRequest(authorizationResponse.createTokenExchangeRequest(), clientAuth);
+    }
+
     private void exchangeAuthorizationCode(AuthorizationResponse authorizationResponse) {
         performTokenRequest(authorizationResponse.createTokenExchangeRequest());
     }
 
-    private void performTokenRequest(TokenRequest request) {
+    private void performTokenRequest(TokenRequest request, ClientAuthentication clientAuth) {
         mAuthService.performTokenRequest(
                 request,
+                clientAuth,
                 new AuthorizationService.TokenResponseCallback() {
                     @Override
                     public void onTokenRequestCompleted(
@@ -268,6 +281,10 @@ public class TokenActivity extends AppCompatActivity {
                         receivedTokenResponse(tokenResponse, ex);
                     }
                 });
+    }
+
+    private void performTokenRequest(TokenRequest request) {
+        performTokenRequest(request, null);
     }
 
     private void fetchUserInfo() {
@@ -353,10 +370,14 @@ public class TokenActivity extends AppCompatActivity {
     static PendingIntent createPostAuthorizationIntent(
             @NonNull Context context,
             @NonNull AuthorizationRequest request,
-            @Nullable AuthorizationServiceDiscovery discoveryDoc) {
+            @Nullable AuthorizationServiceDiscovery discoveryDoc,
+            @Nullable String clientSecret) {
         Intent intent = new Intent(context, TokenActivity.class);
         if (discoveryDoc != null) {
             intent.putExtra(EXTRA_AUTH_SERVICE_DISCOVERY, discoveryDoc.docJson.toString());
+        }
+        if (clientSecret != null) {
+            intent.putExtra(EXTRA_CLIENT_SECRET, clientSecret);
         }
 
         return PendingIntent.getActivity(context, request.hashCode(), intent, 0);
@@ -372,6 +393,13 @@ public class TokenActivity extends AppCompatActivity {
         } catch (JSONException | AuthorizationServiceDiscovery.MissingArgumentException  ex) {
             throw new IllegalStateException("Malformed JSON in discovery doc");
         }
+    }
+
+    static String getClientSecretFromIntent(Intent intent) {
+        if (!intent.hasExtra(EXTRA_CLIENT_SECRET)) {
+            return null;
+        }
+        return intent.getStringExtra(EXTRA_CLIENT_SECRET);
     }
 
     private class UserProfilePictureTarget implements Target {
