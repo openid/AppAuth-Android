@@ -14,6 +14,7 @@
 
 package net.openid.appauth;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -42,6 +43,7 @@ import net.openid.appauth.AuthorizationException.AuthorizationRequestErrors;
  * }
  * </pre>
  */
+@SuppressLint("Registered")
 public class RedirectUriReceiverActivity extends Activity {
 
     private static final String KEY_STATE = "state";
