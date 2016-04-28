@@ -874,10 +874,11 @@ public class AuthorizationRequest {
     }
 
     /**
-     * Produces a JSON representation of the request for storage or transmission.
+     * Produces a JSON representation of the authorization request for persistent storage or local
+     * transmission (e.g. between activities).
      */
     @NonNull
-    public JSONObject toJson() {
+    public JSONObject jsonSerialize() {
         JSONObject json = new JSONObject();
         JsonUtil.put(json, KEY_CONFIGURATION, configuration.toJson());
         JsonUtil.put(json, KEY_CLIENT_ID, clientId);
@@ -885,6 +886,7 @@ public class AuthorizationRequest {
         JsonUtil.put(json, KEY_REDIRECT_URI, redirectUri.toString());
         JsonUtil.putIfNotNull(json, KEY_DISPLAY, display);
         JsonUtil.putIfNotNull(json, KEY_SCOPE, scope);
+        JsonUtil.putIfNotNull(json, KEY_PROMPT, prompt);
         JsonUtil.putIfNotNull(json, KEY_STATE, state);
         JsonUtil.putIfNotNull(json, KEY_CODE_VERIFIER, codeVerifier);
         JsonUtil.putIfNotNull(json, KEY_CODE_VERIFIER_CHALLENGE, codeVerifierChallenge);
@@ -897,30 +899,22 @@ public class AuthorizationRequest {
     }
 
     /**
-     * Produces a JSON string representation of the request for storage or transmission.
+     * Produces a JSON string representation of the authorization request for persistent storage or
+     * local transmission (e.g. between activities). This method is just a convenience wrapper
+     * for {@link #jsonSerialize()}, converting the JSON object to its string form.
      */
-    public String toJsonString() {
-        return toJson().toString();
+    public String jsonSerializeString() {
+        return jsonSerialize().toString();
     }
 
     /**
-     * Reads an Authorization request from a JSON string representation produced by
-     * {@link #toJsonString()}.
+     * Reads an authorization request from a JSON string representation produced by
+     * {@link #jsonSerialize()}.
      * @throws JSONException if the provided JSON does not match the expected structure.
      */
     @NonNull
-    public static AuthorizationRequest fromJson(@NonNull String jsonStr) throws JSONException {
-        checkNotNull(jsonStr, "json string cannot be null");
-        return fromJson(new JSONObject(jsonStr));
-    }
-
-    /**
-     * Reads an Authorization request from a JSON representation produced by
-     * {@link #toJson()}.
-     * @throws JSONException if the provided JSON does not match the expected structure.
-     */
-    @NonNull
-    public static AuthorizationRequest fromJson(@NonNull JSONObject json) throws JSONException {
+    public static AuthorizationRequest jsonDeserialize(@NonNull JSONObject json)
+            throws JSONException {
         checkNotNull(json, "json cannot be null");
         AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
                 AuthorizationServiceConfiguration.fromJson(json.getJSONObject(KEY_CONFIGURATION)),
@@ -940,6 +934,19 @@ public class AuthorizationRequest {
             builder.setScopes(AsciiStringListUtil.stringToSet(JsonUtil.getString(json, KEY_SCOPE)));
         }
         return builder.build();
+    }
+
+    /**
+     * Reads an authorization request from a JSON string representation produced by
+     * {@link #jsonSerializeString()}. This method is just a convenience wrapper for
+     * {@link #jsonDeserialize(JSONObject)}, converting the JSON string to its JSON object form.
+     * @throws JSONException if the provided JSON does not match the expected structure.
+     */
+    @NonNull
+    public static AuthorizationRequest jsonDeserialize(@NonNull String jsonStr)
+            throws JSONException {
+        checkNotNull(jsonStr, "json string cannot be null");
+        return jsonDeserialize(new JSONObject(jsonStr));
     }
 
     private static String generateRandomState() {

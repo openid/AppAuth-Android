@@ -504,8 +504,8 @@ public class AuthStateTest {
         TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
         AuthState state = new AuthState(authResp, tokenResp, null);
 
-        String json = state.toJsonString();
-        AuthState restoredState = AuthState.fromJson(json);
+        String json = state.jsonSerializeString();
+        AuthState restoredState = AuthState.jsonDeserialize(json);
 
         assertThat(restoredState.isAuthorized()).isEqualTo(state.isAuthorized());
 
@@ -525,7 +525,7 @@ public class AuthStateTest {
                 null,
                 AuthorizationException.AuthorizationRequestErrors.INVALID_REQUEST);
 
-        AuthState restored = AuthState.fromJson(state.toJsonString());
+        AuthState restored = AuthState.jsonDeserialize(state.jsonSerializeString());
         assertThat(restored.getAuthorizationException())
                 .isEqualTo(state.getAuthorizationException());
     }
