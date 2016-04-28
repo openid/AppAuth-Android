@@ -424,11 +424,12 @@ public class TokenResponse {
     }
 
     /**
-     * Converts the token response to a JSON object, for storage or transmission.
+     * Produces a JSON string representation of the token response for persistent storage or
+     * local transmission (e.g. between activities).
      */
-    public JSONObject toJson() {
+    public JSONObject jsonSerialize() {
         JSONObject json = new JSONObject();
-        JsonUtil.put(json, KEY_REQUEST, request.toJson());
+        JsonUtil.put(json, KEY_REQUEST, request.jsonSerialize());
         JsonUtil.putIfNotNull(json, KEY_TOKEN_TYPE, tokenType);
         JsonUtil.putIfNotNull(json, KEY_ACCESS_TOKEN, accessToken);
         JsonUtil.putIfNotNull(json, KEY_EXPIRES_AT, accessTokenExpirationTime);
@@ -441,70 +442,41 @@ public class TokenResponse {
     }
 
     /**
-     * Converts the token response to a JSON string, for storage or transmission.
+     * Produces a JSON string representation of the token response for persistent storage or
+     * local transmission (e.g. between activities). This method is just a convenience wrapper
+     * for {@link #jsonSerialize()}, converting the JSON object to its string form.
      */
-    public String toJsonString() {
-        return toJson().toString();
-    }
-
-    /**
-     * Reads a token response from a JSON string produced by {@link #toJsonString()}.
-     * @throws JSONException if the JSON is malformed or missing required fields.
-     */
-    @NonNull
-    public static TokenResponse fromJson(@NonNull String jsonStr) throws JSONException {
-        return fromJson(null, jsonStr);
-    }
-
-    /**
-     * Reads a token response from a JSON string produced by {@link #toJson()}.
-     * @throws JSONException if the JSON is malformed or missing required fields.
-     */
-    @NonNull
-    public static TokenResponse fromJson(@NonNull JSONObject json) throws JSONException {
-        return fromJson(null, json);
+    public String jsonSerializeString() {
+        return jsonSerialize().toString();
     }
 
     /**
      * Reads a token response from a JSON string, and associates it with the provided request.
      * If a request is not provided, its serialized form is expected to be found in the JSON
-     * (as if produced by a prior call to {@link #toJsonString()}.
+     * (as if produced by a prior call to {@link #jsonSerialize()}.
      * @throws JSONException if the JSON is malformed or missing required fields.
      */
     @NonNull
-    public static TokenResponse fromJson(
-            @Nullable TokenRequest request,
-            @NonNull String jsonStr)
-            throws JSONException {
-        checkNotEmpty(jsonStr, "jsonStr cannot be null or empty");
-        return fromJson(request, new JSONObject(jsonStr));
-    }
-
-    /**
-     * Reads a token response from a JSON string, and associates it with the provided request.
-     * If a request is not provided, its serialized form is expected to be found in the JSON
-     * (as if produced by a prior call to {@link #toJson()}.
-     * @throws JSONException if the JSON is malformed or missing required fields.
-     */
-    @NonNull
-    public static TokenResponse fromJson(
-            @Nullable TokenRequest request,
-            @NonNull JSONObject json)
-            throws JSONException {
-
-        TokenRequest extractedRequest;
-        if (request != null) {
-            extractedRequest = request;
-        } else {
-            if (!json.has(KEY_REQUEST)) {
-                throw new IllegalArgumentException(
-                        "token request not provided and not found in JSON");
-            }
-            extractedRequest = TokenRequest.fromJson(json.getJSONObject(KEY_REQUEST));
+    public static TokenResponse jsonDeserialize(@NonNull JSONObject json) throws JSONException {
+        if (!json.has(KEY_REQUEST)) {
+            throw new IllegalArgumentException(
+                    "token request not provided and not found in JSON");
         }
-
-        return new TokenResponse.Builder(extractedRequest)
+        return new TokenResponse.Builder(
+                TokenRequest.jsonDeserialize(json.getJSONObject(KEY_REQUEST)))
                 .fromResponseJson(json)
                 .build();
+    }
+
+    /**
+     * Reads a token response from a JSON string, and associates it with the provided request.
+     * If a request is not provided, its serialized form is expected to be found in the JSON
+     * (as if produced by a prior call to {@link #jsonSerialize()}.
+     * @throws JSONException if the JSON is malformed or missing required fields.
+     */
+    @NonNull
+    public static TokenResponse jsonDeserialize(@NonNull String jsonStr) throws JSONException {
+        checkNotEmpty(jsonStr, "jsonStr cannot be null or empty");
+        return jsonDeserialize(new JSONObject(jsonStr));
     }
 }

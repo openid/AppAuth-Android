@@ -445,9 +445,10 @@ public class AuthState {
     }
 
     /**
-     * Converts the authorization state to a JSON object for storage or transmission.
+     * Produces a JSON representation of the authorization state for persistent storage or local
+     * transmission (e.g. between activities).
      */
-    public JSONObject toJson() {
+    public JSONObject jsonSerialize() {
         JSONObject json = new JSONObject();
         JsonUtil.putIfNotNull(json, KEY_REFRESH_TOKEN, mRefreshToken);
         JsonUtil.putIfNotNull(json, KEY_SCOPE, mScope);
@@ -460,29 +461,32 @@ public class AuthState {
             JsonUtil.put(
                     json,
                     KEY_LAST_AUTHORIZATION_RESPONSE,
-                    mLastAuthorizationResponse.toJson());
+                    mLastAuthorizationResponse.jsonSerialize());
         }
         if (mLastTokenResponse != null) {
             JsonUtil.put(
                     json,
                     KEY_LAST_TOKEN_RESPONSE,
-                    mLastTokenResponse.toJson());
+                    mLastTokenResponse.jsonSerialize());
         }
         return json;
     }
 
     /**
-     * Converts the authorization state to a JSON string for storage or transmission.
+     * Produces a JSON string representation of the authorization state for persistent storage or
+     * local transmission (e.g. between activities). This method is just a convenience wrapper
+     * for {@link #jsonSerialize()}, converting the JSON object to its string form.
      */
-    public String toJsonString() {
-        return toJson().toString();
+    public String jsonSerializeString() {
+        return jsonSerialize().toString();
     }
 
     /**
-     * Restores authorization state from JSON produced by {@link #toJson()}.
-     * @throws JSONException if the JSON is malformed or missing required fields.
+     * Reads an authorization state instance from a JSON string representation produced by
+     * {@link #jsonSerialize()}.
+     * @throws JSONException if the provided JSON does not match the expected structure.
      */
-    public static AuthState fromJson(@NonNull JSONObject json) throws JSONException {
+    public static AuthState jsonDeserialize(@NonNull JSONObject json) throws JSONException {
         checkNotNull(json, "json cannot be null");
 
         AuthState state = new AuthState();
@@ -493,11 +497,11 @@ public class AuthState {
                     json.getJSONObject(KEY_AUTHORIZATION_EXCEPTION));
         }
         if (json.has(KEY_LAST_AUTHORIZATION_RESPONSE)) {
-            state.mLastAuthorizationResponse = AuthorizationResponse.fromJson(
+            state.mLastAuthorizationResponse = AuthorizationResponse.jsonDeserialize(
                     json.getJSONObject(KEY_LAST_AUTHORIZATION_RESPONSE));
         }
         if (json.has(KEY_LAST_TOKEN_RESPONSE)) {
-            state.mLastTokenResponse = TokenResponse.fromJson(
+            state.mLastTokenResponse = TokenResponse.jsonDeserialize(
                     json.getJSONObject(KEY_LAST_TOKEN_RESPONSE));
         }
 
@@ -505,12 +509,14 @@ public class AuthState {
     }
 
     /**
-     * Restored authorization state from a JSON string produced by {@link #toJsonString()}.
-     * @throws JSONException if the JSON is malformed or missing required fields.
+     * Reads an authorization state instance from a JSON string representation produced by
+     * {@link #jsonSerializeString()}. This method is just a convenience wrapper for
+     * {@link #jsonDeserialize(JSONObject)}, converting the JSON string to its JSON object form.
+     * @throws JSONException if the provided JSON does not match the expected structure.
      */
-    public static AuthState fromJson(@NonNull String jsonStr) throws JSONException {
+    public static AuthState jsonDeserialize(@NonNull String jsonStr) throws JSONException {
         checkNotEmpty(jsonStr, "jsonStr cannot be null or empty");
-        return fromJson(new JSONObject(jsonStr));
+        return jsonDeserialize(new JSONObject(jsonStr));
     }
 
     /**

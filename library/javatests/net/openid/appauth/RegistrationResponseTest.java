@@ -87,10 +87,10 @@ public class RegistrationResponseTest {
         @Test
         public void testSerialize() throws Exception {
             JSONObject json = RegistrationResponse.fromJson(getTestRegistrationRequest(), mJson)
-                    .serialize();
+                    .jsonSerialize();
 
             assertThat(json.get(RegistrationResponse.KEY_REQUEST).toString())
-                    .isEqualTo(getTestRegistrationRequest().serialize().toString());
+                    .isEqualTo(getTestRegistrationRequest().jsonSerialize().toString());
             assertThat(json.getLong(RegistrationResponse.PARAM_CLIENT_ID_ISSUED_AT))
                     .isEqualTo(TEST_CLIENT_ID_ISSUED_AT);
             assertThat(json.getString(RegistrationResponse.PARAM_CLIENT_SECRET))
@@ -108,20 +108,22 @@ public class RegistrationResponseTest {
             Map<String, String> additionalParameters = Collections.singletonMap("test1", "value1");
             JSONObject json = mMinimalBuilder.setClientId(TEST_CLIENT_ID)
                     .setAdditionalParameters(additionalParameters)
-                    .build().serialize();
+                    .build()
+                    .jsonSerialize();
             assertThat(JsonUtil.getStringMap(json, RegistrationResponse.KEY_ADDITIONAL_PARAMETERS))
                     .isEqualTo(additionalParameters);
         }
 
         @Test(expected = IllegalArgumentException.class)
         public void testDeserialize_withoutRequest() throws Exception {
-            RegistrationResponse.deserialize(mJson);
+            RegistrationResponse.jsonDeserialize(mJson);
         }
 
         @Test
         public void testDeserialize() throws Exception {
-            mJson.put(RegistrationResponse.KEY_REQUEST, getTestRegistrationRequest().serialize());
-            RegistrationResponse response = RegistrationResponse.deserialize(mJson);
+            mJson.put(RegistrationResponse.KEY_REQUEST,
+                    getTestRegistrationRequest().jsonSerialize());
+            RegistrationResponse response = RegistrationResponse.jsonDeserialize(mJson);
             assertValues(response);
         }
 
