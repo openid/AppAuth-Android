@@ -48,6 +48,7 @@ import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceDiscovery;
 import net.openid.appauth.ClientAuthentication;
 import net.openid.appauth.ClientSecretBasic;
+import net.openid.appauth.NoClientAuthentication;
 import net.openid.appauth.TokenRequest;
 import net.openid.appauth.TokenResponse;
 
@@ -284,7 +285,7 @@ public class TokenActivity extends AppCompatActivity {
     }
 
     private void performTokenRequest(TokenRequest request) {
-        performTokenRequest(request, null);
+        performTokenRequest(request, NoClientAuthentication.INSTANCE);
     }
 
     private void fetchUserInfo() {
