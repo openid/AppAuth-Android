@@ -289,7 +289,7 @@ public class AuthState {
             @Nullable AuthorizationResponse authResponse,
             @Nullable AuthorizationException authException) {
         checkArgument(authResponse != null ^ authException != null,
-                "exactly one of authResponse or authError should be non-null");
+                "exactly one of authResponse or authException should be non-null");
         if (authException != null) {
             if (authException.type == AuthorizationException.TYPE_OAUTH_AUTHORIZATION_ERROR) {
                 mAuthorizationException = authException;
@@ -316,7 +316,7 @@ public class AuthState {
             @Nullable TokenResponse tokenResponse,
             @Nullable AuthorizationException authException) {
         checkArgument(tokenResponse != null ^ authException != null,
-                "exactly one of authResponse or authError should be non-null");
+                "exactly one of tokenResponse or authException should be non-null");
 
         if (mAuthorizationException != null) {
             // Calling updateFromTokenResponse while in an error state probably means the developer
