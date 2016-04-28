@@ -115,4 +115,16 @@ class TestValues {
     public static RegistrationRequest getTestRegistrationRequest() {
         return getTestRegistrationRequestBuilder().build();
     }
+
+    public static RegistrationResponse.Builder getTestRegistrationResponseBuilder() {
+        return new RegistrationResponse.Builder(getTestRegistrationRequest())
+                .setClientId(TEST_CLIENT_ID);
+    }
+
+    public static RegistrationResponse getTestRegistrationResponse() {
+        return getTestRegistrationResponseBuilder()
+                .setClientSecret(TEST_CLIENT_SECRET)
+                .setClientSecretExpiresAt(TEST_CLIENT_SECRET_EXPIRES_AT)
+                .build();
+    }
 }

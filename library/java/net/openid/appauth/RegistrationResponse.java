@@ -41,6 +41,7 @@ public class RegistrationResponse {
     static final String PARAM_REGISTRATION_ACCESS_TOKEN = "registration_access_token";
     static final String PARAM_REGISTRATION_CLIENT_URI = "registration_client_uri";
     static final String PARAM_CLIENT_ID_ISSUED_AT = "client_id_issued_at";
+    static final String PARAM_TOKEN_ENDPOINT_AUTH_METHOD = "token_endpoint_auth_method";
 
     static final String KEY_REQUEST = "request";
     static final String KEY_ADDITIONAL_PARAMETERS = "additionalParameters";
@@ -51,7 +52,8 @@ public class RegistrationResponse {
             PARAM_CLIENT_SECRET_EXPIRES_AT,
             PARAM_REGISTRATION_ACCESS_TOKEN,
             PARAM_REGISTRATION_CLIENT_URI,
-            PARAM_CLIENT_ID_ISSUED_AT
+            PARAM_CLIENT_ID_ISSUED_AT,
+            PARAM_TOKEN_ENDPOINT_AUTH_METHOD
     ));
     /**
      * The registration request associated with this response.
@@ -118,11 +120,19 @@ public class RegistrationResponse {
     public final Uri registrationClientUri;
 
     /**
+     * Client authentication method to use at the token endpoint, if provided.
+     *
+     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">
+     * "OpenID Connect Core 1.0", Section 9</a>
+     */
+    @Nullable
+    public final String tokenEndpointAuthMethod;
+
+    /**
      * Additional, non-standard parameters in the response.
      */
     @NonNull
     public final Map<String, String> additionalParameters;
-
 
     /**
      * Thrown when a mandatory property is missing from the registration response.
@@ -159,6 +169,8 @@ public class RegistrationResponse {
         private String mRegistrationAccessToken;
         @Nullable
         private Uri mRegistrationClientUri;
+        @Nullable
+        private String mTokenEndpointAuthMethod;
 
         @NonNull
         private Map<String, String> mAdditionalParameters = Collections.emptyMap();
@@ -239,6 +251,14 @@ public class RegistrationResponse {
         }
 
         /**
+         * Specifies the client authentication method to use at the token endpoint.
+         */
+        public Builder setTokenEndpointAuthMethod(@Nullable String tokenEndpointAuthMethod) {
+            mTokenEndpointAuthMethod = tokenEndpointAuthMethod;
+            return this;
+        }
+
+        /**
          * Specifies the client configuration endpoint.
          *
          * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
@@ -269,6 +289,7 @@ public class RegistrationResponse {
                     mClientSecretExpiresAt,
                     mRegistrationAccessToken,
                     mRegistrationClientUri,
+                    mTokenEndpointAuthMethod,
                     mAdditionalParameters);
         }
 
@@ -326,6 +347,8 @@ public class RegistrationResponse {
             setRegistrationAccessToken(JsonUtil.getStringIfDefined(json,
                     PARAM_REGISTRATION_ACCESS_TOKEN));
             setRegistrationClientUri(JsonUtil.getUriIfDefined(json, PARAM_REGISTRATION_CLIENT_URI));
+            setTokenEndpointAuthMethod(JsonUtil.getStringIfDefined(json,
+                    PARAM_TOKEN_ENDPOINT_AUTH_METHOD));
 
             setAdditionalParameters(extractAdditionalParams(json, BUILT_IN_PARAMS));
             return this;
@@ -340,6 +363,7 @@ public class RegistrationResponse {
             @Nullable Long clientSecretExpiresAt,
             @Nullable String registrationAccessToken,
             @Nullable Uri registrationClientUri,
+            @Nullable String tokenEndpointAuthMethod,
             @NonNull Map<String, String> additionalParameters) {
         this.request = request;
         this.clientId = clientId;
@@ -348,6 +372,7 @@ public class RegistrationResponse {
         this.clientSecretExpiresAt = clientSecretExpiresAt;
         this.registrationAccessToken = registrationAccessToken;
         this.registrationClientUri = registrationClientUri;
+        this.tokenEndpointAuthMethod = tokenEndpointAuthMethod;
         this.additionalParameters = additionalParameters;
     }
 
@@ -355,7 +380,7 @@ public class RegistrationResponse {
      * Reads a registration response JSON string received from an authorization server,
      * and associates it with the provided request.
      *
-     * @throws JSONException if the JSON is malformed or missing required fields.
+     * @throws JSONException            if the JSON is malformed or missing required fields.
      * @throws MissingArgumentException if the JSON is missing fields required by the specification.
      */
     @NonNull
@@ -370,7 +395,7 @@ public class RegistrationResponse {
      * Reads a registration response JSON object received from an authorization server,
      * and associates it with the provided request.
      *
-     * @throws JSONException if the JSON is malformed or missing required fields.
+     * @throws JSONException            if the JSON is malformed or missing required fields.
      * @throws MissingArgumentException if the JSON is missing fields required by the specification.
      */
     @NonNull
@@ -398,6 +423,7 @@ public class RegistrationResponse {
         JsonUtil.putIfNotNull(json, PARAM_CLIENT_SECRET_EXPIRES_AT, clientSecretExpiresAt);
         JsonUtil.putIfNotNull(json, PARAM_REGISTRATION_ACCESS_TOKEN, registrationAccessToken);
         JsonUtil.putIfNotNull(json, PARAM_REGISTRATION_CLIENT_URI, registrationClientUri);
+        JsonUtil.putIfNotNull(json, PARAM_TOKEN_ENDPOINT_AUTH_METHOD, tokenEndpointAuthMethod);
         JsonUtil.put(json, KEY_ADDITIONAL_PARAMETERS,
                 JsonUtil.mapToJsonObject(additionalParameters));
         return json;
@@ -416,6 +442,7 @@ public class RegistrationResponse {
     /**
      * Reads a registration response from a JSON string representation produced by
      * {@link #jsonSerialize()}.
+     *
      * @throws JSONException if the provided JSON does not match the expected structure.
      */
     public static RegistrationResponse jsonDeserialize(@NonNull JSONObject json)
@@ -441,6 +468,7 @@ public class RegistrationResponse {
      * Reads a registration response from a JSON string representation produced by
      * {@link #jsonSerializeString()}. This method is just a convenience wrapper for
      * {@link #jsonDeserialize(JSONObject)}, converting the JSON string to its JSON object form.
+     *
      * @throws JSONException if the provided JSON does not match the expected structure.
      */
     @NonNull

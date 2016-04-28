@@ -18,6 +18,25 @@ import java.util.Map;
 
 public interface ClientAuthentication {
     /**
+     * Thrown when a mandatory property is missing from the registration response.
+     */
+    class UnsupportedAuthenticationMethod extends Exception {
+        private String mAuthMethod;
+
+        /**
+         * Indicates that the specified client authentication method is unsupported.
+         */
+        public UnsupportedAuthenticationMethod(String field) {
+            super("Unsupported client authentication method: " + field);
+            mAuthMethod = field;
+        }
+
+        public String getUnsupportedAuthenticationMethod() {
+            return mAuthMethod;
+        }
+    }
+
+    /**
      * Constructs any extra parameters necessary to include in the request headers for the client
      * authentication.
      */

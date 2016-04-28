@@ -47,7 +47,7 @@ public class RegistrationResponseTest {
     private static final String TEST_REGISTRATION_ACCESS_TOKEN = "test_access_token";
     private static final String TEST_REGISTRATION_CLIENT_URI =
             "https://test.openid.com/register?client_id=" + TEST_CLIENT_ID;
-
+    private static final String TEST_TOKEN_ENDPOINT_AUTH_METHOD = "client_secret_basic";
 
     private static final String TEST_JSON = "{\n"
             + " \"client_id\": \"" + TEST_CLIENT_ID + "\",\n"
@@ -56,7 +56,8 @@ public class RegistrationResponseTest {
             + " \"client_secret_expires_at\": \"" + TEST_CLIENT_SECRET_EXPIRES_AT + "\",\n"
             + " \"registration_access_token\": \"" + TEST_REGISTRATION_ACCESS_TOKEN + "\",\n"
             + " \"registration_client_uri\": \"" + TEST_REGISTRATION_CLIENT_URI + "\",\n"
-            + " \"application_type\": " + RegistrationRequest.APPLICATION_TYPE_NATIVE + "\n"
+            + " \"application_type\": \"" + RegistrationRequest.APPLICATION_TYPE_NATIVE + "\",\n"
+            + " \"token_endpoint_auth_method\": \"" + TEST_TOKEN_ENDPOINT_AUTH_METHOD + "\"\n"
             + "}";
 
     @RunWith(RobolectricTestRunner.class)
@@ -101,6 +102,8 @@ public class RegistrationResponseTest {
                     .isEqualTo(TEST_REGISTRATION_ACCESS_TOKEN);
             assertThat(JsonUtil.getUri(json, RegistrationResponse.PARAM_REGISTRATION_CLIENT_URI))
                     .isEqualTo(Uri.parse(TEST_REGISTRATION_CLIENT_URI));
+            assertThat(json.getString(RegistrationResponse.PARAM_TOKEN_ENDPOINT_AUTH_METHOD))
+                    .isEqualTo(TEST_TOKEN_ENDPOINT_AUTH_METHOD);
         }
 
         @Test
@@ -151,6 +154,7 @@ public class RegistrationResponseTest {
             assertThat(response.registrationAccessToken).isEqualTo(TEST_REGISTRATION_ACCESS_TOKEN);
             assertThat(response.registrationClientUri)
                     .isEqualTo(Uri.parse(TEST_REGISTRATION_CLIENT_URI));
+            assertThat(response.tokenEndpointAuthMethod).isEqualTo(TEST_TOKEN_ENDPOINT_AUTH_METHOD);
             assertThat(response.additionalParameters)
                     .containsEntry(RegistrationRequest.PARAM_APPLICATION_TYPE,
                             RegistrationRequest.APPLICATION_TYPE_NATIVE);
