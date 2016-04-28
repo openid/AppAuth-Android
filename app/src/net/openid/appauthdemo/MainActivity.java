@@ -29,6 +29,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationService;
@@ -85,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
                                     // Do dynamic client registration if no client_id
                                     makeRegistrationRequest(serviceConfiguration, idp);
                                 } else {
-                                    makeAuthRequest(serviceConfiguration, idp);
+                                    makeAuthRequest(serviceConfiguration, idp, null);
                                 }
                             }
                         }
@@ -127,7 +128,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void makeAuthRequest(
             @NonNull AuthorizationServiceConfiguration serviceConfig,
-            @NonNull IdentityProvider idp) {
+            @NonNull IdentityProvider idp,
+            @Nullable AuthState authState) {
 
         AuthorizationRequest authRequest = new AuthorizationRequest.Builder(
                 serviceConfig,
@@ -144,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
                         this,
                         authRequest,
                         serviceConfig.discoveryDoc,
-                        idp.getClientSecret()),
+                        authState),
                 mAuthService.createCustomTabsIntentBuilder()
                         .setToolbarColor(getColorCompat(R.color.colorAccent))
                         .build());
@@ -171,10 +173,10 @@ public class MainActivity extends AppCompatActivity {
                         Log.d(TAG, "Registration request complete");
                         if (registrationResponse != null) {
                             idp.setClientId(registrationResponse.clientId);
-                            idp.setClientSecret(registrationResponse.clientSecret);
                             Log.d(TAG, "Registration request complete successfully");
                             // Continue with the authentication
-                            makeAuthRequest(registrationResponse.request.configuration, idp);
+                            makeAuthRequest(registrationResponse.request.configuration, idp,
+                                    new AuthState((registrationResponse)));
                         }
                     }
                 });

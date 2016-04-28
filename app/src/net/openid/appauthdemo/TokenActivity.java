@@ -75,7 +75,7 @@ public class TokenActivity extends AppCompatActivity {
     private static final String KEY_USER_INFO = "userInfo";
 
     private static final String EXTRA_AUTH_SERVICE_DISCOVERY = "authServiceDiscovery";
-    private static final String EXTRA_CLIENT_SECRET = "clientSecret";
+    private static final String EXTRA_AUTH_STATE = "authState";
 
     private static final int BUFFER_SIZE = 1024;
 
@@ -110,19 +110,19 @@ public class TokenActivity extends AppCompatActivity {
         }
 
         if (mAuthState == null) {
+            mAuthState = getAuthStateFromIntent(getIntent());
             AuthorizationResponse response = AuthorizationResponse.fromIntent(getIntent());
             AuthorizationException ex = AuthorizationException.fromIntent(getIntent());
-            mAuthState = new AuthState(response, ex);
+            if (mAuthState == null) {
+                mAuthState = new AuthState(response, ex);
+            } else {
+                mAuthState.update(response, ex);
+            }
 
             if (response != null) {
                 Log.d(TAG, "Received AuthorizationResponse.");
                 showSnackbar(R.string.exchange_notification);
-                String clientSecret = getClientSecretFromIntent(getIntent());
-                if (clientSecret != null) {
-                    exchangeAuthorizationCode(response, new ClientSecretBasic(clientSecret));
-                } else {
-                    exchangeAuthorizationCode(response);
-                }
+                exchangeAuthorizationCode(response);
             } else {
                 Log.i(TAG, "Authorization failed: " + ex);
                 showSnackbar(R.string.authorization_failed);
@@ -261,16 +261,19 @@ public class TokenActivity extends AppCompatActivity {
         performTokenRequest(mAuthState.createTokenRefreshRequest());
     }
 
-    private void exchangeAuthorizationCode(AuthorizationResponse authorizationResponse,
-                                           ClientAuthentication clientAuth) {
-        performTokenRequest(authorizationResponse.createTokenExchangeRequest(), clientAuth);
-    }
-
     private void exchangeAuthorizationCode(AuthorizationResponse authorizationResponse) {
         performTokenRequest(authorizationResponse.createTokenExchangeRequest());
     }
 
-    private void performTokenRequest(TokenRequest request, ClientAuthentication clientAuth) {
+    private void performTokenRequest(TokenRequest request) {
+        String clientSecret = mAuthState.getClientSecret();
+        ClientAuthentication clientAuth;
+        if (clientSecret != null) {
+            clientAuth = new ClientSecretBasic(clientSecret);
+        } else {
+            clientAuth = NoClientAuthentication.INSTANCE;
+        }
+
         mAuthService.performTokenRequest(
                 request,
                 clientAuth,
@@ -282,10 +285,6 @@ public class TokenActivity extends AppCompatActivity {
                         receivedTokenResponse(tokenResponse, ex);
                     }
                 });
-    }
-
-    private void performTokenRequest(TokenRequest request) {
-        performTokenRequest(request, NoClientAuthentication.INSTANCE);
     }
 
     private void fetchUserInfo() {
@@ -372,13 +371,13 @@ public class TokenActivity extends AppCompatActivity {
             @NonNull Context context,
             @NonNull AuthorizationRequest request,
             @Nullable AuthorizationServiceDiscovery discoveryDoc,
-            @Nullable String clientSecret) {
+            @Nullable AuthState authState) {
         Intent intent = new Intent(context, TokenActivity.class);
         if (discoveryDoc != null) {
             intent.putExtra(EXTRA_AUTH_SERVICE_DISCOVERY, discoveryDoc.docJson.toString());
         }
-        if (clientSecret != null) {
-            intent.putExtra(EXTRA_CLIENT_SECRET, clientSecret);
+        if (authState != null) {
+            intent.putExtra(EXTRA_AUTH_STATE, authState.jsonSerializeString());
         }
 
         return PendingIntent.getActivity(context, request.hashCode(), intent, 0);
@@ -396,11 +395,16 @@ public class TokenActivity extends AppCompatActivity {
         }
     }
 
-    static String getClientSecretFromIntent(Intent intent) {
-        if (!intent.hasExtra(EXTRA_CLIENT_SECRET)) {
+    static AuthState getAuthStateFromIntent(Intent intent) {
+        if (!intent.hasExtra(EXTRA_AUTH_STATE)) {
             return null;
         }
-        return intent.getStringExtra(EXTRA_CLIENT_SECRET);
+        try {
+            return AuthState.jsonDeserialize(intent.getStringExtra(EXTRA_AUTH_STATE));
+        } catch (JSONException ex) {
+            Log.e(TAG, "Malformed AuthState JSON saved", ex);
+            return null;
+        }
     }
 
     private class UserProfilePictureTarget implements Target {
