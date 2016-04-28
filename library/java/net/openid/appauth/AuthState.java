@@ -50,6 +50,7 @@ public class AuthState {
     private static final String KEY_LAST_AUTHORIZATION_RESPONSE = "lastAuthorizationResponse";
     private static final String KEY_LAST_TOKEN_RESPONSE = "mLastTokenResponse";
     private static final String KEY_AUTHORIZATION_EXCEPTION = "mAuthorizationException";
+    private static final String KEY_LAST_REGISTRATION_RESPONSE = "lastRegistrationResponse";
 
     @Nullable
     private String mRefreshToken;
@@ -62,6 +63,9 @@ public class AuthState {
 
     @Nullable
     private TokenResponse mLastTokenResponse;
+
+    @Nullable
+    private RegistrationResponse mLastRegistrationResponse;
 
     @Nullable
     private AuthorizationException mAuthorizationException;
@@ -81,6 +85,13 @@ public class AuthState {
         checkArgument(authResponse != null ^ authError != null,
                 "exactly one of authResponse or authError should be non-null");
         update(authResponse, authError);
+    }
+
+    /**
+     * Creates an {@link AuthState} based on a dynamic registration client registration request.
+     */
+    public AuthState(@NonNull RegistrationResponse regResponse) {
+        update(regResponse);
     }
 
     /**
@@ -149,6 +160,20 @@ public class AuthState {
     @Nullable
     public TokenResponse getLastTokenResponse() {
         return mLastTokenResponse;
+    }
+
+    /**
+     * The most recent client registration response used to update this authorization state.
+     *
+     * <p>
+     * It is rarely necessary to directly use the response; instead convenience methods are provided
+     * to retrieve the {@link #getClientSecret() client secret} and
+     * {@link #getClientSecretExpirationTime() client secret expiration}.
+     * </p>
+     */
+    @Nullable
+    public RegistrationResponse getLastRegistrationResponse() {
+        return mLastRegistrationResponse;
     }
 
     /**
@@ -227,6 +252,31 @@ public class AuthState {
     }
 
     /**
+     * The current client secret, if available.
+     */
+    public String getClientSecret() {
+        if (mLastRegistrationResponse != null) {
+            return mLastRegistrationResponse.clientSecret;
+        }
+
+        return null;
+    }
+
+    /**
+     * The expiration time of the current client credentials (if available), as milliseconds from
+     * the UNIX epoch (consistent with {@link System#currentTimeMillis()}). If the value is 0, the
+     * client credentials will not expire.
+     */
+    @Nullable
+    public Long getClientSecretExpirationTime() {
+        if (mLastRegistrationResponse != null) {
+            return mLastRegistrationResponse.clientSecretExpiresAt;
+        }
+
+        return null;
+    }
+
+    /**
      * Determines whether the current state represents a successful authorization,
      * from which at least either an access token or an ID token have been retrieved.
      */
@@ -280,6 +330,24 @@ public class AuthState {
      */
     public void setNeedsTokenRefresh(boolean needsTokenRefresh) {
         mNeedsTokenRefreshOverride = needsTokenRefresh;
+    }
+
+    /**
+    * Determines whether the client credentials is considered to have expired. If no client
+    * credentials have been acquired, then this method will always return {@code false}
+    */
+    public boolean hasClientSecretExpired() {
+        return hasClientSecretExpired(SystemClock.INSTANCE);
+    }
+
+    @VisibleForTesting
+    boolean hasClientSecretExpired(Clock clock) {
+        if (getClientSecretExpirationTime() == null || getClientSecretExpirationTime() == 0) {
+            // no explicit expiration time, and 0 means it will not expire
+            return false;
+        }
+
+        return getClientSecretExpirationTime() <= clock.getCurrentTimeMillis();
     }
 
     /**
@@ -344,6 +412,19 @@ public class AuthState {
         if (tokenResponse.refreshToken != null) {
             mRefreshToken = tokenResponse.refreshToken;
         }
+    }
+
+    /**
+     * Updates the authorization state based on a new client registration response.
+     */
+    public void update(@Nullable RegistrationResponse regResponse) {
+        mLastRegistrationResponse = regResponse;
+        /* a new client registration will have a new client id, so invalidate the current session */
+        mRefreshToken = null;
+        mScope = null;
+        mLastAuthorizationResponse = null;
+        mLastTokenResponse = null;
+        mAuthorizationException = null;
     }
 
     /**
@@ -469,6 +550,12 @@ public class AuthState {
                     KEY_LAST_TOKEN_RESPONSE,
                     mLastTokenResponse.jsonSerialize());
         }
+        if (mLastRegistrationResponse != null) {
+            JsonUtil.put(
+                    json,
+                    KEY_LAST_REGISTRATION_RESPONSE,
+                    mLastRegistrationResponse.jsonSerialize());
+        }
         return json;
     }
 
@@ -504,6 +591,10 @@ public class AuthState {
             state.mLastTokenResponse = TokenResponse.jsonDeserialize(
                     json.getJSONObject(KEY_LAST_TOKEN_RESPONSE));
         }
+        if (json.has(KEY_LAST_REGISTRATION_RESPONSE)) {
+            state.mLastRegistrationResponse = RegistrationResponse.jsonDeserialize(
+                    json.getJSONObject(KEY_LAST_REGISTRATION_RESPONSE));
+        }
 
         return state;
     }
@@ -534,5 +625,37 @@ public class AuthState {
                 @Nullable String accessToken,
                 @Nullable String idToken,
                 @Nullable AuthorizationException ex);
+    }
+    /**
+     * Creates the required client authentication for the token endpoint based on information
+     * in the most recent registration response (if it is set).
+     *
+     * @throws ClientAuthentication.UnsupportedAuthenticationMethod if the expected client
+     *     authentication method is unsupported by this client library.
+     */
+    public ClientAuthentication getClientAuthentication() throws
+            ClientAuthentication.UnsupportedAuthenticationMethod {
+        if (getClientSecret() == null) {
+            /* Without client credentials, or unspecified 'token_endpoint_auth_method',
+             * we can never authenticate */
+            return NoClientAuthentication.INSTANCE;
+        } else if (mLastRegistrationResponse.tokenEndpointAuthMethod == null) {
+            /* 'token_endpoint_auth_method': "If omitted, the default is client_secret_basic",
+             * "OpenID Connect Dynamic Client Registration 1.0", Section 2 */
+            return new ClientSecretBasic(getClientSecret());
+        }
+
+        switch (mLastRegistrationResponse.tokenEndpointAuthMethod) {
+            case ClientSecretBasic.NAME:
+                return new ClientSecretBasic(getClientSecret());
+            case ClientSecretPost.NAME:
+                return new ClientSecretPost(getClientSecret());
+            case "none":
+                return NoClientAuthentication.INSTANCE;
+            default:
+                throw new ClientAuthentication.UnsupportedAuthenticationMethod(
+                        mLastRegistrationResponse.tokenEndpointAuthMethod);
+
+        }
     }
 }

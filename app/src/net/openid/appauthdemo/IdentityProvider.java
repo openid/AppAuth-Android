@@ -110,7 +110,6 @@ class IdentityProvider {
     private Uri mTokenEndpoint;
     private Uri mRegistrationEndpoint;
     private String mClientId;
-    private String mClientSecret;
     private Uri mRedirectUri;
     private String mScope;
 
@@ -215,17 +214,9 @@ class IdentityProvider {
         return mClientId;
     }
 
-    @Nullable
-    public String getClientSecret() {
-        return mClientSecret;
-    }
 
     public void setClientId(String clientId) {
         mClientId = clientId;
-    }
-
-    public void setClientSecret(String clientSecret) {
-        mClientSecret = clientSecret;
     }
 
     @NonNull
