@@ -516,7 +516,7 @@ public class AuthStateTest {
         assertThat(restoredState.getRefreshToken()).isEqualTo(state.getRefreshToken());
         assertThat(restoredState.getScope()).isEqualTo(state.getScope());
         assertThat(restoredState.getNeedsTokenRefresh(mClock))
-                .isEqualTo(restoredState.getNeedsTokenRefresh(mClock));
+                .isEqualTo(state.getNeedsTokenRefresh(mClock));
     }
 
     @Test
