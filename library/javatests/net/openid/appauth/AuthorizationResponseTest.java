@@ -26,7 +26,6 @@ import static org.junit.Assert.assertTrue;
 
 import android.net.Uri;
 
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -118,8 +117,8 @@ public class AuthorizationResponseTest {
 
     @Test
     public void testSerialization() throws Exception {
-        JSONObject json = mAuthorizationResponse.toJson();
-        AuthorizationResponse authResponse = AuthorizationResponse.fromJson(json);
+        String json = mAuthorizationResponse.jsonSerializeString();
+        AuthorizationResponse authResponse = AuthorizationResponse.jsonDeserialize(json);
         checkExpectedFields(authResponse);
     }
 

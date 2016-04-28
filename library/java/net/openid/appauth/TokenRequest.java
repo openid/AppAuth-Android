@@ -519,10 +519,11 @@ public class TokenRequest {
     }
 
     /**
-     * Converts the token request to JSON for storage or transmission.
+     * Produces a JSON string representation of the token request for persistent storage or
+     * local transmission (e.g. between activities).
      */
     @NonNull
-    public JSONObject toJson() {
+    public JSONObject jsonSerialize() {
         JSONObject json = new JSONObject();
         JsonUtil.put(json, KEY_CONFIGURATION, configuration.toJson());
         JsonUtil.put(json, KEY_CLIENT_ID, clientId);
@@ -537,33 +538,22 @@ public class TokenRequest {
     }
 
     /**
-     * Converts the authorization request to a JSON string for storage or transmission.
+     * Produces a JSON string representation of the token request for persistent storage or
+     * local transmission (e.g. between activities). This method is just a convenience wrapper
+     * for {@link #jsonSerialize()}, converting the JSON object to its string form.
      */
     @NonNull
-    public String toJsonString() {
-        return toJson().toString();
+    public String jsonSerializeString() {
+        return jsonSerialize().toString();
     }
 
     /**
-     * Reads a token request from a JSON string representation produced by the
-     * {@link #toJson()} method or some other equivalent producer.
-     *
+     * Reads a token request from a JSON string representation produced by
+     * {@link #jsonSerialize()}.
      * @throws JSONException if the provided JSON does not match the expected structure.
      */
     @NonNull
-    public static TokenRequest fromJson(@NonNull String json) throws JSONException {
-        checkNotNull(json, "json string cannot be null");
-        return fromJson(new JSONObject(json));
-    }
-
-    /**
-     * Reads a token request from a JSON representation produced by the
-     * {@link #toJson()} method or some other equivalent producer.
-     *
-     * @throws JSONException if the provided JSON does not match the expected structure.
-     */
-    @NonNull
-    public static TokenRequest fromJson(JSONObject json) throws JSONException {
+    public static TokenRequest jsonDeserialize(JSONObject json) throws JSONException {
         checkNotNull(json, "json object cannot be null");
 
         TokenRequest.Builder builder = new TokenRequest.Builder(
@@ -580,5 +570,17 @@ public class TokenRequest {
         }
 
         return builder.build();
+    }
+
+    /**
+     * Reads a token request from a JSON string representation produced by
+     * {@link #jsonSerializeString()}. This method is just a convenience wrapper for
+     * {@link #jsonDeserialize(JSONObject)}, converting the JSON string to its JSON object form.
+     * @throws JSONException if the provided JSON does not match the expected structure.
+     */
+    @NonNull
+    public static TokenRequest jsonDeserialize(@NonNull String json) throws JSONException {
+        checkNotNull(json, "json string cannot be null");
+        return jsonDeserialize(new JSONObject(json));
     }
 }

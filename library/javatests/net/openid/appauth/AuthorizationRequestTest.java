@@ -419,7 +419,8 @@ public class AuthorizationRequestTest {
 
     @Test
     public void testSerialization() throws Exception {
-        AuthorizationRequest request = AuthorizationRequest.fromJson(mRequest.toJson());
+        AuthorizationRequest request =
+                AuthorizationRequest.jsonDeserialize(mRequest.jsonSerialize());
         assertValues(request);
     }
 
@@ -428,7 +429,8 @@ public class AuthorizationRequestTest {
         AuthorizationRequest request = mRequestBuilder
                 .setScopes((Iterable<String>)null)
                 .build();
-        AuthorizationRequest newRequest = AuthorizationRequest.fromJson(request.toJson());
+        AuthorizationRequest newRequest =
+                AuthorizationRequest.jsonDeserialize(request.jsonSerialize());
         assertNull(newRequest.scope);
     }
 
@@ -437,7 +439,8 @@ public class AuthorizationRequestTest {
         AuthorizationRequest request = mRequestBuilder
                 .setScopes(Collections.<String>emptyList())
                 .build();
-        AuthorizationRequest newRequest = AuthorizationRequest.fromJson(request.toJson());
+        AuthorizationRequest newRequest =
+                AuthorizationRequest.jsonDeserialize(request.jsonSerialize());
         assertNull(newRequest.scope);
     }
 

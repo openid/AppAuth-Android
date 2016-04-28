@@ -335,13 +335,13 @@ public class RegistrationRequest {
         this.applicationType = APPLICATION_TYPE_NATIVE;
     }
 
-
     /**
-     * Converts the registration request to JSON for transmission.
+     * Converts the registration request to JSON for transmission to an authorization service.
+     * For local persistence and transmission, use {@link #jsonSerialize()}.
      */
     @NonNull
     public String toJsonString() {
-        JSONObject json = serializeParams();
+        JSONObject json = jsonSerializeParams();
         for (Map.Entry<String, String> param : additionalParameters.entrySet()) {
             JsonUtil.put(json, param.getKey(), param.getValue());
         }
@@ -349,19 +349,29 @@ public class RegistrationRequest {
     }
 
     /**
-     * Converts the registration request to JSON for internal storage or transmission, e.g. between
-     * activities in intents.
+     * Produces a JSON representation of the registration request for persistent storage or
+     * local transmission (e.g. between activities).
      */
     @NonNull
-    public JSONObject serialize() {
-        JSONObject json = serializeParams();
+    public JSONObject jsonSerialize() {
+        JSONObject json = jsonSerializeParams();
         JsonUtil.put(json, KEY_CONFIGURATION, configuration.toJson());
         JsonUtil.put(json, KEY_ADDITIONAL_PARAMETERS,
                 JsonUtil.mapToJsonObject(additionalParameters));
         return json;
     }
 
-    private JSONObject serializeParams() {
+    /**
+     * Produces a JSON string representation of the registration request for persistent storage or
+     * local transmission (e.g. between activities). This method is just a convenience wrapper
+     * for {@link #jsonSerialize()}, converting the JSON object to its string form.
+     */
+    @NonNull
+    public String jsonSerializeString() {
+        return jsonSerialize().toString();
+    }
+
+    private JSONObject jsonSerializeParams() {
         JSONObject json = new JSONObject();
         JsonUtil.put(json, PARAM_REDIRECT_URIS, JsonUtil.toJsonArray(redirectUris));
         JsonUtil.put(json, PARAM_APPLICATION_TYPE, applicationType);
@@ -379,23 +389,12 @@ public class RegistrationRequest {
     }
 
     /**
-     * Reads a registration request from a JSON representation produced by the
-     * {@link #serialize()} method or some other equivalent producer.
-     *
+     * Reads a registration request from a JSON string representation produced by
+     * {@link #jsonSerialize()}.
      * @throws JSONException if the provided JSON does not match the expected structure.
      */
-    public static RegistrationRequest deserialize(@NonNull String jsonStr) throws JSONException {
-        checkNotEmpty(jsonStr, "jsonStr must not be empty or null");
-        return deserialize(new JSONObject(jsonStr));
-    }
-
-    /**
-     * Reads a registration request from a JSON representation produced by the
-     * {@link #serialize()} method or some other equivalent producer.
-     *
-     * @throws JSONException if the provided JSON does not match the expected structure.
-     */
-    public static RegistrationRequest deserialize(@NonNull JSONObject json) throws JSONException {
+    public static RegistrationRequest jsonDeserialize(@NonNull JSONObject json)
+            throws JSONException {
         checkNotNull(json, "json must not be null");
         List<Uri> redirectUris = JsonUtil.getUriList(json, PARAM_REDIRECT_URIS);
 
@@ -408,5 +407,17 @@ public class RegistrationRequest {
                 .setAdditionalParameters(JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
 
         return builder.build();
+    }
+
+    /**
+     * Reads a registration request from a JSON string representation produced by
+     * {@link #jsonSerializeString()}. This method is just a convenience wrapper for
+     * {@link #jsonDeserialize(JSONObject)}, converting the JSON string to its JSON object form.
+     * @throws JSONException if the provided JSON does not match the expected structure.
+     */
+    public static RegistrationRequest jsonDeserialize(@NonNull String jsonStr)
+            throws JSONException {
+        checkNotEmpty(jsonStr, "jsonStr must not be empty or null");
+        return jsonDeserialize(new JSONObject(jsonStr));
     }
 }

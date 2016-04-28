@@ -477,12 +477,13 @@ public class AuthorizationResponse {
     }
 
     /**
-     * Converts the response to a JSON object for storage or transmission.
+     * Produces a JSON representation of the authorization response for persistent storage or local
+     * transmission (e.g. between activities).
      */
     @NonNull
-    public JSONObject toJson() {
+    public JSONObject jsonSerialize() {
         JSONObject json = new JSONObject();
-        JsonUtil.put(json, KEY_REQUEST, request.toJson());
+        JsonUtil.put(json, KEY_REQUEST, request.jsonSerialize());
         JsonUtil.putIfNotNull(json, KEY_STATE, state);
         JsonUtil.putIfNotNull(json, KEY_TOKEN_TYPE, tokenType);
         JsonUtil.putIfNotNull(json, KEY_AUTHORIZATION_CODE, authorizationCode);
@@ -496,37 +497,30 @@ public class AuthorizationResponse {
     }
 
     /**
-     * Converts the response to a JSON string for storage or transmission.
+     * Produces a JSON representation of the authorization response for persistent storage or local
+     * transmission (e.g. between activities). This method is just a convenience wrapper
+     * for {@link #jsonSerialize()}, converting the JSON object to its string form.
      */
     @NonNull
-    public String toJsonString() {
-        return toJson().toString();
+    public String jsonSerializeString() {
+        return jsonSerialize().toString();
     }
 
     /**
      * Reads an authorization response from a JSON string representation produced by
-     * {@link #toJsonString()}.
+     * {@link #jsonSerialize()}.
      * @throws JSONException if the provided JSON does not match the expected structure.
      */
     @NonNull
-    public static AuthorizationResponse fromJson(@NonNull String jsonStr) throws JSONException {
-        return fromJson(new JSONObject(jsonStr));
-    }
-
-    /**
-     * Reads an authorization response from a JSON object representation produced by
-     * {@link #toJson()}.
-     * @throws JSONException if the provided JSON does not match the expected structure.
-     */
-    @NonNull
-    public static AuthorizationResponse fromJson(@NonNull JSONObject json) throws JSONException {
+    public static AuthorizationResponse jsonDeserialize(@NonNull JSONObject json)
+            throws JSONException {
         if (!json.has(KEY_REQUEST)) {
             throw new IllegalArgumentException(
                 "authorization request not provided and not found in JSON");
         }
 
         AuthorizationRequest request =
-                AuthorizationRequest.fromJson(json.getJSONObject(KEY_REQUEST));
+                AuthorizationRequest.jsonDeserialize(json.getJSONObject(KEY_REQUEST));
 
         return new AuthorizationResponse.Builder(request)
                 .setTokenType(JsonUtil.getStringIfDefined(json, KEY_TOKEN_TYPE))
@@ -542,20 +536,32 @@ public class AuthorizationResponse {
     }
 
     /**
-     * Produces an intent containing this authorization response. Used to deliver the authorization
-     * response to the registered handler after a call to
+     * Reads an authorization request from a JSON string representation produced by
+     * {@link #jsonSerializeString()}. This method is just a convenience wrapper for
+     * {@link #jsonDeserialize(JSONObject)}, converting the JSON string to its JSON object form.
+     * @throws JSONException if the provided JSON does not match the expected structure.
+     */
+    @NonNull
+    public static AuthorizationResponse jsonDeserialize(@NonNull String jsonStr)
+            throws JSONException {
+        return jsonDeserialize(new JSONObject(jsonStr));
+    }
+
+    /**
+     * Produces an intent containing this authorization response. This is used to deliver the
+     * authorization response to the registered handler after a call to
      * {@link AuthorizationService#performAuthorizationRequest}.
      */
     @NonNull
     public Intent toIntent() {
         Intent data = new Intent();
-        data.putExtra(EXTRA_RESPONSE, this.toJsonString());
+        data.putExtra(EXTRA_RESPONSE, this.jsonSerializeString());
         return data;
     }
 
     /**
-     * Extracts an authorization response from an intent produced by {@link #toIntent()}. Use
-     * this to extract the response from the intent data passed to an activity registered as the
+     * Extracts an authorization response from an intent produced by {@link #toIntent()}. This is
+     * used to extract the response from the intent data passed to an activity registered as the
      * handler for {@link AuthorizationService#performAuthorizationRequest}.
      */
     @Nullable
@@ -566,7 +572,7 @@ public class AuthorizationResponse {
         }
 
         try {
-            return AuthorizationResponse.fromJson(dataIntent.getStringExtra(EXTRA_RESPONSE));
+            return AuthorizationResponse.jsonDeserialize(dataIntent.getStringExtra(EXTRA_RESPONSE));
         } catch (JSONException ex) {
             throw new IllegalArgumentException("Intent contains malformed auth response", ex);
         }

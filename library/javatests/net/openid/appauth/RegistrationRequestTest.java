@@ -137,7 +137,7 @@ public class RegistrationRequestTest {
     @Test
     public void testSerialize() throws JSONException {
         RegistrationRequest request = mMaximalRequestBuilder.build();
-        JSONObject json = request.serialize();
+        JSONObject json = request.jsonSerialize();
         assertMaximalValuesInJson(request, json);
         assertThat(json.getJSONObject(RegistrationRequest.KEY_CONFIGURATION).toString())
                 .isEqualTo(request.configuration.toJson().toString());
@@ -148,7 +148,7 @@ public class RegistrationRequestTest {
         Map<String, String> additionalParameters = Collections.singletonMap("test1", "value1");
         RegistrationRequest request = mMaximalRequestBuilder
                 .setAdditionalParameters(additionalParameters).build();
-        JSONObject json = request.serialize();
+        JSONObject json = request.jsonSerialize();
         assertMaximalValuesInJson(request, json);
         assertThat(JsonUtil.getStringMap(json, RegistrationRequest.KEY_ADDITIONAL_PARAMETERS))
                 .isEqualTo(additionalParameters);
@@ -157,7 +157,7 @@ public class RegistrationRequestTest {
     @Test
     public void testDeserialize() throws JSONException {
         mJson.put(RegistrationRequest.KEY_CONFIGURATION, getTestServiceConfig().toJson());
-        RegistrationRequest request = RegistrationRequest.deserialize(mJson);
+        RegistrationRequest request = RegistrationRequest.jsonDeserialize(mJson);
         assertThat(request.configuration.toJsonString())
                 .isEqualTo(getTestServiceConfig().toJsonString());
         assertMaximalValuesInJson(request, mJson);
@@ -171,7 +171,7 @@ public class RegistrationRequestTest {
         additionalParameters.put("key2", "value2");
         mJson.put(RegistrationRequest.KEY_ADDITIONAL_PARAMETERS,
                 JsonUtil.mapToJsonObject(additionalParameters));
-        RegistrationRequest request = RegistrationRequest.deserialize(mJson);
+        RegistrationRequest request = RegistrationRequest.jsonDeserialize(mJson);
         assertThat(request.additionalParameters).isEqualTo(additionalParameters);
     }
 
@@ -187,7 +187,7 @@ public class RegistrationRequestTest {
         assertThat(json.get(RegistrationRequest.PARAM_REDIRECT_URIS))
                 .isEqualTo(JsonUtil.toJsonArray(request.redirectUris));
         assertThat(json.get(RegistrationRequest.PARAM_APPLICATION_TYPE))
-                .isEqualTo(request.APPLICATION_TYPE_NATIVE);
+                .isEqualTo(RegistrationRequest.APPLICATION_TYPE_NATIVE);
         assertThat(json.get(RegistrationRequest.PARAM_RESPONSE_TYPES))
                 .isEqualTo(JsonUtil.toJsonArray(request.responseTypes));
         assertThat(json.get(RegistrationRequest.PARAM_GRANT_TYPES))

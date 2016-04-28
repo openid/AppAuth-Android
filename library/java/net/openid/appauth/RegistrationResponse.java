@@ -352,12 +352,11 @@ public class RegistrationResponse {
     }
 
     /**
-     * Reads a registration response from a JSON string, and associates it with the provided
-     * request.
+     * Reads a registration response JSON string received from an authorization server,
+     * and associates it with the provided request.
      *
-     * @throws JSONException            if the JSON is malformed or missing required fields.
-     * @throws MissingArgumentException if the JSON is missing fields required by the
-     *                                  specification.
+     * @throws JSONException if the JSON is malformed or missing required fields.
+     * @throws MissingArgumentException if the JSON is missing fields required by the specification.
      */
     @NonNull
     public static RegistrationResponse fromJson(
@@ -368,12 +367,11 @@ public class RegistrationResponse {
     }
 
     /**
-     * Reads a registration response from a JSON object, and associates it with the provided
-     * request.
+     * Reads a registration response JSON object received from an authorization server,
+     * and associates it with the provided request.
      *
-     * @throws JSONException            if the JSON is malformed or missing required fields.
-     * @throws MissingArgumentException if the JSON is missing fields required by the
-     *                                  specification.
+     * @throws JSONException if the JSON is malformed or missing required fields.
+     * @throws MissingArgumentException if the JSON is missing fields required by the specification.
      */
     @NonNull
     public static RegistrationResponse fromJson(
@@ -387,12 +385,13 @@ public class RegistrationResponse {
     }
 
     /**
-     * Converts the response to a JSON object for storage.
+     * Produces a JSON representation of the registration response for persistent storage or
+     * local transmission (e.g. between activities).
      */
     @NonNull
-    public JSONObject serialize() {
+    public JSONObject jsonSerialize() {
         JSONObject json = new JSONObject();
-        JsonUtil.put(json, KEY_REQUEST, request.serialize());
+        JsonUtil.put(json, KEY_REQUEST, request.jsonSerialize());
         JsonUtil.put(json, PARAM_CLIENT_ID, clientId);
         JsonUtil.putIfNotNull(json, PARAM_CLIENT_ID_ISSUED_AT, clientIdIssuedAt);
         JsonUtil.putIfNotNull(json, PARAM_CLIENT_SECRET, clientSecret);
@@ -405,38 +404,50 @@ public class RegistrationResponse {
     }
 
     /**
-     * Reads a registration response from a JSON string, and associates it with the provided
-     * request.
-     *
-     * @throws JSONException if the JSON is malformed or missing required fields.
-     * @throws MissingArgumentException if the JSON is missing fields required by the
-     *                                  specification.
+     * Produces a JSON string representation of the registration response for persistent storage or
+     * local transmission (e.g. between activities). This method is just a convenience wrapper
+     * for {@link #jsonSerialize()}, converting the JSON object to its string form.
      */
     @NonNull
-    public static RegistrationResponse deserialize(@NonNull String jsonStr)
-            throws JSONException, MissingArgumentException {
-        checkNotEmpty(jsonStr, "jsonStr cannot be null or empty");
-        return deserialize(new JSONObject(jsonStr));
+    public String jsonSerializeString() {
+        return jsonSerialize().toString();
     }
 
     /**
-     *
-     * @throws JSONException if the JSON is malformed or missing required fields.
-     * @throws MissingArgumentException if the JSON is missing fields required by the
-     *                                  specification.
+     * Reads a registration response from a JSON string representation produced by
+     * {@link #jsonSerialize()}.
+     * @throws JSONException if the provided JSON does not match the expected structure.
      */
-    public static RegistrationResponse deserialize(@NonNull JSONObject json) throws JSONException,
-            MissingArgumentException {
+    public static RegistrationResponse jsonDeserialize(@NonNull JSONObject json)
+            throws JSONException {
         checkNotNull(json, "json cannot be null");
         if (!json.has(KEY_REQUEST)) {
             throw new IllegalArgumentException("registration request not found in JSON");
         }
-        RegistrationRequest request = RegistrationRequest.deserialize(
-                json.getJSONObject(KEY_REQUEST));
 
-        return new RegistrationResponse.Builder(request)
-                .fromResponseJson(json)
-                .build();
+        try {
+            return new Builder(
+                    RegistrationRequest.jsonDeserialize(json.getJSONObject(KEY_REQUEST)))
+                    .fromResponseJson(json)
+                    .build();
+        } catch (MissingArgumentException e) {
+            // as the missing argument should have been present in the original JSON during
+            // serialization, we can treat missing arguments as malformed JSON in this case.
+            throw new JSONException("missing required field: " + e.getMissingField());
+        }
+    }
+
+    /**
+     * Reads a registration response from a JSON string representation produced by
+     * {@link #jsonSerializeString()}. This method is just a convenience wrapper for
+     * {@link #jsonDeserialize(JSONObject)}, converting the JSON string to its JSON object form.
+     * @throws JSONException if the provided JSON does not match the expected structure.
+     */
+    @NonNull
+    public static RegistrationResponse jsonDeserialize(@NonNull String jsonStr)
+            throws JSONException {
+        checkNotEmpty(jsonStr, "jsonStr cannot be null or empty");
+        return jsonDeserialize(new JSONObject(jsonStr));
     }
 
     /**
