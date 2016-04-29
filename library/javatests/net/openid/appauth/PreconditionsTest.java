@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 package net.openid.appauth;
 
 import static net.openid.appauth.Preconditions.checkArgument;
+import static net.openid.appauth.Preconditions.checkCollectionNotEmpty;
 import static net.openid.appauth.Preconditions.checkNotEmpty;
 import static net.openid.appauth.Preconditions.checkNotNull;
 import static net.openid.appauth.Preconditions.checkNullOrNotEmpty;
@@ -29,6 +30,9 @@ import org.junit.runner.RunWith;
 
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
@@ -115,5 +119,20 @@ public class PreconditionsTest {
     @Test(expected = IllegalArgumentException.class)
     public void testCheckNullOrNotEmpty_emptyString() {
         checkNullOrNotEmpty("", TEST_MSG);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testCheckCollectionNotEmpty_withNull() {
+        checkCollectionNotEmpty(null, TEST_MSG);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCheckCollectionNotEmpty_withEmptyList() {
+        checkCollectionNotEmpty(new ArrayList<Object>(), TEST_MSG);
+    }
+
+    @Test
+    public void testCheckCollectionNotEmpty() {
+        checkCollectionNotEmpty(Arrays.asList("value1", "value2"), TEST_MSG);
     }
 }

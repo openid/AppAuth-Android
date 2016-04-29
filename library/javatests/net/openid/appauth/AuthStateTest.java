@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -304,7 +304,7 @@ public class AuthStateTest {
         assertThat(request.configuration.tokenEndpoint)
                 .isEqualTo(state.getAuthorizationServiceConfiguration().tokenEndpoint);
         assertThat(request.clientId).isEqualTo(authResp.request.clientId);
-        assertThat(request.grantType).isEqualTo(TokenRequest.GRANT_TYPE_REFRESH_TOKEN);
+        assertThat(request.grantType).isEqualTo(GrantTypeValues.REFRESH_TOKEN);
         assertThat(request.refreshToken).isEqualTo(state.getRefreshToken());
     }
 
@@ -504,8 +504,8 @@ public class AuthStateTest {
         TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
         AuthState state = new AuthState(authResp, tokenResp, null);
 
-        String json = state.toJsonString();
-        AuthState restoredState = AuthState.fromJson(json);
+        String json = state.jsonSerializeString();
+        AuthState restoredState = AuthState.jsonDeserialize(json);
 
         assertThat(restoredState.isAuthorized()).isEqualTo(state.isAuthorized());
 
@@ -516,7 +516,7 @@ public class AuthStateTest {
         assertThat(restoredState.getRefreshToken()).isEqualTo(state.getRefreshToken());
         assertThat(restoredState.getScope()).isEqualTo(state.getScope());
         assertThat(restoredState.getNeedsTokenRefresh(mClock))
-                .isEqualTo(restoredState.getNeedsTokenRefresh(mClock));
+                .isEqualTo(state.getNeedsTokenRefresh(mClock));
     }
 
     @Test
@@ -525,7 +525,7 @@ public class AuthStateTest {
                 null,
                 AuthorizationException.AuthorizationRequestErrors.INVALID_REQUEST);
 
-        AuthState restored = AuthState.fromJson(state.toJsonString());
+        AuthState restored = AuthState.jsonDeserialize(state.jsonSerializeString());
         assertThat(restored.getAuthorizationException())
                 .isEqualTo(state.getAuthorizationException());
     }

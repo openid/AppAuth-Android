@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -14,6 +14,7 @@
 
 package net.openid.appauth;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -42,6 +43,7 @@ import net.openid.appauth.AuthorizationException.AuthorizationRequestErrors;
  * }
  * </pre>
  */
+@SuppressLint("Registered")
 public class RedirectUriReceiverActivity extends Activity {
 
     private static final String KEY_STATE = "state";

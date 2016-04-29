@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -49,6 +49,7 @@ public class AuthorizationServiceConfiguration {
 
     private static final String KEY_AUTHORIZATION_ENDPOINT = "authorizationEndpoint";
     private static final String KEY_TOKEN_ENDPOINT = "tokenEndpoint";
+    private static final String KEY_REGISTRATION_ENDPOINT = "registrationEndpoint";
     private static final String KEY_DISCOVERY_DOC = "discoveryDoc";
 
     /**
@@ -62,6 +63,13 @@ public class AuthorizationServiceConfiguration {
      */
     @NonNull
     public final Uri tokenEndpoint;
+
+    /**
+     * The authorization service's client registration endpoint.
+     */
+    @Nullable
+    public final Uri registrationEndpoint;
+
 
     /**
      * The discovery document describing the service, if it is an OpenID Connect provider.
@@ -78,9 +86,11 @@ public class AuthorizationServiceConfiguration {
      */
     public AuthorizationServiceConfiguration(
             @NonNull Uri authorizationEndpoint,
-            @NonNull Uri tokenEndpoint) {
+            @NonNull Uri tokenEndpoint,
+            @Nullable Uri registrationEndpoint) {
         this.authorizationEndpoint = checkNotNull(authorizationEndpoint);
         this.tokenEndpoint = checkNotNull(tokenEndpoint);
+        this.registrationEndpoint = registrationEndpoint;
         this.discoveryDoc = null;
     }
 
@@ -95,6 +105,7 @@ public class AuthorizationServiceConfiguration {
         this.discoveryDoc = discoveryDoc;
         this.authorizationEndpoint = discoveryDoc.getAuthorizationEndpoint();
         this.tokenEndpoint = discoveryDoc.getTokenEndpoint();
+        this.registrationEndpoint = discoveryDoc.getRegistrationEndpoint();
     }
 
     /**
@@ -105,6 +116,9 @@ public class AuthorizationServiceConfiguration {
         JSONObject json = new JSONObject();
         JsonUtil.put(json, KEY_AUTHORIZATION_ENDPOINT, authorizationEndpoint.toString());
         JsonUtil.put(json, KEY_TOKEN_ENDPOINT, tokenEndpoint.toString());
+        if (registrationEndpoint != null) {
+            JsonUtil.put(json, KEY_REGISTRATION_ENDPOINT, registrationEndpoint.toString());
+        }
         if (discoveryDoc != null) {
             JsonUtil.put(json, KEY_DISCOVERY_DOC, discoveryDoc.docJson);
         }
@@ -143,7 +157,8 @@ public class AuthorizationServiceConfiguration {
             checkArgument(json.has(KEY_TOKEN_ENDPOINT), "missing tokenEndpoint");
             return new AuthorizationServiceConfiguration(
                     JsonUtil.getUri(json, KEY_AUTHORIZATION_ENDPOINT),
-                    JsonUtil.getUri(json, KEY_TOKEN_ENDPOINT));
+                    JsonUtil.getUri(json, KEY_TOKEN_ENDPOINT),
+                    JsonUtil.getUri(json, KEY_REGISTRATION_ENDPOINT));
         }
     }
 

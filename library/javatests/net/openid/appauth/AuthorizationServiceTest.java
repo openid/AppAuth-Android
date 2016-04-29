@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -15,12 +15,17 @@
 package net.openid.appauth;
 
 import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
+import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
+import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
+import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET_EXPIRES_AT;
+import static net.openid.appauth.TestValues.TEST_IDP_REGISTRATION_ENDPOINT;
 import static net.openid.appauth.TestValues.TEST_IDP_TOKEN_ENDPOINT;
 import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
 import static net.openid.appauth.TestValues.TEST_REFRESH_TOKEN;
 import static net.openid.appauth.TestValues.TEST_STATE;
 import static net.openid.appauth.TestValues.getTestAuthCodeExchangeRequest;
 import static net.openid.appauth.TestValues.getTestAuthRequestBuilder;
+import static net.openid.appauth.TestValues.getTestRegistrationRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -35,6 +40,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.customtabs.CustomTabsClient;
 import android.support.customtabs.CustomTabsIntent;
@@ -62,6 +68,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -81,8 +88,16 @@ public class AuthorizationServiceTest {
             + "  \"token_type\": \"" + AuthorizationResponse.TOKEN_TYPE_BEARER + "\"\n"
             + "}";
 
+    private static final String REGISTRATION_RESPONSE_JSON = "{\n"
+            + " \"client_id\": \"" + TEST_CLIENT_ID + "\",\n"
+            + " \"client_secret\": \"" + TEST_CLIENT_SECRET + "\",\n"
+            + " \"client_secret_expires_at\": \"" + TEST_CLIENT_SECRET_EXPIRES_AT + "\",\n"
+            + " \"application_type\": " + RegistrationRequest.APPLICATION_TYPE_NATIVE + "\n"
+            + "}";
+
     private URL mUrl;
     private AuthorizationCallback mAuthCallback;
+    private RegistrationCallback mRegistrationCallback;
     private AuthorizationService mService;
     private InjectedUrlBuilder mBuilder;
     private OutputStream mOutputStream;
@@ -105,6 +120,7 @@ public class AuthorizationServiceTest {
         };
         mUrl = new URL("foo", "bar", -1, "/foobar", urlStreamHandler);
         mAuthCallback = new AuthorizationCallback();
+        mRegistrationCallback = new RegistrationCallback();
         mBuilder = new InjectedUrlBuilder();
         mService = new AuthorizationService(mContext, mBuilder, mBrowserHandler);
         mOutputStream = new ByteArrayOutputStream();
@@ -171,7 +187,40 @@ public class AuthorizationServiceTest {
         mAuthCallback.waitForCallback();
         assertTokenResponse(mAuthCallback.response, request);
         String postBody = mOutputStream.toString();
-        assertThat(postBody).isEqualTo(request.getFormUrlEncodedRequestBody());
+        assertThat(postBody).isEqualTo(UriUtil.formUrlEncode(request.getRequestParameters()));
+        assertEquals(TEST_IDP_TOKEN_ENDPOINT.toString(), mBuilder.mUri);
+    }
+
+    @Test
+    public void testTokenRequest_withBasicAuth() throws Exception {
+        ClientSecretBasic csb = new ClientSecretBasic(TEST_CLIENT_SECRET);
+        InputStream is = new ByteArrayInputStream(AUTH_CODE_EXCHANGE_RESPONSE_JSON.getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(is);
+        TokenRequest request = getTestAuthCodeExchangeRequest();
+        mService.performTokenRequest(request, csb, mAuthCallback);
+        mAuthCallback.waitForCallback();
+        assertTokenResponse(mAuthCallback.response, request);
+        String postBody = mOutputStream.toString();
+        assertTokenRequestBody(postBody, request.getRequestParameters());
+        assertEquals(TEST_IDP_TOKEN_ENDPOINT.toString(), mBuilder.mUri);
+        verify(mHttpConnection).setRequestProperty("Authorization",
+                csb.getRequestHeaders(TEST_CLIENT_ID).get("Authorization"));
+    }
+
+    @Test
+    public void testTokenRequest_withPostAuth() throws Exception {
+        ClientSecretPost csp = new ClientSecretPost(TEST_CLIENT_SECRET);
+        InputStream is = new ByteArrayInputStream(AUTH_CODE_EXCHANGE_RESPONSE_JSON.getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(is);
+        TokenRequest request = getTestAuthCodeExchangeRequest();
+        mService.performTokenRequest(request, csp, mAuthCallback);
+        mAuthCallback.waitForCallback();
+        assertTokenResponse(mAuthCallback.response, request);
+
+        String postBody = mOutputStream.toString();
+        Map<String, String> expectedRequestBody = request.getRequestParameters();
+        expectedRequestBody.putAll(csp.getRequestParameters(TEST_CLIENT_ID));
+        assertTokenRequestBody(postBody, expectedRequestBody);
         assertEquals(TEST_IDP_TOKEN_ENDPOINT.toString(), mBuilder.mUri);
     }
 
@@ -183,6 +232,29 @@ public class AuthorizationServiceTest {
         mAuthCallback.waitForCallback();
         assertNotNull(mAuthCallback.error);
         assertEquals(GeneralErrors.NETWORK_ERROR, mAuthCallback.error);
+    }
+
+    @Test
+    public void testRegistrationRequest() throws Exception {
+        InputStream is = new ByteArrayInputStream(REGISTRATION_RESPONSE_JSON.getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(is);
+        RegistrationRequest request = getTestRegistrationRequest();
+        mService.performRegistrationRequest(request, mRegistrationCallback);
+        mRegistrationCallback.waitForCallback();
+        assertRegistrationResponse(mRegistrationCallback.response, request);
+        String postBody = mOutputStream.toString();
+        assertThat(postBody).isEqualTo(request.toJsonString());
+        assertEquals(TEST_IDP_REGISTRATION_ENDPOINT.toString(), mBuilder.mUri);
+    }
+
+    @Test
+    public void testRegistrationRequest_IoException() throws Exception {
+        Exception ex = new IOException();
+        when(mHttpConnection.getInputStream()).thenThrow(ex);
+        mService.performRegistrationRequest(getTestRegistrationRequest(), mRegistrationCallback);
+        mRegistrationCallback.waitForCallback();
+        assertNotNull(mRegistrationCallback.error);
+        assertEquals(GeneralErrors.NETWORK_ERROR, mRegistrationCallback.error);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -212,6 +284,23 @@ public class AuthorizationServiceTest {
         assertEquals(TEST_ID_TOKEN, response.idToken);
     }
 
+    private void assertRegistrationResponse(RegistrationResponse response,
+                                            RegistrationRequest expectedRequest) {
+        assertThat(response).isNotNull();
+        assertThat(response.request).isEqualTo(expectedRequest);
+        assertThat(response.clientId).isEqualTo(TEST_CLIENT_ID);
+        assertThat(response.clientSecret).isEqualTo(TEST_CLIENT_SECRET);
+        assertThat(response.clientSecretExpiresAt).isEqualTo(TEST_CLIENT_SECRET_EXPIRES_AT);
+    }
+
+    private void assertTokenRequestBody(
+            String requestBody, Map<String, String> expectedParameters) {
+        Uri postBody = new Uri.Builder().encodedQuery(requestBody).build();
+        for (Map.Entry<String, String> param : expectedParameters.entrySet()) {
+            assertThat(postBody.getQueryParameter(param.getKey())).isEqualTo(param.getValue());
+        }
+    }
+
     private class InjectedUrlBuilder implements AuthorizationService.UrlBuilder {
         public String mUri;
 
@@ -233,6 +322,28 @@ public class AuthorizationServiceTest {
                 @Nullable AuthorizationException ex) {
             assertTrue((tokenResponse == null) ^ (ex == null));
             this.response = tokenResponse;
+            this.error = ex;
+            mSemaphore.release();
+        }
+
+        public void waitForCallback() throws Exception {
+            assertTrue(mSemaphore.tryAcquire(CALLBACK_TIMEOUT_MILLIS,
+                    TimeUnit.MILLISECONDS));
+        }
+    }
+
+    private static class RegistrationCallback implements
+            AuthorizationService.RegistrationResponseCallback {
+        private Semaphore mSemaphore = new Semaphore(0);
+        public RegistrationResponse response;
+        public AuthorizationException error;
+
+        @Override
+        public void onRegistrationRequestCompleted(
+                @Nullable RegistrationResponse registrationResponse,
+                @Nullable AuthorizationException ex) {
+            assertTrue((registrationResponse == null) ^ (ex == null));
+            this.response = registrationResponse;
             this.error = ex;
             mSemaphore.release();
         }

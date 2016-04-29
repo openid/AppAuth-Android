@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -70,13 +70,13 @@ public class AuthorizationRequestTest {
         mMinimalRequestBuilder = new AuthorizationRequest.Builder(
                 getTestServiceConfig(),
                 TEST_CLIENT_ID,
-                AuthorizationRequest.RESPONSE_TYPE_CODE,
+                ResponseTypeValues.CODE,
                 TEST_APP_REDIRECT_URI);
 
         mRequestBuilder = new AuthorizationRequest.Builder(
                 getTestServiceConfig(),
                 TEST_CLIENT_ID,
-                AuthorizationRequest.RESPONSE_TYPE_CODE,
+                ResponseTypeValues.CODE,
                 TEST_APP_REDIRECT_URI)
                 .setState(TEST_STATE)
                 .setScopes(AuthorizationRequest.SCOPE_OPENID, AuthorizationRequest.SCOPE_EMAIL)
@@ -104,7 +104,7 @@ public class AuthorizationRequestTest {
         AuthorizationRequest request = new AuthorizationRequest.Builder(
                 getTestServiceConfig(),
                 TEST_CLIENT_ID,
-                AuthorizationRequest.RESPONSE_TYPE_CODE,
+                ResponseTypeValues.CODE,
                 TEST_APP_REDIRECT_URI)
                 .setCodeVerifier(new String(codeVerifier))
                 .build();
@@ -419,7 +419,8 @@ public class AuthorizationRequestTest {
 
     @Test
     public void testSerialization() throws Exception {
-        AuthorizationRequest request = AuthorizationRequest.fromJson(mRequest.toJson());
+        AuthorizationRequest request =
+                AuthorizationRequest.jsonDeserialize(mRequest.jsonSerialize());
         assertValues(request);
     }
 
@@ -428,7 +429,8 @@ public class AuthorizationRequestTest {
         AuthorizationRequest request = mRequestBuilder
                 .setScopes((Iterable<String>)null)
                 .build();
-        AuthorizationRequest newRequest = AuthorizationRequest.fromJson(request.toJson());
+        AuthorizationRequest newRequest =
+                AuthorizationRequest.jsonDeserialize(request.jsonSerialize());
         assertNull(newRequest.scope);
     }
 
@@ -437,7 +439,8 @@ public class AuthorizationRequestTest {
         AuthorizationRequest request = mRequestBuilder
                 .setScopes(Collections.<String>emptyList())
                 .build();
-        AuthorizationRequest newRequest = AuthorizationRequest.fromJson(request.toJson());
+        AuthorizationRequest newRequest =
+                AuthorizationRequest.jsonDeserialize(request.jsonSerialize());
         assertNull(newRequest.scope);
     }
 
@@ -452,7 +455,7 @@ public class AuthorizationRequestTest {
         assertEquals("unexpected code verifier challenge method",
                 TEST_CODE_VERIFIER_CHALLENGE_METHOD, request.codeVerifierChallengeMethod);
         assertEquals("unexpected response type",
-                AuthorizationRequest.RESPONSE_TYPE_CODE,
+                ResponseTypeValues.CODE,
                 request.responseType);
         assertEquals("unexpected response mode",
                 AuthorizationRequest.RESPONSE_MODE_QUERY,

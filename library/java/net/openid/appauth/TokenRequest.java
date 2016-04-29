@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -95,25 +95,11 @@ public class TokenRequest {
                     PARAM_REFRESH_TOKEN,
                     PARAM_SCOPE)));
 
-    /**
-     * The grant type used for exchanging an authorization code for one or more tokens.
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.3"> "The OAuth 2.0
-     * Authorization
-     * Framework" (RFC 6749), Section 4.1.3</a>
-     */
-    public static final String GRANT_TYPE_AUTHORIZATION_CODE = "authorization_code";
-
-    /**
-     * The grant type used when exchanging a refresh token for a new token.
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-6"> "The OAuth 2.0
-     * Authorization
-     * Framework" (RFC 6749), Section 6</a>
-     */
-    public static final String GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
 
     /**
      * The grant type used when requesting an access token using a username and password.
      * This grant type is not directly supported by this library.
+     *
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.3.2"> "The OAuth 2.0
      * Authorization Framework" (RFC 6749), Section 4.3.2</a>
      */
@@ -122,6 +108,7 @@ public class TokenRequest {
     /**
      * The grant type used when requesting an access token using client credentials, typically
      * TLS client certificates. This grant type is not directly supported by this library.
+     *
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.4.2"> "The OAuth 2.0
      * Authorization Framework" (RFC 6749), Section 4.4.2</a>
      */
@@ -132,7 +119,7 @@ public class TokenRequest {
      * This configuration specifies how to connect to a particular OAuth provider.
      * Configurations may be
      * {@link AuthorizationServiceConfiguration#AuthorizationServiceConfiguration(Uri,
-     * Uri) created manually}, or
+     * Uri, Uri) created manually}, or
      * {@link AuthorizationServiceConfiguration#fetchFromUrl(Uri,
      * AuthorizationServiceConfiguration.RetrieveConfigurationCallback)
      * via an OpenID Connect Discovery Document}.
@@ -331,7 +318,7 @@ public class TokenRequest {
          *
          * <p>Scopes specified here are used to obtain a "down-scoped" access token, where the
          * set of scopes specified <em>must</em> be a subset of those already granted in
-         * previous requests.
+         * previous requests.</p>
          *
          * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3"> "The OAuth 2.0
          * Authorization Framework" (RFC 6749), Section 3.3</a>
@@ -353,7 +340,7 @@ public class TokenRequest {
          *
          * <p>Scopes specified here are used to obtain a "down-scoped" access token, where the
          * set of scopes specified <em>must</em> be a subset of those already granted in
-         * previous requests.
+         * previous requests.</p>
          *
          * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3"> "The OAuth 2.0
          * Authorization
@@ -373,7 +360,7 @@ public class TokenRequest {
          *
          * <p>Specifying an authorization code normally implies that this is a request to exchange
          * this authorization code for one or more tokens. If this is not intended, the grant type
-         * should be explicitly set.
+         * should be explicitly set.</p>
          */
         @NonNull
         public Builder setAuthorizationCode(@Nullable String authorizationCode) {
@@ -388,7 +375,7 @@ public class TokenRequest {
          *
          * <p>Specifying a refresh token normally implies that this is a request to exchange the
          * refresh token for a new token. If this is not intended, the grant type should be
-         * explicit set.
+         * explicit set.</p>
          */
         @NonNull
         public Builder setRefreshToken(@Nullable String refreshToken) {
@@ -429,20 +416,20 @@ public class TokenRequest {
         public TokenRequest build() {
             String grantType = inferGrantType();
 
-            if (GRANT_TYPE_AUTHORIZATION_CODE.equals(grantType)) {
+            if (GrantTypeValues.AUTHORIZATION_CODE.equals(grantType)) {
                 checkNotNull(mAuthorizationCode,
                         "authorization code must be specified for grant_type = "
-                                + GRANT_TYPE_AUTHORIZATION_CODE);
+                                + GrantTypeValues.AUTHORIZATION_CODE);
             }
 
-            if (GRANT_TYPE_REFRESH_TOKEN.equals(grantType)) {
+            if (GrantTypeValues.REFRESH_TOKEN.equals(grantType)) {
                 checkNotNull(mRefreshToken,
                         "refresh token must be specified for grant_type = "
-                                + GRANT_TYPE_REFRESH_TOKEN);
+                                + GrantTypeValues.REFRESH_TOKEN);
             }
 
 
-            if (grantType.equals(GRANT_TYPE_AUTHORIZATION_CODE) && mRedirectUri == null) {
+            if (grantType.equals(GrantTypeValues.AUTHORIZATION_CODE) && mRedirectUri == null) {
                 throw new IllegalStateException(
                         "no redirect URI specified on token request for code exchange");
             }
@@ -463,9 +450,9 @@ public class TokenRequest {
             if (mGrantType != null) {
                 return mGrantType;
             } else if (mAuthorizationCode != null) {
-                return GRANT_TYPE_AUTHORIZATION_CODE;
+                return GrantTypeValues.AUTHORIZATION_CODE;
             } else if (mRefreshToken != null) {
-                return GRANT_TYPE_REFRESH_TOKEN;
+                return GrantTypeValues.REFRESH_TOKEN;
             } else {
                 throw new IllegalStateException("grant type not specified and cannot be inferred");
             }
@@ -507,9 +494,8 @@ public class TokenRequest {
      * Produces the set of request parameters for this query, which can be further
      * processed into a request body.
      */
-    @VisibleForTesting
     @NonNull
-    Map<String, String> getRequestParameters() {
+    public Map<String, String> getRequestParameters() {
         Map<String, String> params = new HashMap<>();
         params.put(PARAM_GRANT_TYPE, grantType);
         params.put(PARAM_CLIENT_ID, clientId);
@@ -533,28 +519,11 @@ public class TokenRequest {
     }
 
     /**
-     * Produces the {@code application/x-www-form-urlencoded} request string that can be used to
-     * POST this request to the token endpoint.
+     * Produces a JSON string representation of the token request for persistent storage or
+     * local transmission (e.g. between activities).
      */
     @NonNull
-    public String getFormUrlEncodedRequestBody() {
-        Map<String, String> requestParams = getRequestParameters();
-
-        // use android.net.Uri to produce the url-encoded string by adding all
-        // parameters, then requesting the encoded query.
-        Uri.Builder encodingUri = new Uri.Builder();
-        for (Entry<String, String> param : requestParams.entrySet()) {
-            encodingUri.appendQueryParameter(param.getKey(), param.getValue());
-        }
-
-        return encodingUri.build().getEncodedQuery();
-    }
-
-    /**
-     * Converts the token request to JSON for storage or transmission.
-     */
-    @NonNull
-    public JSONObject toJson() {
+    public JSONObject jsonSerialize() {
         JSONObject json = new JSONObject();
         JsonUtil.put(json, KEY_CONFIGURATION, configuration.toJson());
         JsonUtil.put(json, KEY_CLIENT_ID, clientId);
@@ -569,31 +538,22 @@ public class TokenRequest {
     }
 
     /**
-     * Converts the authorization request to a JSON string for storage or transmission.
+     * Produces a JSON string representation of the token request for persistent storage or
+     * local transmission (e.g. between activities). This method is just a convenience wrapper
+     * for {@link #jsonSerialize()}, converting the JSON object to its string form.
      */
     @NonNull
-    public String toJsonString() {
-        return toJson().toString();
+    public String jsonSerializeString() {
+        return jsonSerialize().toString();
     }
 
     /**
-     * Reads a token request from a JSON string representation produced by the
-     * {@link #toJson()} method or some other equivalent producer.
+     * Reads a token request from a JSON string representation produced by
+     * {@link #jsonSerialize()}.
      * @throws JSONException if the provided JSON does not match the expected structure.
      */
     @NonNull
-    public static TokenRequest fromJson(@NonNull String json) throws JSONException {
-        checkNotNull(json, "json string cannot be null");
-        return fromJson(new JSONObject(json));
-    }
-
-    /**
-     * Reads a token request from a JSON representation produced by the
-     * {@link #toJson()} method or some other equivalent producer.
-     * @throws JSONException if the provided JSON does not match the expected structure.
-     */
-    @NonNull
-    public static TokenRequest fromJson(JSONObject json) throws JSONException {
+    public static TokenRequest jsonDeserialize(JSONObject json) throws JSONException {
         checkNotNull(json, "json object cannot be null");
 
         TokenRequest.Builder builder = new TokenRequest.Builder(
@@ -610,5 +570,17 @@ public class TokenRequest {
         }
 
         return builder.build();
+    }
+
+    /**
+     * Reads a token request from a JSON string representation produced by
+     * {@link #jsonSerializeString()}. This method is just a convenience wrapper for
+     * {@link #jsonDeserialize(JSONObject)}, converting the JSON string to its JSON object form.
+     * @throws JSONException if the provided JSON does not match the expected structure.
+     */
+    @NonNull
+    public static TokenRequest jsonDeserialize(@NonNull String json) throws JSONException {
+        checkNotNull(json, "json string cannot be null");
+        return jsonDeserialize(new JSONObject(json));
     }
 }

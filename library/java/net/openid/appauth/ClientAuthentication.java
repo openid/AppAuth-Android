@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
+ * Copyright 2016 The AppAuth for Android Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -14,18 +14,18 @@
 
 package net.openid.appauth;
 
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Map;
 
-class TestClock implements Clock {
+public interface ClientAuthentication {
+    /**
+     * Constructs any extra parameters necessary to include in the request headers for the client
+     * authentication.
+     */
+    Map<String, String> getRequestHeaders(String clientId);
 
-    public final AtomicLong currentTime = new AtomicLong();
-
-    TestClock(long time) {
-        currentTime.set(time);
-    }
-
-    @Override
-    public long getCurrentTimeMillis() {
-        return currentTime.get();
-    }
+    /**
+     * Constructs any extra parameters necessary to include in the request body for the client
+     * authentication.
+     */
+    Map<String, String> getRequestParameters(String clientId);
 }

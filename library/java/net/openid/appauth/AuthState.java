@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -289,7 +289,7 @@ public class AuthState {
             @Nullable AuthorizationResponse authResponse,
             @Nullable AuthorizationException authException) {
         checkArgument(authResponse != null ^ authException != null,
-                "exactly one of authResponse or authError should be non-null");
+                "exactly one of authResponse or authException should be non-null");
         if (authException != null) {
             if (authException.type == AuthorizationException.TYPE_OAUTH_AUTHORIZATION_ERROR) {
                 mAuthorizationException = authException;
@@ -316,7 +316,7 @@ public class AuthState {
             @Nullable TokenResponse tokenResponse,
             @Nullable AuthorizationException authException) {
         checkArgument(tokenResponse != null ^ authException != null,
-                "exactly one of authResponse or authError should be non-null");
+                "exactly one of tokenResponse or authException should be non-null");
 
         if (mAuthorizationException != null) {
             // Calling updateFromTokenResponse while in an error state probably means the developer
@@ -437,7 +437,7 @@ public class AuthState {
         return new TokenRequest.Builder(
                 mLastAuthorizationResponse.request.configuration,
                 mLastAuthorizationResponse.request.clientId)
-                .setGrantType(TokenRequest.GRANT_TYPE_REFRESH_TOKEN)
+                .setGrantType(GrantTypeValues.REFRESH_TOKEN)
                 .setScope(mLastAuthorizationResponse.request.scope)
                 .setRefreshToken(mRefreshToken)
                 .setAdditionalParameters(additionalParameters)
@@ -445,9 +445,10 @@ public class AuthState {
     }
 
     /**
-     * Converts the authorization state to a JSON object for storage or transmission.
+     * Produces a JSON representation of the authorization state for persistent storage or local
+     * transmission (e.g. between activities).
      */
-    public JSONObject toJson() {
+    public JSONObject jsonSerialize() {
         JSONObject json = new JSONObject();
         JsonUtil.putIfNotNull(json, KEY_REFRESH_TOKEN, mRefreshToken);
         JsonUtil.putIfNotNull(json, KEY_SCOPE, mScope);
@@ -460,29 +461,32 @@ public class AuthState {
             JsonUtil.put(
                     json,
                     KEY_LAST_AUTHORIZATION_RESPONSE,
-                    mLastAuthorizationResponse.toJson());
+                    mLastAuthorizationResponse.jsonSerialize());
         }
         if (mLastTokenResponse != null) {
             JsonUtil.put(
                     json,
                     KEY_LAST_TOKEN_RESPONSE,
-                    mLastTokenResponse.toJson());
+                    mLastTokenResponse.jsonSerialize());
         }
         return json;
     }
 
     /**
-     * Converts the authorization state to a JSON string for storage or transmission.
+     * Produces a JSON string representation of the authorization state for persistent storage or
+     * local transmission (e.g. between activities). This method is just a convenience wrapper
+     * for {@link #jsonSerialize()}, converting the JSON object to its string form.
      */
-    public String toJsonString() {
-        return toJson().toString();
+    public String jsonSerializeString() {
+        return jsonSerialize().toString();
     }
 
     /**
-     * Restores authorization state from JSON produced by {@link #toJson()}.
-     * @throws JSONException if the JSON is malformed or missing required fields.
+     * Reads an authorization state instance from a JSON string representation produced by
+     * {@link #jsonSerialize()}.
+     * @throws JSONException if the provided JSON does not match the expected structure.
      */
-    public static AuthState fromJson(@NonNull JSONObject json) throws JSONException {
+    public static AuthState jsonDeserialize(@NonNull JSONObject json) throws JSONException {
         checkNotNull(json, "json cannot be null");
 
         AuthState state = new AuthState();
@@ -493,11 +497,11 @@ public class AuthState {
                     json.getJSONObject(KEY_AUTHORIZATION_EXCEPTION));
         }
         if (json.has(KEY_LAST_AUTHORIZATION_RESPONSE)) {
-            state.mLastAuthorizationResponse = AuthorizationResponse.fromJson(
+            state.mLastAuthorizationResponse = AuthorizationResponse.jsonDeserialize(
                     json.getJSONObject(KEY_LAST_AUTHORIZATION_RESPONSE));
         }
         if (json.has(KEY_LAST_TOKEN_RESPONSE)) {
-            state.mLastTokenResponse = TokenResponse.fromJson(
+            state.mLastTokenResponse = TokenResponse.jsonDeserialize(
                     json.getJSONObject(KEY_LAST_TOKEN_RESPONSE));
         }
 
@@ -505,12 +509,14 @@ public class AuthState {
     }
 
     /**
-     * Restored authorization state from a JSON string produced by {@link #toJsonString()}.
-     * @throws JSONException if the JSON is malformed or missing required fields.
+     * Reads an authorization state instance from a JSON string representation produced by
+     * {@link #jsonSerializeString()}. This method is just a convenience wrapper for
+     * {@link #jsonDeserialize(JSONObject)}, converting the JSON string to its JSON object form.
+     * @throws JSONException if the provided JSON does not match the expected structure.
      */
-    public static AuthState fromJson(@NonNull String jsonStr) throws JSONException {
+    public static AuthState jsonDeserialize(@NonNull String jsonStr) throws JSONException {
         checkNotEmpty(jsonStr, "jsonStr cannot be null or empty");
-        return fromJson(new JSONObject(jsonStr));
+        return jsonDeserialize(new JSONObject(jsonStr));
     }
 
     /**

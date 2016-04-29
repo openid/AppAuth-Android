@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -17,6 +17,8 @@ package net.openid.appauth;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+
+import java.util.Collection;
 
 /**
  * Utility class for guava style pre-condition checks.
@@ -60,6 +62,17 @@ final class Preconditions {
     public static String checkNotEmpty(String str, @Nullable Object errorMessage) {
         checkArgument(!TextUtils.isEmpty(str), errorMessage);
         return str;
+    }
+
+    /**
+     * Ensures that a collection is not null or empty.
+     */
+    @NonNull
+    public static <T extends Collection<?>> T checkCollectionNotEmpty(
+            T collection, @Nullable Object errorMessage) {
+        checkNotNull(collection, errorMessage);
+        checkArgument(!collection.isEmpty(), errorMessage);
+        return collection;
     }
 
     /**

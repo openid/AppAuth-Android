@@ -448,7 +448,7 @@ Description: https://source.android.com/source/code-style.html
   <!--################################################-->
 
   <!-- Ensure the copyright header appears in every java source file -->
-  <module name="Header">
+  <module name="RegexpHeader">
     <property name="headerFile" value="${checkstyle.java.header}"/>
     <property name="fileExtensions" value="java"/>
   </module>

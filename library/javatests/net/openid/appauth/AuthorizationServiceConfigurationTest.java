@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -55,6 +55,7 @@ public class AuthorizationServiceConfigurationTest {
     private static final String TEST_ISSUER = "test_issuer";
     private static final String TEST_AUTH_ENDPOINT = "https://test.openid.com/o/oauth/auth";
     private static final String TEST_TOKEN_ENDPOINT = "https://test.openid.com/o/oauth/token";
+    private static final String TEST_REGISTRATION_ENDPOINT = "https://test.openid.com/o/oauth/registration";
     private static final String TEST_USERINFO_ENDPOINT = "https://test.openid.com/o/oauth/userinfo";
     private static final String TEST_JWKS_URI = "https://test.openid.com/o/oauth/jwks";
     private static final List<String> TEST_RESPONSE_TYPE_SUPPORTED = Arrays.asList("code", "token");
@@ -70,6 +71,7 @@ public class AuthorizationServiceConfigurationTest {
             + " \"issuer\": \"" + TEST_ISSUER + "\",\n"
             + " \"authorization_endpoint\": \"" + TEST_AUTH_ENDPOINT + "\",\n"
             + " \"token_endpoint\": \"" + TEST_TOKEN_ENDPOINT + "\",\n"
+            + " \"registration_endpoint\": \"" + TEST_REGISTRATION_ENDPOINT + "\",\n"
             + " \"userinfo_endpoint\": \"" + TEST_USERINFO_ENDPOINT + "\",\n"
             + " \"jwks_uri\": \"" + TEST_JWKS_URI + "\",\n"
             + " \"response_types_supported\": " + toJson(TEST_RESPONSE_TYPE_SUPPORTED) + ",\n"
@@ -125,7 +127,8 @@ public class AuthorizationServiceConfigurationTest {
         mCallback = new RetrievalCallback();
         mConfig = new AuthorizationServiceConfiguration(
                 Uri.parse(TEST_AUTH_ENDPOINT),
-                Uri.parse(TEST_TOKEN_ENDPOINT));
+                Uri.parse(TEST_TOKEN_ENDPOINT),
+                Uri.parse(TEST_REGISTRATION_ENDPOINT));
     }
 
     @Test
@@ -161,6 +164,7 @@ public class AuthorizationServiceConfigurationTest {
     private void assertMembers(AuthorizationServiceConfiguration config) {
         assertEquals(TEST_AUTH_ENDPOINT, config.authorizationEndpoint.toString());
         assertEquals(TEST_TOKEN_ENDPOINT, config.tokenEndpoint.toString());
+        assertEquals(TEST_REGISTRATION_ENDPOINT, config.registrationEndpoint.toString());
     }
 
     @Test

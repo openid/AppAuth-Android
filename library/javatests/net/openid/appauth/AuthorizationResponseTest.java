@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -26,7 +26,6 @@ import static org.junit.Assert.assertTrue;
 
 import android.net.Uri;
 
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -118,8 +117,8 @@ public class AuthorizationResponseTest {
 
     @Test
     public void testSerialization() throws Exception {
-        JSONObject json = mAuthorizationResponse.toJson();
-        AuthorizationResponse authResponse = AuthorizationResponse.fromJson(json);
+        String json = mAuthorizationResponse.jsonSerializeString();
+        AuthorizationResponse authResponse = AuthorizationResponse.jsonDeserialize(json);
         checkExpectedFields(authResponse);
     }
 

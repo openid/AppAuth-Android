@@ -101,16 +101,11 @@ task doFirst {
 }
 
 buildscript {
-    // workaround for the Android plugin thinking that gradle 2.11 is less
-    // up-to-date than gradle 2.2:
-    // https://discuss.gradle.org/t/gradle-thinks-2-10-is-less-than-2-2-when-resolving-plugins
-    System.properties['com.android.build.gradle.overrideVersionCheck'] = 'true'
-
     repositories {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.5.0'
+        classpath 'com.android.tools.build:gradle:2.1.0'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.3'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
         classpath 'org.ajoberstar:gradle-git:1.4.2'

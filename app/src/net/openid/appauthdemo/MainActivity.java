@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -33,7 +33,12 @@ import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
+import net.openid.appauth.ClientSecretBasic;
+import net.openid.appauth.RegistrationRequest;
+import net.openid.appauth.RegistrationResponse;
+import net.openid.appauth.ResponseTypeValues;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -76,7 +81,12 @@ public class MainActivity extends AppCompatActivity {
                             } else {
                                 Log.d(TAG, "configuration retrieved for " + idp.name
                                         + ", proceeding");
-                                makeAuthRequest(serviceConfiguration, idp);
+                                if (idp.getClientId() == null) {
+                                    // Do dynamic client registration if no client_id
+                                    makeRegistrationRequest(serviceConfiguration, idp);
+                                } else {
+                                    makeAuthRequest(serviceConfiguration, idp);
+                                }
                             }
                         }
                     };
@@ -122,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
         AuthorizationRequest authRequest = new AuthorizationRequest.Builder(
                 serviceConfig,
                 idp.getClientId(),
-                AuthorizationRequest.RESPONSE_TYPE_CODE,
+                ResponseTypeValues.CODE,
                 idp.getRedirectUri())
                 .setScope(idp.getScope())
                 .build();
@@ -133,11 +143,43 @@ public class MainActivity extends AppCompatActivity {
                 TokenActivity.createPostAuthorizationIntent(
                         this,
                         authRequest,
-                        serviceConfig.discoveryDoc),
+                        serviceConfig.discoveryDoc,
+                        idp.getClientSecret()),
                 mAuthService.createCustomTabsIntentBuilder()
                         .setToolbarColor(getColorCompat(R.color.colorAccent))
                         .build());
     }
+
+    private void makeRegistrationRequest(
+            @NonNull AuthorizationServiceConfiguration serviceConfig,
+            @NonNull final IdentityProvider idp) {
+
+        final RegistrationRequest registrationRequest = new RegistrationRequest.Builder(
+                serviceConfig,
+                Arrays.asList(idp.getRedirectUri()))
+                .setTokenEndpointAuthenticationMethod(ClientSecretBasic.NAME)
+                .build();
+
+        Log.d(TAG, "Making registration request to " + serviceConfig.registrationEndpoint);
+        mAuthService.performRegistrationRequest(
+                registrationRequest,
+                new AuthorizationService.RegistrationResponseCallback() {
+                    @Override
+                    public void onRegistrationRequestCompleted(
+                            @Nullable RegistrationResponse registrationResponse,
+                            @Nullable AuthorizationException ex) {
+                        Log.d(TAG, "Registration request complete");
+                        if (registrationResponse != null) {
+                            idp.setClientId(registrationResponse.clientId);
+                            idp.setClientSecret(registrationResponse.clientSecret);
+                            Log.d(TAG, "Registration request complete successfully");
+                            // Continue with the authentication
+                            makeAuthRequest(registrationResponse.request.configuration, idp);
+                        }
+                    }
+                });
+    }
+
 
     @TargetApi(Build.VERSION_CODES.M)
     @SuppressWarnings("deprecation")
