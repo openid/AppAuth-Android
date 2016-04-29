@@ -95,7 +95,7 @@ public class PreconditionsTest {
         assertSame(testString, checkNotEmpty(testString, TEST_MSG));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void testCheckNotEmpty_nullString() {
         checkNotEmpty(null, TEST_MSG);
     }
