@@ -50,22 +50,6 @@ import java.util.Set;
 public class AuthorizationRequest {
 
     /**
-     * Instructs the authorization server to send response parameters using
-     * the query portion of the redirect URI.
-     * @see <a href="http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#ResponseModes">
-     * "OAuth 2.0 Multiple Response Type Encoding Practices", Section 2.1</a>
-     */
-    public static final String RESPONSE_MODE_QUERY = "query";
-
-    /**
-     * Instructs the authorization server to send response parameters using
-     * the fragment portion of the redirect URI.
-     * @see <a href="http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#ResponseModes">
-     * "OAuth 2.0 Multiple Response Type Encoding Practices", Section 2.1</a>
-     */
-    public static final String RESPONSE_MODE_FRAGMENT = "fragment";
-
-    /**
      * A scope for OpenID based authorization.
      * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
      * Connect Core 1.0", Section 3.1.2.1</a>
@@ -221,6 +205,35 @@ public class AuthorizationRequest {
          * Connect Core 1.0", Section 3.1.2.6</a>
          */
         public static final String SELECT_ACCOUNT = "select_account";
+    }
+
+    /**
+     * All spec-defined values for the OAuth2 / OpenID Connect {@code response_mode} parameter.
+     * @see Builder#setResponseMode(String)
+     * @see <a href="http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#ResponseModes">
+     * "OAuth 2.0 Multiple Response Type Encoding Practices", Section 2.1</a>
+     * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
+     * Connect Core 1.0", Section 3.1.2.1</a>
+     */
+    // SuppressWarnings justification: the constants defined are not directly used by the library,
+    // existing only for convenience of the developer.
+    @SuppressWarnings("unused")
+    public static final class ResponseMode {
+        /**
+         * Instructs the authorization server to send response parameters using
+         * the query portion of the redirect URI.
+         * @see <a href="http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#ResponseModes">
+         * "OAuth 2.0 Multiple Response Type Encoding Practices", Section 2.1</a>
+         */
+        public static final String QUERY = "query";
+
+        /**
+         * Instructs the authorization server to send response parameters using
+         * the fragment portion of the redirect URI.
+         * @see <a href="http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#ResponseModes">
+         * "OAuth 2.0 Multiple Response Type Encoding Practices", Section 2.1</a>
+         */
+        public static final String FRAGMENT = "fragment";
     }
 
     @VisibleForTesting
