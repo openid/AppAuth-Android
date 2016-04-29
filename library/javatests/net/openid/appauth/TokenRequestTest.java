@@ -60,7 +60,7 @@ public class TokenRequestTest {
     }
 
     @SuppressWarnings("ConstantConditions")
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void testBuild_nullClientId() {
         new TokenRequest.Builder(getTestServiceConfig(), null)
                 .build();

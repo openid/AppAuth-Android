@@ -123,6 +123,9 @@ public class AuthorizationRequest {
      * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
      * Connect Core 1.0", Section 3.1.2.1</a>
      */
+    // SuppressWarnings justification: the constants defined are not directly used by the library,
+    // existing only for convenience of the developer.
+    @SuppressWarnings("unused")
     public static final class Display {
 
         /**
@@ -159,6 +162,9 @@ public class AuthorizationRequest {
      * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
      * Connect Core 1.0", Section 3.1.2.1</a>
      */
+    // SuppressWarnings justification: the constants defined are not directly used by the library,
+    // existing only for convenience of the developer.
+    @SuppressWarnings("unused")
     public static final class Prompt {
 
         /**
@@ -434,10 +440,16 @@ public class AuthorizationRequest {
      */
     public static final class Builder {
 
+        // SuppressWarnings justification: static analysis incorrectly determines that this field
+        // is not initialized, as it is indirectly initialized by setConfiguration
         @NonNull
+        @SuppressWarnings("NullableProblems")
         private AuthorizationServiceConfiguration mConfiguration;
 
+        // SuppressWarnings justification: static analysis incorrectly determines that this field
+        // is not initialized, as it is indirectly initialized by setClientId
         @NonNull
+        @SuppressWarnings("NullableProblems")
         private String mClientId;
 
         @Nullable
@@ -446,10 +458,16 @@ public class AuthorizationRequest {
         @Nullable
         private String mPrompt;
 
+        // SuppressWarnings justification: static analysis incorrectly determines that this field
+        // is not initialized, as it is indirectly initialized by setResponseType
         @NonNull
+        @SuppressWarnings("NullableProblems")
         private String mResponseType;
 
+        // SuppressWarnings justification: static analysis incorrectly determines that this field
+        // is not initialized, as it is indirectly initialized by setRedirectUri
         @NonNull
+        @SuppressWarnings("NullableProblems")
         private Uri mRedirectUri;
 
         @Nullable
@@ -510,8 +528,7 @@ public class AuthorizationRequest {
          */
         @NonNull
         public Builder setClientId(@NonNull String clientId) {
-            checkArgument(!TextUtils.isEmpty(clientId), "client ID cannot be null or empty");
-            mClientId = clientId;
+            mClientId = checkNotEmpty(clientId, "client ID cannot be null or empty");
             return this;
         }
 
@@ -537,7 +554,7 @@ public class AuthorizationRequest {
          */
         @NonNull
         public Builder setPrompt(@Nullable String prompt) {
-            mPrompt = Preconditions.checkNullOrNotEmpty(prompt, "prompt must be null or non-empty");
+            mPrompt = checkNullOrNotEmpty(prompt, "prompt must be null or non-empty");
             return this;
         }
 
@@ -587,9 +604,8 @@ public class AuthorizationRequest {
          */
         @NonNull
         public Builder setResponseType(@NonNull String responseType) {
-            checkArgument(!TextUtils.isEmpty(responseType),
+            mResponseType = checkNotEmpty(responseType,
                     "expected response type cannot be null or empty");
-            mResponseType = responseType;
             return this;
         }
 
@@ -671,11 +687,7 @@ public class AuthorizationRequest {
          */
         @NonNull
         public Builder setState(@Nullable String state) {
-            if (state != null) {
-                checkArgument(!TextUtils.isEmpty(state),
-                        "state cannot be empty if defined");
-            }
-            mState = state;
+            mState = checkNullOrNotEmpty(state, "state cannot be empty if defined");
             return this;
         }
 
@@ -922,6 +934,7 @@ public class AuthorizationRequest {
                 JsonUtil.getString(json, KEY_RESPONSE_TYPE),
                 JsonUtil.getUri(json, KEY_REDIRECT_URI))
                 .setDisplay(JsonUtil.getStringIfDefined(json, KEY_DISPLAY))
+                .setPrompt(JsonUtil.getStringIfDefined(json, KEY_PROMPT))
                 .setState(JsonUtil.getStringIfDefined(json, KEY_STATE))
                 .setCodeVerifier(
                         JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER),

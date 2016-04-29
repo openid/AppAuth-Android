@@ -60,6 +60,9 @@ final class Preconditions {
      */
     @NonNull
     public static String checkNotEmpty(String str, @Nullable Object errorMessage) {
+        // ensure that we throw NullPointerException if the value is null, otherwise,
+        // IllegalArgumentException if it is empty
+        checkNotNull(str, errorMessage);
         checkArgument(!TextUtils.isEmpty(str), errorMessage);
         return str;
     }
