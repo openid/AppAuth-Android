@@ -42,20 +42,40 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:gravity="center"
-                android:orientation="horizontal">
-                <Button
-                    android:id="@+id/refresh_token"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/refresh_token"
-                    style="@style/Widget.AppCompat.Button"/>
+                android:orientation="vertical">
 
-                <Button
-                    android:id="@+id/view_profile"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/view_profile"
-                    style="@style/Widget.AppCompat.Button" />
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <Button
+                        android:id="@+id/refresh_token"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/refresh_token"
+                        style="@style/Widget.AppCompat.Button"/>
+
+                    <Button
+                        android:id="@+id/view_profile"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/view_profile"
+                        style="@style/Widget.AppCompat.Button" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/logout"
+                        android:id="@+id/logout" />
+                </LinearLayout>
             </LinearLayout>
 
             <TextView

@@ -195,8 +195,8 @@ public class AuthorizationServiceConfiguration {
             @NonNull AuthorizationService.UrlBuilder urlBuilder) {
         checkNotNull(openIdConnectDiscoveryUri, "openIDConnectDiscoveryUri cannot be null");
         checkNotNull(callback, "callback cannot be null");
-        checkArgument("https".equals(openIdConnectDiscoveryUri.getScheme()),
-                "openIDConnectDiscoveryUri must be https");
+        // checkArgument("https".equals(openIdConnectDiscoveryUri.getScheme()),
+        //        "openIDConnectDiscoveryUri must be https");
         URL url;
         try {
             url = urlBuilder.buildUrlFromString(openIdConnectDiscoveryUri.toString());

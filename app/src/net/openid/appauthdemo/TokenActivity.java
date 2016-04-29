@@ -46,6 +46,8 @@ import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceDiscovery;
+import net.openid.appauth.LogoutRequest;
+import net.openid.appauth.LogoutService;
 import net.openid.appauth.TokenRequest;
 import net.openid.appauth.TokenResponse;
 
@@ -218,6 +220,20 @@ public class TokenActivity extends AppCompatActivity {
             });
         }
 
+        Button logoutButton = (Button) findViewById(R.id.logout);
+        logoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        logout();
+                        return null;
+                    }
+                }.execute();
+            }
+        });
+
         View userInfoCard = findViewById(R.id.userinfo_card);
         if (mUserInfoJson == null) {
             userInfoCard.setVisibility(View.INVISIBLE);
@@ -317,6 +333,41 @@ public class TokenActivity extends AppCompatActivity {
                         }
                     }
                 }
+            }
+        });
+    }
+
+    private void logout() {
+        if (mAuthState.getAuthorizationServiceConfiguration() == null) {
+            Log.e(TAG, "Cannot make userInfo request without service configuration");
+        }
+
+        mAuthState.performActionWithFreshTokens(mAuthService, new AuthState.AuthStateAction() {
+            @Override
+            public void execute(String accessToken, String idToken, AuthorizationException ex) {
+                if (ex != null) {
+                    Log.e(TAG, "Token refresh failed when fetching user info");
+                    return;
+                }
+
+                AuthorizationServiceDiscovery discoveryDoc = getDiscoveryDocFromIntent(getIntent());
+                if (discoveryDoc == null) {
+                    throw new IllegalStateException("no available discovery doc");
+                }
+
+                Uri endSessionEndpoint = Uri.parse(discoveryDoc.getEndSessionEndpoint().toString());
+
+                String logoutUri = getResources().getString(R.string.keycloak_auth_logout_uri);
+                LogoutRequest logoutRequest = new LogoutRequest(endSessionEndpoint,
+                        Uri.parse(logoutUri));
+
+                LogoutService logoutService = new LogoutService(TokenActivity.this);
+                logoutService.performLogoutRequest(
+                        logoutRequest,
+                        PendingIntent.getActivity(
+                                TokenActivity.this, logoutRequest.hashCode(),
+                                new Intent(TokenActivity.this, MainActivity.class), 0)
+                );
             }
         });
     }
