@@ -62,7 +62,7 @@ class TestValues {
 
     public static AuthorizationRequest.Builder getTestAuthRequestBuilder() {
         return getMinimalAuthRequestBuilder(ResponseTypeValues.CODE)
-                .setScopes(AuthorizationRequest.SCOPE_OPENID, AuthorizationRequest.SCOPE_EMAIL)
+                .setScopes(AuthorizationRequest.Scope.OPENID, AuthorizationRequest.Scope.EMAIL)
                 .setCodeVerifier(TEST_CODE_VERIFIER);
     }
 

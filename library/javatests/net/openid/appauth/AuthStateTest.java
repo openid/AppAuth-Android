@@ -123,7 +123,7 @@ public class AuthStateTest {
         // simulate a situation in which the response grants a subset of the requested scopes,
         // perhaps due to policy or user preference
         AuthorizationResponse resp = getTestAuthResponseBuilder()
-                .setScopes(AuthorizationRequest.SCOPE_OPENID)
+                .setScopes(AuthorizationRequest.Scope.OPENID)
                 .build();
         AuthState state = new AuthState(resp, null);
 
@@ -217,7 +217,7 @@ public class AuthStateTest {
     @Test
     public void testGetAccessToken_fromAuthResponse() {
         AuthorizationRequest authReq = getMinimalAuthRequestBuilder("code token")
-                .setScope(AuthorizationRequest.SCOPE_EMAIL)
+                .setScope(AuthorizationRequest.Scope.EMAIL)
                 .build();
         AuthorizationResponse authResp = new AuthorizationResponse.Builder(authReq)
                 .setAuthorizationCode(TEST_AUTH_CODE)
@@ -237,7 +237,7 @@ public class AuthStateTest {
     @Test
     public void testGetAccessToken_fromTokenResponse() {
         AuthorizationRequest authReq = getMinimalAuthRequestBuilder("code token")
-                .setScope(AuthorizationRequest.SCOPE_EMAIL)
+                .setScope(AuthorizationRequest.Scope.EMAIL)
                 .build();
         AuthorizationResponse authResp = new AuthorizationResponse.Builder(authReq)
                 .setAuthorizationCode(TEST_AUTH_CODE)
@@ -257,7 +257,7 @@ public class AuthStateTest {
     @Test
     public void testGetIdToken_fromAuthResponse() {
         AuthorizationRequest authReq = getMinimalAuthRequestBuilder("code id_token")
-                .setScope(AuthorizationRequest.SCOPE_EMAIL)
+                .setScope(AuthorizationRequest.Scope.EMAIL)
                 .build();
         AuthorizationResponse authResp = new AuthorizationResponse.Builder(authReq)
                 .setAuthorizationCode(TEST_AUTH_CODE)
@@ -277,7 +277,7 @@ public class AuthStateTest {
     @Test
     public void testGetIdToken_fromTokenResponse() {
         AuthorizationRequest authReq = getMinimalAuthRequestBuilder("code id_token")
-                .setScope(AuthorizationRequest.SCOPE_EMAIL)
+                .setScope(AuthorizationRequest.Scope.EMAIL)
                 .build();
         AuthorizationResponse authResp = new AuthorizationResponse.Builder(authReq)
                 .setAuthorizationCode(TEST_AUTH_CODE)
@@ -490,9 +490,9 @@ public class AuthStateTest {
     public void testJsonSerialization() throws Exception {
         AuthorizationRequest authReq = getMinimalAuthRequestBuilder("id_token token code")
                 .setScopes(
-                        AuthorizationRequest.SCOPE_OPENID,
-                        AuthorizationRequest.SCOPE_EMAIL,
-                        AuthorizationRequest.SCOPE_PROFILE)
+                        AuthorizationRequest.Scope.OPENID,
+                        AuthorizationRequest.Scope.EMAIL,
+                        AuthorizationRequest.Scope.PROFILE)
                 .build();
         AuthorizationResponse authResp = new AuthorizationResponse.Builder(authReq)
                 .setAccessToken(TEST_ACCESS_TOKEN)

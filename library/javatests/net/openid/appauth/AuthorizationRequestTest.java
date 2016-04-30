@@ -408,7 +408,7 @@ public class AuthorizationRequestTest {
     @Test(expected = IllegalArgumentException.class)
     public void testBuilder_setAdditionalParams_withBuiltInParam() {
         Map<String, String> additionalParams = new HashMap<>();
-        additionalParams.put(AuthorizationRequest.PARAM_SCOPE, AuthorizationRequest.SCOPE_EMAIL);
+        additionalParams.put(AuthorizationRequest.PARAM_SCOPE, AuthorizationRequest.Scope.EMAIL);
         mRequestBuilder.setAdditionalParameters(additionalParams);
     }
 
@@ -488,13 +488,13 @@ public class AuthorizationRequestTest {
     @Test
     public void testToUri_scopeParam() {
         Uri uri = mRequestBuilder
-                .setScope(AuthorizationRequest.SCOPE_EMAIL)
+                .setScope(AuthorizationRequest.Scope.EMAIL)
                 .build()
                 .toUri();
         assertThat(uri.getQueryParameterNames())
                 .contains(AuthorizationRequest.PARAM_SCOPE);
         assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_SCOPE))
-                .isEqualTo(AuthorizationRequest.SCOPE_EMAIL);
+                .isEqualTo(AuthorizationRequest.Scope.EMAIL);
     }
 
     @Test
@@ -579,8 +579,8 @@ public class AuthorizationRequestTest {
     @Test
     public void testJsonSerialize_scope() throws Exception {
         AuthorizationRequest copy = serializeDeserialize(
-                mRequestBuilder.setScope(AuthorizationRequest.SCOPE_EMAIL).build());
-        assertThat(copy.scope).isEqualTo(AuthorizationRequest.SCOPE_EMAIL);
+                mRequestBuilder.setScope(AuthorizationRequest.Scope.EMAIL).build());
+        assertThat(copy.scope).isEqualTo(AuthorizationRequest.Scope.EMAIL);
     }
 
     @Test

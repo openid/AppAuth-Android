@@ -66,41 +66,6 @@ public class AuthorizationRequest {
     public static final String RESPONSE_MODE_FRAGMENT = "fragment";
 
     /**
-     * A scope for OpenID based authorization.
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
-     * Connect Core 1.0", Section 3.1.2.1</a>
-     */
-    public static final String SCOPE_OPENID = "openid";
-
-    /**
-     * A scope for the authenticated user's basic profile information.
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">"OpenID
-     * Connect Core 1.0", Section 5.4</a>
-     */
-    public static final String SCOPE_PROFILE = "profile";
-
-    /**
-     * A scope for the authenticated user's email address.
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">"OpenID
-     * Connect Core 1.0", Section 5.4</a>
-     */
-    public static final String SCOPE_EMAIL = "email";
-
-    /**
-     * A scope for the authenticated user's mailing address.
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">"OpenID
-     * Connect Core 1.0", Section 5.4</a>
-     */
-    public static final String SCOPE_ADDRESS = "address";
-
-    /**
-     * A scope for the authenticated user's phone number.
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">"OpenID
-     * Connect Core 1.0", Section 5.4</a>
-     */
-    public static final String SCOPE_PHONE = "phone";
-
-    /**
      * SHA-256 based code verifier challenge method.
      *
      * @see <a href="https://tools.ietf.org/html/rfc7636#section-4.3">"Proof Key for Code Exchange
@@ -221,6 +186,61 @@ public class AuthorizationRequest {
          * Connect Core 1.0", Section 3.1.2.6</a>
          */
         public static final String SELECT_ACCOUNT = "select_account";
+    }
+
+    /**
+     * All spec-defined values for the OAuth2 / OpenID Connect 1.0 {@code scope} parameter.
+     * @see Builder#setScope(String)
+     * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">"OpenID
+     * Connect Core 1.0", Section 5.4</a>
+     */
+    // SuppressWarnings justification: the constants defined are not directly used by the library,
+    // existing only for convenience of the developer.
+    @SuppressWarnings("unused")
+    public static final class Scope {
+        /**
+         * A scope for the authenticated user's mailing address.
+         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">"OpenID
+         * Connect Core 1.0", Section 5.4</a>
+         */
+        public static final String ADDRESS = "address";
+
+        /**
+         * A scope for the authenticated user's email address.
+         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">"OpenID
+         * Connect Core 1.0", Section 5.4</a>
+         */
+        public static final String EMAIL = "email";
+
+        /**
+         * A scope for requesting an OAuth 2.0 refresh token to be issued, that can be used to
+         * obtain an Access Token that grants access to the End-User's UserInfo Endpoint even
+         * when the End-User is not present (not logged in).
+         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#OfflineAccess">
+         *     "OpenID Connect Core 1.0", Section 11</a>
+         */
+        public static final String OFFLINE_ACCESS = "offline_access";
+
+        /**
+         * A scope for OpenID based authorization.
+         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
+         * Connect Core 1.0", Section 3.1.2.1</a>
+         */
+        public static final String OPENID = "openid";
+
+        /**
+         * A scope for the authenticated user's phone number.
+         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">"OpenID
+         * Connect Core 1.0", Section 5.4</a>
+         */
+        public static final String PHONE = "phone";
+
+        /**
+         * A scope for the authenticated user's basic profile information.
+         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">"OpenID
+         * Connect Core 1.0", Section 5.4</a>
+         */
+        public static final String PROFILE = "profile";
     }
 
     @VisibleForTesting
