@@ -177,6 +177,39 @@ AuthorizationServiceConfiguration config =
       });
 ```
 
+### Dynamic client registration
+
+If the server supports dynamic client registration, a new registration
+request can be constructed for dispatch:
+
+```java
+RegistrationRequest registrationRequest = new RegistrationRequest.Builder(
+    serviceConfig,
+    Arrays.asList(redirectUri))
+    .build();
+```
+
+Requests are dispatched with the help of `AuthorizationService`. As this
+request is synchronous the response is passed to a callback:
+
+```java
+service.performRegistrationRequest(
+    registrationRequest,
+    new AuthorizationService.RegistrationResponseCallback() {
+        @Override public void onRegistrationRequestCompleted(
+            @Nullable RegistrationResponse resp,
+            @Nullable AuthorizationException ex) {
+            if (resp != null) {
+                // registration succeeded, store the registration response
+                AuthState authState = new AuthState(resp);
+                //proceed to authorization...
+            } else {
+              // registration failed, check ex for more details
+            }
+         }
+    });
+```
+
 ### Authorizing
 
 After configuring or retrieving an authorization service configuration,
