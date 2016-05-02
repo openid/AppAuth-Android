@@ -255,7 +255,7 @@ final class JsonUtil {
     }
 
     @NonNull
-    public static ArrayList<String> getStringList(
+    public static List<String> getStringList(
             @NonNull JSONObject json,
             @NonNull String field) throws JSONException {
         checkNotNull(json, "json must not be null");
@@ -269,7 +269,7 @@ final class JsonUtil {
     }
 
     @NonNull
-    public static ArrayList<Uri> getUriList(
+    public static List<Uri> getUriList(
             @NonNull JSONObject json,
             @NonNull String field) throws JSONException {
         checkNotNull(json, "json must not be null");
@@ -304,9 +304,9 @@ final class JsonUtil {
     }
 
     @NonNull
-    public static ArrayList<String> toStringList(@Nullable JSONArray jsonArray)
+    public static List<String> toStringList(@Nullable JSONArray jsonArray)
             throws JSONException {
-        ArrayList<String> arrayList = new ArrayList<>();
+        List<String> arrayList = new ArrayList<>();
         if (jsonArray != null) {
             for (int i = 0; i < jsonArray.length(); i++) {
                 arrayList.add(checkNotNull(jsonArray.get(i)).toString());
@@ -316,9 +316,9 @@ final class JsonUtil {
     }
 
     @NonNull
-    public static ArrayList<Uri> toUriList(@Nullable JSONArray jsonArray)
+    public static List<Uri> toUriList(@Nullable JSONArray jsonArray)
             throws JSONException {
-        ArrayList<Uri> arrayList = new ArrayList<>();
+        List<Uri> arrayList = new ArrayList<>();
         if (jsonArray != null) {
             for (int i = 0; i < jsonArray.length(); i++) {
                 arrayList.add(Uri.parse(checkNotNull(jsonArray.get(i)).toString()));

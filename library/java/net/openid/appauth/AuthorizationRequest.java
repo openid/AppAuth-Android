@@ -262,7 +262,6 @@ public class AuthorizationRequest {
     private static final String KEY_CONFIGURATION = "configuration";
     private static final String KEY_CLIENT_ID = "clientId";
     private static final String KEY_DISPLAY = "display";
-    private static final String KEY_PROMPT = "prompt";
     private static final String KEY_RESPONSE_TYPE = "responseType";
     private static final String KEY_REDIRECT_URI = "redirectUri";
     private static final String KEY_SCOPE = "scope";
