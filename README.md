@@ -196,9 +196,10 @@ response is delivered via an intent to an activity of your choosing:
 
 ```java
 AuthorizationService service = new AuthorizationService(context);
+Intent postAuthIntent = new Intent(context, MyAuthResultHandlerActivity.class); 
 service.performAuthorizationRequest(
     req,
-    new Intent(context, MyAuthResultHandlerActivity.class));
+    PendingIntent.getActivity(context, req.hashCode(), postAuthIntent, 0));
 ```
 
 ### Handling the Redirect
