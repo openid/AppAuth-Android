@@ -476,13 +476,13 @@ public class AuthorizationRequestTest {
     @Test
     public void testToUri_responseModeParam() {
         Uri uri = mRequestBuilder
-                .setResponseMode(AuthorizationRequest.RESPONSE_MODE_QUERY)
+                .setResponseMode(AuthorizationRequest.ResponseMode.QUERY)
                 .build()
                 .toUri();
         assertThat(uri.getQueryParameterNames())
                 .contains(AuthorizationRequest.PARAM_RESPONSE_MODE);
         assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_RESPONSE_MODE))
-                .isEqualTo(AuthorizationRequest.RESPONSE_MODE_QUERY);
+                .isEqualTo(AuthorizationRequest.ResponseMode.QUERY);
     }
 
     @Test
@@ -565,8 +565,8 @@ public class AuthorizationRequestTest {
     @Test
     public void testJsonSerialize_responseMode() throws Exception {
         AuthorizationRequest copy = serializeDeserialize(
-                mRequestBuilder.setResponseMode(AuthorizationRequest.RESPONSE_MODE_QUERY).build());
-        assertThat(copy.responseMode).isEqualTo(AuthorizationRequest.RESPONSE_MODE_QUERY);
+                mRequestBuilder.setResponseMode(AuthorizationRequest.ResponseMode.QUERY).build());
+        assertThat(copy.responseMode).isEqualTo(AuthorizationRequest.ResponseMode.QUERY);
     }
 
     @Test
