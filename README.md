@@ -180,14 +180,15 @@ AuthorizationServiceConfiguration config =
 ### Authorizing
 
 After configuring or retrieving an authorization service configuration,
-an authorization request can be constructed for dispatch
+an authorization request can be constructed for dispatch:
 
 ```java
 AuthorizationRequest req = new AuthorizationRequest.Builder(
     config,
     clientId,
-    AuthorizationRequest.RESPONSE_TYPE_CODE,
-    redirectUri);
+    ResponseTypeValues.CODE,
+    redirectUri)
+    .build();
 ```
 
 Requests are dispatched with the help of `AuthorizationService`. As this
@@ -204,7 +205,7 @@ service.performAuthorizationRequest(
 ### Handling the Redirect
 
 In the `AndroidManifest.xml`, declare the activity that receives the redirect
-URI intent, and the scheme of your OAuth client's redirect URI
+URI intent, and the scheme of your OAuth client's redirect URI:
 
 ```
 <activity android:name="net.openid.appauth.RedirectUriReceiverActivity">
