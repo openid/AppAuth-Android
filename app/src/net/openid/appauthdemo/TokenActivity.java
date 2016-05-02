@@ -72,7 +72,6 @@ public class TokenActivity extends AppCompatActivity {
     private static final String KEY_USER_INFO = "userInfo";
 
     private static final String EXTRA_AUTH_SERVICE_DISCOVERY = "authServiceDiscovery";
-    private static final String EXTRA_CLIENT_SECRET = "clientSecret";
 
     private static final int BUFFER_SIZE = 1024;
 
