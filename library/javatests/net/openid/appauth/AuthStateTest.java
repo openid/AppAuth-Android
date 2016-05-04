@@ -16,6 +16,7 @@ package net.openid.appauth;
 
 import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
 import static net.openid.appauth.TestValues.TEST_AUTH_CODE;
+import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
 import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
 import static net.openid.appauth.TestValues.TEST_REFRESH_TOKEN;
 import static net.openid.appauth.TestValues.getMinimalAuthRequestBuilder;
@@ -24,6 +25,8 @@ import static net.openid.appauth.TestValues.getTestAuthCodeExchangeResponseBuild
 import static net.openid.appauth.TestValues.getTestAuthRequest;
 import static net.openid.appauth.TestValues.getTestAuthResponse;
 import static net.openid.appauth.TestValues.getTestAuthResponseBuilder;
+import static net.openid.appauth.TestValues.getTestRegistrationResponse;
+import static net.openid.appauth.TestValues.getTestRegistrationResponseBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
@@ -67,6 +70,7 @@ public class AuthStateTest {
 
         assertThat(state.getLastAuthorizationResponse()).isNull();
         assertThat(state.getLastTokenResponse()).isNull();
+        assertThat(state.getLastRegistrationResponse()).isNull();
 
         assertThat(state.getScope()).isNull();
         assertThat(state.getScopeSet()).isNull();
@@ -154,6 +158,27 @@ public class AuthStateTest {
 
         // the refresh token has been acquired, but has not yet been used to fetch an access token
         assertThat(state.getNeedsTokenRefresh(mClock)).isTrue();
+    }
+
+    @Test
+    public void testInitialState_fromRegistrationResponse() {
+        RegistrationResponse regResp = getTestRegistrationResponse();
+        AuthState state = new AuthState(regResp);
+
+        assertThat(state.isAuthorized()).isFalse();
+        assertThat(state.getAccessToken()).isNull();
+        assertThat(state.getAccessTokenExpirationTime()).isNull();
+        assertThat(state.getIdToken()).isNull();
+        assertThat(state.getRefreshToken()).isNull();
+
+        assertThat(state.getAuthorizationException()).isNull();
+        assertThat(state.getLastAuthorizationResponse()).isNull();
+        assertThat(state.getLastTokenResponse()).isNull();
+        assertThat(state.getLastRegistrationResponse()).isSameAs(regResp);
+
+        assertThat(state.getScope()).isNull();
+        assertThat(state.getScopeSet()).isNull();
+        assertThat(state.getNeedsTokenRefresh(mClock)).isFalse();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -502,7 +527,9 @@ public class AuthStateTest {
                 .build();
 
         TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
+        RegistrationResponse regResp = getTestRegistrationResponse();
         AuthState state = new AuthState(authResp, tokenResp, null);
+        state.update(regResp);
 
         String json = state.jsonSerializeString();
         AuthState restoredState = AuthState.jsonDeserialize(json);
@@ -517,6 +544,9 @@ public class AuthStateTest {
         assertThat(restoredState.getScope()).isEqualTo(state.getScope());
         assertThat(restoredState.getNeedsTokenRefresh(mClock))
                 .isEqualTo(state.getNeedsTokenRefresh(mClock));
+        assertThat(restoredState.getClientSecret()).isEqualTo(state.getClientSecret());
+        assertThat(restoredState.hasClientSecretExpired(mClock))
+                .isEqualTo(state.hasClientSecretExpired(mClock));
     }
 
     @Test
@@ -528,5 +558,93 @@ public class AuthStateTest {
         AuthState restored = AuthState.jsonDeserialize(state.jsonSerializeString());
         assertThat(restored.getAuthorizationException())
                 .isEqualTo(state.getAuthorizationException());
+    }
+
+    @Test
+    public void testHasClientSecretExpired() {
+        RegistrationResponse regResp = getTestRegistrationResponseBuilder()
+                .setClientSecret(TEST_CLIENT_SECRET)
+                .setClientSecretExpiresAt(TWO_MINUTES)
+                .build();
+        AuthState state = new AuthState(regResp);
+
+        // before the expiration time
+        mClock.currentTime.set(ONE_SECOND);
+        assertThat(state.hasClientSecretExpired(mClock)).isFalse();
+
+        // on client_secret's actual expiration
+        mClock.currentTime.set(TWO_MINUTES);
+        assertThat(state.hasClientSecretExpired(mClock)).isTrue();
+
+        // past client_secrets's actual expiration
+        mClock.currentTime.set(TWO_MINUTES + ONE_SECOND);
+        assertThat(state.hasClientSecretExpired(mClock)).isTrue();
+    }
+
+    @Test
+    public void testCreateRequiredClientAuthentication_withoutClientCredentials() throws
+            Exception {
+        RegistrationResponse regResp = getTestRegistrationResponseBuilder().build();
+        AuthState state = new AuthState(regResp);
+        assertThat(state.getClientAuthentication())
+                .isInstanceOf(NoClientAuthentication.class);
+    }
+
+    @Test
+    public void testCreateRequiredClientAuthentication_withoutTokenEndpointAuthMethod() throws
+            Exception {
+        RegistrationResponse regResp = getTestRegistrationResponseBuilder()
+                .setClientSecret(TEST_CLIENT_SECRET)
+                .build();
+        AuthState state = new AuthState(regResp);
+        assertThat(state.getClientAuthentication())
+                .isInstanceOf(ClientSecretBasic.class);
+    }
+
+    @Test
+    public void testCreateRequiredClientAuthentication_withTokenEndpointAuthMethodNone() throws
+            Exception {
+        RegistrationResponse regResp = getTestRegistrationResponseBuilder()
+                .setClientSecret(TEST_CLIENT_SECRET)
+                .setTokenEndpointAuthMethod("none")
+                .build();
+        AuthState state = new AuthState(regResp);
+        assertThat(state.getClientAuthentication())
+                .isInstanceOf(NoClientAuthentication.class);
+    }
+
+    @Test
+    public void testCreateRequiredClientAuthentication_withTokenEndpointAuthMethodBasic() throws
+            Exception {
+        RegistrationResponse regResp = getTestRegistrationResponseBuilder()
+                .setClientSecret(TEST_CLIENT_SECRET)
+                .setTokenEndpointAuthMethod(ClientSecretBasic.NAME)
+                .build();
+        AuthState state = new AuthState(regResp);
+        assertThat(state.getClientAuthentication())
+                .isInstanceOf(ClientSecretBasic.class);
+    }
+
+    @Test
+    public void testCreateRequiredClientAuthentication_withTokenEndpointAuthMethodPost() throws
+            Exception {
+        RegistrationResponse regResp = getTestRegistrationResponseBuilder()
+                .setClientSecret(TEST_CLIENT_SECRET)
+                .setTokenEndpointAuthMethod(ClientSecretPost.NAME)
+                .build();
+        AuthState state = new AuthState(regResp);
+        assertThat(state.getClientAuthentication())
+                .isInstanceOf(ClientSecretPost.class);
+    }
+
+    @Test(expected = ClientAuthentication.UnsupportedAuthenticationMethod.class)
+    public void testCreateRequiredClientAuthentication_withUnknownTokenEndpointAuthMethod()
+            throws Exception {
+        RegistrationResponse regResp = getTestRegistrationResponseBuilder()
+                .setClientSecret(TEST_CLIENT_SECRET)
+                .setTokenEndpointAuthMethod("unknown")
+                .build();
+        AuthState state = new AuthState(regResp);
+        state.getClientAuthentication();
     }
 }
