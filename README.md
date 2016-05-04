@@ -160,21 +160,22 @@ AuthorizationServiceConfiguration config =
 Or through discovery:
 
 ```java
-Uri issuerUri = Uri.parse("https://accounts.google.com");
-AuthorizationServiceConfiguration config =
-    AuthorizationServiceConfiguration.fetchFromIssuer(
-        issuerUri,
-        new RetrieveConfigurationCallback() {
-          @Override public void onFetchConfigurationCompleted(
-              @Nullable AuthorizationServiceConfiguration serviceConfiguration,
-              @Nullable AuthorizationException ex) {
-            if (ex != null) {
-                Log.w(TAG, "Failed to retrieve configuration for " + idp.name, ex);
-            } else {
-                // service configuration retrieved, proceed to authorization...
-            }
-          }
-      });
+final Uri issuerUri = Uri.parse("https://accounts.google.com");
+AuthorizationServiceConfiguration config;
+
+AuthorizationServiceConfiguration.fetchFromIssuer(
+    issuerUri,
+    new RetrieveConfigurationCallback() {
+      @Override public void onFetchConfigurationCompleted(
+          @Nullable AuthorizationServiceConfiguration serviceConfiguration,
+          @Nullable AuthorizationException ex) {
+        if (ex != null) {
+            Log.w(TAG, "Failed to retrieve configuration for " + issuerUri, ex);
+        } else {
+            // service configuration retrieved, proceed to authorization...
+        }
+      }
+  });
 ```
 
 ### Dynamic client registration
