@@ -25,6 +25,10 @@ clients when custom URI scheme redirects are used. The library is friendly to
 other extensions (standard or otherwise) with the ability to handle additional
 parameters in all protocol requests and responses.
 
+A talk providing an overview of using the library for enterprise single sign-on (produced by
+Google) can be found here: 
+[Enterprise SSO with Chrome Custom Tabs](https://www.youtube.com/watch?v=DdQTXrk6YTk).
+
 ## Download
 
 Download
