@@ -14,6 +14,7 @@
 
 package net.openid.appauth;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -165,6 +166,28 @@ public class AuthorizationServiceConfigurationTest {
         assertEquals(TEST_AUTH_ENDPOINT, config.authorizationEndpoint.toString());
         assertEquals(TEST_TOKEN_ENDPOINT, config.tokenEndpoint.toString());
         assertEquals(TEST_REGISTRATION_ENDPOINT, config.registrationEndpoint.toString());
+    }
+
+    @Test
+    public void testBuildConfigurationUriFromIssuer() {
+        Uri issuerUri = Uri.parse("https://test.openid.com");
+        assertThat(AuthorizationServiceConfiguration.buildConfigurationUriFromIssuer(issuerUri))
+                .isEqualTo(TEST_DISCOVERY_URI);
+    }
+
+    @Test
+    public void testBuildConfigurationUriFromIssuer_withRootPath() {
+        Uri issuerUri = Uri.parse("https://test.openid.com/");
+        assertThat(AuthorizationServiceConfiguration.buildConfigurationUriFromIssuer(issuerUri))
+                .isEqualTo(TEST_DISCOVERY_URI);
+    }
+
+    @Test
+    public void testBuildConfigurationUriFromIssuer_withExtendedPath() {
+        Uri issuerUri = Uri.parse("https://test.openid.com/tenant1");
+        assertThat(AuthorizationServiceConfiguration.buildConfigurationUriFromIssuer(issuerUri))
+                .isEqualTo(Uri.parse(
+                        "https://test.openid.com/tenant1/.well-known/openid-configuration"));
     }
 
     @Test

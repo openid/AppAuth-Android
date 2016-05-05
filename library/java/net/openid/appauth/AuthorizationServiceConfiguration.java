@@ -39,13 +39,21 @@ import java.net.URL;
 public class AuthorizationServiceConfiguration {
 
     /**
-     * The standard path at which an OpenID Connect discovery document can be found under an
-     * issuer's base URI.
+     * The standard base path for well-known resources on domains.
+     * @see <a href="https://tools.ietf.org/html/rfc5785">RFC 5785: Defining Well-Known Uniform
+     * Resource Identifiers</a>
+     */
+    public static final String WELL_KNOWN_PATH =
+            ".well-known";
+
+    /**
+     * The standard resource under {@link #WELL_KNOWN_PATH .well-known} at which an OpenID Connect
+     * discovery document can be found under an issuer's base URI.
      * @see <a href="https://openid.net/specs/openid-connect-discovery-1_0.html">"OpenID Connect
      * discovery"</a>
      */
-    public static final String OPENID_CONFIGURATION_WELL_KNOWN_PATH =
-            ".well-known/openid-configuration";
+    public static final String OPENID_CONFIGURATION_RESOURCE =
+            "openid-configuration";
 
     private static final String KEY_AUTHORIZATION_ENDPOINT = "authorizationEndpoint";
     private static final String KEY_TOKEN_ENDPOINT = "tokenEndpoint";
@@ -185,10 +193,14 @@ public class AuthorizationServiceConfiguration {
      */
     public static void fetchFromIssuer(@NonNull Uri openIdConnectIssuerUri,
             @NonNull RetrieveConfigurationCallback callback) {
-        Uri fullUri = openIdConnectIssuerUri.buildUpon()
-                .appendPath(OPENID_CONFIGURATION_WELL_KNOWN_PATH)
+        fetchFromUrl(buildConfigurationUriFromIssuer(openIdConnectIssuerUri), callback);
+    }
+
+    static Uri buildConfigurationUriFromIssuer(Uri openIdConnectIssuerUri) {
+        return openIdConnectIssuerUri.buildUpon()
+                .appendPath(WELL_KNOWN_PATH)
+                .appendPath(OPENID_CONFIGURATION_RESOURCE)
                 .build();
-        fetchFromUrl(fullUri, callback);
     }
 
     /**
@@ -200,12 +212,14 @@ public class AuthorizationServiceConfiguration {
      */
     public static void fetchFromUrl(@NonNull Uri openIdConnectDiscoveryUri,
             @NonNull RetrieveConfigurationCallback callback) {
-        fetchFromUrl(openIdConnectDiscoveryUri, callback,
+        fetchFromUrl(openIdConnectDiscoveryUri,
+                callback,
                 new AuthorizationService.DefaultUrlBuilder());
     }
 
     @VisibleForTesting
-    static void fetchFromUrl(@NonNull Uri openIdConnectDiscoveryUri,
+    static void fetchFromUrl(
+            @NonNull Uri openIdConnectDiscoveryUri,
             @NonNull RetrieveConfigurationCallback callback,
             @NonNull AuthorizationService.UrlBuilder urlBuilder) {
         checkNotNull(openIdConnectDiscoveryUri, "openIDConnectDiscoveryUri cannot be null");
