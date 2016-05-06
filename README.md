@@ -206,7 +206,7 @@ service.performRegistrationRequest(
             @Nullable AuthorizationException ex) {
             if (resp != null) {
                 // registration succeeded, store the registration response
-                AuthState authState = new AuthState(resp);
+                AuthState state = new AuthState(resp);
                 //proceed to authorization...
             } else {
               // registration failed, check ex for more details
@@ -280,6 +280,30 @@ authorization code:
 ```java
 service.performTokenRequest(
     resp.createTokenExchangeRequest(),
+    new AuthorizationService.TokenResponseCallback() {
+      @Override public void onTokenRequestCompleted(
+            TokenResponse resp, AuthorizationException ex) {
+          if (resp != null) {
+            // exchange succeeded
+          } else {
+            // authorization failed, check ex for more details
+          }
+        }
+    });
+```
+
+If a confidential client is created through dynamic registration, and
+the server expects the client to authenticate at the token endpoint,
+the necessary client authentication must be supplied in the token
+request. This can be simplified by making sure to store the registration
+response in the `AuthState` instance, then
+`AuthState::getClientAuthentication` can construct the necessary client
+authentication:
+
+```java
+service.performTokenRequest(
+    resp.createTokenExchangeRequest(),
+    state.getClientAuthentication(),
     new AuthorizationService.TokenResponseCallback() {
       @Override public void onTokenRequestCompleted(
             TokenResponse resp, AuthorizationException ex) {
