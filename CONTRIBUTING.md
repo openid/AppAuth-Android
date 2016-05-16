@@ -18,10 +18,9 @@ these agreements will not be merged.
 ## Execute the Contributor License Agreement (CLA)
 
 1. Visit http://openid.net/contribution-license-agreement/
-2. Print, Sign and Scan
-3. Email to help@oidf.org
-
-NB: Electronic signing option is coming soon.
+2. Tap *Execute OpenID Foundation Contribution License Agreement* for the
+   version relevant to you (Individual or Corporate).
+3. Follow the instructions to sign the agreement.
 
 ## Execute the Working Group Contribution Agreement
 
@@ -31,9 +30,10 @@ towards the OpenID Connect spec itself (e.g. in comments, bug reports, feature
 requests).
 
 1. Visit http://openid.net/intellectual-property/
-2. Then tap *Execute Contributor Agreement By Electronic Signature*
+2. Tap *Execute Contributor Agreement By Electronic Signature* in the box
+   marked *Resources*.
 3. Follow the instructions to sign the document, state `OpenID AB/Connect` as
-   the Initial Working Group
+   the Initial Working Group.
 
 # Making a Pull Request
 
