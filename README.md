@@ -25,9 +25,13 @@ clients when custom URI scheme redirects are used. The library is friendly to
 other extensions (standard or otherwise) with the ability to handle additional
 parameters in all protocol requests and responses.
 
-A talk providing an overview of using the library for enterprise single sign-on (produced by
-Google) can be found here: 
-[Enterprise SSO with Chrome Custom Tabs](https://www.youtube.com/watch?v=DdQTXrk6YTk).
+## Codelabs, videos and other resources
+
+- A codelab featuring AppAuth was provided for Google I/O 2016: [Achieving Single Sign-on with AppAuth](https://codelabs.developers.google.com/codelabs/appauth-android-codelab/index.html)
+- A talk providing an overview of using the library for enterprise single sign-on 
+  (produced by Google) can be found here: 
+  [Enterprise SSO with Chrome Custom Tabs](https://www.youtube.com/watch?v=DdQTXrk6YTk).
+- AppAuth is discussed as part of the ["Your apps at work"](https://www.youtube.com/watch?v=Za0OQo8DRM4) session at Google I/O 2016.
 
 ## Download
 
