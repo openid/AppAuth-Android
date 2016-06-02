@@ -49,7 +49,8 @@ discussing your proposal, or email the
 
 The AppAuth library follows the
 [Google Coding Style](https://google.github.io/styleguide/javaguide.html) for
-the Java language. Please review your own code for adherence to the standard.
+the Java language. Please review your own code for adherence to the standard
+and make sure to run the `check` gradle target.
 
 ## Pull Request Reviews
 
