@@ -24,6 +24,7 @@ import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.support.customtabs.CustomTabsCallback;
 import android.support.customtabs.CustomTabsIntent;
 import android.text.TextUtils;
 
@@ -97,10 +98,10 @@ public class AuthorizationService {
      * instances of this class must be manually disposed when no longer required, to avoid
      * leaks (see {@link #dispose()}.
      */
-    public AuthorizationService(@NonNull Context context) {
+    public AuthorizationService(@NonNull Context context, @NonNull CustomTabsCallback customTabsCallback) {
         this(context,
                 DefaultUrlBuilder.INSTANCE,
-                new BrowserHandler(context));
+                new BrowserHandler(context, customTabsCallback));
     }
 
     /**

@@ -29,6 +29,7 @@ import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.customtabs.CustomTabsCallback;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -86,8 +87,13 @@ public class TokenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_token);
 
-        mAuthService = new AuthorizationService(this);
-
+        CustomTabsCallback customTabsCallback = new CustomTabsCallback(){
+            @Override
+            public void onNavigationEvent(int navigationEvent, Bundle extras) {
+                Log.d("NavigationEvent", "NavigationEvent-" + navigationEvent);
+            }
+        };
+        mAuthService = new AuthorizationService(this, customTabsCallback);
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey(KEY_AUTH_STATE)) {
                 try {
