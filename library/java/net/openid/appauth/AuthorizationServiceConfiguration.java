@@ -166,7 +166,7 @@ public class AuthorizationServiceConfiguration {
             return new AuthorizationServiceConfiguration(
                     JsonUtil.getUri(json, KEY_AUTHORIZATION_ENDPOINT),
                     JsonUtil.getUri(json, KEY_TOKEN_ENDPOINT),
-                    JsonUtil.getUri(json, KEY_REGISTRATION_ENDPOINT));
+                    JsonUtil.getUriIfDefined(json, KEY_REGISTRATION_ENDPOINT));
         }
     }
 

@@ -145,6 +145,19 @@ public class AuthorizationServiceConfigurationTest {
     }
 
     @Test
+    public void testSerializationWithoutRegistrationEndpoint() throws Exception {
+        AuthorizationServiceConfiguration config = new AuthorizationServiceConfiguration(
+                Uri.parse(TEST_AUTH_ENDPOINT),
+                Uri.parse(TEST_TOKEN_ENDPOINT),
+                null);
+        AuthorizationServiceConfiguration deserialized = AuthorizationServiceConfiguration
+                .fromJson(config.toJson());
+        assertThat(deserialized.authorizationEndpoint).isEqualTo(config.authorizationEndpoint);
+        assertThat(deserialized.tokenEndpoint).isEqualTo(config.tokenEndpoint);
+        assertThat(deserialized.registrationEndpoint).isNull();
+    }
+
+    @Test
     public void testDiscoveryConstructorWithName() throws Exception {
         JSONObject json = new JSONObject(TEST_JSON);
         AuthorizationServiceDiscovery discovery = new AuthorizationServiceDiscovery(json);
