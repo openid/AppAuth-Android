@@ -6,8 +6,9 @@
     -->
     <eat-comment/>
 
-    <string name="google_name">Google</string>
-    <string name="google_discovery_uri" translatable="false">https://accounts.google.com/.well-known/openid-configuration</string>
-    <string name="google_scope_string" translatable="false">openid profile email</string>
+    <string name="keycloak_name">Keycloak</string>
+    <!-- Change KEYCLOAK to the location of Keycloak -->
+    <string name="keycloak_discovery_uri" translatable="false">http://KEYCLOAK:8080/auth/realms/demo/.well-known/openid-configuration</string>
+    <string name="keycloak_scope_string" translatable="false">openid profile email</string>
 
 </resources>

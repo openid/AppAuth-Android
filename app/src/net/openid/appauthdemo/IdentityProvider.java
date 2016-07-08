@@ -41,21 +41,21 @@ class IdentityProvider {
      */
     public static final int NOT_SPECIFIED = -1;
 
-    public static final IdentityProvider GOOGLE = new IdentityProvider(
-            "Google",
-            R.bool.google_enabled,
-            R.string.google_discovery_uri,
+    public static final IdentityProvider KEYCLOAK = new IdentityProvider(
+            "Keycloak",
+            R.bool.keycloak_enabled,
+            R.string.keycloak_discovery_uri,
             NOT_SPECIFIED, // auth endpoint is discovered
             NOT_SPECIFIED, // token endpoint is discovered
             NOT_SPECIFIED, // dynamic registration not supported
-            R.string.google_client_id,
-            R.string.google_auth_redirect_uri,
-            R.string.google_scope_string,
+            R.string.keycloak_client_id,
+            R.string.keycloak_auth_redirect_uri,
+            R.string.keycloak_scope_string,
             R.drawable.btn_google,
-            R.string.google_name,
+            R.string.keycloak_name,
             android.R.color.white);
 
-    public static final List<IdentityProvider> PROVIDERS = Arrays.asList(GOOGLE);
+    public static final List<IdentityProvider> PROVIDERS = Arrays.asList(KEYCLOAK);
 
     public static List<IdentityProvider> getEnabledProviders(Context context) {
         ArrayList<IdentityProvider> providers = new ArrayList<>();
