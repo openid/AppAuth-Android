@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.customtabs.CustomTabsCallback;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
@@ -60,7 +61,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mAuthService = new AuthorizationService(this);
+        CustomTabsCallback customTabsCallback = new CustomTabsCallback(){
+            @Override
+            public void onNavigationEvent(int navigationEvent, Bundle extras) {
+                Log.d("NavigationEvent", "NavigationEvent-" + navigationEvent);
+            }
+        };
+        mAuthService = new AuthorizationService(this, customTabsCallback);
         ViewGroup idpButtonContainer = (ViewGroup) findViewById(R.id.idp_button_container);
         List<IdentityProvider> providers = IdentityProvider.getEnabledProviders(this);
 

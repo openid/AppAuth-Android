@@ -18,6 +18,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.customtabs.CustomTabsCallback;
 import android.support.customtabs.CustomTabsClient;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.customtabs.CustomTabsServiceConnection;
@@ -53,12 +54,16 @@ class BrowserHandler {
     @NonNull
     private final CountDownLatch mClientLatch;
 
-    BrowserHandler(@NonNull Context context) {
+    @NonNull
+    private CustomTabsCallback customTabsCallback;
+
+    BrowserHandler(@NonNull Context context, CustomTabsCallback customTabsCallback) {
         mContext = context;
         mBrowserPackage = BrowserPackageHelper.getInstance().getPackageNameToUse(context);
         mClient = new AtomicReference<>();
         mClientLatch = new CountDownLatch(1);
         mConnection = bindCustomTabsService();
+        this.customTabsCallback = customTabsCallback;
     }
 
     private CustomTabsServiceConnection bindCustomTabsService() {
@@ -124,7 +129,7 @@ class BrowserHandler {
 
         CustomTabsClient client = mClient.get();
         if (client != null) {
-            return client.newSession(null);
+            return client.newSession(customTabsCallback);
         }
 
         return null;
