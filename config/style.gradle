@@ -1,0 +1,31 @@
+apply plugin: 'checkstyle'
+
+checkstyle {
+    configFile file('../config/checkstyle/checkstyle.xml')
+    configProperties = ['checkstyle.java.header': file('../config/checkstyle/java.header').getAbsolutePath()]
+    toolVersion = "6.11.2"
+}
+
+task checkAllSource(type: Checkstyle) {
+    source 'java'
+    include '**/*.java'
+    classpath = files project.configurations.compile.files
+}
+
+task failOnCheckstyleWarning {
+    def checkstyleWarningsFile = 'build/reports/checkstyle/checkAllSource.xml'
+    doLast {
+        File warningsFile = file(checkstyleWarningsFile)
+        if (warningsFile.exists() && warningsFile.text.contains("<error ")) {
+            throw new GradleException(
+                    "There were checkstyle warnings. For more details check: " \
+                     + file(checkstyleWarningsFile))
+        }
+    }
+}
+
+// ensure that there are no style warnings
+failOnCheckstyleWarning.dependsOn checkAllSource
+
+// run checkstyle as part of the standard set of checks
+check.dependsOn failOnCheckstyleWarning

@@ -14,12 +14,6 @@
 
 package net.openid.appauth;
 
-import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
-import static net.openid.appauth.TestValues.TEST_APP_SCHEME;
-import static net.openid.appauth.TestValues.getTestServiceConfig;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-
 import android.net.Uri;
 
 import org.json.JSONException;
@@ -36,8 +30,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
+import static net.openid.appauth.TestValues.TEST_APP_SCHEME;
+import static net.openid.appauth.TestValues.getTestServiceConfig;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE)
+@Config(constants = BuildConfig.class, sdk=16)
 public class RegistrationRequestTest {
 
     private static final Map<String, String> TEST_ADDITIONAL_PARAMS;

@@ -1,0 +1,18 @@
+task androidJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    title = "OpenYOLO"
+    classpath = files(project.android.getBootClasspath())
+    options {
+        links "http://docs.oracle.com/javase/7/docs/api/"
+        linksOffline "http://d.android.com/reference","${android.sdkDirectory}/docs/reference"
+    }
+    exclude '**/BuildConfig.java'
+    exclude '**/R.java'
+}
+
+afterEvaluate {
+    // fixes issue where javadoc can't find android symbols ref: http://stackoverflow.com/a/34572606
+    androidJavadocs.classpath += files(android.libraryVariants.collect { variant ->
+        variant.javaCompile.classpath.files
+    })
+}

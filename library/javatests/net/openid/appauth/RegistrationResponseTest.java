@@ -14,15 +14,6 @@
 
 package net.openid.appauth;
 
-import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
-import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
-import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
-import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET_EXPIRES_AT;
-import static net.openid.appauth.TestValues.getTestRegistrationRequest;
-import static net.openid.appauth.TestValues.getTestServiceConfig;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
-
 import android.net.Uri;
 
 import org.json.JSONObject;
@@ -40,8 +31,17 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
+import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
+import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
+import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET_EXPIRES_AT;
+import static net.openid.appauth.TestValues.getTestRegistrationRequest;
+import static net.openid.appauth.TestValues.getTestServiceConfig;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
+
 @RunWith(Enclosed.class)
-@Config(manifest = Config.NONE)
+@Config(constants = BuildConfig.class, sdk=16)
 public class RegistrationResponseTest {
     private static final Long TEST_CLIENT_ID_ISSUED_AT = 34L;
     private static final String TEST_REGISTRATION_ACCESS_TOKEN = "test_access_token";

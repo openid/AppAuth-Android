@@ -18,4 +18,5 @@
     <string name="auth_header">Sign in with:</string>
     <string name="no_idps_configured">No IDPs are configured. Please edit idp_configs.xml</string>
     <string name="authorization_failed">Authorization failed</string>
+    <string name="userinfo_profile_content_description">User profile picture</string>
 </resources>

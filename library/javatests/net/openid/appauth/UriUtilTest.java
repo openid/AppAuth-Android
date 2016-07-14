@@ -14,8 +14,6 @@
 
 package net.openid.appauth;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import android.net.UrlQuerySanitizer;
 
 import org.junit.Before;
@@ -27,8 +25,10 @@ import org.robolectric.annotation.Config;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE)
+@Config(constants = BuildConfig.class, sdk=16)
 public class UriUtilTest {
 
     private UrlQuerySanitizer mSanitizer;

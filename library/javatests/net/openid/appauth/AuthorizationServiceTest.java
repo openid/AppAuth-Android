@@ -14,28 +14,6 @@
 
 package net.openid.appauth;
 
-import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
-import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
-import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
-import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET_EXPIRES_AT;
-import static net.openid.appauth.TestValues.TEST_IDP_REGISTRATION_ENDPOINT;
-import static net.openid.appauth.TestValues.TEST_IDP_TOKEN_ENDPOINT;
-import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
-import static net.openid.appauth.TestValues.TEST_REFRESH_TOKEN;
-import static net.openid.appauth.TestValues.TEST_STATE;
-import static net.openid.appauth.TestValues.getTestAuthCodeExchangeRequest;
-import static net.openid.appauth.TestValues.getTestAuthRequestBuilder;
-import static net.openid.appauth.TestValues.getTestRegistrationRequest;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -72,8 +50,30 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
+import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
+import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
+import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET_EXPIRES_AT;
+import static net.openid.appauth.TestValues.TEST_IDP_REGISTRATION_ENDPOINT;
+import static net.openid.appauth.TestValues.TEST_IDP_TOKEN_ENDPOINT;
+import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
+import static net.openid.appauth.TestValues.TEST_REFRESH_TOKEN;
+import static net.openid.appauth.TestValues.TEST_STATE;
+import static net.openid.appauth.TestValues.getTestAuthCodeExchangeRequest;
+import static net.openid.appauth.TestValues.getTestAuthRequestBuilder;
+import static net.openid.appauth.TestValues.getTestRegistrationRequest;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 @RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class)
+@Config(constants = BuildConfig.class, sdk=16)
 public class AuthorizationServiceTest {
     private static final int CALLBACK_TIMEOUT_MILLIS = 1000;
 

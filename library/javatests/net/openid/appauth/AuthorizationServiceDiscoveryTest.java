@@ -14,11 +14,6 @@
 
 package net.openid.appauth;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -30,8 +25,13 @@ import org.robolectric.annotation.Config;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 @RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class)
+@Config(constants = BuildConfig.class, sdk=16)
 public class AuthorizationServiceDiscoveryTest {
     // ToDo: add more tests for remaining getters
     private static final String TEST_ISSUER = "test_issuer";

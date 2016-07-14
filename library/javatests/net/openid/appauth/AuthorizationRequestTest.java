@@ -36,7 +36,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 @RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class)
+@Config(constants = BuildConfig.class, sdk=16)
 public class AuthorizationRequestTest {
 
     /**

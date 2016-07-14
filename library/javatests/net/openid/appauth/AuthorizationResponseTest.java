@@ -14,16 +14,6 @@
 
 package net.openid.appauth;
 
-import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
-import static net.openid.appauth.TestValues.TEST_AUTH_CODE;
-import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
-import static net.openid.appauth.TestValues.TEST_STATE;
-import static net.openid.appauth.TestValues.getTestAuthRequest;
-import static net.openid.appauth.TestValues.getTestAuthRequestBuilder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import android.net.Uri;
 
 import org.junit.Before;
@@ -34,8 +24,18 @@ import org.robolectric.annotation.Config;
 
 import java.util.Collections;
 
+import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
+import static net.openid.appauth.TestValues.TEST_AUTH_CODE;
+import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
+import static net.openid.appauth.TestValues.TEST_STATE;
+import static net.openid.appauth.TestValues.getTestAuthRequest;
+import static net.openid.appauth.TestValues.getTestAuthRequestBuilder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 @RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class)
+@Config(constants = BuildConfig.class, sdk=16)
 public class AuthorizationResponseTest {
 
     // the test is asserted to be running at time 23

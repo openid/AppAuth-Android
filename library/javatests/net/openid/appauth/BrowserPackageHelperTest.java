@@ -44,7 +44,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class, shadows = ShadowIntentFilterFixed.class)
+@Config(constants = BuildConfig.class, sdk=16, shadows = ShadowIntentFilterFixed.class)
 public class BrowserPackageHelperTest {
 
     private static final String SCHEME_HTTP = "http";
