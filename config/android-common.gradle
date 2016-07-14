@@ -1,0 +1,28 @@
+android {
+    compileSdkVersion rootProject.compileSdkVersion
+    buildToolsVersion rootProject.buildToolsVersion
+    defaultConfig {
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.compileSdkVersion
+        versionCode rootProject.versionNum
+        versionName rootProject.versionName
+    }
+    sourceSets {
+        main.manifest.srcFile 'AndroidManifest.xml'
+        main.java.srcDirs = ['java']
+        main.aidl.srcDirs = ['java']
+        main.res.srcDir 'res'
+        main.assets.srcDir 'assets'
+        main.resources.srcDir 'java'
+        test.setRoot('javatests');
+        test.java.srcDir('javatests');
+    }
+    lintOptions {
+        warningsAsErrors true
+        disable 'InvalidPackage', 'TrulyRandom'
+    }
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+    }
+}

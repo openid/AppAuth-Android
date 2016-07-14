@@ -7,14 +7,14 @@
     -->
     <eat-comment/>
 
-    <bool name="google_enabled">false</bool>
-    <string name="google_client_id" translatable="false">YOUR_ID.apps.googleusercontent.com</string>
+    <bool name="google_enabled">true</bool>
+    <string name="google_client_id" translatable="false">533526602309-6g5u7a7gk5gaevtei81mt8c5aokbeklv.apps.googleusercontent.com</string>
     <!--
     NOTE: This scheme is automatically provisioned by Google for Android OAuth2 clients, and is
     the reverse form of the client ID registered above. Handling of this scheme is registered in an
     intent filter in the app's manifest.
     -->
-    <string name="google_auth_redirect_scheme" translatable="false">com.googleusercontent.apps.YOUR_ID</string>
-    <string name="google_auth_redirect_uri" translatable="false">com.googleusercontent.apps.YOUR_ID:/oauth2redirect</string>
+    <string name="google_auth_redirect_scheme" translatable="false">com.googleusercontent.apps.533526602309-6g5u7a7gk5gaevtei81mt8c5aokbeklv</string>
+    <string name="google_auth_redirect_uri" translatable="false">com.googleusercontent.apps.533526602309-6g5u7a7gk5gaevtei81mt8c5aokbeklv:/oauth2redirect</string>
 
 </resources>

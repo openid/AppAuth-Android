@@ -27,7 +27,7 @@
                 android:layout_width="96dp"
                 android:layout_height="96dp"
                 android:layout_gravity="center"
-                android:src="@drawable/openid_96dp"
+                app:srcCompat="@drawable/openid_96dp"
                 android:contentDescription="@string/openid_logo_content_description"/>
 
             <TextView
@@ -90,16 +90,26 @@
                 android:orientation="vertical"
                 android:layout_marginTop="8dp">
 
-                <TextView
-                    android:id="@+id/userinfo_name"
-                    android:drawableLeft="@drawable/unknown_user_48dp"
-                    android:drawableStart="@drawable/unknown_user_48dp"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:drawablePadding="8dp"
-                    tools:text="Jane Doe"
-                    style="@style/Base.TextAppearance.AppCompat.Title" />
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:id="@+id/userinfo_profile"
+                        app:srcCompat="@drawable/unknown_user_48dp" />
+
+                    <TextView
+                        android:id="@+id/userinfo_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        tools:text="Jane Doe"
+                        style="@style/Base.TextAppearance.AppCompat.Title" />
+
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/userinfo_json"
