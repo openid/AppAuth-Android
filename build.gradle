@@ -1,140 +1,42 @@
-// infers the location of the Android SDK from the two most common environment
-// variables, ANDROID_SDK_HOME and ANDROID_HOME (in that order).
-def guessAndroidSdkLocation() {
-    def androidDir = null
-    if (System.env.ANDROID_SDK_HOME != null) {
-        logger.lifecycle("using android location from ANDROID_SDK_HOME")
-        return System.env.ANDROID_SDK_HOME
-    } else if (System.env.ANDROID_HOME != null) {
-        logger.info("using android location from ANDROID_HOME")
-        return System.env.ANDROID_HOME
-    }
-
-    return null
-}
-
-// creates a default local.properties file from inferred values and generated
-// resources
-def createLocalProperties(localPropertiesFile) {
-    def androidDir = guessAndroidSdkLocation()
-    if (androidDir == null) {
-        logger.lifecycle([
-            "Unable to find android SDK location - please ",
-            "create a local.properties file with property sdk.dir set to ",
-            "the location of your android SDK. For example: \n",
-            "sdk.dir=/usr/local/me/android-sdk"].join())
-        throw new GradleException("Android SDK location could not be inferred")
-    }
-
-    def props = new Properties()
-    props.setProperty("sdk.dir", androidDir);
-
-    localPropertiesFile.withWriter('UTF-8') { props.store(it, null) }
-}
-
-// determines the location of the Android SDK, using a key from
-// local.properties. If this file does not exist, an attempt is made to
-// infer the location and stored in the local.properties file for future use
-// (and easy modification, if the inferred value is wrong).
-def androidSdkDir = {
-    def localPropertiesFile = file(new File(projectDir, "local.properties"))
-
-    if (!localPropertiesFile.exists()) {
-        throw new GradleException("local.properties file missing")
-    }
-
-    def props = new Properties()
-    localPropertiesFile.withInputStream {
-    props.load(it)
-    }
-    def sdkDir = props.get("sdk.dir")
-    if (sdkDir == null) {
-        throw new GradleException("sdk.dir not defined in local.properties")
-    }
-    return sdkDir
-}
-
-def verifyLocalProperties = {
-    def localPropertiesFile = file(new File(projectDir, "local.properties"))
-    if (!localPropertiesFile.exists()) {
-        logger.lifecycle("local.properties file missing - attempting to " +
-                "create one")
-        createLocalProperties(localPropertiesFile)
-    }
-
-    def props = new Properties()
-    localPropertiesFile.withInputStream {
-        props.load(it)
-    }
-
-    if (!props.stringPropertyNames().contains('sdk.dir')) {
-        throw new GradleException('sdk.dir not defined in local.properties')
-    }
-}
-
-def generateKeystore(keystoreFile) {
-    exec {
-        executable "keytool"
-        args "-genkey",
-            "-keystore", "appauth.keystore",
-            "-alias", "appauth",
-            "-keyalg", "RSA",
-            "-keysize", "2048",
-            "-validity", "10000",
-            "-keypass", "appauth",
-            "-storepass", "appauth",
-            "-dname", "CN=appauth"
-    }
-}
-
-def verifyKeystore = {
-    def keystoreFile = file(new File(projectDir, "appauth.keystore"))
-    if (!keystoreFile.exists()) {
-        logger.lifecycle("appauth.keystore missing - creating one")
-        generateKeystore(keystoreFile)
-    }
-}
-
-task doFirst {
-    verifyLocalProperties()
-    verifyKeystore()
-}
+apply from: 'config/localprops.gradle'
+apply from: 'config/keystore.gradle'
 
 buildscript {
     repositories {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.1.0'
+        classpath 'com.android.tools.build:gradle:2.1.2'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.3'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
-        classpath 'org.ajoberstar:gradle-git:1.4.2'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7'
+        classpath 'org.ajoberstar:gradle-git:1.5.0'
     }
 }
 
-import org.ajoberstar.grgit.Grgit
-
-allprojects {
+subprojects {
     repositories {
         jcenter()
 
         maven {
-            url "${androidSdkDir()}/extras/android/m2repository"
-        }
-
-        maven {
-            // required for Robolectric 3.1-SNAPSHOT, for v23 API support
-            url "https://oss.sonatype.org/content/repositories/snapshots"
+            url "${rootProject.androidSdkDir}/extras/android/m2repository"
         }
     }
 }
 
-def grgit = Grgit.open(project.file("."))
+def grgit = org.ajoberstar.grgit.Grgit.open(dir: '.')
 def lastCommit = grgit.head()
 
-project.ext.vNum = grgit.log(includes:['HEAD']).size()
-project.ext.vName = grgit.describe()
-project.ext.vDate = lastCommit.getDate()
+project.ext.versionNum = grgit.log(includes:['HEAD']).size()
+project.ext.versionName = grgit.describe()
+project.ext.versionDate = lastCommit.getDate()
+if (project.ext.versionName == null) {
+    project.ext.versionNme = 'DEV'
+}
+
+project.ext.minSdkVersion = 15
+project.ext.compileSdkVersion = 24
+project.ext.buildToolsVersion = '24.0.0'
+project.ext.supportLibVersion = '24.0.0'
 
 task showVersion << {
     logger.lifecycle("Version ID: " + project.vNum)
@@ -143,5 +45,5 @@ task showVersion << {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.11'
+    gradleVersion = '2.14'
 }

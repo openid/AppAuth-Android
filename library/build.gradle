@@ -1,125 +1,22 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.jfrog.bintray'
-apply plugin: 'checkstyle'
-apply plugin: 'jacoco'
 apply plugin: 'com.github.dcendents.android-maven'
 
+apply from: '../config/android-common.gradle'
+
 group = "net.openid"
-version = rootProject.vName
+version = rootProject.versionName
 
-android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.2"
-
-    defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 23
-        versionCode rootProject.vNum
-        versionName rootProject.vName
-        project.archivesBaseName = "appauth"
-    }
-
-    sourceSets {
-        main.manifest.srcFile 'AndroidManifest.xml'
-        main.java.srcDirs = ['java']
-        main.aidl.srcDirs = ['java']
-        main.res.srcDir 'res'
-        main.assets.srcDir 'assets'
-        main.resources.srcDir 'java'
-
-        test.setRoot('javatests');
-        test.java.srcDir('javatests');
-    }
-
-    lintOptions {
-        warningsAsErrors true
-        disable 'TrulyRandom'
-    }
-
-    packagingOptions {
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/NOTICE.txt'
-    }
-}
+android.defaultConfig.project.archivesBaseName = 'appauth'
 
 dependencies {
-    compile 'com.android.support:customtabs:23.2.0'
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:1.10.19'
-    testCompile 'org.robolectric:robolectric:3.1-rc1'
-    testCompile 'com.squareup.assertj:assertj-android:1.1.1'
+    compile "com.android.support:customtabs:${rootProject.supportLibVersion}"
+    apply from: '../config/testdeps.gradle', to:it
 }
 
-checkstyle {
-    configFile file('../config/checkstyle/checkstyle.xml')
-    configProperties = ['checkstyle.java.header': file('../config/checkstyle/java.header').getAbsolutePath()]
-    toolVersion = "6.11.2"
-}
-
-task checkAllSource(type: Checkstyle) {
-    source 'java'
-    source 'javatests'
-    include '**/*.java'
-    classpath = files project.configurations.compile.files
-}
-
-task failOnCheckstyleWarning {
-    def checkstyleWarningsFile = 'build/reports/checkstyle/checkAllSource.xml'
-    doLast {
-        File warningsFile = file(checkstyleWarningsFile)
-        if (warningsFile.exists() && warningsFile.text.contains("<error ")) {
-            throw new GradleException(
-                    "There were checkstyle warnings. For more details check: " \
-                     + file(checkstyleWarningsFile))
-        }
-    }
-}
-
-// ensure that there are no style warnings
-failOnCheckstyleWarning.dependsOn checkAllSource
-
-// run checkstyle as part of the standard set of checks
-check.dependsOn failOnCheckstyleWarning
-
-jacoco {
-    toolVersion = "0.7.1.201405082137"
-}
-
-task jacocoTestReport(type: JacocoReport, dependsOn: "testDebugUnitTest") {
-    group = "Reporting"
-    description = "Generate Jacoco coverage reports after running tests."
-    reports {
-        xml.enabled = true
-        html.enabled = true
-    }
-
-    // Class R is used, but usage will not be covered, so ignore this class from report
-    classDirectories = fileTree(
-        dir: 'build/intermediates/classes/debug',
-        excludes: ['**/BuildConfig.class']
-    )
-    sourceDirectories = files('java')
-    executionData = files('build/jacoco/testDebugUnitTest.exec')
-}
-
-task androidJavadocs(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    title = "AppAuth"
-    classpath = files(project.android.getBootClasspath())
-    options {
-        links "http://docs.oracle.com/javase/7/docs/api/"
-        linksOffline "http://d.android.com/reference","${android.sdkDirectory}/docs/reference"
-    }
-    exclude '**/BuildConfig.java'
-    exclude '**/R.java'
-}
-
-afterEvaluate {
-    // fixes issue where javadoc can't find android symbols ref: http://stackoverflow.com/a/34572606
-    androidJavadocs.classpath += files(android.libraryVariants.collect { variant ->
-        variant.javaCompile.classpath.files
-    })
-}
+apply from: '../config/style.gradle'
+apply from: '../config/coverage.gradle'
+apply from: '../config/javadoc.gradle'
 
 bintray {
     user = System.getenv("BINTRAY_USER")
@@ -136,10 +33,10 @@ bintray {
         githubRepo = 'bintray/gradle-bintray-plugin'
 
         version {
-            name = rootProject.vName
+            name = rootProject.versionName
             desc = "AppAuth for Android"
-            released = rootProject.vDate
-            vcsTag = rootProject.vName
+            released = rootProject.versionDate
+            vcsTag = rootProject.versionName
         }
     }
     configurations = ["archives"]

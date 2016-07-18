@@ -14,21 +14,6 @@
 
 package net.openid.appauth;
 
-import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
-import static net.openid.appauth.TestValues.TEST_APP_SCHEME;
-import static net.openid.appauth.TestValues.TEST_AUTH_CODE;
-import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
-import static net.openid.appauth.TestValues.TEST_STATE;
-import static net.openid.appauth.TestValues.getTestAuthRequest;
-import static net.openid.appauth.TestValues.getTestAuthRequestBuilder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -46,8 +31,23 @@ import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.util.ActivityController;
 
+import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
+import static net.openid.appauth.TestValues.TEST_APP_SCHEME;
+import static net.openid.appauth.TestValues.TEST_AUTH_CODE;
+import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
+import static net.openid.appauth.TestValues.TEST_STATE;
+import static net.openid.appauth.TestValues.getTestAuthRequest;
+import static net.openid.appauth.TestValues.getTestAuthRequestBuilder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+
 @RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class)
+@Config(constants = BuildConfig.class, sdk=16)
 public class RedirectUriReceiverActivityTest {
 
     private static final long TEST_START_TIME = 100L;

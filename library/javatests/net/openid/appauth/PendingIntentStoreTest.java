@@ -14,10 +14,6 @@
 
 package net.openid.appauth;
 
-import static net.openid.appauth.TestValues.getTestAuthRequest;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import android.app.PendingIntent;
 
 import org.junit.After;
@@ -29,8 +25,12 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
+import static net.openid.appauth.TestValues.getTestAuthRequest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 @RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class)
+@Config(constants = BuildConfig.class, sdk=16)
 public class PendingIntentStoreTest {
     @Mock private PendingIntent mPendingIntent;
 

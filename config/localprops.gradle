@@ -1,0 +1,48 @@
+// infers the location of the Android SDK from the two most common environment
+// variables, ANDROID_SDK_HOME and ANDROID_HOME (in that order).
+def guessAndroidSdkLocation = {
+    def androidDir = null
+    if (System.env.ANDROID_SDK_HOME != null) {
+        logger.lifecycle("using android location from ANDROID_SDK_HOME")
+        return System.env.ANDROID_SDK_HOME
+    } else if (System.env.ANDROID_HOME != null) {
+        logger.info("using android location from ANDROID_HOME")
+        return System.env.ANDROID_HOME
+    }
+    return null
+}
+
+// creates a default local.properties file from inferred values and generated
+// resources
+def createLocalProperties = { localPropertiesFile ->
+    def androidDir = guessAndroidSdkLocation()
+    if (androidDir == null) {
+        logger.lifecycle([
+                "Unable to find android SDK location - please ",
+                "create a local.properties file with property sdk.dir set to ",
+                "the location of your android SDK. For example: \n",
+                "sdk.dir=/usr/local/me/android-sdk"].join())
+        throw new GradleException("Android SDK location could not be inferred")
+    }
+    def props = new Properties()
+    props.setProperty("sdk.dir", androidDir);
+    localPropertiesFile.withWriter('UTF-8') { props.store(it, null) }
+}
+
+def localPropertiesFile = file(new File(projectDir, "local.properties"))
+if (!localPropertiesFile.exists()) {
+    logger.lifecycle("local.properties file missing - attempting to " +
+            "create one")
+    createLocalProperties(localPropertiesFile)
+}
+
+def props = new Properties()
+localPropertiesFile.withInputStream {
+    props.load(it)
+}
+
+if (!props.stringPropertyNames().contains('sdk.dir')) {
+    throw new GradleException('sdk.dir not defined in local.properties')
+}
+
+ext.androidSdkDir = props.get("sdk.dir")
