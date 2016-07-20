@@ -306,10 +306,6 @@ public class AuthState {
 
     @VisibleForTesting
     boolean getNeedsTokenRefresh(Clock clock) {
-        if (getRefreshToken() == null) {
-            return false;
-        }
-
         if (mNeedsTokenRefreshOverride) {
             return true;
         }
