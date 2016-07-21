@@ -19,7 +19,7 @@ android {
     }
     lintOptions {
         warningsAsErrors true
-        disable 'InvalidPackage', 'TrulyRandom', 'UseCompoundDrawables'
+        disable 'InvalidPackage', 'TrulyRandom', 'UseCompoundDrawables', 'GradleDependency'
     }
     packagingOptions {
         exclude 'META-INF/LICENSE.txt'
