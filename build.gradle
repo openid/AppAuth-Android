@@ -39,9 +39,9 @@ project.ext.buildToolsVersion = '24.0.0'
 project.ext.supportLibVersion = '24.0.0'
 
 task showVersion << {
-    logger.lifecycle("Version ID: " + project.vNum)
-    logger.lifecycle("Version Name: " + project.vName)
-    logger.lifecycle("Version Date: " + project.vDate)
+    logger.lifecycle("Version ID: " + project.versionNum)
+    logger.lifecycle("Version Name: " + project.versionName)
+    logger.lifecycle("Version Date: " + project.versionDate)
 }
 
 task wrapper(type: Wrapper) {

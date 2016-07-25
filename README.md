@@ -26,7 +26,7 @@ other extensions (standard or otherwise) with the ability to handle additional
 parameters in all protocol requests and responses.
 
 A talk providing an overview of using the library for enterprise single sign-on (produced by
-Google) can be found here: 
+Google) can be found here:
 [Enterprise SSO with Chrome Custom Tabs](https://www.youtube.com/watch?v=DdQTXrk6YTk).
 
 ## Download
@@ -37,7 +37,7 @@ the latest AAR ([direct link](http://cli.re/Gxajn4) /
 or add a dependency using Gradle:
 
 ```groovy
-compile 'net.openid:appauth:0.2.0'
+compile 'net.openid:appauth:0.3.0'
 ```
 
 Or Maven:
@@ -235,7 +235,7 @@ response is delivered via an intent to an activity of your choosing:
 
 ```java
 AuthorizationService service = new AuthorizationService(context);
-Intent postAuthIntent = new Intent(context, MyAuthResultHandlerActivity.class); 
+Intent postAuthIntent = new Intent(context, MyAuthResultHandlerActivity.class);
 service.performAuthorizationRequest(
     req,
     PendingIntent.getActivity(context, req.hashCode(), postAuthIntent, 0));
