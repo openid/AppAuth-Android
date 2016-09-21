@@ -14,23 +14,22 @@
 
 package net.openid.appauth;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricGradleTestRunner;
-import org.robolectric.annotation.Config;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
 import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
 import static net.openid.appauth.TestValues.TEST_CODE_VERIFIER;
 import static net.openid.appauth.TestValues.getTestServiceConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(RobolectricGradleTestRunner.class)
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+
+@RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk=16)
 public class TokenRequestTest {
 

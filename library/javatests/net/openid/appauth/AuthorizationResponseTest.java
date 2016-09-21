@@ -14,16 +14,6 @@
 
 package net.openid.appauth;
 
-import android.net.Uri;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricGradleTestRunner;
-import org.robolectric.annotation.Config;
-
-import java.util.Collections;
-
 import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
 import static net.openid.appauth.TestValues.TEST_AUTH_CODE;
 import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
@@ -34,7 +24,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(RobolectricGradleTestRunner.class)
+import android.net.Uri;
+import java.util.Collections;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+
+@RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk=16)
 public class AuthorizationResponseTest {
 

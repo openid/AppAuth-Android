@@ -14,23 +14,6 @@
 
 package net.openid.appauth;
 
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
-import org.robolectric.RobolectricGradleTestRunner;
-import org.robolectric.annotation.Config;
-import org.robolectric.util.ActivityController;
-
 import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
 import static net.openid.appauth.TestValues.TEST_APP_SCHEME;
 import static net.openid.appauth.TestValues.TEST_AUTH_CODE;
@@ -46,7 +29,23 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
-@RunWith(RobolectricGradleTestRunner.class)
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+import org.robolectric.util.ActivityController;
+
+@RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk=16)
 public class RedirectUriReceiverActivityTest {
 

@@ -14,23 +14,22 @@
 
 package net.openid.appauth;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricGradleTestRunner;
-import org.robolectric.annotation.Config;
-
-import java.util.Arrays;
-import java.util.List;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-@RunWith(RobolectricGradleTestRunner.class)
+import java.util.Arrays;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+
+@RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk=16)
 public class AuthorizationServiceDiscoveryTest {
     // ToDo: add more tests for remaining getters

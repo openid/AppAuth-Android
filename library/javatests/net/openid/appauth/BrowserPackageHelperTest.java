@@ -27,7 +27,9 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.text.TextUtils;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,15 +37,11 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowIntentFilterFixed;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-@RunWith(RobolectricGradleTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk=16, shadows = ShadowIntentFilterFixed.class)
 public class BrowserPackageHelperTest {
 

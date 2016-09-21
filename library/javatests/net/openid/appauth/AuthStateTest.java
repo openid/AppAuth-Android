@@ -14,15 +14,6 @@
 
 package net.openid.appauth;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.robolectric.RobolectricGradleTestRunner;
-import org.robolectric.annotation.Config;
-
-import java.util.Collections;
-
 import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
 import static net.openid.appauth.TestValues.TEST_AUTH_CODE;
 import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
@@ -44,7 +35,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
-@RunWith(RobolectricGradleTestRunner.class)
+import java.util.Collections;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+
+@RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk=16)
 public class AuthStateTest {
 

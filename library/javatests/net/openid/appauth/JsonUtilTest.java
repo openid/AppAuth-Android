@@ -14,21 +14,6 @@
 
 package net.openid.appauth;
 
-import android.net.Uri;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricGradleTestRunner;
-import org.robolectric.annotation.Config;
-
-import java.util.Map;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -40,7 +25,20 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(RobolectricGradleTestRunner.class)
+import android.net.Uri;
+import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+
+@RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk=16)
 public class JsonUtilTest {
     private static final String TEST_KEY = "key";

@@ -14,16 +14,15 @@
 
 package net.openid.appauth;
 
+import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
+import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-
-import java.util.Map;
-
-import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
-import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk=16)

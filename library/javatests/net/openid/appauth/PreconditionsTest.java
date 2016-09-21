@@ -14,14 +14,6 @@
 
 package net.openid.appauth;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricGradleTestRunner;
-import org.robolectric.annotation.Config;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import static net.openid.appauth.Preconditions.checkArgument;
 import static net.openid.appauth.Preconditions.checkCollectionNotEmpty;
 import static net.openid.appauth.Preconditions.checkNotEmpty;
@@ -32,7 +24,14 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
-@RunWith(RobolectricGradleTestRunner.class)
+import java.util.ArrayList;
+import java.util.Arrays;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+
+@RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk=16)
 public class PreconditionsTest {
     private static final String TEST_MSG = "test";

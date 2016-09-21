@@ -14,42 +14,6 @@
 
 package net.openid.appauth;
 
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
-import android.net.Uri;
-import android.support.annotation.Nullable;
-import android.support.customtabs.CustomTabsClient;
-import android.support.customtabs.CustomTabsIntent;
-import android.support.customtabs.CustomTabsServiceConnection;
-
-import net.openid.appauth.AuthorizationException.GeneralErrors;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricGradleTestRunner;
-import org.robolectric.annotation.Config;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLStreamHandler;
-import java.util.Map;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-
 import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
 import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
 import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
@@ -72,7 +36,40 @@ import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(RobolectricGradleTestRunner.class)
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+import android.net.Uri;
+import android.support.annotation.Nullable;
+import android.support.customtabs.CustomTabsClient;
+import android.support.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsServiceConnection;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
+import java.util.Map;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import net.openid.appauth.AuthorizationException.GeneralErrors;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+
+@RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk=16)
 public class AuthorizationServiceTest {
     private static final int CALLBACK_TIMEOUT_MILLIS = 1000;
