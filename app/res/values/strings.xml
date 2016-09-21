@@ -19,4 +19,7 @@
     <string name="no_idps_configured">No IDPs are configured. Please edit idp_configs.xml</string>
     <string name="authorization_failed">Authorization failed</string>
     <string name="userinfo_profile_content_description">User profile picture</string>
+    <string name="login_hint_value">Account ID (e.g. test@gmail.com)</string>
+    <string name="account_id_description">The Account ID is optional. If specified, it is transmitted as a login_hint parameter in the authorization request.</string>
+    <string name="auth_options">Authorization options:</string>
 </resources>

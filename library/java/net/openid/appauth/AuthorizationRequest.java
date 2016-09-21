@@ -269,6 +269,9 @@ public class AuthorizationRequest {
     static final String PARAM_DISPLAY = "display";
 
     @VisibleForTesting
+    static final String PARAM_LOGIN_HINT = "login_hint";
+
+    @VisibleForTesting
     static final String PARAM_PROMPT = "prompt";
 
     @VisibleForTesting
@@ -291,6 +294,7 @@ public class AuthorizationRequest {
             PARAM_CODE_CHALLENGE,
             PARAM_CODE_CHALLENGE_METHOD,
             PARAM_DISPLAY,
+            PARAM_LOGIN_HINT,
             PARAM_PROMPT,
             PARAM_REDIRECT_URI,
             PARAM_RESPONSE_MODE,
@@ -301,6 +305,7 @@ public class AuthorizationRequest {
     private static final String KEY_CONFIGURATION = "configuration";
     private static final String KEY_CLIENT_ID = "clientId";
     private static final String KEY_DISPLAY = "display";
+    private static final String KEY_LOGIN_HINT = "login_hint";
     private static final String KEY_PROMPT = "prompt";
     private static final String KEY_RESPONSE_TYPE = "responseType";
     private static final String KEY_REDIRECT_URI = "redirectUri";
@@ -345,6 +350,18 @@ public class AuthorizationRequest {
      */
     @Nullable
     public final String display;
+
+
+    /**
+     * The OpenID Connect 1.0 {@code login_hint} parameter. This is a string hint to the
+     * Authorization Server about the login identifier the End-User might use to log in, typically
+     * collected directly from the user in an identifier-first authentication flow.
+     *
+     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
+     * Connect Core 1.0, Section 3.1.2.1</a>
+     */
+    @Nullable
+    public final String loginHint;
 
     /**
      * The OpenID Connect 1.0 {@code prompt} parameter. This is a space delimited, case sensitive
@@ -489,6 +506,9 @@ public class AuthorizationRequest {
         private String mDisplay;
 
         @Nullable
+        private String mLoginHint;
+
+        @Nullable
         private String mPrompt;
 
         // SuppressWarnings justification: static analysis incorrectly determines that this field
@@ -573,6 +593,14 @@ public class AuthorizationRequest {
          */
         public Builder setDisplay(@Nullable String display) {
             mDisplay = checkNullOrNotEmpty(display, "display must be null or not empty");
+            return this;
+        }
+
+        /**
+         * Specifies the OpenID Connect 1.0 {@code login_hint} parameter.
+         */
+        public Builder setLoginHint(@Nullable String loginHint) {
+            mLoginHint = checkNullOrNotEmpty(loginHint, "login hint must be null or not empty");
             return this;
         }
 
@@ -828,6 +856,7 @@ public class AuthorizationRequest {
                     mResponseType,
                     mRedirectUri,
                     mDisplay,
+                    mLoginHint,
                     mPrompt,
                     mScope,
                     mState,
@@ -845,6 +874,7 @@ public class AuthorizationRequest {
             @NonNull String responseType,
             @NonNull Uri redirectUri,
             @Nullable String display,
+            @Nullable String loginHint,
             @Nullable String prompt,
             @Nullable String scope,
             @Nullable String state,
@@ -862,6 +892,7 @@ public class AuthorizationRequest {
 
         // optional fields
         this.display = display;
+        this.loginHint = loginHint;
         this.prompt = prompt;
         this.scope = scope;
         this.state = state;
@@ -901,6 +932,7 @@ public class AuthorizationRequest {
                 .appendQueryParameter(PARAM_RESPONSE_TYPE, responseType);
 
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_DISPLAY, display);
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_LOGIN_HINT, loginHint);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_PROMPT, prompt);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_STATE, state);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_SCOPE, scope);
@@ -930,6 +962,7 @@ public class AuthorizationRequest {
         JsonUtil.put(json, KEY_RESPONSE_TYPE, responseType);
         JsonUtil.put(json, KEY_REDIRECT_URI, redirectUri.toString());
         JsonUtil.putIfNotNull(json, KEY_DISPLAY, display);
+        JsonUtil.putIfNotNull(json, KEY_LOGIN_HINT, loginHint);
         JsonUtil.putIfNotNull(json, KEY_SCOPE, scope);
         JsonUtil.putIfNotNull(json, KEY_PROMPT, prompt);
         JsonUtil.putIfNotNull(json, KEY_STATE, state);
@@ -967,6 +1000,7 @@ public class AuthorizationRequest {
                 JsonUtil.getString(json, KEY_RESPONSE_TYPE),
                 JsonUtil.getUri(json, KEY_REDIRECT_URI))
                 .setDisplay(JsonUtil.getStringIfDefined(json, KEY_DISPLAY))
+                .setLoginHint(JsonUtil.getStringIfDefined(json, KEY_LOGIN_HINT))
                 .setPrompt(JsonUtil.getStringIfDefined(json, KEY_PROMPT))
                 .setState(JsonUtil.getStringIfDefined(json, KEY_STATE))
                 .setCodeVerifier(

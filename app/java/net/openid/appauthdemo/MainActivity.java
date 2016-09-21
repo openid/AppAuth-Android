@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -131,12 +132,22 @@ public class MainActivity extends AppCompatActivity {
             @NonNull IdentityProvider idp,
             @NonNull AuthState authState) {
 
+        String loginHint = ((EditText) findViewById(R.id.login_hint_value))
+                .getText()
+                .toString()
+                .trim();
+
+        if (loginHint.isEmpty()) {
+            loginHint = null;
+        }
+
         AuthorizationRequest authRequest = new AuthorizationRequest.Builder(
                 serviceConfig,
                 idp.getClientId(),
                 ResponseTypeValues.CODE,
                 idp.getRedirectUri())
                 .setScope(idp.getScope())
+                .setLoginHint(loginHint)
                 .build();
 
         Log.d(TAG, "Making auth request to " + serviceConfig.authorizationEndpoint);
