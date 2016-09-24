@@ -1,0 +1,234 @@
+/*
+ * Copyright 2016 The AppAuth for Android Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package net.openid.appauth;
+
+import static org.assertj.android.api.Assertions.assertThat;
+import static org.robolectric.Shadows.shadowOf;
+
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+
+import net.openid.appauth.AuthorizationException.AuthorizationRequestErrors;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowActivity;
+import org.robolectric.util.ActivityController;
+
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk=16)
+public class AuthorizationManagementActivityTest {
+
+    private AuthorizationRequest mAuthRequest;
+    private Intent mAuthIntent;
+    private Intent mCompleteIntent;
+    private PendingIntent mCompletePendingIntent;
+    private Intent mCancelIntent;
+    private PendingIntent mCancelPendingIntent;
+    private Intent mStartIntent;
+    private Intent mStartIntentWithoutCancel;
+    private ActivityController<AuthorizationManagementActivity> mController;
+    private AuthorizationManagementActivity mActivity;
+    private ShadowActivity mActivityShadow;
+    private Uri mSuccessAuthRedirect;
+    private Uri mErrorAuthRedirect;
+
+    @Before
+    public void setUp() {
+        mAuthRequest = TestValues.getTestAuthRequest();
+
+        mAuthIntent = new Intent("AUTH");
+        mCompleteIntent = new Intent("COMPLETE");
+        mCompletePendingIntent =
+                PendingIntent.getActivity(RuntimeEnvironment.application, 0, mCompleteIntent, 0);
+        mCancelIntent = new Intent("CANCEL");
+        mCancelPendingIntent =
+                PendingIntent.getActivity(RuntimeEnvironment.application, 0, mCancelIntent, 0);
+
+        mStartIntent = AuthorizationManagementActivity.createStartIntent(
+                RuntimeEnvironment.application,
+                mAuthRequest,
+                mAuthIntent,
+                mCompletePendingIntent,
+                mCancelPendingIntent);
+
+        mStartIntentWithoutCancel = AuthorizationManagementActivity.createStartIntent(
+                RuntimeEnvironment.application,
+                mAuthRequest,
+                mAuthIntent,
+                mCompletePendingIntent,
+                null);
+
+        mSuccessAuthRedirect = mAuthRequest.redirectUri.buildUpon()
+                .appendQueryParameter(AuthorizationResponse.KEY_STATE, mAuthRequest.state)
+                .appendQueryParameter(AuthorizationResponse.KEY_AUTHORIZATION_CODE, "12345")
+                .build();
+
+        mErrorAuthRedirect = mAuthRequest.redirectUri.buildUpon()
+                .appendQueryParameter(
+                        AuthorizationException.PARAM_ERROR,
+                        AuthorizationRequestErrors.ACCESS_DENIED.error)
+                .appendQueryParameter(
+                        AuthorizationException.PARAM_ERROR_DESCRIPTION,
+                        AuthorizationRequestErrors.ACCESS_DENIED.errorDescription)
+                .build();
+
+        instantiateActivity(mStartIntent);
+    }
+
+    private void instantiateActivity(Intent managementIntent) {
+        mController = Robolectric.buildActivity(AuthorizationManagementActivity.class)
+                .withIntent(managementIntent);
+
+        mActivity = mController.get();
+        mActivityShadow = shadowOf(mActivity);
+    }
+
+    @Test
+    public void testSuccessFlow_withoutDestroy() {
+        // start the flow
+        instantiateActivity(mStartIntent);
+        mController.create().start().resume();
+
+        // an activity should be started for auth
+        assertThat(mActivityShadow.getNextStartedActivity()).hasAction("AUTH");
+
+        // the management activity will be paused while the authorization flow is running.
+        // if there is no memory pressure, the activity will remain in the paused state.
+        mController.pause();
+
+        // on completion of the authorization activity, the result will be forwarded to the
+        // management activity via newIntent
+        mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
+                RuntimeEnvironment.application,
+                mSuccessAuthRedirect));
+
+        // the management activity is then resumed
+        mController.resume();
+
+        // after which the completion intent should be fired
+        assertThat(mActivityShadow.getNextStartedActivity())
+                .hasAction("COMPLETE")
+                .hasExtra(AuthorizationResponse.EXTRA_RESPONSE);
+        assertThat(mActivity).isFinishing();
+    }
+
+    @Test
+    public void testSuccessFlow_withDestroy() {
+        // start the flow
+        instantiateActivity(mStartIntent);
+        mController.create().start().resume();
+
+        // an activity should be started for auth
+        assertThat(mActivityShadow.getNextStartedActivity()).hasAction("AUTH");
+
+        // on a device under memory pressure, the management activity will be destroyed, but
+        // it will be able to save its state
+        Bundle savedState = new Bundle();
+        mController.pause().stop().saveInstanceState(savedState).destroy();
+
+        // on completion of the authorization activity, a new management activity will be created
+        instantiateActivity(mStartIntent);
+        mController.create(savedState).start();
+
+        // the authorization redirect will be forwarded via a new intent
+        mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
+                RuntimeEnvironment.application,
+                mSuccessAuthRedirect));
+
+        // the management activity is then resumed
+        mController.resume();
+
+        // after which the completion intent should be fired
+        assertThat(mActivityShadow.getNextStartedActivity())
+                .hasAction("COMPLETE")
+                .hasExtra(AuthorizationResponse.EXTRA_RESPONSE);
+        assertThat(mActivity).isFinishing();
+    }
+
+    @Test
+    public void testFailureFlow_withoutDestroy() {
+        // start the flow
+        instantiateActivity(mStartIntent);
+        mController.create().start().resume();
+
+        // an activity should be started for auth
+        assertThat(mActivityShadow.getNextStartedActivity()).hasAction("AUTH");
+
+        // the management activity will be paused while the authorization flow is running.
+        // if there is no memory pressure, the activity will remain in the paused state.
+        mController.pause();
+
+        // the authorization redirect will be forwarded via a new intent
+        mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
+                RuntimeEnvironment.application,
+                mErrorAuthRedirect));
+
+        // the management activity is then resumed
+        mController.resume();
+
+        // after which the completion intent should be fired
+        assertThat(mActivityShadow.getNextStartedActivity())
+                .hasAction("COMPLETE")
+                .hasExtra(AuthorizationException.EXTRA_EXCEPTION);
+        assertThat(mActivity).isFinishing();
+    }
+
+    @Test
+    public void testCancelFlow_withoutDestroy() {
+        // start the flow
+        instantiateActivity(mStartIntent);
+        mController.create().start().resume();
+
+        // an activity should be started for auth
+        assertThat(mActivityShadow.getNextStartedActivity()).isNotNull();
+
+        // the management activity will be paused while this auth intent is running
+        mController.pause();
+
+        // when the user cancels the auth intent, the management activity will be resumed
+        mController.resume();
+
+        // at which point the cancel intent should be fired
+        assertThat(mActivityShadow.getNextStartedActivity()).hasAction("CANCEL");
+        assertThat(mActivity).isFinishing();
+    }
+
+    @Test
+    public void testCancelFlow_noCancelIntent() {
+        // start the flow
+        instantiateActivity(mStartIntentWithoutCancel);
+        mController.create().start().resume();
+
+        // an activity should be started for auth
+        assertThat(mActivityShadow.getNextStartedActivity()).isNotNull();
+
+        // the management activity will be paused while this auth intent is running
+        mController.pause();
+
+        // when the user cancels the auth intent, the management activity will be resumed
+        mController.resume();
+
+        // as there is no cancel intent, the activity simply finishes
+        assertThat(mActivityShadow.getNextStartedActivity()).isNull();
+        assertThat(mActivity).isFinishing();
+    }
+}

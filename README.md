@@ -46,7 +46,7 @@ Or Maven:
 <dependency>
   <groupId>net.openid</groupId>
   <artifactId>appauth</artifactId>
-  <version>0.2.0</version>
+  <version>0.3.0</version>
 </dependency>
 ```
 
@@ -230,24 +230,40 @@ AuthorizationRequest req = new AuthorizationRequest.Builder(
 ```
 
 Requests are dispatched with the help of `AuthorizationService`. As this
-will open a custom tab or browser instance to fulfill this request, the
-response is delivered via an intent to an activity of your choosing:
+will open a custom tab or browser instance to fulfill this request.
+An intent can be specified for both completion and cancelation of the
+authorization flow:
 
 ```java
 AuthorizationService service = new AuthorizationService(context);
 Intent postAuthIntent = new Intent(context, MyAuthResultHandlerActivity.class);
+Intent authCanceledIntent = new Intent(context, MyAuthCanceledHandlerActivity.class);
 service.performAuthorizationRequest(
     req,
-    PendingIntent.getActivity(context, req.hashCode(), postAuthIntent, 0));
+    PendingIntent.getActivity(context, req.hashCode(), postAuthIntent, 0),
+    PendingIntent.getActivity(context, req.hashCode(), authCanceledIntent, 0));
 ```
 
 ### Handling the Redirect
 
-In the `AndroidManifest.xml`, declare the activity that receives the redirect
-URI intent, and the scheme of your OAuth client's redirect URI:
+We recommend using a custom scheme to send the OAuth redirect back to
+your app. The library configures the `RedirectUriReceiverActivity` to
+handle a custom scheme defined as a "manifest placeholder" which can be
+replaced by adding the following to your `build.gradle`:
 
 ```
-<activity android:name="net.openid.appauth.RedirectUriReceiverActivity">
+android.defaultConfig.manifestPlaceholders = [
+  'appAuthRedirectScheme': 'your-custom-scheme'
+]
+```
+
+Instead of this, you can directly declare the redirect URI by adding the
+following to your `AndroidManifest.xml`:
+
+```
+<activity
+        android:name="net.openid.appauth.RedirectUriReceiverActivity"
+        tools:node="replace">
     <intent-filter>
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
@@ -257,8 +273,26 @@ URI intent, and the scheme of your OAuth client's redirect URI:
 </activity>
 ```
 
-The response is delivered to the specified handler, and can be extracted
-from the intent data:
+This latter option can also be used to capture HTTP(S) redirects if necessary:
+
+```
+<activity
+        android:name="net.openid.appauth.RedirectUriReceiverActivity"
+        tools:node="replace">
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="https"
+              android:host="www.example.com"
+              android:path="/oauth2redirect"/>
+    </intent-filter>
+</activity>
+```
+
+When the response is captured by `RedirectUriReceiverActivity`, it is
+ultimately forwarded to the activity specified in your completion intent,
+and can be extracted from the intent data:
 
 ```java
 public void onCreate(Bundle b) {

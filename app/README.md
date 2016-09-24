@@ -36,8 +36,12 @@ YOUR_CLIENT.apps.googleusercontent.com
 Where `YOUR_CLIENT` is your client string provided by Google. This full string
 should be placed in the `google_client_id` string resource, and the reverse of
 it (i.e. `com.googleusercontent.apps.YOUR_CLIENT`) should be placed in
-both `google_auth_redirect_scheme` and `google_auth_redirect_uri`.
+`google_auth_redirect_uri`.
 After these values populated, set `google_enabled` to `true`.
+
+Additionally, to enable the capture of redirects to a custom scheme based on
+this client ID, modify the `build.gradle` to change the value of the
+`appAuthRedirectScheme` manifest placeholder.
 
 After this is done, recompile the app (`./gradlew assembleDebug`) and
 install it (`adb install -r -d app/build/outputs/apk/app-debug.apk`). A
@@ -124,8 +128,8 @@ And added to `IdentityProvider`'s static list of IDPs, e.g.:
 public static final List<IdentityProvider> PROVIDERS = Arrays.asList(MYAUTH)
 ```
 
-Finally you need to add a new intent-filter to the 
-`net.openid.appauth.RedirectUriReceiverActivity` activity section of 
+Finally you need to add a new intent-filter to the
+`net.openid.appauth.RedirectUriReceiverActivity` activity section of
 the `AndroidManifest.xml`
 
 ```

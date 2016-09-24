@@ -9,6 +9,12 @@ version = rootProject.versionName
 
 android.defaultConfig.project.archivesBaseName = 'appauth'
 
+// Define a default value for building the tests. This is not used when building any dependent
+// libraries or apps.
+android.buildTypes.debug.manifestPlaceholders = [
+    'appAuthRedirectScheme': 'net.openid.appauth.test'
+];
+
 dependencies {
     compile "com.android.support:customtabs:${rootProject.supportLibVersion}"
     apply from: '../config/testdeps.gradle', to:it

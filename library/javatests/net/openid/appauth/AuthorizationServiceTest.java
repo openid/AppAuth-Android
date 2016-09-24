@@ -27,6 +27,7 @@ import static net.openid.appauth.TestValues.getTestAuthCodeExchangeRequest;
 import static net.openid.appauth.TestValues.getTestAuthRequestBuilder;
 import static net.openid.appauth.TestValues.getTestRegistrationRequest;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.android.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -67,6 +68,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -108,7 +110,6 @@ public class AuthorizationServiceTest {
     @SuppressWarnings("ResourceType")
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        PendingIntentStore.getInstance().clearPendingIntents();
         URLStreamHandler urlStreamHandler = new URLStreamHandler() {
             @Override
             protected URLConnection openConnection(URL url) throws IOException {
@@ -129,11 +130,6 @@ public class AuthorizationServiceTest {
         when(mBrowserHandler.getBrowserPackage()).thenReturn(TEST_BROWSER_PACKAGE);
     }
 
-    @After
-    public void tearDown() {
-        PendingIntentStore.getInstance().clearPendingIntents();
-    }
-
     @Test
     public void testAuthorizationRequest_withSpecifiedState() throws Exception {
         AuthorizationRequest request = getTestAuthRequestBuilder()
@@ -143,7 +139,6 @@ public class AuthorizationServiceTest {
         Intent intent = captureAuthRequestIntent();
         assertRequestIntent(intent, null);
         assertEquals(request.toUri().toString(), intent.getData().toString());
-        assertEquals(mPendingIntent, PendingIntentStore.getInstance().getPendingIntent(TEST_STATE));
     }
 
     @Test
@@ -152,8 +147,6 @@ public class AuthorizationServiceTest {
         mService.performAuthorizationRequest(request, mPendingIntent);
         Intent intent = captureAuthRequestIntent();
         assertRequestIntent(intent, null);
-        assertEquals(mPendingIntent,
-                PendingIntentStore.getInstance().getPendingIntent(request.state));
     }
 
     @Test
@@ -269,7 +262,11 @@ public class AuthorizationServiceTest {
     private Intent captureAuthRequestIntent() {
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         verify(mContext).startActivity(intentCaptor.capture());
-        return intentCaptor.getValue();
+
+        // the real auth intent is wrapped in the intent by AuthorizationManagementActivity
+        return intentCaptor
+                .getValue()
+                .getParcelableExtra(AuthorizationManagementActivity.KEY_AUTH_INTENT);
     }
 
     private void assertTokenResponse(TokenResponse response, TokenRequest expectedRequest) {
