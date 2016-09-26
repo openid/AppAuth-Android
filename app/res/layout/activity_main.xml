@@ -47,11 +47,38 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="@string/auth_header"
-                    style="@style/Base.TextAppearance.AppCompat.Subhead" />
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center"
+                  android:text="@string/auth_options"
+                  style="@style/Base.TextAppearance.AppCompat.Subhead" />
+
+                <android.support.design.widget.TextInputLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginTop="8dp">
+
+                    <android.support.design.widget.TextInputEditText
+                      android:id="@+id/login_hint_value"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:inputType="textEmailAddress"
+                      android:hint="@string/login_hint_value"/>
+
+                </android.support.design.widget.TextInputLayout>
+
+                <TextView
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:text="@string/account_id_description"/>
+
+                <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center"
+                  android:text="@string/auth_header"
+                  android:layout_marginTop="16dp"
+                  style="@style/Base.TextAppearance.AppCompat.Subhead" />
 
                 <!-- IDP buttons are dynamically injected into this container -->
                 <LinearLayout

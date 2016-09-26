@@ -16,6 +16,7 @@ package net.openid.appauth;
 
 import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
 import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
+import static net.openid.appauth.TestValues.TEST_EMAIL_ADDRESS;
 import static net.openid.appauth.TestValues.TEST_STATE;
 import static net.openid.appauth.TestValues.getTestServiceConfig;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -241,6 +242,36 @@ public class AuthorizationRequestTest {
         mRequestBuilder.setDisplay("").build();
     }
 
+    /* ***********************************  login_hint ********************************************/
+
+    @Test
+    public void testLoginHint_unspecified() {
+        AuthorizationRequest request = mRequestBuilder.build();
+        assertThat(request.loginHint).isNull();
+    }
+
+    @Test
+    public void testLoginHint() {
+        AuthorizationRequest req = mRequestBuilder
+            .setLoginHint(TEST_EMAIL_ADDRESS)
+            .build();
+        assertThat(req.loginHint).isEqualTo(TEST_EMAIL_ADDRESS);
+    }
+
+    @Test
+    public void testLoginHint_withNullValue() {
+        AuthorizationRequest req = mRequestBuilder
+            .setLoginHint(null)
+            .build();
+
+        assertThat(req.loginHint).isNull();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testLoginHint_withEmptyValue() {
+        mRequestBuilder.setLoginHint("").build();
+    }
+
     /* ************************************** prompt **********************************************/
 
     @Test
@@ -460,6 +491,20 @@ public class AuthorizationRequestTest {
     }
 
     @Test
+    public void testToUri_loginHint() {
+        Uri uri = mRequestBuilder
+            .setLoginHint(TEST_EMAIL_ADDRESS)
+            .build()
+            .toUri();
+
+        assertThat(uri.getQueryParameterNames())
+            .contains(AuthorizationRequest.PARAM_LOGIN_HINT);
+        assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_LOGIN_HINT))
+            .isEqualTo(TEST_EMAIL_ADDRESS);
+    }
+
+
+    @Test
     public void testToUri_promptParam() {
         Uri uri = mRequestBuilder
                 .setPrompt(AuthorizationRequest.Prompt.CONSENT)
@@ -544,6 +589,13 @@ public class AuthorizationRequestTest {
         AuthorizationRequest copy = serializeDeserialize(
                 mRequestBuilder.setDisplay(AuthorizationRequest.Display.POPUP).build());
         assertThat(copy.display).isEqualTo(AuthorizationRequest.Display.POPUP);
+    }
+
+    @Test
+    public void testJsonSerialize_loginHint() throws Exception {
+        AuthorizationRequest copy = serializeDeserialize(
+                mRequestBuilder.setLoginHint(TEST_EMAIL_ADDRESS).build());
+        assertThat(copy.loginHint).isEqualTo(TEST_EMAIL_ADDRESS);
     }
 
     @Test

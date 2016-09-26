@@ -45,6 +45,8 @@ class TestValues {
     public static final Long TEST_CLIENT_SECRET_EXPIRES_AT = 78L;
     public static final String TEST_CLIENT_SECRET = "test_client_secret";
 
+    public static final String TEST_EMAIL_ADDRESS = "test@example.com";
+
     public static AuthorizationServiceConfiguration getTestServiceConfig() {
         return new AuthorizationServiceConfiguration(
                 TEST_IDP_AUTH_ENDPOINT,
