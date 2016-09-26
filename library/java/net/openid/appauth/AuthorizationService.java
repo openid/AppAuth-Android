@@ -126,16 +126,41 @@ public class AuthorizationService {
 
     /**
      * Sends an authorization request to the authorization service, using a
-     * <a href="https://developer.chrome.com/multidevice/android/customtabs">custom tab</a>.
+     * <a href="https://developer.chrome.com/multidevice/android/customtabs">custom tab</a>
+     * if available, or a browser instance.
      * The parameters of this request are determined by both the authorization service
      * configuration and the provided {@link AuthorizationRequest request object}. Upon completion
-     * of this request, the provided {@link PendingIntent result handler intent} will be invoked.
+     * of this request, the provided {@link PendingIntent completion PendingIntent} will be invoked.
+     * If the user cancels the authorization request, the current activity will regain control.
      */
     public void performAuthorizationRequest(
             @NonNull AuthorizationRequest request,
-            @NonNull PendingIntent resultHandlerIntent) {
-        performAuthorizationRequest(request,
-                resultHandlerIntent,
+            @NonNull PendingIntent completedIntent) {
+        performAuthorizationRequest(
+                request,
+                completedIntent,
+                null,
+                createCustomTabsIntentBuilder().build());
+    }
+
+    /**
+     * Sends an authorization request to the authorization service, using a
+     * <a href="https://developer.chrome.com/multidevice/android/customtabs">custom tab</a>
+     * if available, or a browser instance.
+     * The parameters of this request are determined by both the authorization service
+     * configuration and the provided {@link AuthorizationRequest request object}. Upon completion
+     * of this request, the provided {@link PendingIntent completion PendingIntent} will be invoked.
+     * If the user cancels the authorization request, the provided
+     * {@link PendingIntent cancel PendingIntent} will be invoked.
+     */
+    public void performAuthorizationRequest(
+            @NonNull AuthorizationRequest request,
+            @NonNull PendingIntent completedIntent,
+            @NonNull PendingIntent canceledIntent) {
+        performAuthorizationRequest(
+                request,
+                completedIntent,
+                canceledIntent,
                 createCustomTabsIntentBuilder().build());
     }
 
@@ -144,7 +169,8 @@ public class AuthorizationService {
      * <a href="https://developer.chrome.com/multidevice/android/customtabs">custom tab</a>.
      * The parameters of this request are determined by both the authorization service
      * configuration and the provided {@link AuthorizationRequest request object}. Upon completion
-     * of this request, the provided {@link PendingIntent result handler intent} will be invoked.
+     * of this request, the provided {@link PendingIntent completion PendingIntent} will be invoked.
+     * If the user cancels the authorization request, the current activity will regain control.
      *
      * @param customTabsIntent
      *     The intent that will be used to start the custom tab. It is recommended that this intent
@@ -153,11 +179,36 @@ public class AuthorizationService {
      */
     public void performAuthorizationRequest(
             @NonNull AuthorizationRequest request,
-            @NonNull PendingIntent resultHandlerIntent,
+            @NonNull PendingIntent completedIntent,
+            @NonNull CustomTabsIntent customTabsIntent) {
+        performAuthorizationRequest(
+                request,
+                completedIntent,
+                null,
+                customTabsIntent);
+    }
+
+    /**
+     * Sends an authorization request to the authorization service, using a
+     * <a href="https://developer.chrome.com/multidevice/android/customtabs">custom tab</a>.
+     * The parameters of this request are determined by both the authorization service
+     * configuration and the provided {@link AuthorizationRequest request object}. Upon completion
+     * of this request, the provided {@link PendingIntent completion PendingIntent} will be invoked.
+     * If the user cancels the authorization request, the provided
+     * {@link PendingIntent cancel PendingIntent} will be invoked.
+     *
+     * @param customTabsIntent
+     *     The intent that will be used to start the custom tab. It is recommended that this intent
+     *     be created with the help of {@link #createCustomTabsIntentBuilder()}, which will ensure
+     *     that a warmed-up version of the browser will be used, minimizing latency.
+     */
+    public void performAuthorizationRequest(
+            @NonNull AuthorizationRequest request,
+            @NonNull PendingIntent completedIntent,
+            @Nullable PendingIntent canceledIntent,
             @NonNull CustomTabsIntent customTabsIntent) {
         checkNotDisposed();
         Uri requestUri = request.toUri();
-        PendingIntentStore.getInstance().addPendingIntent(request, resultHandlerIntent);
         Intent intent = customTabsIntent.intent;
         intent.setData(requestUri);
         if (TextUtils.isEmpty(intent.getPackage())) {
@@ -170,7 +221,12 @@ public class AuthorizationService {
 
         Logger.debug("Initiating authorization request to %s",
                 request.configuration.authorizationEndpoint);
-        mContext.startActivity(intent);
+        mContext.startActivity(AuthorizationManagementActivity.createStartIntent(
+                mContext,
+                request,
+                intent,
+                completedIntent,
+                canceledIntent));
     }
 
     /**

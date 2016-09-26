@@ -14,7 +14,6 @@
     the reverse form of the client ID registered above. Handling of this scheme is registered in an
     intent filter in the app's manifest.
     -->
-    <string name="google_auth_redirect_scheme" translatable="false">com.googleusercontent.apps.YOUR_ID</string>
     <string name="google_auth_redirect_uri" translatable="false">com.googleusercontent.apps.YOUR_ID:/oauth2redirect</string>
 
 </resources>
