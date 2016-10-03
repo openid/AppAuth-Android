@@ -269,6 +269,13 @@ public final class AuthorizationException extends Exception {
         public static final AuthorizationException OTHER =
                 authEx(1008, null);
 
+        /**
+         * Indicates that the response state param did not match the request state param,
+         * resulting in the response being discarded.
+         */
+        public static final AuthorizationException STATE_MISMATCH =
+                generalEx(9, "Response state param did not match request state");
+
         private static final Map<String, AuthorizationException> STRING_TO_EXCEPTION =
                 exceptionMapByString(
                         INVALID_REQUEST,

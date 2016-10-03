@@ -15,6 +15,7 @@
 package net.openid.appauth;
 
 import static org.assertj.android.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.app.PendingIntent;
@@ -63,19 +64,8 @@ public class AuthorizationManagementActivityTest {
         mCancelPendingIntent =
                 PendingIntent.getActivity(RuntimeEnvironment.application, 0, mCancelIntent, 0);
 
-        mStartIntent = AuthorizationManagementActivity.createStartIntent(
-                RuntimeEnvironment.application,
-                mAuthRequest,
-                mAuthIntent,
-                mCompletePendingIntent,
-                mCancelPendingIntent);
-
-        mStartIntentWithoutCancel = AuthorizationManagementActivity.createStartIntent(
-                RuntimeEnvironment.application,
-                mAuthRequest,
-                mAuthIntent,
-                mCompletePendingIntent,
-                null);
+        mStartIntent = createStartIntent(mAuthRequest, mCancelPendingIntent);
+        mStartIntentWithoutCancel = createStartIntent(mAuthRequest, null);
 
         mSuccessAuthRedirect = mAuthRequest.redirectUri.buildUpon()
                 .appendQueryParameter(AuthorizationResponse.KEY_STATE, mAuthRequest.state)
@@ -92,6 +82,17 @@ public class AuthorizationManagementActivityTest {
                 .build();
 
         instantiateActivity(mStartIntent);
+    }
+
+    private Intent createStartIntent(
+            AuthorizationRequest authRequest,
+            PendingIntent cancelIntent) {
+        return AuthorizationManagementActivity.createStartIntent(
+                RuntimeEnvironment.application,
+                authRequest,
+                mAuthIntent,
+                mCompletePendingIntent,
+                cancelIntent);
     }
 
     private void instantiateActivity(Intent managementIntent) {
@@ -193,6 +194,66 @@ public class AuthorizationManagementActivityTest {
     }
 
     @Test
+    public void testMismatchedState_responseDiffersFromRequest() {
+        emulateFlowToAuthorizationActivityLaunch(mStartIntent);
+
+        Uri authResponseUri = mAuthRequest.redirectUri.buildUpon()
+                .appendQueryParameter(AuthorizationResponse.KEY_STATE, "differentState")
+                .appendQueryParameter(AuthorizationResponse.KEY_AUTHORIZATION_CODE, "12345")
+                .build();
+
+        Intent nextStartedActivity = emulateAuthorizationResponseReceived(
+                AuthorizationManagementActivity.createResponseHandlingIntent(
+                        RuntimeEnvironment.application,
+                        authResponseUri));
+
+        // the next activity should be from the completion intent, carrying an error
+        assertThat(nextStartedActivity)
+                .hasAction("COMPLETE")
+                .hasExtra(AuthorizationException.EXTRA_EXCEPTION);
+
+        assertThat(AuthorizationException.fromIntent(nextStartedActivity))
+                .isEqualTo(AuthorizationRequestErrors.STATE_MISMATCH);
+    }
+
+    @Test
+    public void testMismatchedState_noStateInRequestWithStateInResponse() {
+        AuthorizationRequest request = new AuthorizationRequest.Builder(
+                TestValues.getTestServiceConfig(),
+                TestValues.TEST_CLIENT_ID,
+                ResponseTypeValues.CODE,
+                TestValues.TEST_APP_REDIRECT_URI)
+                .setState(null)
+                .build();
+
+        emulateFlowToAuthorizationActivityLaunch(createStartIntent(request, mCancelPendingIntent));
+
+        Uri authResponseUri = mAuthRequest.redirectUri.buildUpon()
+                .appendQueryParameter(AuthorizationResponse.KEY_STATE, "differentState")
+                .appendQueryParameter(AuthorizationResponse.KEY_AUTHORIZATION_CODE, "12345")
+                .build();
+
+        // the next activity should be from the completion intent, carrying an error
+        Intent nextStartedActivity = emulateAuthorizationResponseReceived(
+                AuthorizationManagementActivity.createResponseHandlingIntent(
+                        RuntimeEnvironment.application,
+                        authResponseUri));
+
+        assertThat(AuthorizationException.fromIntent(nextStartedActivity))
+                .isEqualTo(AuthorizationRequestErrors.STATE_MISMATCH);
+    }
+
+    @Test
+    public void testInvalidResponse() {
+        emulateFlowToAuthorizationActivityLaunch(mStartIntent);
+
+        Uri authResponseUri = mAuthRequest.redirectUri.buildUpon()
+                .appendQueryParameter(AuthorizationResponse.KEY_STATE, "differentState")
+                .appendQueryParameter(AuthorizationResponse.KEY_AUTHORIZATION_CODE, "12345")
+                .build();
+    }
+
+    @Test
     public void testCancelFlow_withoutDestroy() {
         // start the flow
         instantiateActivity(mStartIntent);
@@ -230,5 +291,30 @@ public class AuthorizationManagementActivityTest {
         // as there is no cancel intent, the activity simply finishes
         assertThat(mActivityShadow.getNextStartedActivity()).isNull();
         assertThat(mActivity).isFinishing();
+    }
+
+    private void emulateFlowToAuthorizationActivityLaunch(Intent startIntent) {
+        // start the flow
+        instantiateActivity(mStartIntent);
+        mController.create().start().resume();
+
+        // an activity should be started for auth
+        assertThat(mActivityShadow.getNextStartedActivity()).hasAction("AUTH");
+
+        // the management activity will be paused while the authorization flow is running.
+        // if there is no memory pressure, the activity will remain in the paused state.
+        mController.pause();
+    }
+
+    private Intent emulateAuthorizationResponseReceived(Intent relaunchIntent) {
+        if (relaunchIntent != null) {
+            // the authorization redirect will be forwarded via a new intent
+            mController.newIntent(relaunchIntent);
+        }
+
+        // the management activity is then resumed
+        mController.resume();
+
+        return mActivityShadow.getNextStartedActivity();
     }
 }
