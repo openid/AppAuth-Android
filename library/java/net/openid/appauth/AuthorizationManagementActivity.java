@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.VisibleForTesting;
 
+import net.openid.appauth.AuthorizationException.AuthorizationRequestErrors;
 import org.json.JSONException;
 
 /**
@@ -289,6 +290,17 @@ public class AuthorizationManagementActivity extends Activity {
             AuthorizationResponse response = new AuthorizationResponse.Builder(mAuthRequest)
                     .fromUri(responseUri, mClock)
                     .build();
+
+            if (mAuthRequest.state == null && response.state != null
+                    || (mAuthRequest.state != null && !mAuthRequest.state.equals(response.state))) {
+                Logger.warn("State returned in authorization response (%s) does not match state "
+                        + "from request (%s) - discarding response",
+                        response.state,
+                        mAuthRequest.state);
+
+                return AuthorizationRequestErrors.STATE_MISMATCH.toIntent();
+            }
+
             return response.toIntent();
         }
     }
