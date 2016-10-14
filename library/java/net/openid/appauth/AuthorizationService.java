@@ -49,38 +49,6 @@ import java.util.Map;
  */
 public class AuthorizationService {
 
-    /**
-     * Scope value which requests access to the end-user's stable identifier.
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">
-     *     "Requesting Claims using Scope Values", OpenID Connect Core 1.0 Specification,
-     *     Section 5.4</a>
-     */
-    public static final String SCOPE_OPENID = "openid";
-
-    /**
-     * Scope value which requests access to the end-user's default profile claims.
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">
-     *     "Requesting Claims using Scope Values", OpenID Connect Core 1.0 Specification,
-     *     Section 5.4</a>
-     */
-    public static final String SCOPE_PROFILE = "profile";
-
-    /**
-     * Scope value which requests access to the email and email_verified claims.
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">
-     *     "Requesting Claims using Scope Values", OpenID Connect Core 1.0 Specification,
-     *     Section 5.4</a>
-     */
-    public static final String SCOPE_EMAIL = "email";
-
-    /**
-     * Scope value which requests access to the address claim.
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">
-     *     "Requesting Claims using Scope Values", OpenID Connect Core 1.0 Specification,
-     *     Section 5.4</a>
-     */
-    public static final String SCOPE_ADDRESS = "address";
-
     @VisibleForTesting
     Context mContext;
 
