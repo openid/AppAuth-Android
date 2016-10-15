@@ -59,7 +59,7 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import net.openid.appauth.AuthorizationException.GeneralErrors;
-import org.junit.After;
+import net.openid.appauth.browser.Browsers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,7 +68,6 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -104,7 +103,7 @@ public class AuthorizationServiceTest {
     @Mock PendingIntent mPendingIntent;
     @Mock Context mContext;
     @Mock CustomTabsClient mClient;
-    @Mock BrowserHandler mBrowserHandler;
+    @Mock CustomTabManager mCustomTabManager;
 
     @Before
     @SuppressWarnings("ResourceType")
@@ -120,14 +119,18 @@ public class AuthorizationServiceTest {
         mAuthCallback = new AuthorizationCallback();
         mRegistrationCallback = new RegistrationCallback();
         mBuilder = new InjectedUrlBuilder();
-        mService = new AuthorizationService(mContext, mBuilder, mBrowserHandler);
+        mService = new AuthorizationService(
+                mContext,
+                AppAuthConfiguration.DEFAULT,
+                Browsers.Chrome.customTab("46"),
+                mBuilder,
+                mCustomTabManager);
         mOutputStream = new ByteArrayOutputStream();
         when(mHttpConnection.getOutputStream()).thenReturn(mOutputStream);
         when(mContext.bindService(serviceIntentEq(), any(CustomTabsServiceConnection.class),
                 anyInt())).thenReturn(true);
-        when(mBrowserHandler.createCustomTabsIntentBuilder())
+        when(mCustomTabManager.createCustomTabsIntentBuilder())
                 .thenReturn(new CustomTabsIntent.Builder());
-        when(mBrowserHandler.getBrowserPackage()).thenReturn(TEST_BROWSER_PACKAGE);
     }
 
     @Test

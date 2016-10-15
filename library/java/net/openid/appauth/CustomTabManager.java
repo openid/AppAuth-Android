@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Hides the details of establishing connections and sessions with custom tabs, to make testing
  * easier.
  */
-class BrowserHandler {
+class CustomTabManager {
 
     /**
      * Wait for at most this amount of time for the browser connection to be established.
@@ -42,27 +42,26 @@ class BrowserHandler {
     private final Context mContext;
 
     @NonNull
-    private final String mBrowserPackage;
-
-    @Nullable
-    private final CustomTabsServiceConnection mConnection;
-
-    @NonNull
     private final AtomicReference<CustomTabsClient> mClient;
 
     @NonNull
     private final CountDownLatch mClientLatch;
 
-    BrowserHandler(@NonNull Context context) {
+    @Nullable
+    private CustomTabsServiceConnection mConnection;
+
+    CustomTabManager(@NonNull Context context) {
         mContext = context;
-        mBrowserPackage = BrowserPackageHelper.getInstance().getPackageNameToUse(context);
         mClient = new AtomicReference<>();
         mClientLatch = new CountDownLatch(1);
-        mConnection = bindCustomTabsService();
     }
 
-    private CustomTabsServiceConnection bindCustomTabsService() {
-        CustomTabsServiceConnection connection = new CustomTabsServiceConnection() {
+    public synchronized void bind(@NonNull String browserPackage) {
+        if (mConnection != null) {
+            return;
+        }
+
+        mConnection = new CustomTabsServiceConnection() {
             @Override
             public void onServiceDisconnected(ComponentName componentName) {
                 Logger.debug("CustomTabsService is disconnected");
@@ -85,26 +84,19 @@ class BrowserHandler {
 
         if (!CustomTabsClient.bindCustomTabsService(
                 mContext,
-                mBrowserPackage,
-                connection)) {
+                browserPackage,
+                mConnection)) {
             // this is expected if the browser does not support custom tabs
             Logger.info("Unable to bind custom tabs service");
             mClientLatch.countDown();
-            return null;
         }
-
-        return connection;
     }
 
     public CustomTabsIntent.Builder createCustomTabsIntentBuilder() {
         return new CustomTabsIntent.Builder(createSession());
     }
 
-    public String getBrowserPackage() {
-        return mBrowserPackage;
-    }
-
-    public void unbind() {
+    public synchronized void unbind() {
         if (mConnection == null) {
             return;
         }
