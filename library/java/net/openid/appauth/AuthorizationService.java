@@ -31,6 +31,8 @@ import net.openid.appauth.AuthorizationException.GeneralErrors;
 import net.openid.appauth.AuthorizationException.RegistrationRequestErrors;
 import net.openid.appauth.AuthorizationException.TokenRequestErrors;
 
+import net.openid.appauth.browser.BrowserDescriptor;
+import net.openid.appauth.browser.BrowserSelector;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -81,6 +83,7 @@ public class AuthorizationService {
      */
     public static final String SCOPE_ADDRESS = "address";
 
+
     @VisibleForTesting
     Context mContext;
 
@@ -88,19 +91,41 @@ public class AuthorizationService {
     private final UrlBuilder mUrlBuilder;
 
     @NonNull
-    private final BrowserHandler mBrowserHandler;
+    private final AppAuthConfiguration mClientConfiguration;
+
+    @NonNull
+    private final CustomTabManager mCustomTabManager;
+
+    @Nullable
+    private final BrowserDescriptor mBrowser;
 
     private boolean mDisposed = false;
 
     /**
-     * Creates an AuthorizationService instance based on the provided configuration. Note that
+     * Creates an AuthorizationService instance, using the
+     * {@link AppAuthConfiguration#DEFAULT default configuration}. Note that
      * instances of this class must be manually disposed when no longer required, to avoid
      * leaks (see {@link #dispose()}.
      */
     public AuthorizationService(@NonNull Context context) {
+        this(context, AppAuthConfiguration.DEFAULT);
+    }
+
+    /**
+     * Creates an AuthorizationService instance, using the specified configuration. Note that
+     * instances of this class must be manually disposed when no longer required, to avoid
+     * leaks (see {@link #dispose()}.
+     */
+    public AuthorizationService(
+            @NonNull Context context,
+            @NonNull AppAuthConfiguration clientConfiguration) {
         this(context,
+                clientConfiguration,
+                BrowserSelector.select(
+                        context,
+                        clientConfiguration.getBrowserMatcher()),
                 DefaultUrlBuilder.INSTANCE,
-                new BrowserHandler(context));
+                new CustomTabManager(context));
     }
 
     /**
@@ -108,11 +133,19 @@ public class AuthorizationService {
      */
     @VisibleForTesting
     AuthorizationService(@NonNull Context context,
+                         @NonNull AppAuthConfiguration clientConfiguration,
+                         @Nullable BrowserDescriptor browser,
                          @NonNull UrlBuilder urlBuilder,
-                         @NonNull BrowserHandler browserHandler) {
+                         @NonNull CustomTabManager customTabManager) {
         mContext = checkNotNull(context);
+        mClientConfiguration = clientConfiguration;
         mUrlBuilder = checkNotNull(urlBuilder);
-        mBrowserHandler = checkNotNull(browserHandler);
+        mCustomTabManager = customTabManager;
+        mBrowser = browser;
+
+        if (browser != null && browser.useCustomTab) {
+            mCustomTabManager.bind(browser.packageName);
+        }
     }
 
     /**
@@ -121,7 +154,7 @@ public class AuthorizationService {
      */
     public CustomTabsIntent.Builder createCustomTabsIntentBuilder() {
         checkNotDisposed();
-        return mBrowserHandler.createCustomTabsIntentBuilder();
+        return mCustomTabManager.createCustomTabsIntentBuilder();
     }
 
     /**
@@ -201,6 +234,9 @@ public class AuthorizationService {
      *     The intent that will be used to start the custom tab. It is recommended that this intent
      *     be created with the help of {@link #createCustomTabsIntentBuilder()}, which will ensure
      *     that a warmed-up version of the browser will be used, minimizing latency.
+     *
+     * @throws android.content.ActivityNotFoundException if no suitable browser is available to
+     *     perform the authorization flow.
      */
     public void performAuthorizationRequest(
             @NonNull AuthorizationRequest request,
@@ -211,8 +247,8 @@ public class AuthorizationService {
         Uri requestUri = request.toUri();
         Intent intent = customTabsIntent.intent;
         intent.setData(requestUri);
-        if (TextUtils.isEmpty(intent.getPackage())) {
-            intent.setPackage(mBrowserHandler.getBrowserPackage());
+        if (mBrowser != null && TextUtils.isEmpty(intent.getPackage())) {
+            intent.setPackage(mBrowser.packageName);
         }
 
         Logger.debug("Using %s as browser for auth", intent.getPackage());
@@ -281,7 +317,7 @@ public class AuthorizationService {
         if (mDisposed) {
             return;
         }
-        mBrowserHandler.unbind();
+        mCustomTabManager.unbind();
         mDisposed = true;
     }
 

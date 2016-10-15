@@ -12,28 +12,34 @@
  * limitations under the License.
  */
 
-package net.openid.appauth;
+package net.openid.appauth.browser;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 /**
  * Utility class to obtain the browser package name to be used for
- * {@link AuthorizationService#performAuthorizationRequest(AuthorizationRequest,
+ * {@link net.openid.appauth.AuthorizationService#performAuthorizationRequest(
+ * net.openid.appauth.AuthorizationRequest,
  * android.app.PendingIntent)} calls. It prioritizes browsers which support
  * <a href="https://developer.chrome.com/multidevice/android/customtabs">custom tabs</a>. To
  * mitigate man-in-the-middle attacks by malicious apps pretending to be browsers for the
  * specific URI we query, only those which are registered as a handler for <em>all</em> HTTP and
  * HTTPS URIs will be used.
  */
-class BrowserPackageHelper {
+public final class BrowserSelector {
 
     private static final String SCHEME_HTTP = "http";
     private static final String SCHEME_HTTPS = "https";
@@ -55,24 +61,6 @@ class BrowserPackageHelper {
             Intent.ACTION_VIEW,
             Uri.parse("http://www.example.com"));
 
-    private static BrowserPackageHelper sInstance;
-
-    public static synchronized BrowserPackageHelper getInstance() {
-        if (sInstance == null) {
-            sInstance = new BrowserPackageHelper();
-        }
-        return sInstance;
-    }
-
-    @VisibleForTesting
-    static synchronized void clearInstance() {
-        sInstance = null;
-    }
-
-    private String mPackageNameToUse;
-
-    private BrowserPackageHelper() {}
-
     /**
      * Searches through all apps that handle VIEW intents and have a warmup service. Picks
      * the one chosen by the user if this choice has been made, otherwise any browser with a warmup
@@ -84,18 +72,17 @@ class BrowserPackageHelper {
      * @param context {@link Context} to use for accessing {@link PackageManager}.
      * @return The package name recommended to use for connecting to custom tabs related components.
      */
-    public String getPackageNameToUse(Context context) {
-        if (mPackageNameToUse != null) {
-            return mPackageNameToUse;
-        }
-
+    @SuppressLint("PackageManagerGetSignatures")
+    @Nullable
+    public static BrowserDescriptor select(Context context, BrowserMatcher browserMatcher) {
         PackageManager pm = context.getPackageManager();
 
         // retrieve a list of all the matching handlers for the browser intent.
         // queryIntentActivities will ensure that these are priority ordered, with the default
         // (if set) as the first entry. Ignoring any matches which are not "full" browsers,
-        // pick the first that supports custom tabs, or the first full browser otherwise.
-        ResolveInfo firstMatch = null;
+        // pick the first browser that matches against the provided browser matcher, preferring
+        // use of custom tabs over standalone browsers if possible.
+        List<BrowserDescriptor> descriptors = new ArrayList<>();
         List<ResolveInfo> resolvedActivityList =
                 pm.queryIntentActivities(BROWSER_INTENT, PackageManager.GET_RESOLVED_FILTER);
 
@@ -105,37 +92,60 @@ class BrowserPackageHelper {
                 continue;
             }
 
-            // we hold the first non-default browser as the default browser to use, if we do
-            // not find any that support a warmup service.
-            if (firstMatch == null) {
-                firstMatch = info;
+            BrowserDescriptor descriptor;
+            try {
+                PackageInfo packageInfo = pm.getPackageInfo(
+                        info.activityInfo.packageName,
+                        PackageManager.GET_SIGNATURES);
+                descriptor = new BrowserDescriptor(
+                        packageInfo,
+                        hasWarmupService(pm, info.activityInfo.packageName));
+                descriptors.add(descriptor);
+            } catch (NameNotFoundException e) {
+                // a descriptor cannot be generated without the package info
+                continue;
             }
 
-            if (hasWarmupService(pm, info.activityInfo.packageName)) {
-                // we have found a browser with a warmup service, return it
-                mPackageNameToUse = info.activityInfo.packageName;
-                return mPackageNameToUse;
+            if (!descriptor.useCustomTab) {
+                // skip this browser for now, we prefer browsers with custom tab support.
+                // If no custom tab supporting browsers match, we will check this browser again
+                // on the next pass.
+                continue;
+            }
+
+            if (!browserMatcher.matches(descriptor)) {
+                continue;
+            }
+
+            // this browser matches the specified constraints and supports custom tabs, so
+            // we prefer it over any other options.
+            return descriptor;
+        }
+
+        // No browsers have a warmup service, so re-evaluate all browsers in priority order for
+        // use as a standalone browser.
+        for (BrowserDescriptor descriptor : descriptors) {
+            if (descriptor.useCustomTab) {
+                // re-evaluate this browser for standalone use
+                descriptor = descriptor.changeUseCustomTab(false);
+            }
+            if (browserMatcher.matches(descriptor)) {
+                return descriptor;
             }
         }
 
-        // No handlers have a warmup service, so we return the first match (typically the
-        // default browser), or null if there are no identifiable browsers.
-        if (firstMatch != null) {
-            mPackageNameToUse = firstMatch.activityInfo.packageName;
-        } else {
-            mPackageNameToUse = null;
-        }
-        return mPackageNameToUse;
+        // nothing matched
+        return null;
     }
 
-    private boolean hasWarmupService(PackageManager pm, String packageName) {
+    private static boolean hasWarmupService(PackageManager pm, String packageName) {
         Intent serviceIntent = new Intent();
         serviceIntent.setAction(ACTION_CUSTOM_TABS_CONNECTION);
         serviceIntent.setPackage(packageName);
         return (pm.resolveService(serviceIntent, 0) != null);
     }
 
-    public boolean isFullBrowser(ResolveInfo resolveInfo) {
+    private static boolean isFullBrowser(ResolveInfo resolveInfo) {
         // The filter must match ACTION_VIEW, CATEGORY_BROWSEABLE, and at least one scheme,
         if (!resolveInfo.filter.hasAction(Intent.ACTION_VIEW)
                 || !resolveInfo.filter.hasCategory(Intent.CATEGORY_BROWSABLE)
