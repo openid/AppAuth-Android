@@ -21,9 +21,11 @@ import android.text.TextUtils;
 import java.util.Collection;
 
 /**
- * Utility class for guava style pre-condition checks.
+ * Utility class for guava style pre-condition checks. Not an official part of the AppAuth API;
+ * only intended for internal use and no guarantees are given on source or binary compatibility
+ * for this class between versions of AppAuth.
  */
-final class Preconditions {
+public final class Preconditions {
 
     /**
      * Ensures that an object reference passed as a parameter to the calling method is not null.
@@ -115,6 +117,13 @@ final class Preconditions {
         }
     }
 
+    /**
+     * Ensures the truth of an expression involving one or more parameters to the calling method.
+     * @param expression a boolean expression
+     * @param errorTemplate the exception message to use if the check fails; this is used
+     *     as the template for String.format.
+     * @param params the parameters to the exception message.
+     */
     public static void checkArgument(
             boolean expression,
             @NonNull String errorTemplate,
