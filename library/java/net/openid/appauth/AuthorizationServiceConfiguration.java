@@ -15,6 +15,7 @@
 package net.openid.appauth;
 
 import static net.openid.appauth.Preconditions.checkArgument;
+import static net.openid.appauth.Preconditions.checkNotEmpty;
 import static net.openid.appauth.Preconditions.checkNotNull;
 
 import android.net.Uri;
@@ -224,8 +225,9 @@ public class AuthorizationServiceConfiguration {
             @NonNull AuthorizationService.UrlBuilder urlBuilder) {
         checkNotNull(openIdConnectDiscoveryUri, "openIDConnectDiscoveryUri cannot be null");
         checkNotNull(callback, "callback cannot be null");
-        checkArgument("https".equals(openIdConnectDiscoveryUri.getScheme()),
-                "openIDConnectDiscoveryUri must be https");
+        checkNotEmpty(openIdConnectDiscoveryUri.getScheme(), "openIDConnectDiscoveryUri scheme cannot be empty");
+        final String scheme = openIdConnectDiscoveryUri.getScheme().toLowerCase();
+        checkArgument(("https".equals(scheme) || "http".equals(scheme)), "openIDConnectDiscoveryUri must be http(s)");
         URL url;
         try {
             url = urlBuilder.buildUrlFromString(openIdConnectDiscoveryUri.toString());
