@@ -60,6 +60,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import net.openid.appauth.AuthorizationException.GeneralErrors;
 import net.openid.appauth.browser.Browsers;
+import net.openid.appauth.connectivity.ConnectionBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -93,12 +94,11 @@ public class AuthorizationServiceTest {
             + " \"application_type\": " + RegistrationRequest.APPLICATION_TYPE_NATIVE + "\n"
             + "}";
 
-    private URL mUrl;
     private AuthorizationCallback mAuthCallback;
     private RegistrationCallback mRegistrationCallback;
     private AuthorizationService mService;
-    private InjectedUrlBuilder mBuilder;
     private OutputStream mOutputStream;
+    @Mock ConnectionBuilder mConnectionBuilder;
     @Mock HttpURLConnection mHttpConnection;
     @Mock PendingIntent mPendingIntent;
     @Mock Context mContext;
@@ -109,23 +109,18 @@ public class AuthorizationServiceTest {
     @SuppressWarnings("ResourceType")
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        URLStreamHandler urlStreamHandler = new URLStreamHandler() {
-            @Override
-            protected URLConnection openConnection(URL url) throws IOException {
-                return mHttpConnection;
-            }
-        };
-        mUrl = new URL("foo", "bar", -1, "/foobar", urlStreamHandler);
         mAuthCallback = new AuthorizationCallback();
         mRegistrationCallback = new RegistrationCallback();
-        mBuilder = new InjectedUrlBuilder();
+
         mService = new AuthorizationService(
                 mContext,
-                AppAuthConfiguration.DEFAULT,
+                new AppAuthConfiguration.Builder()
+                        .setConnectionBuilder(mConnectionBuilder)
+                        .build(),
                 Browsers.Chrome.customTab("46"),
-                mBuilder,
                 mCustomTabManager);
         mOutputStream = new ByteArrayOutputStream();
+        when(mConnectionBuilder.openConnection(any(Uri.class))).thenReturn(mHttpConnection);
         when(mHttpConnection.getOutputStream()).thenReturn(mOutputStream);
         when(mContext.bindService(serviceIntentEq(), any(CustomTabsServiceConnection.class),
                 anyInt())).thenReturn(true);
@@ -181,7 +176,6 @@ public class AuthorizationServiceTest {
         assertTokenResponse(mAuthCallback.response, request);
         String postBody = mOutputStream.toString();
         assertThat(postBody).isEqualTo(UriUtil.formUrlEncode(request.getRequestParameters()));
-        assertEquals(TEST_IDP_TOKEN_ENDPOINT.toString(), mBuilder.mUri);
     }
 
     @Test
@@ -195,7 +189,6 @@ public class AuthorizationServiceTest {
         assertTokenResponse(mAuthCallback.response, request);
         String postBody = mOutputStream.toString();
         assertTokenRequestBody(postBody, request.getRequestParameters());
-        assertEquals(TEST_IDP_TOKEN_ENDPOINT.toString(), mBuilder.mUri);
         verify(mHttpConnection).setRequestProperty("Authorization",
                 csb.getRequestHeaders(TEST_CLIENT_ID).get("Authorization"));
     }
@@ -214,7 +207,6 @@ public class AuthorizationServiceTest {
         Map<String, String> expectedRequestBody = request.getRequestParameters();
         expectedRequestBody.putAll(csp.getRequestParameters(TEST_CLIENT_ID));
         assertTokenRequestBody(postBody, expectedRequestBody);
-        assertEquals(TEST_IDP_TOKEN_ENDPOINT.toString(), mBuilder.mUri);
     }
 
     @Test
@@ -237,7 +229,6 @@ public class AuthorizationServiceTest {
         assertRegistrationResponse(mRegistrationCallback.response, request);
         String postBody = mOutputStream.toString();
         assertThat(postBody).isEqualTo(request.toJsonString());
-        assertEquals(TEST_IDP_REGISTRATION_ENDPOINT.toString(), mBuilder.mUri);
     }
 
     @Test
@@ -295,15 +286,6 @@ public class AuthorizationServiceTest {
         Uri postBody = new Uri.Builder().encodedQuery(requestBody).build();
         for (Map.Entry<String, String> param : expectedParameters.entrySet()) {
             assertThat(postBody.getQueryParameter(param.getKey())).isEqualTo(param.getValue());
-        }
-    }
-
-    private class InjectedUrlBuilder implements AuthorizationService.UrlBuilder {
-        public String mUri;
-
-        public URL buildUrlFromString(String uri) throws IOException {
-            mUri = uri;
-            return mUrl;
         }
     }
 

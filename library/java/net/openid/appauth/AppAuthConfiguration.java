@@ -18,6 +18,8 @@ import android.support.annotation.NonNull;
 
 import net.openid.appauth.browser.AnyBrowserMatcher;
 import net.openid.appauth.browser.BrowserMatcher;
+import net.openid.appauth.connectivity.ConnectionBuilder;
+import net.openid.appauth.connectivity.DefaultConnectionBuilder;
 
 /**
  * Defines configuration properties that control the behavior of the AppAuth library, independent
@@ -35,9 +37,14 @@ public class AppAuthConfiguration {
     @NonNull
     private final BrowserMatcher mBrowserMatcher;
 
+    @NonNull
+    private final ConnectionBuilder mConnectionBuilder;
+
     private AppAuthConfiguration(
-            @NonNull BrowserMatcher browserMatcher) {
+            @NonNull BrowserMatcher browserMatcher,
+            @NonNull ConnectionBuilder connectionBuilder) {
         mBrowserMatcher = browserMatcher;
+        mConnectionBuilder = connectionBuilder;
     }
 
     /**
@@ -49,16 +56,27 @@ public class AppAuthConfiguration {
     }
 
     /**
+     * Creates {@link java.net.HttpURLConnection} instances for use in token requests and related
+     * interactions with the authorization service.
+     */
+    @NonNull
+    public ConnectionBuilder getConnectionBuilder() {
+        return mConnectionBuilder;
+    }
+
+    /**
      * Creates {@link AppAuthConfiguration} instances.
      */
     public static class Builder {
 
         private BrowserMatcher mBrowserMatcher = AnyBrowserMatcher.INSTANCE;
+        private ConnectionBuilder mConnectionBuilder = DefaultConnectionBuilder.INSTANCE;
 
         /**
          * Specify the browser matcher to use, which controls the browsers that can be used
          * for authorization.
          */
+        @NonNull
         public Builder setBrowserMatcher(@NonNull BrowserMatcher browserMatcher) {
             Preconditions.checkNotNull(browserMatcher, "browserMatcher cannot be null");
             mBrowserMatcher = browserMatcher;
@@ -66,10 +84,24 @@ public class AppAuthConfiguration {
         }
 
         /**
+         * Specify the connection builder to use, which creates {@link java.net.HttpURLConnection}
+         * instances for use in direct communication with the authorization service.
+         */
+        @NonNull
+        public Builder setConnectionBuilder(@NonNull ConnectionBuilder connectionBuilder) {
+            Preconditions.checkNotNull(connectionBuilder, "connectionBuilder cannot be null");
+            mConnectionBuilder = connectionBuilder;
+            return this;
+        }
+
+        /**
          * Creates the instance from the configured properties.
          */
+        @NonNull
         public AppAuthConfiguration build() {
-            return new AppAuthConfiguration(mBrowserMatcher);
+            return new AppAuthConfiguration(mBrowserMatcher, mConnectionBuilder);
         }
+
+
     }
 }

@@ -40,7 +40,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Map;
 
 
@@ -53,9 +52,6 @@ public class AuthorizationService {
 
     @VisibleForTesting
     Context mContext;
-
-    @NonNull
-    private final UrlBuilder mUrlBuilder;
 
     @NonNull
     private final AppAuthConfiguration mClientConfiguration;
@@ -91,7 +87,6 @@ public class AuthorizationService {
                 BrowserSelector.select(
                         context,
                         clientConfiguration.getBrowserMatcher()),
-                DefaultUrlBuilder.INSTANCE,
                 new CustomTabManager(context));
     }
 
@@ -102,11 +97,9 @@ public class AuthorizationService {
     AuthorizationService(@NonNull Context context,
                          @NonNull AppAuthConfiguration clientConfiguration,
                          @Nullable BrowserDescriptor browser,
-                         @NonNull UrlBuilder urlBuilder,
                          @NonNull CustomTabManager customTabManager) {
         mContext = checkNotNull(context);
         mClientConfiguration = clientConfiguration;
-        mUrlBuilder = checkNotNull(urlBuilder);
         mCustomTabManager = customTabManager;
         mBrowser = browser;
 
@@ -313,13 +306,11 @@ public class AuthorizationService {
         protected JSONObject doInBackground(Void... voids) {
             InputStream is = null;
             try {
-                URL url = mUrlBuilder.buildUrlFromString(
-                        mRequest.configuration.tokenEndpoint.toString());
-
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                HttpURLConnection conn =
+                        mClientConfiguration.getConnectionBuilder()
+                                .openConnection(mRequest.configuration.tokenEndpoint);
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                conn.setInstanceFollowRedirects(false);
                 conn.setDoOutput(true);
 
                 Map<String, String> headers = mClientAuthentication
@@ -444,11 +435,10 @@ public class AuthorizationService {
             InputStream is = null;
             String postData = mRequest.toJsonString();
             try {
-                URL requestUrl = mUrlBuilder.buildUrlFromString(
-                        mRequest.configuration.registrationEndpoint.toString());
-                HttpURLConnection conn = (HttpURLConnection) requestUrl.openConnection();
+                HttpURLConnection conn =
+                        mClientConfiguration.getConnectionBuilder()
+                                .openConnection(mRequest.configuration.registrationEndpoint);
                 conn.setRequestMethod("POST");
-
                 conn.setDoOutput(true);
                 conn.setRequestProperty("Content-Length", String.valueOf(postData.length()));
                 OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
@@ -542,20 +532,5 @@ public class AuthorizationService {
          */
         void onRegistrationRequestCompleted(@Nullable RegistrationResponse response,
                                             @Nullable AuthorizationException ex);
-    }
-
-    @VisibleForTesting
-    interface UrlBuilder {
-        URL buildUrlFromString(String uri) throws IOException;
-    }
-
-    static class DefaultUrlBuilder implements UrlBuilder {
-        public static final DefaultUrlBuilder INSTANCE = new DefaultUrlBuilder();
-
-        DefaultUrlBuilder() {}
-
-        public URL buildUrlFromString(String uri) throws IOException {
-            return new URL(uri);
-        }
     }
 }
