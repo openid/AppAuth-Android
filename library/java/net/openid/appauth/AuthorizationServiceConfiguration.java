@@ -21,17 +21,17 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 
 import net.openid.appauth.AuthorizationException.GeneralErrors;
 
+import net.openid.appauth.connectivity.ConnectionBuilder;
+import net.openid.appauth.connectivity.DefaultConnectionBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
 
 /**
  * Configuration details required to interact with an authorization service.
@@ -204,7 +204,8 @@ public class AuthorizationServiceConfiguration {
     }
 
     /**
-     * Fetch a AuthorizationServiceConfiguration from an OpenID Connect discovery URI.
+     * Fetch a AuthorizationServiceConfiguration from an OpenID Connect discovery URI, using
+     * the {@link DefaultConnectionBuilder default connection builder}.
      * @param openIdConnectDiscoveryUri The OpenID Connect discovery URI
      * @param callback A callback to invoke upon completion
      * @see <a href="https://openid.net/specs/openid-connect-discovery-1_0.html">"OpenID Connect
@@ -214,25 +215,30 @@ public class AuthorizationServiceConfiguration {
             @NonNull RetrieveConfigurationCallback callback) {
         fetchFromUrl(openIdConnectDiscoveryUri,
                 callback,
-                new AuthorizationService.DefaultUrlBuilder());
+                DefaultConnectionBuilder.INSTANCE);
     }
 
-    @VisibleForTesting
-    static void fetchFromUrl(
+    /**
+     * Fetch a AuthorizationServiceConfiguration from an OpenID Connect discovery URI.
+     * @param openIdConnectDiscoveryUri The OpenID Connect discovery URI
+     * @param connectionBuilder The connection builder that is used to establish a connection
+     *     to the resource server.
+     * @param callback A callback to invoke upon completion
+     * @see <a href="https://openid.net/specs/openid-connect-discovery-1_0.html">"OpenID Connect
+     * discovery"</a>
+     */
+    public static void fetchFromUrl(
             @NonNull Uri openIdConnectDiscoveryUri,
             @NonNull RetrieveConfigurationCallback callback,
-            @NonNull AuthorizationService.UrlBuilder urlBuilder) {
+            @NonNull ConnectionBuilder connectionBuilder) {
         checkNotNull(openIdConnectDiscoveryUri, "openIDConnectDiscoveryUri cannot be null");
         checkNotNull(callback, "callback cannot be null");
-        checkArgument("https".equals(openIdConnectDiscoveryUri.getScheme()),
-                "openIDConnectDiscoveryUri must be https");
-        URL url;
-        try {
-            url = urlBuilder.buildUrlFromString(openIdConnectDiscoveryUri.toString());
-        } catch (IOException ex) {
-            throw new IllegalArgumentException("Malformed discovery doc URI", ex);
-        }
-        new ConfigurationRetrievalAsyncTask(url, callback).execute();
+        checkNotNull(connectionBuilder, "connectionBuilder must not be null");
+        new ConfigurationRetrievalAsyncTask(
+                openIdConnectDiscoveryUri,
+                connectionBuilder,
+                callback)
+                .execute();
     }
 
     /**
@@ -265,16 +271,18 @@ public class AuthorizationServiceConfiguration {
      */
     private static class ConfigurationRetrievalAsyncTask
             extends AsyncTask<Void, Void, AuthorizationServiceConfiguration> {
-        private URL mUrl;
 
-        private static final int CONNECTION_TIMEOUT_MS = 15000;
-        private static final int CONNECTION_READ_TIMEOUT_MS = 10000;
-
+        private Uri mUri;
+        private ConnectionBuilder mConnectionBuilder;
         private RetrieveConfigurationCallback mCallback;
         private AuthorizationException mException;
 
-        ConfigurationRetrievalAsyncTask(URL url, RetrieveConfigurationCallback callback) {
-            mUrl = url;
+        ConfigurationRetrievalAsyncTask(
+                Uri uri,
+                ConnectionBuilder connectionBuilder,
+                RetrieveConfigurationCallback callback) {
+            mUri = uri;
+            mConnectionBuilder = connectionBuilder;
             mCallback = callback;
             mException = null;
         }
@@ -283,9 +291,7 @@ public class AuthorizationServiceConfiguration {
         protected AuthorizationServiceConfiguration doInBackground(Void... voids) {
             InputStream is = null;
             try {
-                HttpURLConnection conn = (HttpURLConnection) mUrl.openConnection();
-                conn.setConnectTimeout(CONNECTION_TIMEOUT_MS);
-                conn.setReadTimeout(CONNECTION_READ_TIMEOUT_MS);
+                HttpURLConnection conn = mConnectionBuilder.openConnection(mUri);
                 conn.setRequestMethod("GET");
                 conn.setDoInput(true);
                 conn.connect();

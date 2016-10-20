@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import net.openid.appauth.AuthorizationException.GeneralErrors;
+import net.openid.appauth.connectivity.ConnectionBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -106,27 +108,19 @@ public class AuthorizationServiceConfigurationTest {
             + "}";
 
     private AuthorizationServiceConfiguration mConfig;
-    private URL mUrl;
     private RetrievalCallback mCallback;
-    private InjectedUrlBuilder mBuilder;
     @Mock HttpURLConnection mHttpConnection;
+    @Mock ConnectionBuilder mConnectionBuilder;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        URLStreamHandler urlStreamHandler = new URLStreamHandler() {
-            @Override
-            protected URLConnection openConnection(URL url) throws IOException {
-                return mHttpConnection;
-            }
-        };
-        mUrl = new URL("foo", "bar", -1, "/foobar", urlStreamHandler);
-        mBuilder = new InjectedUrlBuilder();
         mCallback = new RetrievalCallback();
         mConfig = new AuthorizationServiceConfiguration(
                 Uri.parse(TEST_AUTH_ENDPOINT),
                 Uri.parse(TEST_TOKEN_ENDPOINT),
                 Uri.parse(TEST_REGISTRATION_ENDPOINT));
+        when(mConnectionBuilder.openConnection(any(Uri.class))).thenReturn(mHttpConnection);
     }
 
     @Test
@@ -204,10 +198,7 @@ public class AuthorizationServiceConfigurationTest {
     public void testFetchFromUrl_success() throws Exception {
         InputStream is = new ByteArrayInputStream(TEST_JSON.getBytes());
         when(mHttpConnection.getInputStream()).thenReturn(is);
-        AuthorizationServiceConfiguration.fetchFromUrl(
-                TEST_DISCOVERY_URI,
-                mCallback,
-                mBuilder);
+        doFetch();
         mCallback.waitForCallback();
         AuthorizationServiceConfiguration result = mCallback.config;
         assertNotNull(result);
@@ -216,28 +207,11 @@ public class AuthorizationServiceConfigurationTest {
         verify(mHttpConnection).connect();
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testFetchFromUrl_failure() throws Exception {
-        final IOException ex = new IOException();
-        AuthorizationServiceConfiguration.fetchFromUrl(
-                TEST_DISCOVERY_URI,
-                mCallback,
-                new AuthorizationService.UrlBuilder() {
-                    @Override
-                    public URL buildUrlFromString(String uri) throws IOException {
-                        throw ex;
-                    }
-                });
-    }
-
     @Test
     public void testFetchFromUrlWithoutName() throws Exception {
         InputStream is = new ByteArrayInputStream(TEST_JSON.getBytes());
         when(mHttpConnection.getInputStream()).thenReturn(is);
-        AuthorizationServiceConfiguration.fetchFromUrl(
-                TEST_DISCOVERY_URI,
-                mCallback,
-                mBuilder);
+        doFetch();
         mCallback.waitForCallback();
         AuthorizationServiceConfiguration result = mCallback.config;
         assertNotNull(result);
@@ -250,10 +224,7 @@ public class AuthorizationServiceConfigurationTest {
     public void testFetchFromUrl_missingArgument() throws Exception {
         InputStream is = new ByteArrayInputStream(TEST_JSON_MISSING_ARGUMENT.getBytes());
         when(mHttpConnection.getInputStream()).thenReturn(is);
-        AuthorizationServiceConfiguration.fetchFromUrl(
-                TEST_DISCOVERY_URI,
-                mCallback,
-                mBuilder);
+        doFetch();
         mCallback.waitForCallback();
         assertNotNull(mCallback.error);
         assertEquals(GeneralErrors.INVALID_DISCOVERY_DOCUMENT, mCallback.error);
@@ -263,10 +234,7 @@ public class AuthorizationServiceConfigurationTest {
     public void testFetchFromUrl_malformedJson() throws Exception {
         InputStream is = new ByteArrayInputStream(TEST_JSON_MALFORMED.getBytes());
         when(mHttpConnection.getInputStream()).thenReturn(is);
-        AuthorizationServiceConfiguration.fetchFromUrl(
-                TEST_DISCOVERY_URI,
-                mCallback,
-                mBuilder);
+        doFetch();
         mCallback.waitForCallback();
         assertNotNull(mCallback.error);
         assertEquals(GeneralErrors.JSON_DESERIALIZATION_ERROR, mCallback.error);
@@ -276,13 +244,17 @@ public class AuthorizationServiceConfigurationTest {
     public void testFetchFromUrl_IoException() throws Exception {
         IOException ex = new IOException();
         when(mHttpConnection.getInputStream()).thenThrow(ex);
-        AuthorizationServiceConfiguration.fetchFromUrl(
-                TEST_DISCOVERY_URI,
-                mCallback,
-                mBuilder);
+        doFetch();
         mCallback.waitForCallback();
         assertNotNull(mCallback.error);
         assertEquals(GeneralErrors.NETWORK_ERROR, mCallback.error);
+    }
+
+    private void doFetch() {
+        AuthorizationServiceConfiguration.fetchFromUrl(
+                TEST_DISCOVERY_URI,
+                mCallback,
+                mConnectionBuilder);
     }
 
     private static class RetrievalCallback implements
@@ -309,14 +281,5 @@ public class AuthorizationServiceConfigurationTest {
 
     private static String toJson(List<String> strings) {
         return new JSONArray(strings).toString();
-    }
-
-    private class InjectedUrlBuilder implements AuthorizationService.UrlBuilder {
-        public String mUri;
-
-        public URL buildUrlFromString(String uri) throws IOException {
-            mUri = uri;
-            return mUrl;
-        }
     }
 }
