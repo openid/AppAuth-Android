@@ -22,4 +22,8 @@
     <string name="login_hint_value">Account ID (e.g. test@gmail.com)</string>
     <string name="account_id_description">The Account ID is optional. If specified, it is transmitted as a login_hint parameter in the authorization request.</string>
     <string name="auth_options">Authorization options:</string>
+    <string name="browser_selector_label">Use browser:</string>
+    <string name="browser_icon_contentDescription">Browser app icon</string>
+    <string name="browser_appauth_default_label">AppAuth heuristic selection</string>
+    <string name="custom_tab_label">"%1$s (custom tab)"</string>
 </resources>

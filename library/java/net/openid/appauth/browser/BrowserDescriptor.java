@@ -29,6 +29,9 @@ import java.util.Set;
  */
 public class BrowserDescriptor {
 
+    // See: http://stackoverflow.com/a/2816747
+    private static final int PRIME_HASH_FACTOR = 92821;
+
     private static final String DIGEST_SHA_512 = "SHA-512";
 
     /**
@@ -105,6 +108,37 @@ public class BrowserDescriptor {
                 signatureHashes,
                 version,
                 newUseCustomTabValue);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null || !(obj instanceof BrowserDescriptor)) {
+            return false;
+        }
+
+        BrowserDescriptor other = (BrowserDescriptor) obj;
+        return this.packageName.equals(other.packageName)
+                && this.version.equals(other.version)
+                && this.useCustomTab == other.useCustomTab
+                && this.signatureHashes.equals(other.signatureHashes);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = packageName.hashCode();
+
+        hash = PRIME_HASH_FACTOR * hash + version.hashCode();
+        hash = PRIME_HASH_FACTOR * hash + (useCustomTab ? 1 : 0);
+
+        for (String signatureHash : signatureHashes) {
+            hash = PRIME_HASH_FACTOR * hash + signatureHash.hashCode();
+        }
+
+        return hash;
     }
 
     /**

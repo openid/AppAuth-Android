@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
@@ -62,12 +63,49 @@ public final class BrowserSelector {
             Uri.parse("http://www.example.com"));
 
     /**
-     * Searches through all apps that handle VIEW intents and have a warmup service. Picks
-     * the one chosen by the user if this choice has been made, otherwise any browser with a warmup
-     * service is returned. If no browser has a warmup service, the default browser will be
-     * returned. If no default browser has been chosen, an arbitrary browser package is returned.
-     *
-     * <p>This is <strong>not</strong> threadsafe.
+     * Retrieves the full list of browsers installed on the device. Two entries will exist
+     * for each browser that supports custom tabs, with the {@link BrowserDescriptor#useCustomTab}
+     * flag set to {@code true} in one and {@code false} in the other. The list is in the
+     * order returned by the package manager, so indirectly reflects the user's preferences
+     * (i.e. their default browser, if set, should be the first entry in the list).
+     */
+    @SuppressLint("PackageManagerGetSignatures")
+    @NonNull
+    public static List<BrowserDescriptor> getAllBrowsers(Context context) {
+        PackageManager pm = context.getPackageManager();
+        List<BrowserDescriptor> browsers = new ArrayList<>();
+
+        List<ResolveInfo> resolvedActivityList =
+                pm.queryIntentActivities(BROWSER_INTENT, PackageManager.GET_RESOLVED_FILTER);
+        for (ResolveInfo info : resolvedActivityList) {
+            // ignore handlers which are not browsers
+            if (!isFullBrowser(info)) {
+                continue;
+            }
+
+            try {
+                PackageInfo packageInfo = pm.getPackageInfo(
+                        info.activityInfo.packageName,
+                        PackageManager.GET_SIGNATURES);
+
+                if (hasWarmupService(pm, info.activityInfo.packageName)) {
+                    browsers.add(new BrowserDescriptor(packageInfo, true));
+                }
+
+                browsers.add(new BrowserDescriptor(packageInfo, false));
+            } catch (NameNotFoundException e) {
+                // a descriptor cannot be generated without the package info
+            }
+        }
+
+        return browsers;
+    }
+
+    /**
+     * Searches through all browsers for the best match based on the supplied browser matcher.
+     * Custom tab supporting browsers are preferred, if the matcher permits them, and browsers
+     * are evaluated in the order returned by the package manager, which should indirectly match
+     * the user's preferences.
      *
      * @param context {@link Context} to use for accessing {@link PackageManager}.
      * @return The package name recommended to use for connecting to custom tabs related components.
@@ -75,67 +113,26 @@ public final class BrowserSelector {
     @SuppressLint("PackageManagerGetSignatures")
     @Nullable
     public static BrowserDescriptor select(Context context, BrowserMatcher browserMatcher) {
-        PackageManager pm = context.getPackageManager();
-
-        // retrieve a list of all the matching handlers for the browser intent.
-        // queryIntentActivities will ensure that these are priority ordered, with the default
-        // (if set) as the first entry. Ignoring any matches which are not "full" browsers,
-        // pick the first browser that matches against the provided browser matcher, preferring
-        // use of custom tabs over standalone browsers if possible.
-        List<BrowserDescriptor> descriptors = new ArrayList<>();
-        List<ResolveInfo> resolvedActivityList =
-                pm.queryIntentActivities(BROWSER_INTENT, PackageManager.GET_RESOLVED_FILTER);
-
-        for (ResolveInfo info : resolvedActivityList) {
-            // ignore handlers which are not browers
-            if (!isFullBrowser(info)) {
+        List<BrowserDescriptor> allBrowsers = getAllBrowsers(context);
+        BrowserDescriptor bestMatch = null;
+        for (BrowserDescriptor browser : allBrowsers) {
+            if (!browserMatcher.matches(browser)) {
                 continue;
             }
 
-            BrowserDescriptor descriptor;
-            try {
-                PackageInfo packageInfo = pm.getPackageInfo(
-                        info.activityInfo.packageName,
-                        PackageManager.GET_SIGNATURES);
-                descriptor = new BrowserDescriptor(
-                        packageInfo,
-                        hasWarmupService(pm, info.activityInfo.packageName));
-                descriptors.add(descriptor);
-            } catch (NameNotFoundException e) {
-                // a descriptor cannot be generated without the package info
-                continue;
+            if (browser.useCustomTab) {
+                // directly return the first custom tab supporting browser that is matched
+                return browser;
             }
 
-            if (!descriptor.useCustomTab) {
-                // skip this browser for now, we prefer browsers with custom tab support.
-                // If no custom tab supporting browsers match, we will check this browser again
-                // on the next pass.
-                continue;
-            }
-
-            if (!browserMatcher.matches(descriptor)) {
-                continue;
-            }
-
-            // this browser matches the specified constraints and supports custom tabs, so
-            // we prefer it over any other options.
-            return descriptor;
-        }
-
-        // No browsers have a warmup service, so re-evaluate all browsers in priority order for
-        // use as a standalone browser.
-        for (BrowserDescriptor descriptor : descriptors) {
-            if (descriptor.useCustomTab) {
-                // re-evaluate this browser for standalone use
-                descriptor = descriptor.changeUseCustomTab(false);
-            }
-            if (browserMatcher.matches(descriptor)) {
-                return descriptor;
+            if (bestMatch == null) {
+                // store this as the best match for use if we don't find any matching
+                // custom tab supporting browsers
+                bestMatch = browser;
             }
         }
 
-        // nothing matched
-        return null;
+        return bestMatch;
     }
 
     private static boolean hasWarmupService(PackageManager pm, String packageName) {

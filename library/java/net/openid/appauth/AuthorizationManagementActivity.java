@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.support.annotation.VisibleForTesting;
 
 import net.openid.appauth.AuthorizationException.AuthorizationRequestErrors;
+
 import org.json.JSONException;
 
 /**
@@ -266,7 +267,9 @@ public class AuthorizationManagementActivity extends Activity {
 
     private void extractState(Bundle state) {
         if (state == null) {
-            throw new IllegalStateException("No state to extract");
+            Logger.warn("No stored state - unable to handle response");
+            finish();
+            return;
         }
 
         mAuthIntent = state.getParcelable(KEY_AUTH_INTENT);

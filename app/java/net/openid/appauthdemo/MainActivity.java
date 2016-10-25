@@ -25,11 +25,15 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
+import net.openid.appauth.AppAuthConfiguration;
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationRequest;
@@ -39,6 +43,9 @@ import net.openid.appauth.ClientSecretBasic;
 import net.openid.appauth.RegistrationRequest;
 import net.openid.appauth.RegistrationResponse;
 import net.openid.appauth.ResponseTypeValues;
+import net.openid.appauth.browser.BrowserDescriptor;
+import net.openid.appauth.browser.ExactBrowserMatcher;
+import net.openid.appauthdemo.BrowserSelectionAdapter.BrowserInfo;
 
 import java.util.Arrays;
 import java.util.List;
@@ -69,6 +76,8 @@ public class MainActivity extends AppCompatActivity {
                 providers.isEmpty() ? View.GONE : View.VISIBLE);
         findViewById(R.id.no_idps_configured).setVisibility(
                 providers.isEmpty() ? View.VISIBLE : View.GONE);
+
+        configureBrowserSelector();
 
         for (final IdentityProvider idp : providers) {
             final AuthorizationServiceConfiguration.RetrieveConfigurationCallback retrieveCallback =
@@ -125,6 +134,41 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         mAuthService.dispose();
+    }
+
+    private AppAuthConfiguration createConfiguration(
+            @Nullable BrowserDescriptor browser) {
+        AppAuthConfiguration.Builder builder = new AppAuthConfiguration.Builder();
+
+        if (browser != null) {
+            builder.setBrowserMatcher(new ExactBrowserMatcher(browser));
+        }
+
+        return builder.build();
+    }
+
+    private void configureBrowserSelector() {
+        Spinner spinner = (Spinner) findViewById(R.id.browser_selector);
+        final BrowserSelectionAdapter adapter = new BrowserSelectionAdapter(this);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                BrowserInfo info = (BrowserInfo) adapter.getItem(position);
+                mAuthService.dispose();
+                mAuthService = new AuthorizationService(
+                        MainActivity.this,
+                        createConfiguration(info != null ? info.mDescriptor : null));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                mAuthService.dispose();
+                mAuthService = new AuthorizationService(
+                        MainActivity.this,
+                        createConfiguration(null));
+            }
+        });
     }
 
     private void makeAuthRequest(
