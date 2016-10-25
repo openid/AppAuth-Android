@@ -17,6 +17,7 @@ package net.openid.appauth;
 import static net.openid.appauth.Preconditions.checkNotNull;
 
 import android.app.PendingIntent;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -25,7 +26,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.customtabs.CustomTabsIntent;
-import android.text.TextUtils;
 
 import net.openid.appauth.AuthorizationException.GeneralErrors;
 import net.openid.appauth.AuthorizationException.RegistrationRequestErrors;
@@ -204,14 +204,24 @@ public class AuthorizationService {
             @Nullable PendingIntent canceledIntent,
             @NonNull CustomTabsIntent customTabsIntent) {
         checkNotDisposed();
-        Uri requestUri = request.toUri();
-        Intent intent = customTabsIntent.intent;
-        intent.setData(requestUri);
-        if (mBrowser != null && TextUtils.isEmpty(intent.getPackage())) {
-            intent.setPackage(mBrowser.packageName);
+
+        if (mBrowser == null) {
+            throw new ActivityNotFoundException();
         }
 
-        Logger.debug("Using %s as browser for auth", intent.getPackage());
+        Uri requestUri = request.toUri();
+        Intent intent;
+        if (mBrowser.useCustomTab) {
+            intent = customTabsIntent.intent;
+        } else {
+            intent = new Intent(Intent.ACTION_VIEW);
+        }
+        intent.setPackage(mBrowser.packageName);
+        intent.setData(requestUri);
+
+        Logger.debug("Using %s as browser for auth, custom tab = %s",
+                intent.getPackage(),
+                mBrowser.useCustomTab.toString());
         intent.putExtra(CustomTabsIntent.EXTRA_TITLE_VISIBILITY_STATE, CustomTabsIntent.NO_TITLE);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 
