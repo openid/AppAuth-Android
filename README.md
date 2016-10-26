@@ -37,7 +37,7 @@ the latest AAR ([direct link](http://cli.re/Gxajn4) /
 or add a dependency using Gradle:
 
 ```groovy
-compile 'net.openid:appauth:0.3.0'
+compile 'net.openid:appauth:0.4.0'
 ```
 
 Or Maven:
@@ -46,7 +46,7 @@ Or Maven:
 <dependency>
   <groupId>net.openid</groupId>
   <artifactId>appauth</artifactId>
-  <version>0.3.0</version>
+  <version>0.4.0</version>
 </dependency>
 ```
 
@@ -152,7 +152,8 @@ public void writeAuthState(@NonNull AuthState state) {
 
 ### Configuration
 
-You can configure AppAuth by specifying the endpoints directly:
+You can configure communication with your chosen authorization server by
+specifying the endpoints directly:
 
 ```java
 AuthorizationServiceConfiguration config =
@@ -180,6 +181,42 @@ AuthorizationServiceConfiguration.fetchFromIssuer(
         }
       }
   });
+```
+
+Additionally, AppAuth provides additional client configuration, in order to
+control the browsers that can be used for the authorization flow, or to
+control the HttpURLConnection implementation that is used for token
+exchange. This can be done by creating an `AppAuthConfiguration` object:
+
+```java
+AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
+    .setBrowserMatcher(new BrowserWhitelist(
+        VersionedBrowserMatcher.CHROME_CUSTOM_TAB,
+        VersionedBrowserMatcher.SAMSUNG_CUSTOM_TAB))
+    .setConnectionBuilder(new ConnectionBuilder() {
+      public HttpURLConnection openConnect(Uri uri) throws IOException {
+        URL url = new URL(uri.toString());
+        HttpURLConnection connection =
+            (HttpURLConnection) url.openConnection();
+        if (connection instanceof HttpsUrlConnection) {
+          HttpsURLConnection connection = (HttpsURLConnection) connection;
+          connection.setSSLSocketFactory(MySocketFactory.getInstance());
+        }
+      }
+    })
+    .build();
+```
+
+This configuration will only permit Chrome or Samsung Browser to be used as
+a custom tab for authorization flows, and changes the SSL socket factory to
+a hypothetical custom version `MySocketFactory`. The modification of the
+socket factory is useful for certificate pinning, or adding some additional
+certificates to the trusted set (such as for testing).
+
+This configuration is provided to `AuthorizationService` upon construction:
+
+```java
+new AuthorizationService(context, appAuthConfig);
 ```
 
 ### Dynamic client registration
