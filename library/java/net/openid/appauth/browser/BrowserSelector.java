@@ -22,6 +22,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -75,8 +77,13 @@ public final class BrowserSelector {
         PackageManager pm = context.getPackageManager();
         List<BrowserDescriptor> browsers = new ArrayList<>();
 
+        int queryFlag = PackageManager.GET_RESOLVED_FILTER;
+        if (VERSION.SDK_INT >= VERSION_CODES.M) {
+            queryFlag |= PackageManager.MATCH_ALL;
+        }
         List<ResolveInfo> resolvedActivityList =
-                pm.queryIntentActivities(BROWSER_INTENT, PackageManager.GET_RESOLVED_FILTER);
+                pm.queryIntentActivities(BROWSER_INTENT, queryFlag);
+
         for (ResolveInfo info : resolvedActivityList) {
             // ignore handlers which are not browsers
             if (!isFullBrowser(info)) {
