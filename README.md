@@ -37,7 +37,7 @@ the latest AAR ([direct link](http://cli.re/Gxajn4) /
 or add a dependency using Gradle:
 
 ```groovy
-compile 'net.openid:appauth:0.4.0'
+compile 'net.openid:appauth:0.4.1'
 ```
 
 Or Maven:
@@ -46,7 +46,7 @@ Or Maven:
 <dependency>
   <groupId>net.openid</groupId>
   <artifactId>appauth</artifactId>
-  <version>0.4.0</version>
+  <version>0.4.1</version>
 </dependency>
 ```
 
