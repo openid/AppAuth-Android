@@ -52,7 +52,7 @@ Adding additional IDPs
 ======================
 
 Additional authorization services can be added to the demo app by defining
-additional instances of `IdentityProvider`. Assuming an service named
+additional instances of `IdentityProvider`. Assuming a service named
 `myauth`, the following steps would be taken:
 
 1. The name of the service should be defined in `myauth_name` in
