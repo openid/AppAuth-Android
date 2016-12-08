@@ -17,6 +17,7 @@ package net.openid.appauth;
 import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
 import static net.openid.appauth.TestValues.TEST_AUTH_CODE;
 import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
+import static net.openid.appauth.TestValues.TEST_SCOPE;
 import static net.openid.appauth.TestValues.TEST_STATE;
 import static net.openid.appauth.TestValues.getTestAuthRequest;
 import static net.openid.appauth.TestValues.getTestAuthRequestBuilder;
@@ -52,6 +53,7 @@ public class AuthorizationResponseTest {
             .appendQueryParameter(AuthorizationResponse.KEY_ID_TOKEN, TEST_ID_TOKEN)
             .appendQueryParameter(AuthorizationResponse.KEY_EXPIRES_IN,
                     TEST_EXPIRES_IN.toString())
+            .appendQueryParameter(AuthorizationResponse.KEY_SCOPE, TEST_SCOPE)
             .build();
 
     private AuthorizationResponse.Builder mAuthorizationResponseBuilder;
@@ -68,7 +70,8 @@ public class AuthorizationResponseTest {
                 .setAccessToken(TEST_ACCESS_TOKEN)
                 .setTokenType(AuthorizationResponse.TOKEN_TYPE_BEARER)
                 .setIdToken(TEST_ID_TOKEN)
-                .setAccessTokenExpirationTime(TEST_TOKEN_EXPIRE_TIME);
+                .setAccessTokenExpirationTime(TEST_TOKEN_EXPIRE_TIME)
+                .setScope(TEST_SCOPE);
 
         mAuthorizationResponse = mAuthorizationResponseBuilder.build();
     }
@@ -133,5 +136,7 @@ public class AuthorizationResponseTest {
                 TEST_ID_TOKEN, authResponse.idToken);
         assertEquals("access token expiration time does not match",
                 TEST_TOKEN_EXPIRE_TIME, authResponse.accessTokenExpirationTime);
+        assertEquals("scope does not match",
+                     TEST_SCOPE, authResponse.scope);
     }
 }
