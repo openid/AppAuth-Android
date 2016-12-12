@@ -216,6 +216,7 @@ public class TokenResponse {
                 }
                 setRefreshToken(JsonUtil.getStringIfDefined(json, KEY_REFRESH_TOKEN));
                 setIdToken(JsonUtil.getStringIfDefined(json, KEY_ID_TOKEN));
+                setScope(JsonUtil.getStringIfDefined(json, KEY_SCOPE));
                 setAdditionalParameters(extractAdditionalParams(json, BUILT_IN_PARAMS));
 
                 return this;
