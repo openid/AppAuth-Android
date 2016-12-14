@@ -128,6 +128,7 @@ public class AuthorizationManagementActivityTest {
         // after which the completion intent should be fired
         assertThat(mActivityShadow.getNextStartedActivity())
                 .hasAction("COMPLETE")
+                .hasData(mSuccessAuthRedirect)
                 .hasExtra(AuthorizationResponse.EXTRA_RESPONSE);
         assertThat(mActivity).isFinishing();
     }
@@ -161,6 +162,7 @@ public class AuthorizationManagementActivityTest {
         // after which the completion intent should be fired
         assertThat(mActivityShadow.getNextStartedActivity())
                 .hasAction("COMPLETE")
+                .hasData(mSuccessAuthRedirect)
                 .hasExtra(AuthorizationResponse.EXTRA_RESPONSE);
         assertThat(mActivity).isFinishing();
     }
@@ -189,6 +191,7 @@ public class AuthorizationManagementActivityTest {
         // after which the completion intent should be fired
         assertThat(mActivityShadow.getNextStartedActivity())
                 .hasAction("COMPLETE")
+                .hasData(mErrorAuthRedirect)
                 .hasExtra(AuthorizationException.EXTRA_EXCEPTION);
         assertThat(mActivity).isFinishing();
     }
@@ -210,6 +213,7 @@ public class AuthorizationManagementActivityTest {
         // the next activity should be from the completion intent, carrying an error
         assertThat(nextStartedActivity)
                 .hasAction("COMPLETE")
+                .hasData(authResponseUri)
                 .hasExtra(AuthorizationException.EXTRA_EXCEPTION);
 
         assertThat(AuthorizationException.fromIntent(nextStartedActivity))

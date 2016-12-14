@@ -243,6 +243,7 @@ public class AuthorizationManagementActivity extends Activity {
             Logger.error("Failed to extract OAuth2 response from redirect");
             return;
         }
+        responseData.setData(responseUri);
 
         Logger.debug("Authorization complete - invoking completion intent");
         try {

@@ -345,6 +345,16 @@ public void onCreate(Bundle b) {
 }
 ```
 
+The full redirect URI is also provided in your completion intent:
+
+```java
+public void onCreate(Bundle b) {
+  // ...
+  Uri redirectUri = getIntent().getData();
+  // ...
+}
+```
+
 Given the auth response, a token request can be created to exchange the
 authorization code:
 
