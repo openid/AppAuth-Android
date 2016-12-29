@@ -48,7 +48,7 @@ class IdentityProvider {
             NOT_SPECIFIED, // auth endpoint is discovered
             NOT_SPECIFIED, // token endpoint is discovered
             NOT_SPECIFIED, // dynamic registration not supported
-            NOT_SPECIFIED,
+            NOT_SPECIFIED, // set openid_client_id here
             R.string.openid_auth_redirect_uri,
             R.string.openid_scope_string,
             R.drawable.btn_openid,
