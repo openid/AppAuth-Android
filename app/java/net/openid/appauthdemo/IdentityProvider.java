@@ -41,21 +41,21 @@ class IdentityProvider {
      */
     public static final int NOT_SPECIFIED = -1;
 
-    public static final IdentityProvider GOOGLE = new IdentityProvider(
-            "Google",
-            R.bool.google_enabled,
-            R.string.google_discovery_uri,
+    public static final IdentityProvider OPEN_ID = new IdentityProvider(
+            "OpenID",
+            R.bool.openid_enabled,
+            R.string.openid_discovery_uri,
             NOT_SPECIFIED, // auth endpoint is discovered
             NOT_SPECIFIED, // token endpoint is discovered
             NOT_SPECIFIED, // dynamic registration not supported
-            R.string.google_client_id,
-            R.string.google_auth_redirect_uri,
-            R.string.google_scope_string,
-            R.drawable.btn_google,
-            R.string.google_name,
+            NOT_SPECIFIED,
+            R.string.openid_auth_redirect_uri,
+            R.string.openid_scope_string,
+            R.drawable.btn_openid,
+            R.string.openid_name,
             android.R.color.white);
 
-    public static final List<IdentityProvider> PROVIDERS = Arrays.asList(GOOGLE);
+    public static final List<IdentityProvider> PROVIDERS = Arrays.asList(OPEN_ID);
 
     public static List<IdentityProvider> getEnabledProviders(Context context) {
         ArrayList<IdentityProvider> providers = new ArrayList<>();

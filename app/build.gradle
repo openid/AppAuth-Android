@@ -8,10 +8,10 @@ android {
         project.archivesBaseName = 'appauth-demoapp'
         vectorDrawables.useSupportLibrary = true
 
-        // replace the below string with your own Google client ID. Make sure this is consistent
+        // replace the below string with your own OpenID client ID. Make sure this is consistent
         // with the values used in idp_configs.xml
         manifestPlaceholders = [
-                'appAuthRedirectScheme': 'com.googleusercontent.apps.YOUR-ID'
+                'appAuthRedirectScheme': 'appscheme'
         ]
     }
 }
