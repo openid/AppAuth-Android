@@ -49,6 +49,7 @@ class IdentityProvider {
             NOT_SPECIFIED, // token endpoint is discovered
             NOT_SPECIFIED, // dynamic registration not supported
             NOT_SPECIFIED, // set openid_client_id here
+            NOT_SPECIFIED, // set openid_client_secret here
             R.string.openid_auth_redirect_uri,
             R.string.openid_scope_string,
             R.drawable.btn_openid,
@@ -98,6 +99,9 @@ class IdentityProvider {
     private final int mClientIdRes;
 
     @StringRes
+    private final int mClientSecretRes ;
+
+    @StringRes
     private final int mRedirectUriRes;
 
     @StringRes
@@ -110,6 +114,7 @@ class IdentityProvider {
     private Uri mTokenEndpoint;
     private Uri mRegistrationEndpoint;
     private String mClientId;
+    private String mClientSecret;
     private Uri mRedirectUri;
     private String mScope;
 
@@ -140,6 +145,44 @@ class IdentityProvider {
         this.mTokenEndpointRes = tokenEndpointRes;
         this.mRegistrationEndpointRes = registrationEndpointRes;
         this.mClientIdRes = clientIdRes;
+        this.mClientSecretRes = -1;
+        this.mRedirectUriRes = checkSpecified(redirectUriRes, "redirectUriRes");
+        this.mScopeRes = checkSpecified(scopeRes, "scopeRes");
+        this.buttonImageRes = checkSpecified(buttonImageRes, "buttonImageRes");
+        this.buttonContentDescriptionRes =
+                checkSpecified(buttonContentDescriptionRes, "buttonContentDescriptionRes");
+        this.buttonTextColorRes = checkSpecified(buttonTextColorRes, "buttonTextColorRes");
+    }
+
+    IdentityProvider(
+            @NonNull String name,
+            @BoolRes int enabledRes,
+            @StringRes int discoveryEndpointRes,
+            @StringRes int authEndpointRes,
+            @StringRes int tokenEndpointRes,
+            @StringRes int registrationEndpointRes,
+            @StringRes int clientIdRes,
+            @StringRes int clientSecretRes,
+            @StringRes int redirectUriRes,
+            @StringRes int scopeRes,
+            @DrawableRes int buttonImageRes,
+            @StringRes int buttonContentDescriptionRes,
+            @ColorRes int buttonTextColorRes) {
+        if (!isSpecified(discoveryEndpointRes)
+                && !isSpecified(authEndpointRes)
+                && !isSpecified(tokenEndpointRes)) {
+            throw new IllegalArgumentException(
+                    "the discovery endpoint or the auth and token endpoints must be specified");
+        }
+
+        this.name = name;
+        this.mEnabledRes = checkSpecified(enabledRes, "enabledRes");
+        this.mDiscoveryEndpointRes = discoveryEndpointRes;
+        this.mAuthEndpointRes = authEndpointRes;
+        this.mTokenEndpointRes = tokenEndpointRes;
+        this.mRegistrationEndpointRes = registrationEndpointRes;
+        this.mClientIdRes = clientIdRes;
+        this.mClientSecretRes = clientSecretRes;
         this.mRedirectUriRes = checkSpecified(redirectUriRes, "redirectUriRes");
         this.mScopeRes = checkSpecified(scopeRes, "scopeRes");
         this.buttonImageRes = checkSpecified(buttonImageRes, "buttonImageRes");
@@ -173,6 +216,9 @@ class IdentityProvider {
                 : null;
         mClientId = isSpecified(mClientIdRes)
                 ? res.getString(mClientIdRes)
+                : null;
+        mClientSecret = isSpecified(mClientSecretRes)
+                ? res.getString(mClientSecretRes)
                 : null;
         mRedirectUri = getUriResource(res, mRedirectUriRes, "mRedirectUriRes");
         mScope = res.getString(mScopeRes);
@@ -214,6 +260,9 @@ class IdentityProvider {
         return mClientId;
     }
 
+    public String getClientSecret() {
+        return mClientSecret;
+    }
 
     public void setClientId(String clientId) {
         mClientId = clientId;

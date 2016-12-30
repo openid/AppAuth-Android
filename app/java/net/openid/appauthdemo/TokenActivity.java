@@ -28,6 +28,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -43,6 +44,7 @@ import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceDiscovery;
 import net.openid.appauth.ClientAuthentication;
+import net.openid.appauth.ClientSecretBasic;
 import net.openid.appauth.TokenRequest;
 import net.openid.appauth.TokenResponse;
 
@@ -255,6 +257,11 @@ public class TokenActivity extends AppCompatActivity {
         ClientAuthentication clientAuthentication;
         try {
             clientAuthentication = mAuthState.getClientAuthentication();
+            if ((mAuthState.getClientSecret() == null
+                    || TextUtils.isEmpty(mAuthState.getClientSecret())
+                    && IdentityProvider.getEnabledProviders(TokenActivity.this).get(0).getClientSecret() != null)) {
+                clientAuthentication = new ClientSecretBasic(IdentityProvider.getEnabledProviders(TokenActivity.this).get(0).getClientSecret());
+            }
         } catch (ClientAuthentication.UnsupportedAuthenticationMethod ex) {
             Log.d(TAG, "Token request cannot be made, client authentication for the token "
                             + "endpoint could not be constructed (%s)", ex);
@@ -375,7 +382,7 @@ public class TokenActivity extends AppCompatActivity {
         String discoveryJson = intent.getStringExtra(EXTRA_AUTH_SERVICE_DISCOVERY);
         try {
             return new AuthorizationServiceDiscovery(new JSONObject(discoveryJson));
-        } catch (JSONException | AuthorizationServiceDiscovery.MissingArgumentException  ex) {
+        } catch (JSONException | AuthorizationServiceDiscovery.MissingArgumentException ex) {
             throw new IllegalStateException("Malformed JSON in discovery doc");
         }
     }

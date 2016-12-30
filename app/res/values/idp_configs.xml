@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <bool name="openid_enabled">true</bool>
-    <string name="openid_client_id" translatable="false">YOUR_ID.apps.com</string>
-    <string name="openid_auth_redirect_uri" translatable="false">appscheme://client.example.com/callback</string>
+    <string name="openid_client_id" translatable="false">clientId</string>
+    <string name="openid_client_secret" translatable="false">clientSecret</string>
+    <string name="openid_auth_redirect_uri" translatable="false">https://client.example.com/callback</string>
 </resources>
