@@ -32,6 +32,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import net.openid.appauth.AppAuthConfiguration;
 import net.openid.appauth.AuthState;
@@ -95,8 +96,11 @@ public class MainActivity extends AppCompatActivity {
                                 if (idp.getClientId() == null) {
                                     // Do dynamic client registration if no client_id
                                     makeRegistrationRequest(serviceConfiguration, idp);
-                                } else {
+                                } else if (idp.getClientId() != null && idp.getClientSecret() != null) {
                                     makeAuthRequest(serviceConfiguration, idp, new AuthState());
+                                } else {
+                                    Toast.makeText(MainActivity.this, "Client Secret must be specified", Toast.LENGTH_SHORT).show();
+                                    Log.e(TAG, "onFetchConfigurationCompleted: Client Secret must be specified");
                                 }
                             }
                         }
