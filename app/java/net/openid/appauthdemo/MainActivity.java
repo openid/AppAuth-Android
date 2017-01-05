@@ -54,7 +54,7 @@ import java.util.List;
 /**
  * Demonstrates the usage of the AppAuth library to connect to a set of pre-configured
  * OAuth2 providers.
- *
+ * <p>
  * <p><em>NOTE</em>: From a clean checkout of this project, no IDPs are automatically configured.
  * Edit {@code res/values/idp_configs.xml} to specify the required configuration properties to
  * enable the IDPs you wish to test. If you wish to add additional IDPs for testing, please see
@@ -232,6 +232,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.d(TAG, "Registration request complete");
                         if (registrationResponse != null) {
                             idp.setClientId(registrationResponse.clientId);
+                            idp.setClientSecret(registrationResponse.clientSecret);
                             Log.d(TAG, "Registration request complete successfully");
                             // Continue with the authentication
                             makeAuthRequest(registrationResponse.request.configuration, idp,
@@ -247,6 +248,7 @@ public class MainActivity extends AppCompatActivity {
     private int getColorCompat(@ColorRes int color) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             return getColor(color);
+
         } else {
             return getResources().getColor(color);
         }

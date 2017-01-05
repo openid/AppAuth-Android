@@ -48,9 +48,10 @@ class IdentityProvider {
             NOT_SPECIFIED, // auth endpoint is discovered
             NOT_SPECIFIED, // token endpoint is discovered
             NOT_SPECIFIED, // dynamic registration not supported
-            NOT_SPECIFIED, // set openid_client_id here
-            NOT_SPECIFIED, // set openid_client_secret here
+            R.string.openid_client_id, // set openid_client_id here
+            R.string.openid_client_secret, // set openid_client_secret here
             R.string.openid_auth_redirect_uri,
+            R.string.openid_logout_redirect_uri,
             R.string.openid_scope_string,
             R.drawable.btn_openid,
             R.string.openid_name,
@@ -99,7 +100,10 @@ class IdentityProvider {
     private final int mClientIdRes;
 
     @StringRes
-    private final int mClientSecretRes ;
+    private final int mClientSecretRes;
+
+    @StringRes
+    private final int mLogoutRedirectUriRes;
 
     @StringRes
     private final int mRedirectUriRes;
@@ -113,6 +117,8 @@ class IdentityProvider {
     private Uri mAuthEndpoint;
     private Uri mTokenEndpoint;
     private Uri mRegistrationEndpoint;
+    private Uri mLogoutEndpoint;
+    private Uri mLogoutRedirectUri;
     private String mClientId;
     private String mClientSecret;
     private Uri mRedirectUri;
@@ -126,44 +132,9 @@ class IdentityProvider {
             @StringRes int tokenEndpointRes,
             @StringRes int registrationEndpointRes,
             @StringRes int clientIdRes,
-            @StringRes int redirectUriRes,
-            @StringRes int scopeRes,
-            @DrawableRes int buttonImageRes,
-            @StringRes int buttonContentDescriptionRes,
-            @ColorRes int buttonTextColorRes) {
-        if (!isSpecified(discoveryEndpointRes)
-                && !isSpecified(authEndpointRes)
-                && !isSpecified(tokenEndpointRes)) {
-            throw new IllegalArgumentException(
-                    "the discovery endpoint or the auth and token endpoints must be specified");
-        }
-
-        this.name = name;
-        this.mEnabledRes = checkSpecified(enabledRes, "enabledRes");
-        this.mDiscoveryEndpointRes = discoveryEndpointRes;
-        this.mAuthEndpointRes = authEndpointRes;
-        this.mTokenEndpointRes = tokenEndpointRes;
-        this.mRegistrationEndpointRes = registrationEndpointRes;
-        this.mClientIdRes = clientIdRes;
-        this.mClientSecretRes = -1;
-        this.mRedirectUriRes = checkSpecified(redirectUriRes, "redirectUriRes");
-        this.mScopeRes = checkSpecified(scopeRes, "scopeRes");
-        this.buttonImageRes = checkSpecified(buttonImageRes, "buttonImageRes");
-        this.buttonContentDescriptionRes =
-                checkSpecified(buttonContentDescriptionRes, "buttonContentDescriptionRes");
-        this.buttonTextColorRes = checkSpecified(buttonTextColorRes, "buttonTextColorRes");
-    }
-
-    IdentityProvider(
-            @NonNull String name,
-            @BoolRes int enabledRes,
-            @StringRes int discoveryEndpointRes,
-            @StringRes int authEndpointRes,
-            @StringRes int tokenEndpointRes,
-            @StringRes int registrationEndpointRes,
-            @StringRes int clientIdRes,
             @StringRes int clientSecretRes,
             @StringRes int redirectUriRes,
+            @StringRes int logoutRedirectUriRes,
             @StringRes int scopeRes,
             @DrawableRes int buttonImageRes,
             @StringRes int buttonContentDescriptionRes,
@@ -184,6 +155,7 @@ class IdentityProvider {
         this.mClientIdRes = clientIdRes;
         this.mClientSecretRes = clientSecretRes;
         this.mRedirectUriRes = checkSpecified(redirectUriRes, "redirectUriRes");
+        this.mLogoutRedirectUriRes = checkSpecified(logoutRedirectUriRes, "logoutRedirectUriRes");
         this.mScopeRes = checkSpecified(scopeRes, "scopeRes");
         this.buttonImageRes = checkSpecified(buttonImageRes, "buttonImageRes");
         this.buttonContentDescriptionRes =
@@ -213,6 +185,9 @@ class IdentityProvider {
                 : null;
         mRegistrationEndpoint = isSpecified(mRegistrationEndpointRes)
                 ? getUriResource(res, mRegistrationEndpointRes, "registrationEndpointRes")
+                : null;
+        mLogoutRedirectUri = isSpecified(mLogoutRedirectUriRes)
+                ? getUriResource(res, mLogoutRedirectUriRes, "logoutRedirectUriRes")
                 : null;
         mClientId = isSpecified(mClientIdRes)
                 ? res.getString(mClientIdRes)
@@ -260,18 +235,32 @@ class IdentityProvider {
         return mClientId;
     }
 
+    public void setClientId(String clientId) {
+        mClientId = clientId;
+    }
+
     public String getClientSecret() {
         return mClientSecret;
     }
 
-    public void setClientId(String clientId) {
-        mClientId = clientId;
-    }
+    public void setClientSecret(String clientSecret) { mClientSecret = clientSecret; }
 
     @NonNull
     public Uri getRedirectUri() {
         checkConfigurationRead();
         return mRedirectUri;
+    }
+
+    @NonNull
+    public Uri getLogoutEndpoint() {
+        checkConfigurationRead();
+        return mLogoutEndpoint;
+    }
+
+    @NonNull
+    public Uri getLogoutRedirectUri() {
+        checkConfigurationRead();
+        return mLogoutRedirectUri;
     }
 
     @NonNull

@@ -14,14 +14,19 @@
 
 package net.openid.appauthdemo;
 
+import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.ColorRes;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -34,6 +39,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
@@ -65,6 +71,19 @@ import java.util.Date;
  * A sample activity to serve as a client to the Native Oauth library.
  */
 public class TokenActivity extends AppCompatActivity {
+
+    // constants for intents
+    private static final String INTENT_EXTRA_AUTH_CALLBACK = "authorizationCallback";
+    private static final String INTENT_EXTRA_LOGOUT_CALLBACK = "logoutCallback";
+    private static final int LOGOUT_CALLBACK_INTENT_CONSTANT = 12345;
+
+    // constants for saving state on disk
+    private static final String FILE_SAVED_APP_STATE = "savedAppState";
+    private static final String KEY_DISCOVERY_DOC_JSON = "discoveryDocInJson";
+    private static final String KEY_AUTH_STATE_JSON = "authStateInJson";
+    private static final String KEY_AUTH_MODE_STRING = "authModeAsString";
+    private static final String KEY_REFRESH_TIMESTAMP = "refreshTimestamp";
+
     private static final String TAG = "TokenActivity";
 
     private static final String KEY_AUTH_STATE = "authState";
@@ -78,6 +97,9 @@ public class TokenActivity extends AppCompatActivity {
     private AuthState mAuthState;
     private AuthorizationService mAuthService;
     private JSONObject mUserInfoJson;
+    private IdentityProvider mIdentityProvider;
+    private LogoutService mLogoutService;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +108,8 @@ public class TokenActivity extends AppCompatActivity {
 
         mAuthService = new AuthorizationService(this);
 
+        mIdentityProvider = IdentityProvider.getEnabledProviders(TokenActivity.this).get(0);
+        mLogoutService = new LogoutService(TokenActivity.this);
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey(KEY_AUTH_STATE)) {
                 try {
@@ -136,9 +160,73 @@ public class TokenActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume()");
+        refreshUi();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause()");
+        if (mAuthService != null) {
+            mAuthService.dispose();
+        }
+        mAuthService = null;
+        if (mLogoutService != null) {
+            mLogoutService.dispose();
+            mLogoutService = null;
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart()");
+        refreshUi();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop()");
+        saveAuthState(true);
+
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
-        mAuthService.dispose();
+        Log.d(TAG, "onDestroy()");
+        if (mAuthService != null) {
+            mAuthService.dispose();
+            mAuthService = null;
+        }
+        if (mLogoutService != null) {
+            mLogoutService.dispose();
+            mLogoutService = null;
+        }
+
+    }
+
+
+    // save AuthState internal state to permanent storage
+    private void saveAuthState(boolean immediately) {
+        Log.d(TAG, "saveAuthState(): mAuthState.len=" + (mAuthState != null ?
+                mAuthState.jsonSerializeString().length() : "0"));
+        if (mAuthState != null) {
+            SharedPreferences appPrefs = getSharedPreferences(FILE_SAVED_APP_STATE, MODE_PRIVATE);
+            if (immediately) {
+                appPrefs.edit()
+                        .putString(KEY_AUTH_STATE_JSON, mAuthState.jsonSerializeString())
+                        .commit();
+            } else {
+                appPrefs.edit()
+                        .putString(KEY_AUTH_STATE_JSON, mAuthState.jsonSerializeString())
+                        .apply();
+            }
+        }
     }
 
     private void receivedTokenResponse(
@@ -218,6 +306,27 @@ public class TokenActivity extends AppCompatActivity {
             });
         }
 
+        Button viewLogoutButton = (Button) findViewById(R.id.logout);
+
+        if (!mAuthState.isAuthorized()
+                || discoveryDoc == null
+                || discoveryDoc.getUserinfoEndpoint() == null) {
+            viewLogoutButton.setVisibility(View.GONE);
+        } else {
+            viewLogoutButton.setVisibility(View.VISIBLE);
+            viewLogoutButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    new AsyncTask<Void, Void, Void>() {
+                        @Override
+                        protected Void doInBackground(Void... params) {
+                            logoutUser();
+                            return null;
+                        }
+                    }.execute();
+                }
+            });
+        }
         View userInfoCard = findViewById(R.id.userinfo_card);
         if (mUserInfoJson == null) {
             userInfoCard.setVisibility(View.INVISIBLE);
@@ -264,7 +373,7 @@ public class TokenActivity extends AppCompatActivity {
             }
         } catch (ClientAuthentication.UnsupportedAuthenticationMethod ex) {
             Log.d(TAG, "Token request cannot be made, client authentication for the token "
-                            + "endpoint could not be constructed (%s)", ex);
+                    + "endpoint could not be constructed (%s)", ex);
             return;
         }
 
@@ -330,6 +439,84 @@ public class TokenActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void logoutUser() {
+        final Activity activityContext = TokenActivity.this;
+
+        if (mAuthState.getAuthorizationServiceConfiguration() == null) {
+            Log.e(TAG, "Cannot make userInfo request without service configuration");
+        }
+
+        mAuthState.performActionWithFreshTokens(mAuthService, new AuthState.AuthStateAction() {
+            @Override
+            public void execute(String accessToken, String idToken, AuthorizationException ex) {
+                if (ex != null) {
+                    Log.e(TAG, "Token refresh failed when performing logout", ex);
+                    Toast.makeText(TokenActivity.this, "Token refresh failed when performing logout: "
+                            + ex.getMessage(), Toast.LENGTH_SHORT).show();
+                    //mLogoutOngoing = false;
+                    //cleanLocalData();
+                    refreshUi();
+                    return;
+                }
+
+
+                /*Log.d(TAG, "makeLogoutRequest():  TESTING: changing id token");
+                mLogoutService.performLogoutRequest("***dummyIdTokenPrefix" + mAuthState.getIdToken(),
+                        mIdentityProvider,
+                        createPostLogoutIntent(activityContext),
+                        mAuthService.createCustomTabsIntentBuilder()
+                                .setToolbarColor(getColorCompat(R.color.colorAccent))
+                                .build());*/
+
+                Log.d(TAG, "makeLogoutRequest():  calling logoutService");
+                mLogoutService.performLogoutRequest(mAuthState.getIdToken(),
+                        mIdentityProvider,
+                        createPostLogoutIntent(activityContext),
+                        mAuthService.createCustomTabsIntentBuilder()
+                                .setToolbarColor(getColorCompat(R.color.colorAccent))
+                                .build());
+            }
+        });
+    }
+
+    // intent for starting up main activity after logout response redirect
+    private static PendingIntent createPostLogoutIntent(
+            @NonNull Context context) {
+        Intent intent = new Intent(context, MainActivity.class);
+        //intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra(INTENT_EXTRA_LOGOUT_CALLBACK, true);
+        return PendingIntent.getActivity(context, LOGOUT_CALLBACK_INTENT_CONSTANT, intent, 0);
+        // PendingIntent.FLAG_UPDATE_CURRENT  );
+    }
+
+    /*private void performLogoutRequest() {
+
+        Log.d(TAG, "makeLogoutRequest(): Making logout request to " + mIdentityProvider.getLogoutEndpoint());
+
+
+        // using performActionWithFreshTokens(), which potentially updates access and id tokens,
+        // since id token's lifetime (1h) is shorter than refresh token's (4h)
+        performActionWithFreshTokens(
+                new ClientSecretBasic(mIdentityProvider.getClientSecret()),
+                new AuthState.AuthStateAction() {
+                    @Override
+                    public void execute(final String accessToken, String idToken, AuthorizationException ex) {
+
+
+                    }
+                });
+    }*/
+
+    @TargetApi(Build.VERSION_CODES.M)
+    @SuppressWarnings("deprecation")
+    private int getColorCompat(@ColorRes int color) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return getColor(color);
+        } else {
+            return getResources().getColor(color);
+        }
     }
 
     private void updateUserInfo(final JSONObject jsonObject) {

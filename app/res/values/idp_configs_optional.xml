@@ -2,5 +2,5 @@
 <resources>
     <string name="openid_name">OpenIDDemo</string>
     <string name="openid_scope_string" translatable="false">openid profile email</string>
-    <string name="openid_discovery_uri" translatable="false">https://example.openidprovider.com/.well-known/openid-configuration</string>
+    <string name="openid_discovery_uri" translatable="false">https://ce-dev.gluu.org/.well-known/openid-configuration</string>
 </resources>

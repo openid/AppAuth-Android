@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <bool name="openid_enabled">true</bool>
-    <string name="openid_client_id" translatable="false">clientId</string>
-    <string name="openid_client_secret" translatable="false">clientSecret</string>
-    <string name="openid_auth_redirect_uri" translatable="false">https://client.example.com/callback</string>
+
+    <string name="openid_client_id" translatable="false">client_id</string>
+    <string name="openid_client_secret" translatable="false">client_secret</string>
+
+    <string name="openid_auth_redirect_uri" translatable="false">appscheme://client.example.com</string>
+    <string name="openid_logout_redirect_uri" translatable="false">https://net.openid.appauthdemo.logout</string>
+
+    <string name="openid_auth_redirect_scheme" translatable="false">net.openid.appauthdemo.auth</string>
+    <string name="openid_logout_redirect_scheme" translatable="false">net.openid.appauthdemo.logout</string>
+
 </resources>
