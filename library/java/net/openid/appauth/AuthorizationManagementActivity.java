@@ -53,8 +53,8 @@ import org.json.JSONException;
  *                +-------+  |  |                      (S2)                    |
  *                |          |  +----------------------------------------------+
  *                |          |
- *                |          v (C2)
- *           (S3) |      +------------+
+ *                |          v (S3)
+ *          (C2a) |      +------------+
  *                |      |            |
  *                |      | Completion |
  *                |      |  Activity  |
@@ -95,7 +95,7 @@ import org.json.JSONException;
  *     </ul>
  *   <li>S flow:
  *     <ul>
- *       <li>Step S1: The authorization activity completes with a success of failure, and sends
+ *       <li>Step S1: The authorization activity completes with a success or failure, and sends
  *           this result to {@link RedirectUriReceiverActivity}.
  *       <li>Step S2: {@link RedirectUriReceiverActivity} extracts the forwarded data, and
  *           invokes AuthorizationManagementActivity using an intent derived from
