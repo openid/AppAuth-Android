@@ -133,10 +133,9 @@ private to the app:
 ```java
 @NonNull public AuthState readAuthState() {
   SharedPreferences authPrefs = getSharedPreferences("auth", MODE_PRIVATE);
-  String stateJson = authPrefs.getString("stateJson");
-  AuthState state;
-  if (stateStr != null) {
-    return AuthState.fromJsonString(stateJson);
+  String stateJson = authPrefs.getString("stateJson", null);
+  if (stateJson != null) {
+    return AuthState.jsonDeserialize(stateJson);
   } else {
     return new AuthState();
   }
@@ -145,7 +144,7 @@ private to the app:
 public void writeAuthState(@NonNull AuthState state) {
   SharedPreferences authPrefs = getSharedPreferences("auth", MODE_PRIVATE);
   authPrefs.edit()
-      .putString("stateJson", state.toJsonString())
+      .putString("stateJson", state.jsonSerializeString())
       .apply();
 }
 ```
@@ -156,17 +155,19 @@ You can configure communication with your chosen authorization server by
 specifying the endpoints directly:
 
 ```java
+final Uri authorizationEndpoint = Uri.parse("https://accounts.google.com/o/oauth2/v2/auth");
+final Uri tokenEndpoint = Uri.parse("https://www.googleapis.com/oauth2/v4/token");
+
 AuthorizationServiceConfiguration config =
-        new AuthorizationServiceConfiguration(name, mAuthEndpoint, mTokenEndpoint);
+        new AuthorizationServiceConfiguration(authorizationEndpoint, tokenEndpoint, null);
 
 // perform the auth request...
 ```
 
-Or through discovery:
+Or through discovery via an asynchronous request: 
 
 ```java
 final Uri issuerUri = Uri.parse("https://accounts.google.com");
-AuthorizationServiceConfiguration config;
 
 AuthorizationServiceConfiguration.fetchFromIssuer(
     issuerUri,
@@ -194,14 +195,14 @@ AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
         VersionedBrowserMatcher.CHROME_CUSTOM_TAB,
         VersionedBrowserMatcher.SAMSUNG_CUSTOM_TAB))
     .setConnectionBuilder(new ConnectionBuilder() {
-      public HttpURLConnection openConnect(Uri uri) throws IOException {
+      public HttpURLConnection openConnection(Uri uri) throws IOException {
         URL url = new URL(uri.toString());
         HttpURLConnection connection =
             (HttpURLConnection) url.openConnection();
-        if (connection instanceof HttpsUrlConnection) {
-          HttpsURLConnection connection = (HttpsURLConnection) connection;
-          connection.setSSLSocketFactory(MySocketFactory.getInstance());
+        if (connection instanceof HttpsURLConnection) {
+          ((HttpsURLConnection) connection).setSSLSocketFactory(MySocketFactory.getInstance());
         }
+        return connection;
       }
     })
     .build();
@@ -226,7 +227,7 @@ request can be constructed for dispatch:
 
 ```java
 RegistrationRequest registrationRequest = new RegistrationRequest.Builder(
-    serviceConfig,
+    config,
     Arrays.asList(redirectUri))
     .build();
 ```
@@ -266,8 +267,8 @@ AuthorizationRequest req = new AuthorizationRequest.Builder(
     .build();
 ```
 
-Requests are dispatched with the help of `AuthorizationService`. As this
-will open a custom tab or browser instance to fulfill this request.
+Requests are dispatched with the help of `AuthorizationService`. This
+will open a custom tab or browser instance to fulfill the request.
 An intent can be specified for both completion and cancelation of the
 authorization flow:
 
