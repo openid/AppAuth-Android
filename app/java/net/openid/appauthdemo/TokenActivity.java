@@ -99,6 +99,7 @@ public class TokenActivity extends AppCompatActivity {
     private JSONObject mUserInfoJson;
     private IdentityProvider mIdentityProvider;
     private LogoutService mLogoutService;
+    private TokenResponse tokenResponse;
 
 
     @Override
@@ -233,11 +234,17 @@ public class TokenActivity extends AppCompatActivity {
             @Nullable TokenResponse tokenResponse,
             @Nullable AuthorizationException authException) {
         Log.d(TAG, "Token request complete");
-        mAuthState.update(tokenResponse, authException);
-        showSnackbar((tokenResponse != null)
-                ? R.string.exchange_complete
-                : R.string.refresh_failed);
-        refreshUi();
+        this.tokenResponse = tokenResponse;
+        if (this.tokenResponse != null &&
+                this.tokenResponse.idToken != null && tokenResponse.idToken.length() > 0) {
+            performTokenValidation(tokenResponse);
+        } else {
+            mAuthState.update(tokenResponse, authException);
+            showSnackbar((tokenResponse != null)
+                    ? R.string.exchange_complete
+                    : R.string.refresh_failed);
+            refreshUi();
+        }
     }
 
     private void refreshUi() {
@@ -389,6 +396,46 @@ public class TokenActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    private void performTokenValidation(TokenResponse response) {
+        ClientAuthentication clientAuthentication;
+        try {
+            clientAuthentication = mAuthState.getClientAuthentication();
+            if ((mAuthState.getClientSecret() == null
+                    || TextUtils.isEmpty(mAuthState.getClientSecret())
+                    && IdentityProvider.getEnabledProviders(TokenActivity.this).get(0).getClientSecret() != null)) {
+                clientAuthentication = new ClientSecretBasic(IdentityProvider.getEnabledProviders(TokenActivity.this).get(0).getClientSecret());
+            }
+        } catch (ClientAuthentication.UnsupportedAuthenticationMethod ex) {
+            Log.d(TAG, "Token request cannot be made, client authentication for the token "
+                    + "endpoint could not be constructed (%s)", ex);
+            return;
+        }
+        mAuthService = new AuthorizationService(this);
+
+        mAuthService.performTokenValidationRequest(
+                response,
+                clientAuthentication,
+                new AuthorizationService.TokenValidationResponseCallback() {
+                    @Override
+                    public void onTokenValidationRequestCompleted(boolean isTokenValid, @Nullable AuthorizationException ex) {
+                        if (isTokenValid) {
+                            mAuthState.update(tokenResponse, ex);
+                            showSnackbar((tokenResponse != null)
+                                    ? R.string.exchange_complete
+                                    : R.string.refresh_failed);
+                            refreshUi();
+                        } else {
+                            mAuthState.update(tokenResponse, ex);
+                            showSnackbar((tokenResponse != null)
+                                    ? R.string.exchange_complete
+                                    : R.string.refresh_failed);
+                            refreshUi();
+                        }
+                    }
+                });
+    }
+
 
     private void fetchUserInfo() {
         if (mAuthState.getAuthorizationServiceConfiguration() == null) {
