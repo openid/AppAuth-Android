@@ -419,6 +419,48 @@ state.performActionWithFreshTokens(service, new AuthStateAction() {
 });
 ```
 
+### Logout
+
+For logout we must have a user logged in or an active session of the user.
+The user may have logged out from other application which invalidates the session.
+So to make sure that a user still have a session, we perform token refresh and then make
+the logout request. If the token refresh fails, the user is logged out from the app locally
+and if the refresh token is successful we make a logout request to the service provider for logout.
+
+```java
+private void makeLogoutRequest() {
+    final Activity activityContext = TokenActivity.this;
+
+    if (mAuthState.getAuthorizationServiceConfiguration() == null) {
+        Log.e(TAG, "Cannot make userInfo request without service configuration");
+    }
+
+    mAuthState.performActionWithFreshTokens(mAuthService, new AuthState.AuthStateAction() {
+        @Override
+        public void execute(String accessToken, String idToken, AuthorizationException ex) {
+            if (ex != null) {
+                Log.e(TAG, "Token refresh failed when performing logout", ex);
+                Toast.makeText(TokenActivity.this, "Token refresh failed when performing logout: "
+                        + ex.getMessage(), Toast.LENGTH_SHORT).show();
+                cleanLocalData();
+                refreshUi();
+                return;
+            }
+
+            Log.d(TAG, "makeLogoutRequest():  calling logoutService");
+            mLogoutService.performLogoutRequest(mAuthState.getIdToken(),
+                    mIdentityProvider,
+                    createPostLogoutIntent(activityContext),
+                    mAuthService.createCustomTabsIntentBuilder()
+                            .setToolbarColor(getColorCompat(R.color.colorAccent))
+                            .build());
+        }
+    });
+}
+```
+
+performLogoutRequest method from LogoutService performs logout.
+
 ## API Documentation
 
 Browse the [API documentation]

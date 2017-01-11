@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="openid_logout_redirect_uri" translatable="false">net.openid.appauthdemo.logout://oidc_callback</string>
-
-</resources>

@@ -107,7 +107,6 @@ public class LogoutService {
                 //No Application can handle your intent
                 Log.d(TAG, "performLogoutRequest: No browser found");
 
-
             }
         } else {
             Intent i = new Intent(Intent.ACTION_VIEW,

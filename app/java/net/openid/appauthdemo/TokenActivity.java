@@ -327,7 +327,7 @@ public class TokenActivity extends AppCompatActivity {
                     new AsyncTask<Void, Void, Void>() {
                         @Override
                         protected Void doInBackground(Void... params) {
-                            logoutUser();
+                            makeLogoutRequest();
                             return null;
                         }
                     }.execute();
@@ -488,7 +488,7 @@ public class TokenActivity extends AppCompatActivity {
         });
     }
 
-    private void logoutUser() {
+    private void makeLogoutRequest() {
         final Activity activityContext = TokenActivity.this;
 
         if (mAuthState.getAuthorizationServiceConfiguration() == null) {
@@ -502,20 +502,10 @@ public class TokenActivity extends AppCompatActivity {
                     Log.e(TAG, "Token refresh failed when performing logout", ex);
                     Toast.makeText(TokenActivity.this, "Token refresh failed when performing logout: "
                             + ex.getMessage(), Toast.LENGTH_SHORT).show();
-                    //mLogoutOngoing = false;
-                    //cleanLocalData();
+                    cleanLocalData();
                     refreshUi();
                     return;
                 }
-
-
-                /*Log.d(TAG, "makeLogoutRequest():  TESTING: changing id token");
-                mLogoutService.performLogoutRequest("***dummyIdTokenPrefix" + mAuthState.getIdToken(),
-                        mIdentityProvider,
-                        createPostLogoutIntent(activityContext),
-                        mAuthService.createCustomTabsIntentBuilder()
-                                .setToolbarColor(getColorCompat(R.color.colorAccent))
-                                .build());*/
 
                 Log.d(TAG, "makeLogoutRequest():  calling logoutService");
                 mLogoutService.performLogoutRequest(mAuthState.getIdToken(),
@@ -528,6 +518,20 @@ public class TokenActivity extends AppCompatActivity {
         });
     }
 
+    private void cleanLocalData() {
+        Log.d(TAG,"cleanLocalData()");
+        mAuthState = new AuthState();
+
+        SharedPreferences appPrefs = getSharedPreferences(FILE_SAVED_APP_STATE, MODE_PRIVATE);
+        appPrefs.edit()
+                .clear()
+                .apply();
+
+        Intent intent = new Intent(TokenActivity.this, MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
     // intent for starting up main activity after logout response redirect
     private static PendingIntent createPostLogoutIntent(
             @NonNull Context context) {
@@ -537,24 +541,6 @@ public class TokenActivity extends AppCompatActivity {
         return PendingIntent.getActivity(context, LOGOUT_CALLBACK_INTENT_CONSTANT, intent, 0);
         // PendingIntent.FLAG_UPDATE_CURRENT  );
     }
-
-    /*private void performLogoutRequest() {
-
-        Log.d(TAG, "makeLogoutRequest(): Making logout request to " + mIdentityProvider.getLogoutEndpoint());
-
-
-        // using performActionWithFreshTokens(), which potentially updates access and id tokens,
-        // since id token's lifetime (1h) is shorter than refresh token's (4h)
-        performActionWithFreshTokens(
-                new ClientSecretBasic(mIdentityProvider.getClientSecret()),
-                new AuthState.AuthStateAction() {
-                    @Override
-                    public void execute(final String accessToken, String idToken, AuthorizationException ex) {
-
-
-                    }
-                });
-    }*/
 
     @TargetApi(Build.VERSION_CODES.M)
     @SuppressWarnings("deprecation")
