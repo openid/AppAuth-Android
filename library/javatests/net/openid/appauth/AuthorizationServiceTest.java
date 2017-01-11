@@ -55,6 +55,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -217,6 +218,21 @@ public class AuthorizationServiceTest {
         mAuthCallback.waitForCallback();
         assertNotNull(mAuthCallback.error);
         assertEquals(GeneralErrors.NETWORK_ERROR, mAuthCallback.error);
+    }
+
+    @Test
+    public void testTokenRequest_400StatusCode() throws Exception {
+
+        Exception ex = new IOException();
+        when(mHttpConnection.getInputStream()).thenThrow(ex);
+        final String json = "{\"error\":\"invalid_grant\"}";
+        final InputStream errorJsonInputStream = new ByteArrayInputStream(json.getBytes("UTF-8"));
+        when(mHttpConnection.getErrorStream()).thenReturn(errorJsonInputStream);
+
+        mService.performTokenRequest(getTestAuthCodeExchangeRequest(), mAuthCallback);
+        mAuthCallback.waitForCallback();
+        assertNotNull(mAuthCallback.error);
+        assertEquals(AuthorizationException.TokenRequestErrors.INVALID_GRANT, mAuthCallback.error);
     }
 
     @Test
