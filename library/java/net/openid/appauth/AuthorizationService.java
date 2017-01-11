@@ -36,10 +36,13 @@ import net.openid.appauth.browser.BrowserSelector;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.util.Locale;
 import java.util.Map;
 
 
@@ -297,6 +300,47 @@ public class AuthorizationService {
         }
     }
 
+    private AuthorizationException exceptionForErrorStream(InputStream is, int errorType)
+            throws IOException, JSONException {
+
+        BufferedReader inputReader = new BufferedReader(new InputStreamReader(is));
+        StringBuilder jsonStringBuilder = new StringBuilder();
+        String currentlyReadLine;
+
+        try {
+            while (( currentlyReadLine = inputReader.readLine() ) != null) {
+
+                jsonStringBuilder.append(currentlyReadLine);
+            }
+
+            JSONObject jsonResult = new JSONObject(jsonStringBuilder.toString());
+            String errorString = jsonResult.getString("error");
+            switch (errorType) {
+
+                case AuthorizationException.TYPE_OAUTH_TOKEN_ERROR:
+                    return AuthorizationException.TokenRequestErrors.byString(errorString);
+
+                case AuthorizationException.TYPE_OAUTH_REGISTRATION_ERROR:
+                    return AuthorizationException.RegistrationRequestErrors.byString(errorString);
+
+                case AuthorizationException.TYPE_OAUTH_AUTHORIZATION_ERROR:
+                    return AuthorizationException.AuthorizationRequestErrors.byString(errorString);
+            }
+
+           return AuthorizationException.fromTemplate(GeneralErrors.JSON_DESERIALIZATION_ERROR, new Throwable(new Exception(errorString + " not found")));
+        }
+        catch (IOException ioExc) {
+
+            return AuthorizationException.fromTemplate(GeneralErrors.NETWORK_ERROR, ioExc);
+        }
+        catch (JSONException jsonExc) {
+
+            return AuthorizationException
+                    .fromTemplate(GeneralErrors.JSON_DESERIALIZATION_ERROR, jsonExc);
+        }
+    }
+
+
     private class TokenRequestTask
             extends AsyncTask<Void, Void, JSONObject> {
         private TokenRequest mRequest;
@@ -345,9 +389,26 @@ public class AuthorizationService {
                 wr.write(queryData);
                 wr.flush();
 
-                is = conn.getInputStream();
-                String response = Utils.readInputStream(is);
-                return new JSONObject(response);
+                try {
+                    is = conn.getInputStream();
+                    String response = Utils.readInputStream(is);
+                    return new JSONObject(response);
+                }
+                catch (IOException isIoExc) {
+
+                    is = conn.getErrorStream();
+
+                    if(is != null) {
+
+                        mException = exceptionForErrorStream(is,
+                                AuthorizationException.TYPE_OAUTH_TOKEN_ERROR);
+                    }
+                    else {
+
+                        mException = AuthorizationException.fromTemplate(
+                                GeneralErrors.NETWORK_ERROR, isIoExc);
+                    }
+                }
             } catch (IOException ex) {
                 Logger.debugWithStack(ex, "Failed to complete exchange request");
                 mException = AuthorizationException.fromTemplate(
@@ -455,9 +516,26 @@ public class AuthorizationService {
                 wr.write(postData);
                 wr.flush();
 
-                is = conn.getInputStream();
-                String response = Utils.readInputStream(is);
-                return new JSONObject(response);
+                try {
+                    is = conn.getInputStream();
+                    String response = Utils.readInputStream(is);
+                    return new JSONObject(response);
+                }
+                catch (IOException isIoExc) {
+
+                    is = conn.getErrorStream();
+
+                    if(is != null) {
+
+                        mException = exceptionForErrorStream(is,
+                                AuthorizationException.TYPE_OAUTH_REGISTRATION_ERROR);
+                    }
+                    else {
+
+                        mException = AuthorizationException.fromTemplate(
+                                GeneralErrors.NETWORK_ERROR, isIoExc);
+                    }
+                }
             } catch (IOException ex) {
                 Logger.debugWithStack(ex, "Failed to complete registration request");
                 mException = AuthorizationException.fromTemplate(
