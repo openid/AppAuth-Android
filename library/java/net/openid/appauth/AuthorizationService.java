@@ -42,7 +42,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.util.Locale;
 import java.util.Map;
 
 
@@ -325,9 +324,12 @@ public class AuthorizationService {
 
                 case AuthorizationException.TYPE_OAUTH_AUTHORIZATION_ERROR:
                     return AuthorizationException.AuthorizationRequestErrors.byString(errorString);
-            }
 
-           return AuthorizationException.fromTemplate(GeneralErrors.JSON_DESERIALIZATION_ERROR, new Throwable(new Exception(errorString + " not found")));
+                default:
+                    return AuthorizationException.fromTemplate(
+                            GeneralErrors.JSON_DESERIALIZATION_ERROR,
+                            new Throwable(new Exception(errorString + " not found")));
+            }
         }
         catch (IOException ioExc) {
 
@@ -398,7 +400,7 @@ public class AuthorizationService {
 
                     is = conn.getErrorStream();
 
-                    if(is != null) {
+                    if (is != null) {
 
                         mException = exceptionForErrorStream(is,
                                 AuthorizationException.TYPE_OAUTH_TOKEN_ERROR);
@@ -525,7 +527,7 @@ public class AuthorizationService {
 
                     is = conn.getErrorStream();
 
-                    if(is != null) {
+                    if (is != null) {
 
                         mException = exceptionForErrorStream(is,
                                 AuthorizationException.TYPE_OAUTH_REGISTRATION_ERROR);
