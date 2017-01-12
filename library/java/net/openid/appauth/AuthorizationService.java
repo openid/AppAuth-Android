@@ -300,7 +300,7 @@ public class AuthorizationService {
     }
 
     private AuthorizationException exceptionForErrorStream(InputStream is, int errorType)
-            throws IOException, JSONException {
+            throws IOException {
 
         BufferedReader inputReader = new BufferedReader(new InputStreamReader(is));
         StringBuilder jsonStringBuilder = new StringBuilder();
@@ -323,10 +323,6 @@ public class AuthorizationService {
                 case AuthorizationException.TYPE_OAUTH_REGISTRATION_ERROR:
                     return AuthorizationException.RegistrationRequestErrors.byString(errorString);
             }
-        }
-        catch (IOException ioExc) {
-
-            return AuthorizationException.fromTemplate(GeneralErrors.NETWORK_ERROR, ioExc);
         }
         catch (JSONException jsonExc) {
 
