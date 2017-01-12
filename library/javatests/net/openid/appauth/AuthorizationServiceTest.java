@@ -257,6 +257,21 @@ public class AuthorizationServiceTest {
         assertEquals(GeneralErrors.NETWORK_ERROR, mRegistrationCallback.error);
     }
 
+    @Test
+    public void testRegistrationRequest_400StatusCode() throws Exception {
+
+        Exception ex = new IOException();
+        when(mHttpConnection.getInputStream()).thenThrow(ex);
+        final String json = "{\"error\":\"invalid_request\"}";
+        final InputStream errorJsonInputStream = new ByteArrayInputStream(json.getBytes("UTF-8"));
+        when(mHttpConnection.getErrorStream()).thenReturn(errorJsonInputStream);
+
+        mService.performRegistrationRequest(getTestRegistrationRequest(), mRegistrationCallback);
+        mRegistrationCallback.waitForCallback();
+        assertNotNull(mRegistrationCallback.error);
+        assertEquals(AuthorizationException.RegistrationRequestErrors.INVALID_REQUEST,
+                mRegistrationCallback.error);
+    }
     @Test(expected = IllegalStateException.class)
     public void testTokenRequest_afterDispose() throws Exception {
         mService.dispose();

@@ -319,16 +319,9 @@ public class AuthorizationService {
                 case AuthorizationException.TYPE_OAUTH_TOKEN_ERROR:
                     return AuthorizationException.TokenRequestErrors.byString(errorString);
 
+                default:
                 case AuthorizationException.TYPE_OAUTH_REGISTRATION_ERROR:
                     return AuthorizationException.RegistrationRequestErrors.byString(errorString);
-
-                case AuthorizationException.TYPE_OAUTH_AUTHORIZATION_ERROR:
-                    return AuthorizationException.AuthorizationRequestErrors.byString(errorString);
-
-                default:
-                    return AuthorizationException.fromTemplate(
-                            GeneralErrors.JSON_DESERIALIZATION_ERROR,
-                            new Throwable(new Exception(errorString + " not found")));
             }
         }
         catch (IOException ioExc) {
