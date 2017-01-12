@@ -180,6 +180,17 @@ public class AuthorizationServiceTest {
     }
 
     @Test
+    public void testTokenRequest_invalidJson() throws Exception {
+        InputStream is = new ByteArrayInputStream("{\"invalid_json".getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(is);
+        TokenRequest request = getTestAuthCodeExchangeRequest();
+        mService.performTokenRequest(request, mAuthCallback);
+        mAuthCallback.waitForCallback();
+        assertNotNull(mAuthCallback.error);
+        assertEquals(GeneralErrors.JSON_DESERIALIZATION_ERROR, mAuthCallback.error);
+    }
+
+    @Test
     public void testTokenRequest_withBasicAuth() throws Exception {
         ClientSecretBasic csb = new ClientSecretBasic(TEST_CLIENT_SECRET);
         InputStream is = new ByteArrayInputStream(AUTH_CODE_EXCHANGE_RESPONSE_JSON.getBytes());
@@ -272,6 +283,17 @@ public class AuthorizationServiceTest {
         assertRegistrationResponse(mRegistrationCallback.response, request);
         String postBody = mOutputStream.toString();
         assertThat(postBody).isEqualTo(request.toJsonString());
+    }
+
+    @Test
+    public void testRegistrationRequest_invalidJson() throws Exception {
+        InputStream is = new ByteArrayInputStream("{\"invalid_json".getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(is);
+        RegistrationRequest request = getTestRegistrationRequest();
+        mService.performRegistrationRequest(request, mRegistrationCallback);
+        mRegistrationCallback.waitForCallback();
+        assertNotNull(mRegistrationCallback.error);
+        assertEquals(GeneralErrors.JSON_DESERIALIZATION_ERROR, mRegistrationCallback.error);
     }
 
     @Test
