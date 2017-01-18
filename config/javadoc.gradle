@@ -1,6 +1,6 @@
 task androidJavadocs(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
-    title = "OpenYOLO"
+    title = "AppAuth Android"
     classpath = files(project.android.getBootClasspath())
     options {
         links "http://docs.oracle.com/javase/7/docs/api/"
