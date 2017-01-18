@@ -345,7 +345,12 @@ public class AuthorizationService {
                 wr.write(queryData);
                 wr.flush();
 
-                is = conn.getInputStream();
+                if (conn.getResponseCode() >= HttpURLConnection.HTTP_OK
+                        && conn.getResponseCode() < HttpURLConnection.HTTP_MULT_CHOICE) {
+                    is = conn.getInputStream();
+                } else {
+                    is = conn.getErrorStream();
+                }
                 String response = Utils.readInputStream(is);
                 return new JSONObject(response);
             } catch (IOException ex) {
@@ -378,7 +383,7 @@ public class AuthorizationService {
                             error,
                             json.getString(AuthorizationException.PARAM_ERROR_DESCRIPTION),
                             UriUtil.parseUriIfAvailable(
-                                    json.getString(AuthorizationException.PARAM_ERROR_URI)));
+                                    json.optString(AuthorizationException.PARAM_ERROR_URI)));
                 } catch (JSONException jsonEx) {
                     ex = AuthorizationException.fromTemplate(
                             GeneralErrors.JSON_DESERIALIZATION_ERROR,
