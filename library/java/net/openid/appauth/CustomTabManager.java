@@ -18,6 +18,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.customtabs.CustomTabsCallback;
 import android.support.customtabs.CustomTabsClient;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.customtabs.CustomTabsServiceConnection;
@@ -92,8 +93,8 @@ class CustomTabManager {
         }
     }
 
-    public CustomTabsIntent.Builder createCustomTabsIntentBuilder() {
-        return new CustomTabsIntent.Builder(createSession());
+    public CustomTabsIntent.Builder createCustomTabsIntentBuilder(@Nullable CustomTabsCallback tabsCallback) {
+        return new CustomTabsIntent.Builder(createSession(tabsCallback));
     }
 
     public synchronized void unbind() {
@@ -106,7 +107,7 @@ class CustomTabManager {
         Logger.debug("CustomTabsService is disconnected");
     }
 
-    private CustomTabsSession createSession() {
+    private CustomTabsSession createSession(@Nullable CustomTabsCallback tabsCallback) {
         try {
             mClientLatch.await(CLIENT_WAIT_TIME, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
@@ -116,7 +117,7 @@ class CustomTabManager {
 
         CustomTabsClient client = mClient.get();
         if (client != null) {
-            return client.newSession(null);
+            return client.newSession(tabsCallback);
         }
 
         return null;

@@ -202,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
                         authRequest,
                         serviceConfig.discoveryDoc,
                         authState),
-                mAuthService.createCustomTabsIntentBuilder()
+                mAuthService.createCustomTabsIntentBuilder(null)
                         .setToolbarColor(getColorCompat(R.color.colorAccent))
                         .build());
     }
