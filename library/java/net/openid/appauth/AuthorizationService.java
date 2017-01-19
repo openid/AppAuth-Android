@@ -223,7 +223,6 @@ public class AuthorizationService {
                 intent.getPackage(),
                 mBrowser.useCustomTab.toString());
         intent.putExtra(CustomTabsIntent.EXTRA_TITLE_VISIBILITY_STATE, CustomTabsIntent.NO_TITLE);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 
         Logger.debug("Initiating authorization request to %s",
                 request.configuration.authorizationEndpoint);
