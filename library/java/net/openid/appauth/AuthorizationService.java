@@ -214,6 +214,7 @@ public class AuthorizationService {
         }
 
         Uri requestUri = request.toUri();
+        Log.v("TAG","Authorization request: "+requestUri);
         Intent intent;
         if (mBrowser.useCustomTab) {
             intent = customTabsIntent.intent;
@@ -490,6 +491,7 @@ public class AuthorizationService {
 
                     }
                 }
+
                 if (requiredJson != null) {
                     if (jsonObject_header.getString("kid").equals(requiredJson.getString("kid"))) {
                         if (jsonObject_body.getString("aud").equals(response.request.getRequestParameters().get("client_id"))) {
@@ -497,35 +499,26 @@ public class AuthorizationService {
                             c.setTimeInMillis(Long.parseLong(jsonObject_body.getString("exp")) * 1000);
                             c.getTimeInMillis();
 
-                            if (c.getTimeInMillis() > System.currentTimeMillis()) {
+                            if ((c.getTimeInMillis() > System.currentTimeMillis()) && jsonObject_body.getString("nonce").equals(response.request.getRequestParameters().get("nonce"))) {
                                 mCallback.onTokenValidationRequestCompleted(true, null);
-
                             } else {
                                 mCallback.onTokenValidationRequestCompleted(false, mException);
-
                             }
                         } else {
                             mCallback.onTokenValidationRequestCompleted(false, mException);
-
                         }
                     } else {
                         mCallback.onTokenValidationRequestCompleted(false, mException);
-
                     }
                 } else {
                     mCallback.onTokenValidationRequestCompleted(false, mException);
-
                 }
-
-
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
                 mCallback.onTokenValidationRequestCompleted(false, mException);
-
             } catch (JSONException e) {
                 e.printStackTrace();
                 mCallback.onTokenValidationRequestCompleted(false, mException);
-
             }
 
             if (mException != null || requiredJson == null) {
@@ -539,7 +532,6 @@ public class AuthorizationService {
                 mCallback.onTokenValidationRequestCompleted(true, null);
             } else {
                 mCallback.onTokenValidationRequestCompleted(false, mException);
-
             }
         }
     }
@@ -605,6 +597,7 @@ public class AuthorizationService {
         protected JSONObject doInBackground(Void... voids) {
             InputStream is = null;
             String postData = mRequest.toJsonString();
+            Log.v("TAG","Params of register request: "+postData);
             try {
                 HttpURLConnection conn =
                         mClientConfiguration.getConnectionBuilder()

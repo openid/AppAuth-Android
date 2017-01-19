@@ -221,7 +221,7 @@ public class TokenActivity extends AppCompatActivity {
             if (immediately) {
                 appPrefs.edit()
                         .putString(KEY_AUTH_STATE_JSON, mAuthState.jsonSerializeString())
-                        .commit();
+                        .apply();
             } else {
                 appPrefs.edit()
                         .putString(KEY_AUTH_STATE_JSON, mAuthState.jsonSerializeString())
@@ -235,6 +235,7 @@ public class TokenActivity extends AppCompatActivity {
             @Nullable AuthorizationException authException) {
         Log.d(TAG, "Token request complete");
         this.tokenResponse = tokenResponse;
+        Log.v(TAG, "Received token response: "+tokenResponse);
         if (this.tokenResponse != null &&
                 this.tokenResponse.idToken != null && tokenResponse.idToken.length() > 0) {
             performTokenValidation(tokenResponse);

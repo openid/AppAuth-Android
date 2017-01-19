@@ -58,6 +58,10 @@ public class TokenRequest {
     @VisibleForTesting
     static final String KEY_SCOPE = "scope";
     @VisibleForTesting
+    static final String KEY_STATE = "state";
+    @VisibleForTesting
+    static final String KEY_NONCE = "nonce";
+    @VisibleForTesting
     static final String KEY_AUTHORIZATION_CODE = "authorizationCode";
     @VisibleForTesting
     static final String KEY_REFRESH_TOKEN = "refreshToken";
@@ -85,6 +89,12 @@ public class TokenRequest {
     @VisibleForTesting
     static final String PARAM_SCOPE = "scope";
 
+    @VisibleForTesting
+    static final String PARAM_STATE = "state";
+
+    @VisibleForTesting
+    static final String PARAM_NONCE = "nonce";
+
     private static final Set<String> BUILT_IN_PARAMS = Collections.unmodifiableSet(
             new HashSet<>(Arrays.asList(
                     PARAM_CLIENT_ID,
@@ -93,7 +103,9 @@ public class TokenRequest {
                     PARAM_GRANT_TYPE,
                     PARAM_REDIRECT_URI,
                     PARAM_REFRESH_TOKEN,
-                    PARAM_SCOPE)));
+                    PARAM_SCOPE,
+                    PARAM_STATE,
+                    PARAM_NONCE)));
 
 
     /**
@@ -184,6 +196,12 @@ public class TokenRequest {
     @Nullable
     public final String scope;
 
+    @Nullable
+    public final String state;
+
+    @Nullable
+    public final String nonce;
+
     /**
      * A refresh token to be exchanged for a new token.
      *
@@ -229,6 +247,12 @@ public class TokenRequest {
 
         @Nullable
         private String mScope;
+
+        @Nullable
+        private String mState;
+
+        @Nullable
+        private String mNonce;
 
         @Nullable
         private String mAuthorizationCode;
@@ -309,6 +333,34 @@ public class TokenRequest {
             } else {
                 setScopes(scope.split(" +"));
             }
+            return this;
+        }
+
+        /**
+         * Specifies the state for an authorization code exchange request. This must match
+         * the state that was used to generate the challenge sent in the request that
+         * produced the authorization code.
+         */
+        public Builder setState(@Nullable String strState) {
+            if (strState != null) {
+                checkNotEmpty(strState, "state cannot be empty if defined");
+            }
+
+            mState = strState;
+            return this;
+        }
+
+        /**
+         * Specifies the nonce for an authorization code exchange request. This must match
+         * the nonce that was used to generate the challenge sent in the request that
+         * produced the authorization code.
+         */
+        public Builder setNonce(@Nullable String strNonce) {
+            if (strNonce != null) {
+                checkNotEmpty(strNonce, "nonce cannot be empty if defined");
+            }
+
+            mNonce = strNonce;
             return this;
         }
 
@@ -440,6 +492,8 @@ public class TokenRequest {
                     grantType,
                     mRedirectUri,
                     mScope,
+                    mState,
+                    mNonce,
                     mAuthorizationCode,
                     mRefreshToken,
                     mCodeVerifier,
@@ -465,6 +519,8 @@ public class TokenRequest {
             @NonNull String grantType,
             @Nullable Uri redirectUri,
             @Nullable String scope,
+            @Nullable String state,
+            @Nullable String nonce,
             @Nullable String authorizationCode,
             @Nullable String refreshToken,
             @Nullable String codeVerifier,
@@ -474,6 +530,8 @@ public class TokenRequest {
         this.grantType = grantType;
         this.redirectUri = redirectUri;
         this.scope = scope;
+        this.state=state;
+        this.nonce=nonce;
         this.authorizationCode = authorizationCode;
         this.refreshToken = refreshToken;
         this.codeVerifier = codeVerifier;
@@ -504,6 +562,8 @@ public class TokenRequest {
         putIfNotNull(params, PARAM_REFRESH_TOKEN, refreshToken);
         putIfNotNull(params, PARAM_CODE_VERIFIER, codeVerifier);
         putIfNotNull(params, PARAM_SCOPE, scope);
+        putIfNotNull(params, PARAM_STATE, state);
+        putIfNotNull(params, PARAM_NONCE, nonce);
 
         for (Entry<String, String> param : additionalParameters.entrySet()) {
             params.put(param.getKey(), param.getValue());
@@ -530,6 +590,8 @@ public class TokenRequest {
         JsonUtil.put(json, KEY_GRANT_TYPE, grantType);
         JsonUtil.putIfNotNull(json, KEY_REDIRECT_URI, redirectUri);
         JsonUtil.putIfNotNull(json, KEY_SCOPE, scope);
+        JsonUtil.putIfNotNull(json, KEY_STATE, state);
+        JsonUtil.putIfNotNull(json, KEY_NONCE, nonce);
         JsonUtil.putIfNotNull(json, KEY_AUTHORIZATION_CODE, authorizationCode);
         JsonUtil.putIfNotNull(json, KEY_REFRESH_TOKEN, refreshToken);
         JsonUtil.put(json, KEY_ADDITIONAL_PARAMETERS,
@@ -562,6 +624,7 @@ public class TokenRequest {
                 .setRedirectUri(JsonUtil.getUriIfDefined(json, KEY_REDIRECT_URI))
                 .setGrantType(JsonUtil.getString(json, KEY_GRANT_TYPE))
                 .setRefreshToken(JsonUtil.getStringIfDefined(json, KEY_REFRESH_TOKEN))
+                .setState(JsonUtil.getStringIfDefined(json,KEY_STATE))
                 .setAuthorizationCode(JsonUtil.getStringIfDefined(json, KEY_AUTHORIZATION_CODE))
                 .setAdditionalParameters(JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
 

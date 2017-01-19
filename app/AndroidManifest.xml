@@ -12,7 +12,6 @@
  * limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="net.openid.appauthdemo">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -42,7 +41,7 @@
             android:name=".TokenActivity"
             android:label="@string/app_name_short"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden"></activity>
+            android:windowSoftInputMode="stateHidden" />
 
         <!--
         This activity declaration is merged with the version from the library manifest.
