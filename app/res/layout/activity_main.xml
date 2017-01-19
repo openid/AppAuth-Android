@@ -27,7 +27,7 @@
                 android:layout_width="96dp"
                 android:layout_height="96dp"
                 android:layout_gravity="center"
-                app:srcCompat="@drawable/openid_96dp"
+                app:srcCompat="@drawable/appauth_96dp"
                 android:contentDescription="@string/openid_logo_content_description"/>
 
             <TextView
