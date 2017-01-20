@@ -25,7 +25,9 @@ import java.io.InputStreamReader;
 class Utils {
     private static final int INITIAL_READ_BUFFER_SIZE = 1024;
 
-    private Utils() {}
+    private Utils() {
+        throw new IllegalStateException("This type is not intended to be instantiated");
+    }
 
     /**
      * Read a string from an input stream.

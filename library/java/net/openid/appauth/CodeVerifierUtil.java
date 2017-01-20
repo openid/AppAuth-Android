@@ -86,7 +86,9 @@ public class CodeVerifierUtil {
             Pattern.compile("^[0-9a-zA-Z\\-\\.\\_\\~]{43,128}$");
 
 
-    private CodeVerifierUtil() {}
+    private CodeVerifierUtil() {
+        throw new IllegalStateException("This type is not intended to be instantiated");
+    }
 
     /**
      * Throws an IllegalArgumentException if the provided code verifier is invalid, as

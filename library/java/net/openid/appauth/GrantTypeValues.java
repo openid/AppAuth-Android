@@ -19,7 +19,7 @@ package net.openid.appauth;
  * Authorization Framework" (RFC 6749)</a>, and used in {@link AuthorizationRequest authorization}
  * and {@link RegistrationRequest dynamic client registration} requests.
  */
-public class GrantTypeValues {
+public final class GrantTypeValues {
     /**
      * The grant type used for exchanging an authorization code for one or more tokens.
      *
@@ -47,4 +47,7 @@ public class GrantTypeValues {
      */
     public static final String REFRESH_TOKEN = "refresh_token";
 
+    private GrantTypeValues() {
+        throw new IllegalStateException("This type is not intended to be instantiated");
+    }
 }

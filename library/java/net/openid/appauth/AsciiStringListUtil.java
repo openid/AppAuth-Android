@@ -30,6 +30,10 @@ import java.util.Set;
  */
 final class AsciiStringListUtil {
 
+    private AsciiStringListUtil() {
+        throw new IllegalStateException("This type is not intended to be instantiated");
+    }
+
     /**
      * Converts an iterable collection of strings into a consolidated, space-delimited
      * format. If the provided iterable is {@code null}, or contains no elements, then
