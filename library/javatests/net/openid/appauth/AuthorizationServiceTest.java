@@ -377,7 +377,6 @@ public class AuthorizationServiceTest {
 
     private void assertRequestIntent(Intent intent, Integer color) {
         assertEquals(Intent.ACTION_VIEW, intent.getAction());
-        assertTrue((intent.getFlags() & Intent.FLAG_ACTIVITY_NO_HISTORY) > 0);
         assertColorMatch(intent, color);
     }
 
