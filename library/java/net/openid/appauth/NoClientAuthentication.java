@@ -37,6 +37,7 @@ public class NoClientAuthentication implements ClientAuthentication {
     public static final NoClientAuthentication INSTANCE = new NoClientAuthentication();
 
     private NoClientAuthentication() {
+        // no need to instantiate separate instances from INSTANCE
     }
 
     /**

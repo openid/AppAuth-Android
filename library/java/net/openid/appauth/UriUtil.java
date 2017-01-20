@@ -30,7 +30,9 @@ import java.util.Map;
  */
 class UriUtil {
 
-    private UriUtil() {}
+    private UriUtil() {
+        throw new IllegalStateException("This type is not intended to be instantiated");
+    }
 
     public static Uri parseUriIfAvailable(@Nullable String uri) {
         if (uri == null) {

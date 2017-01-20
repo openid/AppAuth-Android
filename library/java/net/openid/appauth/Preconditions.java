@@ -132,4 +132,8 @@ public final class Preconditions {
             throw new IllegalArgumentException(String.format(errorTemplate, params));
         }
     }
+
+    private Preconditions() {
+        throw new IllegalStateException("This type is not intended to be instantiated");
+    }
 }
