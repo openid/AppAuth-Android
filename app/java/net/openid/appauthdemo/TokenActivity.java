@@ -138,8 +138,13 @@ public class TokenActivity extends AppCompatActivity {
 
             if (response != null) {
                 Log.d(TAG, "Received AuthorizationResponse.");
-                showSnackbar(R.string.exchange_notification);
-                exchangeAuthorizationCode(response);
+                if(response.request.state!=null && response.state!=null && response.state.equals(response.request.state)){
+                    showSnackbar(R.string.exchange_notification);
+                    exchangeAuthorizationCode(response);
+                } else{
+                    Log.i(TAG, "Authorization failed: Invalid state");
+                    showSnackbar(R.string.authorization_failed);
+                }
             } else {
                 Log.i(TAG, "Authorization failed: " + ex);
                 showSnackbar(R.string.authorization_failed);
@@ -193,7 +198,6 @@ public class TokenActivity extends AppCompatActivity {
         super.onStop();
         Log.d(TAG, "onStop()");
         saveAuthState(true);
-
     }
 
     @Override
@@ -208,7 +212,6 @@ public class TokenActivity extends AppCompatActivity {
             mLogoutService.dispose();
             mLogoutService = null;
         }
-
     }
 
 
@@ -235,7 +238,6 @@ public class TokenActivity extends AppCompatActivity {
             @Nullable AuthorizationException authException) {
         Log.d(TAG, "Token request complete");
         this.tokenResponse = tokenResponse;
-        Log.v(TAG, "Received token response: "+tokenResponse);
         if (this.tokenResponse != null &&
                 this.tokenResponse.idToken != null && tokenResponse.idToken.length() > 0) {
             performTokenValidation(tokenResponse);
