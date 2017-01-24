@@ -48,6 +48,7 @@ import android.support.customtabs.CustomTabsIntent;
 import android.support.customtabs.CustomTabsServiceConnection;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -234,6 +235,7 @@ public class AuthorizationServiceTest {
     public void testTokenRequest_withInvalidGrant() throws Exception {
         ClientSecretPost csp = new ClientSecretPost(TEST_CLIENT_SECRET);
         InputStream is = new ByteArrayInputStream(INVALID_GRANT_RESPONSE_JSON.getBytes());
+        when(mHttpConnection.getInputStream()).thenThrow(new FileNotFoundException());
         when(mHttpConnection.getErrorStream()).thenReturn(is);
         when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_BAD_REQUEST);
         TokenRequest request = getTestAuthCodeExchangeRequest();
@@ -246,6 +248,7 @@ public class AuthorizationServiceTest {
     public void testTokenRequest_withInvalidGrant2() throws Exception {
         ClientSecretPost csp = new ClientSecretPost(TEST_CLIENT_SECRET);
         InputStream is = new ByteArrayInputStream(INVALID_GRANT_RESPONSE_JSON.getBytes());
+        when(mHttpConnection.getInputStream()).thenThrow(new FileNotFoundException());
         when(mHttpConnection.getErrorStream()).thenReturn(is);
         when(mHttpConnection.getResponseCode()).thenReturn(199);
         TokenRequest request = getTestAuthCodeExchangeRequest();
@@ -418,7 +421,6 @@ public class AuthorizationServiceTest {
         assertEquals(AuthorizationException.TYPE_OAUTH_TOKEN_ERROR, error.type);
         assertEquals(TEST_INVALID_GRANT_CODE, error.code);
         assertEquals("invalid_grant", error.error);
-        assertEquals("invalid_grant description", error.errorDescription);
     }
 
     private void assertRegistrationResponse(RegistrationResponse response,
