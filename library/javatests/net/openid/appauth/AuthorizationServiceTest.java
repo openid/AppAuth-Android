@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.android.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -98,6 +99,11 @@ public class AuthorizationServiceTest {
             + "  \"error\": \"invalid_grant\",\n"
             + "  \"error_description\": \"invalid_grant description\"\n"
             + "}";
+
+    private static final String INVALID_GRANT_NO_DESC_RESPONSE_JSON = "{\n"
+            + "  \"error\": \"invalid_grant\"\n"
+            + "}";
+
     private static final int TEST_INVALID_GRANT_CODE = 2002;
 
     private AuthorizationCallback mAuthCallback;
@@ -243,6 +249,18 @@ public class AuthorizationServiceTest {
     }
 
     @Test
+    public void testTokenRequest_withInvalidGrantWithNoDesc() throws Exception {
+        ClientSecretPost csp = new ClientSecretPost(TEST_CLIENT_SECRET);
+        InputStream is = new ByteArrayInputStream(INVALID_GRANT_NO_DESC_RESPONSE_JSON.getBytes());
+        when(mHttpConnection.getErrorStream()).thenReturn(is);
+        when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_BAD_REQUEST);
+        TokenRequest request = getTestAuthCodeExchangeRequest();
+        mService.performTokenRequest(request, csp, mAuthCallback);
+        mAuthCallback.waitForCallback();
+        assertInvalidGrantWithNoDescription(mAuthCallback.error);
+    }
+
+    @Test
     public void testTokenRequest_IoException() throws Exception {
         Exception ex = new IOException();
         when(mHttpConnection.getInputStream()).thenThrow(ex);
@@ -312,6 +330,14 @@ public class AuthorizationServiceTest {
         assertEquals(TEST_INVALID_GRANT_CODE, error.code);
         assertEquals("invalid_grant", error.error);
         assertEquals("invalid_grant description", error.errorDescription);
+    }
+
+    private void assertInvalidGrantWithNoDescription(AuthorizationException error) {
+        assertNotNull(error);
+        assertEquals(AuthorizationException.TYPE_OAUTH_TOKEN_ERROR, error.type);
+        assertEquals(TEST_INVALID_GRANT_CODE, error.code);
+        assertEquals("invalid_grant", error.error);
+        assertNull(error.errorDescription);
     }
 
     private void assertRegistrationResponse(RegistrationResponse response,

@@ -380,7 +380,7 @@ public class AuthorizationService {
                     ex = AuthorizationException.fromOAuthTemplate(
                             TokenRequestErrors.byString(error),
                             error,
-                            json.getString(AuthorizationException.PARAM_ERROR_DESCRIPTION),
+                            json.optString(AuthorizationException.PARAM_ERROR_DESCRIPTION, null),
                             UriUtil.parseUriIfAvailable(
                                     json.optString(AuthorizationException.PARAM_ERROR_URI)));
                 } catch (JSONException jsonEx) {
