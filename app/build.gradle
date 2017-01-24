@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'checkstyle'
 apply from: '../config/android-common.gradle'
+apply from: '../config/keystore.gradle'
 
 android {
     defaultConfig {
@@ -13,6 +14,24 @@ android {
         manifestPlaceholders = [
                 'appAuthRedirectScheme': 'com.googleusercontent.apps.YOUR-ID'
         ]
+    }
+
+    signingConfigs {
+        debugAndRelease {
+            storeFile file("${rootDir}/appauth.keystore")
+            storePassword "appauth"
+            keyAlias "appauth"
+            keyPassword "appauth"
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debugAndRelease
+        }
+        release {
+            signingConfig signingConfigs.debugAndRelease
+        }
     }
 }
 

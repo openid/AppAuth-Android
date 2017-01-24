@@ -21,7 +21,7 @@ package net.openid.appauth;
  * specifications, used in {@link AuthorizationRequest authorization} and
  * {@link RegistrationRequest dynamic client registration} requests.
  */
-public class ResponseTypeValues {
+public final class ResponseTypeValues {
     /**
      * For requesting an authorization code.
      *
@@ -46,4 +46,7 @@ public class ResponseTypeValues {
      */
     public static final String ID_TOKEN = "id_token";
 
+    private ResponseTypeValues() {
+        throw new IllegalStateException("This type is not intended to be instantiated");
+    }
 }

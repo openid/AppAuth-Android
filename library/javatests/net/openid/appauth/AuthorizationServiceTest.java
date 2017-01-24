@@ -95,6 +95,12 @@ public class AuthorizationServiceTest {
             + " \"application_type\": " + RegistrationRequest.APPLICATION_TYPE_NATIVE + "\n"
             + "}";
 
+    private static final String INVALID_GRANT_RESPONSE_JSON = "{\n"
+            + "  \"error\": \"invalid_grant\",\n"
+            + "  \"error_description\": \"invalid_grant description\"\n"
+            + "}";
+    private static final int TEST_INVALID_GRANT_CODE = 2002;
+
     private AuthorizationCallback mAuthCallback;
     private RegistrationCallback mRegistrationCallback;
     private AuthorizationService mService;
@@ -171,6 +177,7 @@ public class AuthorizationServiceTest {
     public void testTokenRequest() throws Exception {
         InputStream is = new ByteArrayInputStream(AUTH_CODE_EXCHANGE_RESPONSE_JSON.getBytes());
         when(mHttpConnection.getInputStream()).thenReturn(is);
+        when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
         TokenRequest request = getTestAuthCodeExchangeRequest();
         mService.performTokenRequest(request, mAuthCallback);
         mAuthCallback.waitForCallback();
@@ -194,6 +201,7 @@ public class AuthorizationServiceTest {
     public void testTokenRequest_withBasicAuth() throws Exception {
         ClientSecretBasic csb = new ClientSecretBasic(TEST_CLIENT_SECRET);
         InputStream is = new ByteArrayInputStream(AUTH_CODE_EXCHANGE_RESPONSE_JSON.getBytes());
+        when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
         when(mHttpConnection.getInputStream()).thenReturn(is);
         TokenRequest request = getTestAuthCodeExchangeRequest();
         mService.performTokenRequest(request, csb, mAuthCallback);
@@ -210,6 +218,7 @@ public class AuthorizationServiceTest {
         ClientSecretPost csp = new ClientSecretPost(TEST_CLIENT_SECRET);
         InputStream is = new ByteArrayInputStream(AUTH_CODE_EXCHANGE_RESPONSE_JSON.getBytes());
         when(mHttpConnection.getInputStream()).thenReturn(is);
+        when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
         TokenRequest request = getTestAuthCodeExchangeRequest();
         mService.performTokenRequest(request, csp, mAuthCallback);
         mAuthCallback.waitForCallback();
@@ -222,9 +231,34 @@ public class AuthorizationServiceTest {
     }
 
     @Test
+    public void testTokenRequest_withInvalidGrant() throws Exception {
+        ClientSecretPost csp = new ClientSecretPost(TEST_CLIENT_SECRET);
+        InputStream is = new ByteArrayInputStream(INVALID_GRANT_RESPONSE_JSON.getBytes());
+        when(mHttpConnection.getErrorStream()).thenReturn(is);
+        when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_BAD_REQUEST);
+        TokenRequest request = getTestAuthCodeExchangeRequest();
+        mService.performTokenRequest(request, csp, mAuthCallback);
+        mAuthCallback.waitForCallback();
+        assertInvalidGrant(mAuthCallback.error);
+    }
+
+    @Test
+    public void testTokenRequest_withInvalidGrant2() throws Exception {
+        ClientSecretPost csp = new ClientSecretPost(TEST_CLIENT_SECRET);
+        InputStream is = new ByteArrayInputStream(INVALID_GRANT_RESPONSE_JSON.getBytes());
+        when(mHttpConnection.getErrorStream()).thenReturn(is);
+        when(mHttpConnection.getResponseCode()).thenReturn(199);
+        TokenRequest request = getTestAuthCodeExchangeRequest();
+        mService.performTokenRequest(request, csp, mAuthCallback);
+        mAuthCallback.waitForCallback();
+        assertInvalidGrant(mAuthCallback.error);
+    }
+
+    @Test
     public void testTokenRequest_IoException() throws Exception {
         Exception ex = new IOException();
         when(mHttpConnection.getInputStream()).thenThrow(ex);
+        when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
         mService.performTokenRequest(getTestAuthCodeExchangeRequest(), mAuthCallback);
         mAuthCallback.waitForCallback();
         assertNotNull(mAuthCallback.error);
@@ -379,6 +413,14 @@ public class AuthorizationServiceTest {
         assertEquals(TEST_ID_TOKEN, response.idToken);
     }
 
+    private void assertInvalidGrant(AuthorizationException error) {
+        assertNotNull(error);
+        assertEquals(AuthorizationException.TYPE_OAUTH_TOKEN_ERROR, error.type);
+        assertEquals(TEST_INVALID_GRANT_CODE, error.code);
+        assertEquals("invalid_grant", error.error);
+        assertEquals("invalid_grant description", error.errorDescription);
+    }
+
     private void assertRegistrationResponse(RegistrationResponse response,
                                             RegistrationRequest expectedRequest) {
         assertThat(response).isNotNull();
@@ -442,7 +484,6 @@ public class AuthorizationServiceTest {
 
     private void assertRequestIntent(Intent intent, Integer color) {
         assertEquals(Intent.ACTION_VIEW, intent.getAction());
-        assertTrue((intent.getFlags() & Intent.FLAG_ACTIVITY_NO_HISTORY) > 0);
         assertColorMatch(intent, color);
     }
 

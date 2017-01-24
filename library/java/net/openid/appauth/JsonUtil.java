@@ -35,7 +35,9 @@ import java.util.Map;
  */
 final class JsonUtil {
 
-    private JsonUtil() {}
+    private JsonUtil() {
+        throw new IllegalStateException("This type is not intended to be instantiated");
+    }
 
     public static void put(
             @NonNull JSONObject json,

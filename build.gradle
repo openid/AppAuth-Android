@@ -6,7 +6,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.0'
+        classpath 'com.android.tools.build:gradle:2.2.3'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.1'
         classpath 'org.ajoberstar:gradle-git:1.5.1'
@@ -23,6 +23,8 @@ subprojects {
     }
 }
 
+ext.verifyKeystore()
+
 def grgit = org.ajoberstar.grgit.Grgit.open(dir: '.')
 def lastCommit = grgit.head()
 
@@ -34,12 +36,14 @@ if (project.ext.versionName == null) {
 }
 
 project.ext.minSdkVersion = 15
-project.ext.compileSdkVersion = 24
-project.ext.buildToolsVersion = '24.0.2'
-project.ext.supportLibVersion = '24.2.1'
+project.ext.compileSdkVersion = 25
+project.ext.buildToolsVersion = '25.0.1'
+project.ext.supportLibVersion = '25.1.0'
 
-task showVersion << {
-    logger.lifecycle("Version ID: " + project.versionNum)
-    logger.lifecycle("Version Name: " + project.versionName)
-    logger.lifecycle("Version Date: " + project.versionDate)
+task showVersion {
+    doLast {
+        logger.lifecycle("Version ID: " + project.versionNum)
+        logger.lifecycle("Version Name: " + project.versionName)
+        logger.lifecycle("Version Date: " + project.versionDate)
+    }
 }

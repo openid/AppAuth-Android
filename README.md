@@ -1,4 +1,4 @@
-# AppAuth for Android
+![AppAuth for Android](https://rawgit.com/openid/AppAuth-Android/master/appauth_lockup.svg)
 
 [![Build Status](https://www.bitrise.io/app/a09572dde99baf30.svg?token=DROliGDWTq1SbhaHTid9fw&branch=master)](https://www.bitrise.io/app/a09572dde99baf30)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/321412eec811478085ec6c4c923ad8a1)](https://www.codacy.com/app/iainmcgin/AppAuth-Android)
@@ -37,7 +37,7 @@ the latest AAR ([direct link](http://cli.re/Gxajn4) /
 or add a dependency using Gradle:
 
 ```groovy
-compile 'net.openid:appauth:0.4.1'
+compile 'net.openid:appauth:0.5.0'
 ```
 
 Or Maven:
@@ -46,7 +46,7 @@ Or Maven:
 <dependency>
   <groupId>net.openid</groupId>
   <artifactId>appauth</artifactId>
-  <version>0.4.1</version>
+  <version>0.5.0</version>
 </dependency>
 ```
 

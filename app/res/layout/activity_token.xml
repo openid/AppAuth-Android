@@ -27,7 +27,7 @@
                 android:layout_width="96dp"
                 android:layout_height="96dp"
                 android:layout_gravity="center"
-                app:srcCompat="@drawable/openid_96dp"
+                app:srcCompat="@drawable/appauth_96dp"
                 android:contentDescription="@string/openid_logo_content_description"/>
 
             <TextView
@@ -93,7 +93,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
                     <ImageView
                         android:layout_width="48dp"
@@ -106,7 +107,10 @@
                         android:id="@+id/userinfo_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
+                        android:paddingLeft="8dp"
+                        android:paddingStart="8dp"
+                        android:paddingRight="0dp"
+                        android:paddingEnd="0dp"
                         tools:text="Jane Doe"
                         style="@style/Base.TextAppearance.AppCompat.Title" />
 

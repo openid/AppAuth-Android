@@ -225,7 +225,6 @@ public class AuthorizationService {
                 intent.getPackage(),
                 mBrowser.useCustomTab.toString());
         intent.putExtra(CustomTabsIntent.EXTRA_TITLE_VISIBILITY_STATE, CustomTabsIntent.NO_TITLE);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 
         Logger.debug("Initiating authorization request to %s",
                 request.configuration.authorizationEndpoint);
@@ -430,7 +429,7 @@ public class AuthorizationService {
                             error,
                             json.getString(AuthorizationException.PARAM_ERROR_DESCRIPTION),
                             UriUtil.parseUriIfAvailable(
-                                    json.getString(AuthorizationException.PARAM_ERROR_URI)));
+                                    json.optString(AuthorizationException.PARAM_ERROR_URI)));
                 } catch (JSONException jsonEx) {
                     ex = AuthorizationException.fromTemplate(
                             GeneralErrors.JSON_DESERIALIZATION_ERROR,

@@ -3,6 +3,6 @@
     <!-- OpenID gray -->
     <color name="colorPrimary">#aeafb3</color>
     <color name="colorPrimaryDark">#7c7d80</color>
-    <!-- OpenID orange -->
-    <color name="colorAccent">#f38019</color>
+    <!-- AppAuth blue -->
+    <color name="colorAccent">#00aeef</color>
 </resources>
