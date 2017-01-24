@@ -488,7 +488,6 @@ public class AuthorizationService {
                     if (jsonArray.getJSONObject(i).optString("alg").contains(jsonObject_header.getString("alg"))) {
                         requiredJson = jsonArray.getJSONObject(i);
                         break;
-
                     }
                 }
 
@@ -697,5 +696,30 @@ public class AuthorizationService {
          */
         void onRegistrationRequestCompleted(@Nullable RegistrationResponse response,
                                             @Nullable AuthorizationException ex);
+    }
+
+    /**
+     * Function that validates user info response
+     */
+    public boolean validateUserInfo(JSONObject userInfoResponse, TokenResponse tokenResponse){
+        boolean isValid=false;
+
+        String[] split = tokenResponse.idToken.split("\\.");
+        try {
+
+            String decodeToken_Body = JsonUtil.decodeBase64(split[1]);
+
+            JSONObject jsonObject_body = new JSONObject(decodeToken_Body);
+
+            if(userInfoResponse.getString("sub").equals(jsonObject_body.getString("sub"))){
+                isValid=true;
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return isValid;
     }
 }

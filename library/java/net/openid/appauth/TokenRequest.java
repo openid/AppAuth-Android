@@ -196,9 +196,29 @@ public class TokenRequest {
     @Nullable
     public final String scope;
 
+    /**
+     * An opaque value used by the client to maintain state between the request and callback. If
+     * this value is not explicitly set, this library will automatically add state and perform
+     * appropriate  validation of the state in the authorization response. It is recommended that
+     * the default implementation of this parameter be used wherever possible. Typically used to
+     * prevent CSRF attacks, as recommended in
+     * <a href="https://tools.ietf.org/html/rfc6819#section-5.3.5">RFC6819 Section 5.3.5</a>.
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.1"> "The OAuth 2.0
+     * Authorization
+     * Framework" (RFC 6749), Section 4.1.1</a>
+     * @see <a href="https://tools.ietf.org/html/rfc6819#section-5.3.5"> "The OAuth 2.0
+     * Authorization
+     * Framework" (RFC 6749), Section 5.3.5</a>
+     */
     @Nullable
     public final String state;
 
+    /**
+     * String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
+     * The value is passed through unmodified from the Authentication Request to the ID Token.
+     * Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.
+     * */
     @Nullable
     public final String nonce;
 
@@ -337,10 +357,12 @@ public class TokenRequest {
         }
 
         /**
-         * Specifies the state for an authorization code exchange request. This must match
-         * the state that was used to generate the challenge sent in the request that
-         * produced the authorization code.
-         */
+        * An opaque value used by the client to maintain state between the request and callback. If
+        * this value is not explicitly set, this library will automatically add state and perform
+        * appropriate  validation of the state in the authorization response. It is recommended that
+        * the default implementation of this parameter be used wherever possible. Typically used to
+        * prevent CSRF attacks
+        * */
         public Builder setState(@Nullable String strState) {
             if (strState != null) {
                 checkNotEmpty(strState, "state cannot be empty if defined");
@@ -351,10 +373,10 @@ public class TokenRequest {
         }
 
         /**
-         * Specifies the nonce for an authorization code exchange request. This must match
-         * the nonce that was used to generate the challenge sent in the request that
-         * produced the authorization code.
-         */
+         * String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
+         * The value is passed through unmodified from the Authentication Request to the ID Token.
+         * Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.
+         * */
         public Builder setNonce(@Nullable String strNonce) {
             if (strNonce != null) {
                 checkNotEmpty(strNonce, "nonce cannot be empty if defined");

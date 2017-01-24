@@ -100,7 +100,7 @@ public class TokenActivity extends AppCompatActivity {
     private IdentityProvider mIdentityProvider;
     private LogoutService mLogoutService;
     private TokenResponse tokenResponse;
-
+    public static String idTokenSub;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -473,7 +473,15 @@ public class TokenActivity extends AppCompatActivity {
                     conn.setInstanceFollowRedirects(false);
                     userInfoResponse = conn.getInputStream();
                     String response = readStream(userInfoResponse);
-                    updateUserInfo(new JSONObject(response));
+                    JSONObject jObjResponse=new JSONObject(response);
+
+                    if(mAuthService.validateUserInfo(jObjResponse,tokenResponse)){
+                        updateUserInfo(jObjResponse);
+                    }else {
+                        Log.i(TAG, "User Info validation failed: Invalid sub");
+                        showSnackbar(R.string.user_info_validation_failed);
+                    }
+
                 } catch (IOException ioEx) {
                     Log.e(TAG, "Network error when querying userinfo endpoint", ioEx);
                 } catch (JSONException jsonEx) {

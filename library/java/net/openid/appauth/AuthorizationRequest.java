@@ -429,6 +429,11 @@ public class AuthorizationRequest {
     @Nullable
     public final String state;
 
+    /**
+     * String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
+     * The value is passed through unmodified from the Authentication Request to the ID Token.
+     * Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.
+    * */
     @Nullable
     public final String nonce;
 
@@ -765,6 +770,11 @@ public class AuthorizationRequest {
             return this;
         }
 
+        /**
+         * Specifies the String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
+         * The value is passed through unmodified from the Authentication Request to the ID Token.
+         * Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.
+         * */
         @NonNull
         public Builder setNonce(@Nullable String nonce) {
             mNonce = checkNullOrNotEmpty(nonce, "nonce cannot be empty if defined");
@@ -863,11 +873,11 @@ public class AuthorizationRequest {
         /**
          * Constructs the authorization request. At a minimum the following fields must have been
          * set:
-         * <ul> <li>The client ID</li> <li>The expected response type</li> <li>The redirect
-         * URI</li>
-         * </ul> Failure to specify any of these parameters will result in a runtime exception.
-         */
         @NonNull
+        * <ul> <li>The client ID</li> <li>The expected response type</li> <li>The redirect
+        * URI</li>
+                * </ul> Failure to specify any of these parameters will result in a runtime exception.
+        */
         public AuthorizationRequest build() {
             return new AuthorizationRequest(
                     mConfiguration,
