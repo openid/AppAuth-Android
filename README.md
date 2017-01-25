@@ -1,5 +1,6 @@
 ![AppAuth for Android](https://rawgit.com/openid/AppAuth-Android/master/appauth_lockup.svg)
 
+[![Download](https://api.bintray.com/packages/openid/net.openid/appauth/images/download.svg) ](https://bintray.com/openid/net.openid/appauth/_latestVersion)
 [![Build Status](https://www.bitrise.io/app/a09572dde99baf30.svg?token=DROliGDWTq1SbhaHTid9fw&branch=master)](https://www.bitrise.io/app/a09572dde99baf30)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/321412eec811478085ec6c4c923ad8a1)](https://www.codacy.com/app/iainmcgin/AppAuth-Android)
 [![codecov.io](https://codecov.io/github/openid/AppAuth-Android/coverage.svg?branch=master)](https://codecov.io/github/openid/AppAuth-Android?branch=master)
@@ -31,24 +32,9 @@ Google) can be found here:
 
 ## Download
 
-Download
-the latest AAR ([direct link](http://cli.re/Gxajn4) /
-[Bintray repository](https://bintray.com/openid/net.openid/appauth/view))
-or add a dependency using Gradle:
-
-```groovy
-compile 'net.openid:appauth:0.5.0'
-```
-
-Or Maven:
-
-```xml
-<dependency>
-  <groupId>net.openid</groupId>
-  <artifactId>appauth</artifactId>
-  <version>0.5.0</version>
-</dependency>
-```
+Instructions for downloading AppAuth or adding a dependency
+using Maven, Gradle or Ivy can be found on our 
+[Bintray page](https://bintray.com/openid/net.openid/appauth).
 
 ## Specification
 
