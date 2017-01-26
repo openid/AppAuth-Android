@@ -274,7 +274,7 @@ your app. The library configures the `RedirectUriReceiverActivity` to
 handle a custom scheme defined as a "manifest placeholder" which can be
 replaced by adding the following to your `build.gradle`:
 
-```
+```groovy
 android.defaultConfig.manifestPlaceholders = [
   'appAuthRedirectScheme': 'your-custom-scheme'
 ]
@@ -283,7 +283,7 @@ android.defaultConfig.manifestPlaceholders = [
 Instead of this, you can directly declare the redirect URI by adding the
 following to your `AndroidManifest.xml`:
 
-```
+```xml
 <activity
         android:name="net.openid.appauth.RedirectUriReceiverActivity"
         tools:node="replace">
@@ -298,7 +298,7 @@ following to your `AndroidManifest.xml`:
 
 This latter option can also be used to capture HTTP(S) redirects if necessary:
 
-```
+```xml
 <activity
         android:name="net.openid.appauth.RedirectUriReceiverActivity"
         tools:node="replace">
