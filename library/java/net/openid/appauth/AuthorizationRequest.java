@@ -429,9 +429,6 @@ public class AuthorizationRequest {
     @Nullable
     public final String state;
 
-    @Nullable
-    public final String nonce;
-
     /**
      * String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
      * The value is passed through unmodified from the Authentication Request to the ID Token.
@@ -770,12 +767,6 @@ public class AuthorizationRequest {
         @NonNull
         public Builder setState(@Nullable String state) {
             mState = checkNullOrNotEmpty(state, "state cannot be empty if defined");
-            return this;
-        }
-
-        @NonNull
-        public Builder setNonce(@Nullable String nonce) {
-            mNonce = checkNullOrNotEmpty(nonce, "nonce cannot be empty if defined");
             return this;
         }
 
