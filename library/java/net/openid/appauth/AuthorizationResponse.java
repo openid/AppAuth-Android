@@ -72,6 +72,8 @@ public class AuthorizationResponse {
     @VisibleForTesting
     static final String KEY_STATE = "state";
     @VisibleForTesting
+    static final String KEY_NONCE = "nonce";
+    @VisibleForTesting
     static final String KEY_TOKEN_TYPE = "token_type";
     @VisibleForTesting
     static final String KEY_AUTHORIZATION_CODE = "code";
@@ -88,6 +90,7 @@ public class AuthorizationResponse {
             new HashSet<>(Arrays.asList(
                     KEY_TOKEN_TYPE,
                     KEY_STATE,
+                    KEY_NONCE,
                     KEY_AUTHORIZATION_CODE,
                     KEY_ACCESS_TOKEN,
                     KEY_EXPIRES_IN,
@@ -106,6 +109,13 @@ public class AuthorizationResponse {
      */
     @Nullable
     public final String state;
+
+    /**
+     * The returned nonce parameter, which must match the value returned in the id_token in
+     * order to validate id_token.
+     */
+    @Nullable
+    public final String nonce;
 
     /**
      * The type of the retrieved token. Typically this is "Bearer" when present. Otherwise,
@@ -189,6 +199,9 @@ public class AuthorizationResponse {
         private String mState;
 
         @Nullable
+        private String mNonce;
+
+        @Nullable
         private String mTokenType;
 
         @Nullable
@@ -229,6 +242,7 @@ public class AuthorizationResponse {
         @VisibleForTesting
         Builder fromUri(@NonNull Uri uri, @NonNull Clock clock) {
             setState(uri.getQueryParameter(KEY_STATE));
+            setNonce(uri.getQueryParameter(KEY_NONCE));
             setTokenType(uri.getQueryParameter(KEY_TOKEN_TYPE));
             setAuthorizationCode(uri.getQueryParameter(KEY_AUTHORIZATION_CODE));
             setAccessToken(uri.getQueryParameter(KEY_ACCESS_TOKEN));
@@ -246,6 +260,16 @@ public class AuthorizationResponse {
         public Builder setState(@Nullable String state) {
             checkNullOrNotEmpty(state, "state must not be empty");
             mState = state;
+            return this;
+        }
+
+        /**
+         * Specifies the OAuth 2 nonce.
+         */
+        @NonNull
+        public Builder setNonce(@Nullable String nonce) {
+            checkNullOrNotEmpty(nonce, "nonce must not be empty");
+            mNonce = nonce;
             return this;
         }
 
@@ -388,6 +412,7 @@ public class AuthorizationResponse {
             return new AuthorizationResponse(
                     mRequest,
                     mState,
+                    mNonce,
                     mTokenType,
                     mAuthorizationCode,
                     mAccessToken,
@@ -401,6 +426,7 @@ public class AuthorizationResponse {
     private AuthorizationResponse(
             @NonNull AuthorizationRequest request,
             @Nullable String state,
+            @Nullable String nonce,
             @Nullable String tokenType,
             @Nullable String authorizationCode,
             @Nullable String accessToken,
@@ -410,6 +436,7 @@ public class AuthorizationResponse {
             @NonNull Map<String, String> additionalParameters) {
         this.request = request;
         this.state = state;
+        this.nonce=nonce;
         this.tokenType = tokenType;
         this.authorizationCode = authorizationCode;
         this.accessToken = accessToken;
@@ -473,6 +500,7 @@ public class AuthorizationResponse {
                 .setCodeVerifier(request.codeVerifier)
                 .setAuthorizationCode(authorizationCode)
                 .setAdditionalParameters(additionalExchangeParameters)
+                .setNonce(request.nonce)
                 .build();
     }
 
@@ -485,6 +513,7 @@ public class AuthorizationResponse {
         JSONObject json = new JSONObject();
         JsonUtil.put(json, KEY_REQUEST, request.jsonSerialize());
         JsonUtil.putIfNotNull(json, KEY_STATE, state);
+        JsonUtil.putIfNotNull(json, KEY_NONCE, nonce);
         JsonUtil.putIfNotNull(json, KEY_TOKEN_TYPE, tokenType);
         JsonUtil.putIfNotNull(json, KEY_AUTHORIZATION_CODE, authorizationCode);
         JsonUtil.putIfNotNull(json, KEY_ACCESS_TOKEN, accessToken);
@@ -529,6 +558,7 @@ public class AuthorizationResponse {
                 .setIdToken(JsonUtil.getStringIfDefined(json, KEY_ID_TOKEN))
                 .setScope(JsonUtil.getStringIfDefined(json, KEY_SCOPE))
                 .setState(JsonUtil.getStringIfDefined(json, KEY_STATE))
+                .setNonce(JsonUtil.getStringIfDefined(json, KEY_NONCE))
                 .setAccessTokenExpirationTime(JsonUtil.getLongIfDefined(json, KEY_EXPIRES_AT))
                 .setAdditionalParameters(
                         JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS))

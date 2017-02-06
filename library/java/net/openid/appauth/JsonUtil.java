@@ -19,11 +19,13 @@ import static net.openid.appauth.Preconditions.checkNotNull;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Base64;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -495,6 +497,15 @@ final class JsonUtil {
         @Override
         String convert(String value) {
             return value;
+        }
+    }
+
+    public static String decodeBase64(String strEncoded) throws UnsupportedEncodingException {
+        if (strEncoded != null) {
+            byte[] decodedBytes = Base64.decode(strEncoded, Base64.URL_SAFE);
+            return new String(decodedBytes, "UTF-8");
+        } else {
+            return "";
         }
     }
 }
