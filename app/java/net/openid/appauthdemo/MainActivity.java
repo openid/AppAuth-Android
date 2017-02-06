@@ -228,6 +228,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.d(TAG, "Registration request complete");
                         if (registrationResponse != null) {
                             idp.setClientId(registrationResponse.clientId);
+                            idp.setClientSecret(registrationResponse.clientSecret);
                             Log.d(TAG, "Registration request complete successfully");
                             // Continue with the authentication
                             makeAuthRequest(registrationResponse.request.configuration, idp,

@@ -17,6 +17,7 @@ package net.openid.appauthdemo;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -43,6 +45,7 @@ import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceDiscovery;
 import net.openid.appauth.ClientAuthentication;
+import net.openid.appauth.ClientSecretBasic;
 import net.openid.appauth.TokenRequest;
 import net.openid.appauth.TokenResponse;
 
@@ -63,6 +66,19 @@ import java.util.Date;
  * A sample activity to serve as a client to the Native Oauth library.
  */
 public class TokenActivity extends AppCompatActivity {
+
+    // constants for intents
+    private static final String INTENT_EXTRA_AUTH_CALLBACK = "authorizationCallback";
+    private static final String INTENT_EXTRA_LOGOUT_CALLBACK = "logoutCallback";
+    private static final int LOGOUT_CALLBACK_INTENT_CONSTANT = 12345;
+
+    // constants for saving state on disk
+    private static final String FILE_SAVED_APP_STATE = "savedAppState";
+    private static final String KEY_DISCOVERY_DOC_JSON = "discoveryDocInJson";
+    private static final String KEY_AUTH_STATE_JSON = "authStateInJson";
+    private static final String KEY_AUTH_MODE_STRING = "authModeAsString";
+    private static final String KEY_REFRESH_TIMESTAMP = "refreshTimestamp";
+
     private static final String TAG = "TokenActivity";
 
     private static final String KEY_AUTH_STATE = "authState";
@@ -76,6 +92,9 @@ public class TokenActivity extends AppCompatActivity {
     private AuthState mAuthState;
     private AuthorizationService mAuthService;
     private JSONObject mUserInfoJson;
+    private IdentityProvider mIdentityProvider;
+    private TokenResponse tokenResponse;
+    public static String idTokenSub;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +103,7 @@ public class TokenActivity extends AppCompatActivity {
 
         mAuthService = new AuthorizationService(this);
 
+        mIdentityProvider = IdentityProvider.getEnabledProviders(TokenActivity.this).get(0);
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey(KEY_AUTH_STATE)) {
                 try {
@@ -134,20 +154,80 @@ public class TokenActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume()");
+        refreshUi();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause()");
+        if (mAuthService != null) {
+            mAuthService.dispose();
+        }
+        mAuthService = null;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart()");
+        refreshUi();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop()");
+        saveAuthState(true);
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
-        mAuthService.dispose();
+        Log.d(TAG, "onDestroy()");
+        if (mAuthService != null) {
+            mAuthService.dispose();
+            mAuthService = null;
+        }
+    }
+
+
+    // save AuthState internal state to permanent storage
+    private void saveAuthState(boolean immediately) {
+        Log.d(TAG, "saveAuthState(): mAuthState.len=" + (mAuthState != null ?
+                mAuthState.jsonSerializeString().length() : "0"));
+        if (mAuthState != null) {
+            SharedPreferences appPrefs = getSharedPreferences(FILE_SAVED_APP_STATE, MODE_PRIVATE);
+            if (immediately) {
+                appPrefs.edit()
+                        .putString(KEY_AUTH_STATE_JSON, mAuthState.jsonSerializeString())
+                        .apply();
+            } else {
+                appPrefs.edit()
+                        .putString(KEY_AUTH_STATE_JSON, mAuthState.jsonSerializeString())
+                        .apply();
+            }
+        }
     }
 
     private void receivedTokenResponse(
             @Nullable TokenResponse tokenResponse,
             @Nullable AuthorizationException authException) {
         Log.d(TAG, "Token request complete");
-        mAuthState.update(tokenResponse, authException);
-        showSnackbar((tokenResponse != null)
-                ? R.string.exchange_complete
-                : R.string.refresh_failed);
-        refreshUi();
+        this.tokenResponse = tokenResponse;
+        if (this.tokenResponse != null &&
+                this.tokenResponse.idToken != null && tokenResponse.idToken.length() > 0) {
+            performTokenValidation(tokenResponse);
+        } else {
+            mAuthState.update(tokenResponse, authException);
+            showSnackbar((tokenResponse != null)
+                    ? R.string.exchange_complete
+                    : R.string.refresh_failed);
+            refreshUi();
+        }
     }
 
     private void refreshUi() {
@@ -255,9 +335,14 @@ public class TokenActivity extends AppCompatActivity {
         ClientAuthentication clientAuthentication;
         try {
             clientAuthentication = mAuthState.getClientAuthentication();
+            if ((mAuthState.getClientSecret() == null
+                    || TextUtils.isEmpty(mAuthState.getClientSecret())
+                    && IdentityProvider.getEnabledProviders(TokenActivity.this).get(0).getClientSecret() != null)) {
+                clientAuthentication = new ClientSecretBasic(IdentityProvider.getEnabledProviders(TokenActivity.this).get(0).getClientSecret());
+            }
         } catch (ClientAuthentication.UnsupportedAuthenticationMethod ex) {
             Log.d(TAG, "Token request cannot be made, client authentication for the token "
-                            + "endpoint could not be constructed (%s)", ex);
+                    + "endpoint could not be constructed (%s)", ex);
             return;
         }
 
@@ -273,6 +358,46 @@ public class TokenActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    private void performTokenValidation(TokenResponse response) {
+        ClientAuthentication clientAuthentication;
+        try {
+            clientAuthentication = mAuthState.getClientAuthentication();
+            if ((mAuthState.getClientSecret() == null
+                    || TextUtils.isEmpty(mAuthState.getClientSecret())
+                    && IdentityProvider.getEnabledProviders(TokenActivity.this).get(0).getClientSecret() != null)) {
+                clientAuthentication = new ClientSecretBasic(IdentityProvider.getEnabledProviders(TokenActivity.this).get(0).getClientSecret());
+            }
+        } catch (ClientAuthentication.UnsupportedAuthenticationMethod ex) {
+            Log.d(TAG, "Token request cannot be made, client authentication for the token "
+                    + "endpoint could not be constructed (%s)", ex);
+            return;
+        }
+        mAuthService = new AuthorizationService(this);
+
+        mAuthService.performTokenValidationRequest(
+                response,
+                clientAuthentication,
+                new AuthorizationService.TokenValidationResponseCallback() {
+                    @Override
+                    public void onTokenValidationRequestCompleted(boolean isTokenValid, @Nullable AuthorizationException ex) {
+                        if (isTokenValid) {
+                            mAuthState.update(tokenResponse, ex);
+                            showSnackbar((tokenResponse != null)
+                                    ? R.string.exchange_complete
+                                    : R.string.refresh_failed);
+                            refreshUi();
+                        } else {
+                            mAuthState.update(tokenResponse, ex);
+                            showSnackbar((tokenResponse != null)
+                                    ? R.string.exchange_complete
+                                    : R.string.refresh_failed);
+                            refreshUi();
+                        }
+                    }
+                });
+    }
+
 
     private void fetchUserInfo() {
         if (mAuthState.getAuthorizationServiceConfiguration() == null) {
