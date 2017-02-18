@@ -113,6 +113,7 @@ public static final IdentityProvider MYAUTH = new IdentityProvider(
     NOT_SPECIFIED, // discovery document not provided
     R.string.myauth_auth_endpoint_uri,
     R.string.myauth_token_endpoint_uri,
+    NOT_SPECIFIED, // dynamic registration not supported
     R.string.myauth_client_id,
     R.string.myauth_auth_redirect_uri,
     R.string.myauth_scope_string,
