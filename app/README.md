@@ -107,7 +107,7 @@ With these properties defined, a new instance of IdentityProvider can be
 defined in `IdentityProvider`:
 
 ```
-public static final MYAUTH = new IdentityProvider(
+public static final IdentityProvider MYAUTH = new IdentityProvider(
     "MyAuth", // name of the provider, for debug strings
     R.bool.myauth_enabled,
     NOT_SPECIFIED, // discovery document not provided
