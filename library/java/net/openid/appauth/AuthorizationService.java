@@ -26,6 +26,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.customtabs.CustomTabsIntent;
+import android.text.TextUtils;
 
 import net.openid.appauth.AuthorizationException.GeneralErrors;
 import net.openid.appauth.AuthorizationException.RegistrationRequestErrors;
@@ -40,6 +41,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.URLConnection;
 import java.util.Map;
 
 
@@ -320,6 +322,7 @@ public class AuthorizationService {
                                 .openConnection(mRequest.configuration.tokenEndpoint);
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                addJsonToAcceptHeader(conn);
                 conn.setDoOutput(true);
 
                 Map<String, String> headers = mClientAuthentication
@@ -406,6 +409,18 @@ public class AuthorizationService {
             Logger.debug("Token exchange with %s completed",
                     mRequest.configuration.tokenEndpoint);
             mCallback.onTokenRequestCompleted(response, null);
+        }
+
+        /**
+         * GitHub will only return a spec-compliant response if JSON is explicitly defined
+         * as an acceptable response type. As this is essentially harmless for all other
+         * spec-compliant IDPs, we add this header if no existing Accept header has been set
+         * by the connection builder.
+         */
+        private void addJsonToAcceptHeader(URLConnection conn) {
+            if (TextUtils.isEmpty(conn.getRequestProperty("Accept"))) {
+                conn.setRequestProperty("Accept", "application/json");
+            }
         }
     }
 
