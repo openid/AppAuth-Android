@@ -453,6 +453,7 @@ public class AuthorizationService {
                         mClientConfiguration.getConnectionBuilder()
                                 .openConnection(mRequest.configuration.registrationEndpoint);
                 conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
                 conn.setDoOutput(true);
                 conn.setRequestProperty("Content-Length", String.valueOf(postData.length()));
                 OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
