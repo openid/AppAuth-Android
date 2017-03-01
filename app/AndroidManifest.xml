@@ -11,28 +11,26 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
 -->
-<manifest
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        package="net.openid.appauthdemo" >
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="net.openid.appauthdemo">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-            android:allowBackup="false"
-            android:fullBackupContent="false"
-            android:icon="@mipmap/ic_launcher"
-            android:label="@string/app_name_short"
-            android:theme="@style/AppTheme"
-            android:supportsRtl="false"
-            android:name=".Application">
+        android:name=".Application"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name_short"
+        android:supportsRtl="false"
+        android:theme="@style/AppTheme">
 
         <!-- Main activity -->
         <activity
-                android:name=".MainActivity"
-                android:label="@string/app_name_short"
-                android:theme="@style/AppTheme.NoActionBar"
-                android:windowSoftInputMode="stateHidden" >
+            android:name=".MainActivity"
+            android:label="@string/app_name_short"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -40,11 +38,10 @@
         </activity>
 
         <activity
-                android:name=".TokenActivity"
-                android:label="@string/app_name_short"
-                android:theme="@style/AppTheme.NoActionBar"
-                android:windowSoftInputMode="stateHidden" >
-        </activity>
+            android:name=".TokenActivity"
+            android:label="@string/app_name_short"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
 
         <!--
         This activity declaration is merged with the version from the library manifest.
@@ -64,12 +61,26 @@
         -->
         <activity android:name="net.openid.appauth.RedirectUriReceiverActivity">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="https"
-                  android:host="appauth.demo-app.io"
-                  android:path="/oauth2redirect"/>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+
+                <data android:scheme="appscheme" />
+                <data android:host="client.example.login" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".RedirectUriReceiverActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:host="net.openid.appauthdemo.logout" />
             </intent-filter>
         </activity>
     </application>

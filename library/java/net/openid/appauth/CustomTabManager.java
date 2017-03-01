@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Hides the details of establishing connections and sessions with custom tabs, to make testing
  * easier.
  */
-class CustomTabManager {
+public class CustomTabManager {
 
     /**
      * Wait for at most this amount of time for the browser connection to be established.
@@ -50,7 +50,7 @@ class CustomTabManager {
     @Nullable
     private CustomTabsServiceConnection mConnection;
 
-    CustomTabManager(@NonNull Context context) {
+    public CustomTabManager(@NonNull Context context) {
         mContext = context;
         mClient = new AtomicReference<>();
         mClientLatch = new CountDownLatch(1);
@@ -94,6 +94,8 @@ class CustomTabManager {
 
     public CustomTabsIntent.Builder createCustomTabsIntentBuilder() {
         return new CustomTabsIntent.Builder(createSession());
+//        return new CustomTabsIntent.Builder();
+
     }
 
     public synchronized void unbind() {

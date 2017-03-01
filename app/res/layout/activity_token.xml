@@ -56,6 +56,13 @@
                     android:layout_height="wrap_content"
                     android:text="@string/view_profile"
                     style="@style/Widget.AppCompat.Button" />
+
+                <Button
+                    android:id="@+id/logout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Logout"
+                    style="@style/Widget.AppCompat.Button" />
             </LinearLayout>
 
             <TextView
