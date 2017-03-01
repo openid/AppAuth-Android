@@ -49,6 +49,7 @@ import android.support.customtabs.CustomTabsIntent;
 import android.support.customtabs.CustomTabsServiceConnection;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -56,6 +57,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -192,6 +194,17 @@ public class AuthorizationServiceTest {
     }
 
     @Test
+    public void testTokenRequest_invalidJson() throws Exception {
+        InputStream is = new ByteArrayInputStream("{\"invalid_json".getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(is);
+        TokenRequest request = getTestAuthCodeExchangeRequest();
+        mService.performTokenRequest(request, mAuthCallback);
+        mAuthCallback.waitForCallback();
+        assertNotNull(mAuthCallback.error);
+        assertEquals(GeneralErrors.JSON_DESERIALIZATION_ERROR, mAuthCallback.error);
+    }
+
+    @Test
     public void testTokenRequest_withBasicAuth() throws Exception {
         ClientSecretBasic csb = new ClientSecretBasic(TEST_CLIENT_SECRET);
         InputStream is = new ByteArrayInputStream(AUTH_CODE_EXCHANGE_RESPONSE_JSON.getBytes());
@@ -228,6 +241,7 @@ public class AuthorizationServiceTest {
     public void testTokenRequest_withInvalidGrant() throws Exception {
         ClientSecretPost csp = new ClientSecretPost(TEST_CLIENT_SECRET);
         InputStream is = new ByteArrayInputStream(INVALID_GRANT_RESPONSE_JSON.getBytes());
+        when(mHttpConnection.getInputStream()).thenThrow(new FileNotFoundException());
         when(mHttpConnection.getErrorStream()).thenReturn(is);
         when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_BAD_REQUEST);
         TokenRequest request = getTestAuthCodeExchangeRequest();
@@ -240,6 +254,7 @@ public class AuthorizationServiceTest {
     public void testTokenRequest_withInvalidGrant2() throws Exception {
         ClientSecretPost csp = new ClientSecretPost(TEST_CLIENT_SECRET);
         InputStream is = new ByteArrayInputStream(INVALID_GRANT_RESPONSE_JSON.getBytes());
+        when(mHttpConnection.getInputStream()).thenThrow(new FileNotFoundException());
         when(mHttpConnection.getErrorStream()).thenReturn(is);
         when(mHttpConnection.getResponseCode()).thenReturn(199);
         TokenRequest request = getTestAuthCodeExchangeRequest();
@@ -272,6 +287,48 @@ public class AuthorizationServiceTest {
     }
 
     @Test
+    public void testTokenRequest_400StatusCode() throws Exception {
+
+        Exception ex = new IOException();
+        when(mHttpConnection.getInputStream()).thenThrow(ex);
+        final String json = "{\"error\":\"invalid_grant\"}";
+        final InputStream errorJsonInputStream = new ByteArrayInputStream(json.getBytes("UTF-8"));
+        when(mHttpConnection.getErrorStream()).thenReturn(errorJsonInputStream);
+
+        mService.performTokenRequest(getTestAuthCodeExchangeRequest(), mAuthCallback);
+        mAuthCallback.waitForCallback();
+        assertNotNull(mAuthCallback.error);
+        assertEquals(AuthorizationException.TokenRequestErrors.INVALID_GRANT, mAuthCallback.error);
+    }
+
+    @Test
+    public void testTokenRequest_400InvalidJsonBody() throws Exception {
+
+        Exception ex = new IOException();
+        when(mHttpConnection.getInputStream()).thenThrow(ex);
+        final String json = "{\"error\":\"invalid_grant";
+        final InputStream errorJsonInputStream = new ByteArrayInputStream(json.getBytes("UTF-8"));
+        when(mHttpConnection.getErrorStream()).thenReturn(errorJsonInputStream);
+
+        mService.performTokenRequest(getTestAuthCodeExchangeRequest(), mAuthCallback);
+        mAuthCallback.waitForCallback();
+        assertNotNull(mAuthCallback.error);
+        assertEquals(GeneralErrors.JSON_DESERIALIZATION_ERROR, mAuthCallback.error);
+    }
+
+    @Test
+    public void testTokenRequest_connectionOutputStreamException() throws Exception {
+
+        Exception ex = new IOException();
+        when(mHttpConnection.getOutputStream()).thenThrow(ex);
+
+        mService.performTokenRequest(getTestAuthCodeExchangeRequest(), mAuthCallback);
+        mAuthCallback.waitForCallback();
+        assertNotNull(mAuthCallback.error);
+        assertEquals(GeneralErrors.NETWORK_ERROR, mAuthCallback.error);
+    }
+
+    @Test
     public void testRegistrationRequest() throws Exception {
         InputStream is = new ByteArrayInputStream(REGISTRATION_RESPONSE_JSON.getBytes());
         when(mHttpConnection.getInputStream()).thenReturn(is);
@@ -284,6 +341,17 @@ public class AuthorizationServiceTest {
     }
 
     @Test
+    public void testRegistrationRequest_invalidJson() throws Exception {
+        InputStream is = new ByteArrayInputStream("{\"invalid_json".getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(is);
+        RegistrationRequest request = getTestRegistrationRequest();
+        mService.performRegistrationRequest(request, mRegistrationCallback);
+        mRegistrationCallback.waitForCallback();
+        assertNotNull(mRegistrationCallback.error);
+        assertEquals(GeneralErrors.JSON_DESERIALIZATION_ERROR, mRegistrationCallback.error);
+    }
+
+    @Test
     public void testRegistrationRequest_IoException() throws Exception {
         Exception ex = new IOException();
         when(mHttpConnection.getInputStream()).thenThrow(ex);
@@ -293,6 +361,48 @@ public class AuthorizationServiceTest {
         assertEquals(GeneralErrors.NETWORK_ERROR, mRegistrationCallback.error);
     }
 
+    @Test
+    public void testRegistrationRequest_400StatusCode() throws Exception {
+
+        Exception ex = new IOException();
+        when(mHttpConnection.getInputStream()).thenThrow(ex);
+        final String json = "{\"error\":\"invalid_request\"}";
+        final InputStream errorJsonInputStream = new ByteArrayInputStream(json.getBytes("UTF-8"));
+        when(mHttpConnection.getErrorStream()).thenReturn(errorJsonInputStream);
+
+        mService.performRegistrationRequest(getTestRegistrationRequest(), mRegistrationCallback);
+        mRegistrationCallback.waitForCallback();
+        assertNotNull(mRegistrationCallback.error);
+        assertEquals(AuthorizationException.RegistrationRequestErrors.INVALID_REQUEST,
+                mRegistrationCallback.error);
+    }
+
+    @Test
+    public void testRegistrationRequest_400InvalidJson() throws Exception {
+
+        Exception ex = new IOException();
+        when(mHttpConnection.getInputStream()).thenThrow(ex);
+        final String json = "{\"error\":\"invalid_request";
+        final InputStream errorJsonInputStream = new ByteArrayInputStream(json.getBytes("UTF-8"));
+        when(mHttpConnection.getErrorStream()).thenReturn(errorJsonInputStream);
+
+        mService.performRegistrationRequest(getTestRegistrationRequest(), mRegistrationCallback);
+        mRegistrationCallback.waitForCallback();
+        assertNotNull(mRegistrationCallback.error);
+        assertEquals(GeneralErrors.JSON_DESERIALIZATION_ERROR, mRegistrationCallback.error);
+    }
+
+    @Test
+    public void testRegistrationRequest_outputStreamException() throws Exception {
+
+        Exception ex = new IOException();
+        when(mHttpConnection.getOutputStream()).thenThrow(ex);
+
+        mService.performRegistrationRequest(getTestRegistrationRequest(), mRegistrationCallback);
+        mRegistrationCallback.waitForCallback();
+        assertNotNull(mRegistrationCallback.error);
+        assertEquals(GeneralErrors.NETWORK_ERROR, mRegistrationCallback.error);
+    }
     @Test(expected = IllegalStateException.class)
     public void testTokenRequest_afterDispose() throws Exception {
         mService.dispose();
@@ -329,7 +439,6 @@ public class AuthorizationServiceTest {
         assertEquals(AuthorizationException.TYPE_OAUTH_TOKEN_ERROR, error.type);
         assertEquals(TEST_INVALID_GRANT_CODE, error.code);
         assertEquals("invalid_grant", error.error);
-        assertEquals("invalid_grant description", error.errorDescription);
     }
 
     private void assertInvalidGrantWithNoDescription(AuthorizationException error) {

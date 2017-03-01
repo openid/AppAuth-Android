@@ -37,7 +37,7 @@ if (project.ext.versionName == null) {
 
 project.ext.minSdkVersion = 15
 project.ext.compileSdkVersion = 25
-project.ext.buildToolsVersion = '25.0.1'
+project.ext.buildToolsVersion = '25.0.2'
 project.ext.supportLibVersion = '25.1.0'
 
 task showVersion {
