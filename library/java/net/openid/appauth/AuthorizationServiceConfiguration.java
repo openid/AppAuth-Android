@@ -84,6 +84,19 @@ public class AuthorizationServiceConfiguration {
      */
     @Nullable
     public final AuthorizationServiceDiscovery discoveryDoc;
+    
+    /**
+     * Creates a service configuration for a basic OAuth2 provider.
+     * @param authorizationEndpoint The <a href="https://tools.ietf.org/html/rfc6749#section-3.1">
+     *     authorization endpoint</a> URI for the service.
+     * @param tokenEndpoint The <a href="https://tools.ietf.org/html/rfc6749#section-3.2">token
+     *     endpoint</a> URI for the service.
+     */
+    public AuthorizationServiceConfiguration(
+            @NonNull Uri authorizationEndpoint,
+            @NonNull Uri tokenEndpoint) {
+        this(authorizationEndpoint, tokenEndpoint, null);
+    }
 
     /**
      * Creates a service configuration for a basic OAuth2 provider.
@@ -91,6 +104,8 @@ public class AuthorizationServiceConfiguration {
      *     authorization endpoint</a> URI for the service.
      * @param tokenEndpoint The <a href="https://tools.ietf.org/html/rfc6749#section-3.2">token
      *     endpoint</a> URI for the service.
+     * @param registrationEndpoint The <a href="https://tools.ietf.org/html/rfc7591#section-3">client
+     *     registration endpoint</a> URI for the service.
      */
     public AuthorizationServiceConfiguration(
             @NonNull Uri authorizationEndpoint,
