@@ -39,15 +39,16 @@ import java.util.concurrent.TimeUnit;
  * A response to a token request.
  *
  * @see TokenRequest
- * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.4">"The OAuth 2.0
- * Authorization Framework" (RFC 6749), Section 4.1.4</a>
+ * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.4
+ * <https://tools.ietf.org/html/rfc6749#section-4.1.4>"
  */
 public class TokenResponse {
 
     /**
      * Indicates that a provided access token is a bearer token.
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-7.1">""The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 7.1</a>
+     *
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 7.1
+     * <https://tools.ietf.org/html/rfc6749#section-7.1>"
      */
     public static final String TOKEN_TYPE_BEARER = "bearer";
 
@@ -97,18 +98,20 @@ public class TokenResponse {
     /**
      * The type of the token returned. Typically this is {@link #TOKEN_TYPE_BEARER}, or some
      * other token type that the client has negotiated with the authorization service.
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.4">"The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 4.1.4</a>
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-5.1">"The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 5.1</a>
+     *
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.4
+     * <https://tools.ietf.org/html/rfc6749#section-4.1.4>"
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 5.1
+     * <https://tools.ietf.org/html/rfc6749#section-5.1>"
      */
     @Nullable
     public final String tokenType;
 
     /**
      * The access token, if provided.
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-5.1">"The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 5.1</a>
+     *
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 5.1
+     * <https://tools.ietf.org/html/rfc6749#section-5.1>"
      */
     @Nullable
     public final String accessToken;
@@ -124,16 +127,18 @@ public class TokenResponse {
 
     /**
      * The ID token describing the authenticated user, if provided.
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#IDToken">"OpenID
-     * Connect Core 1.0", Section 2</a>
+     *
+     * @see "OpenID Connect Core 1.0, Section 2
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.2>"
      */
     @Nullable
     public final String idToken;
 
     /**
      * The refresh token, if provided.
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-5.1">"The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 5.1</a>
+     *
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 5.1
+     * <https://tools.ietf.org/html/rfc6749#section-5.1>"
      */
     @Nullable
     public final String refreshToken;
@@ -141,8 +146,9 @@ public class TokenResponse {
     /**
      * The scope of the access token. If the scope is identical to that originally
      * requested, then this value is optional.
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-5.1">"The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 5.1</a>
+     *
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 5.1
+     * <https://tools.ietf.org/html/rfc6749#section-5.1>"
      */
     @Nullable
     public final String scope;
@@ -191,6 +197,7 @@ public class TokenResponse {
 
         /**
          * Extracts token response fields from a JSON string.
+         *
          * @throws JSONException if the JSON is malformed or has incorrect value types for fields.
          */
         @NonNull
@@ -201,6 +208,7 @@ public class TokenResponse {
 
         /**
          * Extracts token response fields from a JSON object.
+         *
          * @throws JSONException if the JSON is malformed or has incorrect value types for fields.
          */
         @NonNull
@@ -314,9 +322,8 @@ public class TokenResponse {
          * Specifies the encoded scope string, which is a space-delimited set of
          * case-sensitive scope identifiers. Replaces any previously specified scope.
          *
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3"> "The OAuth 2.0
-         * Authorization
-         * Framework" (RFC 6749), Section 3.3</a>
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.3
+         * <https://tools.ietf.org/html/rfc6749#section-3.3>"
          */
         @NonNull
         public Builder setScope(@Nullable String scope) {
@@ -333,13 +340,13 @@ public class TokenResponse {
          * scopes. Individual scope strings cannot be null or empty.
          *
          * <p>Scopes specified here are used to obtain a "down-scoped" access token, where the
-         * set of scopes specified <em>must</em> be a subset of those already granted in
+         * set of scopes specified _must_ be a subset of those already granted in
          * previous requests.
          *
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3"> "The OAuth 2.0
-         * Authorization Framework" (RFC 6749), Section 3.3</a>
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-6"> "The OAuth 2.0
-         * Authorization Framework" (RFC 6749), Section 6</a>
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.3
+         * <https://tools.ietf.org/html/rfc6749#section-3.3>"
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 6
+         * <https://tools.ietf.org/html/rfc6749#section-6>"
          */
         @NonNull
         public Builder setScopes(String... scopes) {
@@ -355,14 +362,13 @@ public class TokenResponse {
          * scopes. Individual scope strings cannot be null or empty.
          *
          * <p>Scopes specified here are used to obtain a "down-scoped" access token, where the
-         * set of scopes specified <em>must</em> be a subset of those already granted in
+         * set of scopes specified _must_ be a subset of those already granted in
          * previous requests.
          *
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3"> "The OAuth 2.0
-         * Authorization
-         * Framework" (RFC 6749), Section 3.3</a>
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-6"> "The OAuth 2.0
-         * Authorization Framework" (RFC 6749), Section 6</a>
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.3
+         * <https://tools.ietf.org/html/rfc6749#section-3.3>"
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 6
+         * <https://tools.ietf.org/html/rfc6749#section-6>"
          */
         @NonNull
         public Builder setScopes(@Nullable Iterable<String> scopes) {
@@ -417,7 +423,7 @@ public class TokenResponse {
     /**
      * Derives the set of scopes from the consolidated, space-delimited scopes in the
      * {@link #scope} field. If no scopes were specified on this response, the method will
-     * return {@code null}.
+     * return `null`.
      */
     @Nullable
     public Set<String> getScopeSet() {

@@ -296,7 +296,7 @@ public class AuthState {
 
     /**
      * Determines whether the access token is considered to have expired. If no refresh token
-     * has been acquired, then this method will always return {@code false}. A token refresh
+     * has been acquired, then this method will always return `false`. A token refresh
      * can be forced, regardless of the validity of any currently acquired access token, by
      * calling {@link #setNeedsTokenRefresh(boolean) setNeedsTokenRefresh(true)}.
      */
@@ -330,7 +330,7 @@ public class AuthState {
 
     /**
     * Determines whether the client credentials is considered to have expired. If no client
-    * credentials have been acquired, then this method will always return {@code false}
+    * credentials have been acquired, then this method will always return `false`
     */
     public boolean hasClientSecretExpired() {
         return hasClientSecretExpired(SystemClock.INSTANCE);

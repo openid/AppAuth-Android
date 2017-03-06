@@ -26,3 +26,17 @@ android {
         exclude 'META-INF/NOTICE.txt'
     }
 }
+
+// produces just the classes JAR
+task jar(type: Copy, dependsOn:'bundleRelease') {
+    from("${project.buildDir}/intermediates/bundles/release/")
+    into("${project.buildDir}/libs/")
+    include('classes.jar')
+    rename('classes.jar', "appauth-${rootProject.versionName}.jar")
+}
+
+// produces a JAR containing sources
+task sourcesJar(type: Jar, dependsOn:'generateReleaseSources') {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}

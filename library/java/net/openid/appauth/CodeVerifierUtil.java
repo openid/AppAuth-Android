@@ -29,32 +29,29 @@ import java.util.regex.Pattern;
 /**
  * Generates code verifiers and challenges for PKCE exchange.
  *
- * @see <a href="https://tools.ietf.org/html/rfc7636">"Proof Key for Code Exchange by OAuth Public
- * Clients" (RFC 7636)</a>
+ * @see "Proof Key for Code Exchange by OAuth Public Clients (RFC 7636)
+ * <https://tools.ietf.org/html/rfc7636>"
  */
 public class CodeVerifierUtil {
 
     /**
      * The minimum permitted length for a code verifier.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7636#section-4.1">"Proof Key for Code Exchange
-     * by OAuth Public Clients" (RFC 7636), Section 4.1</a>
+     * @see "Proof Key for Code Exchange by OAuth Public Clients (RFC 7636), Section 4.1
+     * <https://tools.ietf.org/html/rfc7636#section-4.1>"
      */
     public static final int MIN_CODE_VERIFIER_LENGTH = 43;
 
     /**
      * The maximum permitted length for a code verifier.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7636#section-4.1">"Proof Key for Code Exchange
-     * by OAuth Public Clients" (RFC 7636), Section 4.1</a>
+     * @see "Proof Key for Code Exchange by OAuth Public Clients (RFC 7636), Section 4.1
+     * <https://tools.ietf.org/html/rfc7636#section-4.1>"
      */
     public static final int MAX_CODE_VERIFIER_LENGTH = 128;
 
     /**
      * The default entropy (in bytes) used for the code verifier.
-     *
-     * @see <a href="https://tools.ietf.org/html/rfc7636">"Proof Key for Code Exchange by OAuth
-     * Public Clients" (RFC 7636)</a>
      */
     public static final int DEFAULT_CODE_VERIFIER_ENTROPY = 64;
 
@@ -79,8 +76,8 @@ public class CodeVerifierUtil {
     /**
      * Regex for legal code verifier strings, as defined in the spec.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7636#section-4.1">"Proof Key for Code Exchange
-     * by OAuth Public Clients" (RFC 7636), Section 4.1</a>
+     * @see "Proof Key for Code Exchange by OAuth Public Clients (RFC 7636), Section 4.1
+     * <https://tools.ietf.org/html/rfc7636#section-4.1>"
      */
     private static final Pattern REGEX_CODE_VERIFIER =
             Pattern.compile("^[0-9a-zA-Z\\-\\.\\_\\~]{43,128}$");
@@ -91,9 +88,10 @@ public class CodeVerifierUtil {
     }
 
     /**
-     * Throws an IllegalArgumentException if the provided code verifier is invalid, as
-     * defined by the <a href="https://tools.ietf.org/html/rfc7636#section-4.1">PKCE specification
-     * (Section 4.1)</a>.
+     * Throws an IllegalArgumentException if the provided code verifier is invalid.
+     *
+     * @see "Proof Key for Code Exchange by OAuth Public Clients (RFC 7636), Section 4.1
+     * <https://tools.ietf.org/html/rfc7636#section-4.1>"
      */
     public static void checkCodeVerifier(String codeVerifier) {
         checkArgument(MIN_CODE_VERIFIER_LENGTH <= codeVerifier.length(),
@@ -108,9 +106,6 @@ public class CodeVerifierUtil {
      * Generates a random code verifier string using {@link SecureRandom} as the source of
      * entropy, with the default entropy quantity as defined by
      * {@link #DEFAULT_CODE_VERIFIER_ENTROPY}.
-     *
-     * @see <a href="https://tools.ietf.org/html/rfc7636">"Proof Key for Code Exchange by OAuth
-     * Public Clients" (RFC 7636)</a>
      */
     public static String generateRandomCodeVerifier() {
         return generateRandomCodeVerifier(new SecureRandom(), DEFAULT_CODE_VERIFIER_ENTROPY);
@@ -119,9 +114,6 @@ public class CodeVerifierUtil {
     /**
      * Generates a random code verifier string using the provided entropy source and the specified
      * number of bytes of entropy.
-     *
-     * @see <a href="https://tools.ietf.org/html/rfc7636">"Proof Key for Code Exchange by OAuth
-     * Public Clients" (RFC 7636)</a>
      */
     public static String generateRandomCodeVerifier(SecureRandom entropySource, int entropyBytes) {
         checkNotNull(entropySource, "entropySource cannot be null");
@@ -136,7 +128,7 @@ public class CodeVerifierUtil {
 
     /**
      * Produces a challenge from a code verifier, using SHA-256 as the challenge method if the
-     * system supports it (all Android devices <em>should</em> support SHA-256), and falls back
+     * system supports it (all Android devices _should_ support SHA-256), and falls back
      * to the {@link AuthorizationRequest#CODE_CHALLENGE_METHOD_PLAIN "plain" challenge type} if
      * unavailable.
      */

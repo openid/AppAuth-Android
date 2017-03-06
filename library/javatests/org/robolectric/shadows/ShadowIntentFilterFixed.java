@@ -37,7 +37,7 @@ public class ShadowIntentFilterFixed extends ShadowIntentFilter {
     }
 
     /**
-     * Provides an iterator over all defined schemes. Returns {@code null} if none were
+     * Provides an iterator over all defined schemes. Returns `null` if none were
      * specified.
      */
     @Implementation
@@ -46,7 +46,7 @@ public class ShadowIntentFilterFixed extends ShadowIntentFilter {
     }
 
     /**
-     * Provides an iterator over all defined authorities. Returns {@code null} if none were
+     * Provides an iterator over all defined authorities. Returns `null` if none were
      * specified.
      */
     @Implementation

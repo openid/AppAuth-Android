@@ -112,8 +112,8 @@ public final class Browsers {
 
     /**
      * Constants related to
-     * <a href="https://play.google.com/store/apps/details?id=com.sec.android.app.sbrowser">
-     * SBrowser</a>, the default browser on Samsung devices.
+     * [SBrowser](https://play.google.com/store/apps/details?id=com.sec.android.app.sbrowser),
+     * the default browser on Samsung devices.
      */
     public static final class SBrowser {
 

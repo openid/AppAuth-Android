@@ -1,8 +1,18 @@
-task androidJavadocs(type: Javadoc) {
+configurations {
+    mdDoclet
+}
+
+dependencies {
+    mdDoclet 'com.github.mnlipp.jdrupes-mdoclet:doclet:1.0.3'
+}
+
+task androidJavadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
-    title = "AppAuth Android"
-    classpath = files(project.android.getBootClasspath())
+    title = "AppAuth for Android"
+    classpath += files(project.android.getBootClasspath())
     options {
+        doclet "org.jdrupes.mdoclet.MDoclet"
+        docletpath(*configurations.mdDoclet.files.asType(List))
         links "http://docs.oracle.com/javase/7/docs/api/"
         linksOffline "http://d.android.com/reference","${android.sdkDirectory}/docs/reference"
     }
@@ -10,9 +20,14 @@ task androidJavadocs(type: Javadoc) {
     exclude '**/R.java'
 }
 
+task javadocJar(type: Jar, dependsOn:androidJavadoc) {
+    classifier = 'javadoc'
+    from androidJavadoc.destinationDir
+}
+
 afterEvaluate {
     // fixes issue where javadoc can't find android symbols ref: http://stackoverflow.com/a/34572606
-    androidJavadocs.classpath += files(android.libraryVariants.collect { variant ->
+    androidJavadoc.classpath += files(android.libraryVariants.collect { variant ->
         variant.javaCompile.classpath.files
     })
 }

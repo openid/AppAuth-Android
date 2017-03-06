@@ -15,7 +15,7 @@
 package net.openid.appauth;
 
 /**
- * Default implementation of clock which wraps {@code System.currentTimeMillis}.
+ * Default implementation of clock which wraps `System.currentTimeMillis()`.
  */
 class SystemClock implements Clock {
     public static final SystemClock INSTANCE = new SystemClock();
