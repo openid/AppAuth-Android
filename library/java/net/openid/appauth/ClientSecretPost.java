@@ -25,15 +25,15 @@ import java.util.Map;
 /**
  * Implementation of the client authentication method 'client_secret_post'.
  *
- * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">
- * "OpenID Connect Core 1.0", Section 9</a>
+ * @see "OpenID Connect Core 1.0, Section 9
+ * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.9>"
  */
 public class ClientSecretPost implements ClientAuthentication {
     /**
      * Name of this authentication method.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">
-     * "OpenID Connect Core 1.0", Section 9</a>
+     * @see "OpenID Connect Core 1.0, Section 9
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.9>"
      */
     public static final String NAME = "client_secret_post";
     static final String PARAM_CLIENT_ID = "client_id";
@@ -44,7 +44,7 @@ public class ClientSecretPost implements ClientAuthentication {
 
     /**
      * Creates a {@link ClientAuthentication} which will use the client authentication method
-     * 'client_secret_post'.
+     * `client_secret_post`.
      */
     public ClientSecretPost(@NonNull String clientSecret) {
         mClientSecret = checkNotNull(clientSecret, "clientSecret cannot be null");

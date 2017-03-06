@@ -21,11 +21,9 @@ import java.util.List;
 
 /**
  * A blacklist of browsers. This will reject a match for any browser on the list, and permit
- * all others.
+ * all others. Examples:
  *
- * <p>Examples:
- *
- * <pre>{@code
+ * ```java
  * // blacklist Chrome, whether using a custom tab or not
  * new BrowserBlacklist(
  *     VersionedBrowserMatcher.CHROME_BROWSER,
@@ -42,7 +40,8 @@ import java.util.List;
  *         "<DOLPHIN_SIGNATURE>",
  *         false,
  *         VersionRange.ANY_VERSION));
- * }</pre>
+ * }
+ * ```
  */
 public class BrowserBlacklist implements BrowserMatcher {
 

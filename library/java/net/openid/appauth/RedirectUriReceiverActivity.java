@@ -24,25 +24,23 @@ import android.os.Bundle;
  * {@link android.app.PendingIntent}
  * provided to {@link AuthorizationService#performAuthorizationRequest}.
  *
- * <p>App developers using this library must override the {@code appAuthRedirectScheme}
- * property in their {@code build.gradle} to specify the custom scheme that will be used for
+ * App developers using this library must override the `appAuthRedirectScheme`
+ * property in their `build.gradle` to specify the custom scheme that will be used for
  * the OAuth2 redirect. If custom scheme redirect cannot be used with the identity provider
  * you are integrating with, then a custom intent filter should be defined in your
  * application manifest instead. For example, to handle
- * {@code https://www.example.com/oauth2redirect}:
+ * `https://www.example.com/oauth2redirect`:
  *
- * <pre>
- * {@code
- * < intent-filter>
- *   < action android:name="android.intent.action.VIEW"/>
- *   < category android:name="android.intent.category.DEFAULT"/>
- *   < category android:name="android.intent.category.BROWSABLE"/>
- *   < data android:scheme="https"
+ * ```xml
+ * <intent-filter>
+ *   <action android:name="android.intent.action.VIEW"/>
+ *   <category android:name="android.intent.category.DEFAULT"/>
+ *   <category android:name="android.intent.category.BROWSABLE"/>
+ *   <data android:scheme="https"
  *          android:host="www.example.com"
  *          android:path="/oauth2redirect" />
- * < /intent-filter>
- * }
- * </pre>
+ * </intent-filter>
+ * ```
  */
 public class RedirectUriReceiverActivity extends Activity {
 

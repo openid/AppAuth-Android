@@ -45,7 +45,7 @@ import java.util.Map;
 
 /**
  * Dispatches requests to an OAuth2 authorization service. Note that instances of this class
- * <em>must be manually disposed</em> when no longer required, to avoid leaks
+ * _must be manually disposed_ when no longer required, to avoid leaks
  * (see {@link #dispose()}.
  */
 public class AuthorizationService {
@@ -119,7 +119,7 @@ public class AuthorizationService {
 
     /**
      * Sends an authorization request to the authorization service, using a
-     * <a href="https://developer.chrome.com/multidevice/android/customtabs">custom tab</a>
+     * [custom tab](https://developer.chrome.com/multidevice/android/customtabs)
      * if available, or a browser instance.
      * The parameters of this request are determined by both the authorization service
      * configuration and the provided {@link AuthorizationRequest request object}. Upon completion
@@ -138,7 +138,7 @@ public class AuthorizationService {
 
     /**
      * Sends an authorization request to the authorization service, using a
-     * <a href="https://developer.chrome.com/multidevice/android/customtabs">custom tab</a>
+     * [custom tab](https://developer.chrome.com/multidevice/android/customtabs)
      * if available, or a browser instance.
      * The parameters of this request are determined by both the authorization service
      * configuration and the provided {@link AuthorizationRequest request object}. Upon completion
@@ -159,7 +159,7 @@ public class AuthorizationService {
 
     /**
      * Sends an authorization request to the authorization service, using a
-     * <a href="https://developer.chrome.com/multidevice/android/customtabs">custom tab</a>.
+     * [custom tab](https://developer.chrome.com/multidevice/android/customtabs).
      * The parameters of this request are determined by both the authorization service
      * configuration and the provided {@link AuthorizationRequest request object}. Upon completion
      * of this request, the provided {@link PendingIntent completion PendingIntent} will be invoked.
@@ -183,7 +183,7 @@ public class AuthorizationService {
 
     /**
      * Sends an authorization request to the authorization service, using a
-     * <a href="https://developer.chrome.com/multidevice/android/customtabs">custom tab</a>.
+     * [custom tab](https://developer.chrome.com/multidevice/android/customtabs).
      * The parameters of this request are determined by both the authorization service
      * configuration and the provided {@link AuthorizationRequest request object}. Upon completion
      * of this request, the provided {@link PendingIntent completion PendingIntent} will be invoked.
@@ -417,13 +417,13 @@ public class AuthorizationService {
         /**
          * Invoked when the request completes successfully or fails.
          *
-         * <p>Exactly one of {@code response} or {@code ex} will be non-null. If
-         * {@code response} is {@code null}, a failure occurred during the request. This can
-         * happen if a bad URI was provided, no connection to the server could be established, or
-         * the response JSON was incomplete or badly formatted.
+         * Exactly one of `response` or `ex` will be non-null. If `response` is `null`, a failure
+         * occurred during the request. This can happen if a bad URI was provided, no connection
+         * to the server could be established, or the response JSON was incomplete or incorrectly
+         * formatted.
          *
-         * @param response the retrieved token response, if successful; {@code null} otherwise.
-         * @param ex a description of the failure, if one occurred: {@code null} otherwise.
+         * @param response the retrieved token response, if successful; `null` otherwise.
+         * @param ex a description of the failure, if one occurred: `null` otherwise.
          *
          * @see AuthorizationException.TokenRequestErrors
          */
@@ -535,14 +535,13 @@ public class AuthorizationService {
         /**
          * Invoked when the request completes successfully or fails.
          *
-         * <p>Exactly one of {@code response} or {@code ex} will be non-null. If
-         * {@code response} is {@code null}, a failure occurred during the request. This can
-         * happen if a bad URI was provided, no connection to the server could be established, or
-         * the response JSON was incomplete or badly formatted.</p>
+         * Exactly one of `response` or `ex` will be non-null. If `response` is `null`, a failure
+         * occurred during the request. This can happen if an invalid URI was provided, no
+         * connection to the server could be established, or the response JSON was incomplete or
+         * incorrectly formatted.
          *
-         * @param response the retrieved registration response, if successful; {@code null}
-         *                 otherwise.
-         * @param ex       a description of the failure, if one occurred: {@code null} otherwise.
+         * @param response the retrieved registration response, if successful; `null` otherwise.
+         * @param ex a description of the failure, if one occurred: `null` otherwise.
          * @see AuthorizationException.RegistrationRequestErrors
          */
         void onRegistrationRequestCompleted(@Nullable RegistrationResponse response,

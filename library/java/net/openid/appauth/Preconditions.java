@@ -32,7 +32,7 @@ public final class Preconditions {
      *
      * @param reference an object reference
      * @return the non-null reference that was validated
-     * @throws NullPointerException if {@code reference} is null
+     * @throws NullPointerException if `reference` is `null`
      */
     public static <T> T checkNotNull(T reference) {
         if (reference == null) {
@@ -48,7 +48,7 @@ public final class Preconditions {
      * @param errorMessage the exception message to use if the check fails; will be converted to a
      *     string using {@link String#valueOf(Object)}
      * @return the non-null reference that was validated
-     * @throws NullPointerException if {@code reference} is null
+     * @throws NullPointerException if `reference` is `null`
      */
     public static <T> T checkNotNull(T reference, @Nullable Object errorMessage) {
         if (reference == null) {
@@ -95,7 +95,7 @@ public final class Preconditions {
      * Ensures the truth of an expression involving one or more parameters to the calling method.
      *
      * @param expression a boolean expression
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if `expression` is `false`
      */
     public static void checkArgument(boolean expression) {
         if (!expression) {
@@ -109,7 +109,7 @@ public final class Preconditions {
      * @param expression a boolean expression
      * @param errorMessage the exception message to use if the check fails; will be converted to a
      *     string using {@link String#valueOf(Object)}
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if `expression` is `false`
      */
     public static void checkArgument(boolean expression, @Nullable Object errorMessage) {
         if (!expression) {

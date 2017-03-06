@@ -36,8 +36,8 @@ final class AsciiStringListUtil {
 
     /**
      * Converts an iterable collection of strings into a consolidated, space-delimited
-     * format. If the provided iterable is {@code null}, or contains no elements, then
-     * {@code null} will be returned. If any individual scope element is null or empty, an
+     * format. If the provided iterable is `null`, or contains no elements, then
+     * `null` will be returned. If any individual scope element is `null` or empty, an
      * exception will be thrown.
      */
     @Nullable
@@ -62,7 +62,7 @@ final class AsciiStringListUtil {
 
     /**
      * Converts the consolidated, space-delimited scope string to a set. If the supplied scope
-     * string is {@code null}, then {@code null} will be returned.
+     * string is `null`, then `null` will be returned.
      */
     @Nullable
     public static Set<String> stringToSet(@Nullable String spaceDelimitedStr) {

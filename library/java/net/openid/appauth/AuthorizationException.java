@@ -33,16 +33,15 @@ import java.util.Map;
 /**
  * Returned as a response to OAuth2 requests if they fail. Specifically:
  *
- * <ul>
- * <li>The {@link net.openid.appauth.AuthorizationService.TokenResponseCallback response} to
+ * - The {@link net.openid.appauth.AuthorizationService.TokenResponseCallback response} to
  * {@link AuthorizationService#performTokenRequest(net.openid.appauth.TokenRequest,
  * AuthorizationService.TokenResponseCallback) token requests},
- * <li>The {@link net.openid.appauth.AuthorizationServiceConfiguration.RetrieveConfigurationCallback
+ *
+ * - The {@link net.openid.appauth.AuthorizationServiceConfiguration.RetrieveConfigurationCallback
  * response}
  * to
  * {@link AuthorizationServiceConfiguration#fetchFromUrl(android.net.Uri,
  * AuthorizationServiceConfiguration.RetrieveConfigurationCallback) configuration retrieval}.
- * </ul>
  */
 @SuppressWarnings({"ThrowableInstanceNeverThrown", "ThrowableResultOfMethodCallIgnored"})
 public final class AuthorizationException extends Exception {
@@ -57,10 +56,10 @@ public final class AuthorizationException extends Exception {
      * The OAuth2 parameter used to indicate the type of error during an authorization or
      * token request.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.2.1"> "The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 4.1.2.1</a>
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-5.2"> "The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 5.2</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.2.1
+     * <https://tools.ietf.org/html/rfc6749#section-4.1.2.1>"
+     * @see "The OAuth 2.0 Authorization Framework" (RFC 6749), Section 5.2
+     * <https://tools.ietf.org/html/rfc6749#section-5.2>"
      */
     public static final String PARAM_ERROR = "error";
 
@@ -68,10 +67,10 @@ public final class AuthorizationException extends Exception {
      * The OAuth2 parameter used to provide a human readable description of the error which
      * occurred.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.2.1"> "The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 4.1.2.1</a>
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-5.2"> "The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 5.2</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.2.1
+     * <https://tools.ietf.org/html/rfc6749#section-4.1.2.1>"
+     * @see "The OAuth 2.0 Authorization Framework" (RFC 6749), Section 5.2
+     * <https://tools.ietf.org/html/rfc6749#section-5.2>"
      */
     public static final String PARAM_ERROR_DESCRIPTION = "error_description";
 
@@ -79,10 +78,10 @@ public final class AuthorizationException extends Exception {
      * The OAuth2 parameter used to provide a URI to a human-readable page which describes the
      * error.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.2.1"> "The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 4.1.2.1</a>
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-5.2"> "The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 5.2</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.2.1
+     * <https://tools.ietf.org/html/rfc6749#section-4.1.2.1>"
+     * @see "The OAuth 2.0 Authorization Framework" (RFC 6749), Section 5.2
+     * <https://tools.ietf.org/html/rfc6749#section-5.2>"
      */
     public static final String PARAM_ERROR_URI = "error_uri";
 
@@ -95,22 +94,24 @@ public final class AuthorizationException extends Exception {
     /**
      * The error type for OAuth specific errors on the authorization endpoint. This error type is
      * used when the server responds to an authorization request with an explicit OAuth error, as
-     * defined by
-     * <a href="https://tools.ietf.org/html/rfc6749#section-4.1.2.1">The OAuth2 specification</a>.
-     * If the authorization response is invalid and not explicitly an error response, another error
-     * type will be used.
+     * defined by [the OAuth2 specification, section 4.1.2.1](
+     * https://tools.ietf.org/html/rfc6749#section-4.1.2.1). If the authorization response is
+     * invalid and not explicitly an error response, another error type will be used.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.2.1"> "The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 4.1.2.1</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.2.1
+     * <https://tools.ietf.org/html/rfc6749#section-4.1.2.1>"
      */
     public static final int TYPE_OAUTH_AUTHORIZATION_ERROR = 1;
 
     /**
      * The error type for OAuth specific errors on the token endpoint. This error type is used when
      * the server responds with HTTP 400 and an OAuth error, as defined by
-     * <a href="https://tools.ietf.org/html/rfc6749#section-5.2">The OAuth2 specification</a>.
+     * [the OAuth2 specification, section 5.2](https://tools.ietf.org/html/rfc6749#section-5.2).
      * If an HTTP 400 response does not parse as an OAuth error (i.e. no 'error' field is present
      * or the JSON is invalid), another error domain will be used.
+     *
+     * @see "The OAuth 2.0 Authorization Framework" (RFC 6749), Section 5.2
+     * <https://tools.ietf.org/html/rfc6749#section-5.2>"
      */
     public static final int TYPE_OAUTH_TOKEN_ERROR = 2;
 
@@ -203,51 +204,52 @@ public final class AuthorizationException extends Exception {
 
     /**
      * Error codes related to failed authorization requests.
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.2.1"> "The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 4.1.2.1</a>
+     *
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.2.1
+     * <https://tools.ietf.org/html/rfc6749#section-4.1.2.1>"
      */
     public static final class AuthorizationRequestErrors {
         // codes in this group should be between 1000-1999
 
         /**
-         * An {@code invalid_request} OAuth2 error response.
+         * An `invalid_request` OAuth2 error response.
          */
         public static final AuthorizationException INVALID_REQUEST =
                 authEx(1000, "invalid_request");
 
         /**
-         * An {@code unauthorized_client} OAuth2 error response.
+         * An `unauthorized_client` OAuth2 error response.
          */
         public static final AuthorizationException UNAUTHORIZED_CLIENT =
                 authEx(1001, "unauthorized_client");
 
         /**
-         * An {@code access_denied} OAuth2 error response.
+         * An `access_denied` OAuth2 error response.
          */
         public static final AuthorizationException ACCESS_DENIED =
                 authEx(1002, "access_denied");
 
         /**
-         * An {@code unsupported_response_type} OAuth2 error response.
+         * An `unsupported_response_type` OAuth2 error response.
          */
         public static final AuthorizationException UNSUPPORTED_RESPONSE_TYPE =
                 authEx(1003, "unsupported_response_type");
 
         /**
-         * An {@code invalid_scope} OAuth2 error response.
+         * An `invalid_scope` OAuth2 error response.
          */
         public static final AuthorizationException INVALID_SCOPE =
                 authEx(1004, "invalid_scope");
 
         /**
-         * An {@code server_error} OAuth2 error response, equivalent to an HTTP 500 error code, but
+         * An `server_error` OAuth2 error response, equivalent to an HTTP 500 error code, but
          * sent via redirect.
          */
         public static final AuthorizationException SERVER_ERROR =
                 authEx(1005, "server_error");
 
         /**
-         * A {@code temporarily_unavailable} OAuth2 error response, equivalent to an HTTP 503 error
+         * A `temporarily_unavailable` OAuth2 error response, equivalent to an HTTP 503 error
          * code, but sent via redirect.
          */
         public static final AuthorizationException TEMPORARILY_UNAVAILABLE =
@@ -304,44 +306,45 @@ public final class AuthorizationException extends Exception {
 
     /**
      * Error codes related to failed token requests.
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-5.2"> "The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 5.2</a>
+     *
+     * @see "The OAuth 2.0 Authorization Framework" (RFC 6749), Section 5.2
+     * <https://tools.ietf.org/html/rfc6749#section-5.2>"
      */
     public static final class TokenRequestErrors {
         // codes in this group should be between 2000-2999
 
         /**
-         * An {@code invalid_request} OAuth2 error response.
+         * An `invalid_request` OAuth2 error response.
          */
         public static final AuthorizationException INVALID_REQUEST =
                 tokenEx(2000, "invalid_request");
 
         /**
-         * An {@code invalid_client} OAuth2 error response.
+         * An `invalid_client` OAuth2 error response.
          */
         public static final AuthorizationException INVALID_CLIENT =
                 tokenEx(2001, "invalid_client");
 
         /**
-         * An {@code invalid_grant} OAuth2 error response.
+         * An `invalid_grant` OAuth2 error response.
          */
         public static final AuthorizationException INVALID_GRANT =
                 tokenEx(2002, "invalid_grant");
 
         /**
-         * An {@code unauthorized_client} OAuth2 error response.
+         * An `unauthorized_client` OAuth2 error response.
          */
         public static final AuthorizationException UNAUTHORIZED_CLIENT =
                 tokenEx(2003, "unauthorized_client");
 
         /**
-         * An {@code unsupported_grant_type} OAuth2 error response.
+         * An `unsupported_grant_type` OAuth2 error response.
          */
         public static final AuthorizationException UNSUPPORTED_GRANT_TYPE =
                 tokenEx(2004, "unsupported_grant_type");
 
         /**
-         * An {@code invalid_scope} OAuth2 error response.
+         * An `invalid_scope` OAuth2 error response.
          */
         public static final AuthorizationException INVALID_SCOPE =
                 tokenEx(2005, "invalid_scope");
@@ -393,19 +396,19 @@ public final class AuthorizationException extends Exception {
         // codes in this group should be between 4000-4999
 
         /**
-         * An {@code invalid_request} OAuth2 error response.
+         * An `invalid_request` OAuth2 error response.
          */
         public static final AuthorizationException INVALID_REQUEST =
                 registrationEx(4000, "invalid_request");
 
         /**
-         * An {@code invalid_client} OAuth2 error response.
+         * An `invalid_client` OAuth2 error response.
          */
         public static final AuthorizationException INVALID_REDIRECT_URI =
                 registrationEx(4001, "invalid_redirect_uri");
 
         /**
-         * An {@code invalid_grant} OAuth2 error response.
+         * An `invalid_grant` OAuth2 error response.
          */
         public static final AuthorizationException INVALID_CLIENT_METADATA =
                 registrationEx(4002, "invalid_client_metadata");

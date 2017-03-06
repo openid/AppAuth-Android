@@ -41,8 +41,8 @@ import java.util.concurrent.TimeUnit;
  * A response to an authorization request.
  *
  * @see AuthorizationRequest
- * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.2">
- * "The OAuth 2.0 Authorization Framework"</a>
+ * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.2
+ * <https://tools.ietf.org/html/rfc6749#section-4.1.2>"
  */
 public class AuthorizationResponse {
 
@@ -54,8 +54,7 @@ public class AuthorizationResponse {
 
     /**
      * Indicates that a provided access token is a bearer token.
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-7.1">""The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 7.1</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 7.1 <https://tools.ietf.org/html/rfc6749#section-7.1>"
      */
     public static final String TOKEN_TYPE_BEARER = "bearer";
 
@@ -111,9 +110,8 @@ public class AuthorizationResponse {
      * The type of the retrieved token. Typically this is "Bearer" when present. Otherwise,
      * another token_type value that the Client has negotiated with the Authorization Server.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ImplicitAuthResponse">
-     *     OpenID Connect Core 1.0 Specification, Section 3.2.2.5,
-     *     "Successful Authentication Response"</a>
+     * @see "OpenID Connect Core 1.0, Section 3.2.2.5
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.2.2.5>"
      */
     @Nullable
     public final String tokenType;
@@ -130,9 +128,8 @@ public class AuthorizationResponse {
      * This is available when the {@link AuthorizationRequest#responseType response_type}
      * of the request included 'token'.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ImplicitAuthResponse">
-     *     OpenID Connect Core 1.0 Specification, Section 3.2.2.5,
-     *     "Successful Authentication Response"</a>
+     * @see "OpenID Connect Core 1.0, Section 3.2.2.5
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.2.2.5>"
      */
     @Nullable
     public final String accessToken;
@@ -142,9 +139,8 @@ public class AuthorizationResponse {
      * Set when the requested {@link AuthorizationRequest#responseType response_type}
      * included 'token'.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ImplicitAuthResponse">
-     *     OpenID Connect Core 1.0 Specification, Section 3.2.2.5,
-     *     "Successful Authentication Response"</a>
+     * @see "OpenID Connect Core 1.0, Section 3.2.2.5
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.2.2.5>"
      */
     @Nullable
     public final Long accessTokenExpirationTime;
@@ -154,12 +150,10 @@ public class AuthorizationResponse {
      * This is available when the {@link  AuthorizationRequest#responseType response_type}
      * of the request included 'id_token'.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#IDToken">
-     *     OpenID Connect Core 1.0 Specification, Section 2,
-     *     "ID Token"</a>
-     *  @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ImplicitAuthResponse">
-     *     OpenID Connect Core 1.0 Specification, Section 3.2.2.5,
-     *     "Successful Authentication Response"</a>
+     * @see "OpenID Connect Core 1.0, Section 2
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.2>"
+     * @see "OpenID Connect Core 1.0, Section 3.2.2.5
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.2.2.5>"
      */
     @Nullable
     public final String idToken;
@@ -326,9 +320,8 @@ public class AuthorizationResponse {
          * Specifies the encoded scope string, which is a space-delimited set of
          * case-sensitive scope identifiers. Replaces any previously specified scope.
          *
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3"> "The OAuth 2.0
-         * Authorization
-         * Framework" (RFC 6749), Section 3.3</a>
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.3
+         * <https://tools.ietf.org/html/rfc6749#section-3.3>"
          */
         @NonNull
         public Builder setScope(@Nullable String scope) {
@@ -344,8 +337,8 @@ public class AuthorizationResponse {
          * Specifies the set of case-sensitive scopes. Replaces any previously specified set of
          * scopes. Individual scope strings cannot be null or empty.
          *
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3"> "The OAuth 2.0
-         * Authorization Framework" (RFC 6749), Section 3.3</a>
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.3
+         * <https://tools.ietf.org/html/rfc6749#section-3.3>"
          */
         @NonNull
         public Builder setScopes(String... scopes) {
@@ -361,9 +354,8 @@ public class AuthorizationResponse {
          * Specifies the set of case-sensitive scopes. Replaces any previously specified set of
          * scopes. Individual scope strings cannot be null or empty.
          *
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3"> "The OAuth 2.0
-         * Authorization
-         * Framework" (RFC 6749), Section 3.3</a>
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.3
+         * <https://tools.ietf.org/html/rfc6749#section-3.3>"
          */
         @NonNull
         public Builder setScopes(@Nullable Iterable<String> scopes) {
@@ -435,7 +427,7 @@ public class AuthorizationResponse {
     /**
      * Derives the set of scopes from the consolidated, space-delimited scopes in the
      * {@link #scope} field. If no scopes were specified on this response, the method will
-     * return {@code null}.
+     * return `null`.
      */
     @Nullable
     public Set<String> getScopeSet() {
@@ -509,6 +501,7 @@ public class AuthorizationResponse {
     /**
      * Reads an authorization response from a JSON string representation produced by
      * {@link #jsonSerialize()}.
+     *
      * @throws JSONException if the provided JSON does not match the expected structure.
      */
     @NonNull
@@ -539,6 +532,7 @@ public class AuthorizationResponse {
      * Reads an authorization request from a JSON string representation produced by
      * {@link #jsonSerializeString()}. This method is just a convenience wrapper for
      * {@link #jsonDeserialize(JSONObject)}, converting the JSON string to its JSON object form.
+     *
      * @throws JSONException if the provided JSON does not match the expected structure.
      */
     @NonNull

@@ -54,8 +54,8 @@ import java.util.List;
  * Demonstrates the usage of the AppAuth library to connect to a set of pre-configured
  * OAuth2 providers.
  *
- * <p><em>NOTE</em>: From a clean checkout of this project, no IDPs are automatically configured.
- * Edit {@code res/values/idp_configs.xml} to specify the required configuration properties to
+ * _NOTE_: From a clean checkout of this project, no IDPs are automatically configured.
+ * Edit `res/values/idp_configs.xml` to specify the required configuration properties to
  * enable the IDPs you wish to test. If you wish to add additional IDPs for testing, please see
  * {@link IdentityProvider}.
  */

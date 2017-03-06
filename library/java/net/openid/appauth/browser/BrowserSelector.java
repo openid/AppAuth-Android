@@ -37,10 +37,10 @@ import java.util.List;
  * {@link net.openid.appauth.AuthorizationService#performAuthorizationRequest(
  * net.openid.appauth.AuthorizationRequest,
  * android.app.PendingIntent)} calls. It prioritizes browsers which support
- * <a href="https://developer.chrome.com/multidevice/android/customtabs">custom tabs</a>. To
- * mitigate man-in-the-middle attacks by malicious apps pretending to be browsers for the
- * specific URI we query, only those which are registered as a handler for <em>all</em> HTTP and
- * HTTPS URIs will be used.
+ * [custom tabs](https://developer.chrome.com/multidevice/android/customtabs). To mitigate
+ * man-in-the-middle attacks by malicious apps pretending to be browsers for the specific URI we
+ * query, only those which are registered as a handler for _all_ HTTP and HTTPS URIs will be
+ * used.
  */
 public final class BrowserSelector {
 
@@ -67,7 +67,7 @@ public final class BrowserSelector {
     /**
      * Retrieves the full list of browsers installed on the device. Two entries will exist
      * for each browser that supports custom tabs, with the {@link BrowserDescriptor#useCustomTab}
-     * flag set to {@code true} in one and {@code false} in the other. The list is in the
+     * flag set to `true` in one and `false` in the other. The list is in the
      * order returned by the package manager, so indirectly reflects the user's preferences
      * (i.e. their default browser, if set, should be the first entry in the list).
      */

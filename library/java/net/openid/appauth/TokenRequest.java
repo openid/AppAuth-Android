@@ -41,9 +41,8 @@ import java.util.Set;
  * An OAuth2 token request. These are used to exchange codes for tokens, or exchange a refresh
  * token for updated tokens.
  *
- * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.3"> "The OAuth 2.0
- * Authorization
- * Framework" (RFC 6749), Section 4.1.3</a>
+ * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.3
+ * <https://tools.ietf.org/html/rfc6749#section-4.1.3>"
  */
 public class TokenRequest {
 
@@ -100,8 +99,8 @@ public class TokenRequest {
      * The grant type used when requesting an access token using a username and password.
      * This grant type is not directly supported by this library.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.3.2"> "The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 4.3.2</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.3.2
+     * <https://tools.ietf.org/html/rfc6749#section-4.3.2>"
      */
     public static final String GRANT_TYPE_PASSWORD = "password";
 
@@ -109,8 +108,8 @@ public class TokenRequest {
      * The grant type used when requesting an access token using client credentials, typically
      * TLS client certificates. This grant type is not directly supported by this library.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.4.2"> "The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 4.4.2</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.4.2
+     * <https://tools.ietf.org/html/rfc6749#section-4.4.2>"
      */
     public static final String GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials";
 
@@ -130,11 +129,10 @@ public class TokenRequest {
     /**
      * The client identifier.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4"> "The OAuth 2.0 Authorization
-     * Framework" (RFC 6749), Section 4</a>
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.1"> "The OAuth 2.0
-     * Authorization
-     * Framework" (RFC 6749), Section 4.1.1</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4
+     * <https://tools.ietf.org/html/rfc6749#section-4>"
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.1
+     * <https://tools.ietf.org/html/rfc6749#section-4.1.1>"
      */
     @NonNull
     public final String clientId;
@@ -142,8 +140,8 @@ public class TokenRequest {
     /**
      * The type of token being sent to the token endpoint.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.3">"The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 4.1.3</a>.
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.3
+     * <https://tools.ietf.org/html/rfc6749#section-4.1.3>"
      */
     @NonNull
     public final String grantType;
@@ -153,12 +151,10 @@ public class TokenRequest {
      * code for one or more tokens, and must be identical to the value specified in the original
      * authorization request.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.1.2"> "The OAuth 2.0
-     * Authorization
-     * Framework" (RFC 6749), Section 3.1.2</a>
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.3"> "The OAuth 2.0
-     * Authorization
-     * Framework" (RFC 6749), Section 4.1.3</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.1.2
+     * <https://tools.ietf.org/html/rfc6749#section-3.1.2>"
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.3
+     * <https://tools.ietf.org/html/rfc6749#section-4.1.3>"
      */
     @Nullable
     public final Uri redirectUri;
@@ -166,9 +162,8 @@ public class TokenRequest {
     /**
      * An authorization code to be exchanged for one or more tokens.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.3"> "The OAuth 2.0
-     * Authorization
-     * Framework" (RFC 6749), Section 4.1.3</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.3
+     * <https://tools.ietf.org/html/rfc6749#section-4.1.3>"
      */
     @Nullable
     public final String authorizationCode;
@@ -176,10 +171,10 @@ public class TokenRequest {
     /**
      * A space-delimited set of scopes used to determine the scope of any returned tokens.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3"> "The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 3.3</a>
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-6"> "The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 6</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.3
+     * <https://tools.ietf.org/html/rfc6749#section-3.3>"
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 6
+     * <https://tools.ietf.org/html/rfc6749#section-6>"
      */
     @Nullable
     public final String scope;
@@ -187,9 +182,8 @@ public class TokenRequest {
     /**
      * A refresh token to be exchanged for a new token.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-6"> "The OAuth 2.0
-     * Authorization
-     * Framework" (RFC 6749), Section 6</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 6
+     * <https://tools.ietf.org/html/rfc6749#section-6>"
      */
     @Nullable
     public final String refreshToken;
@@ -198,8 +192,8 @@ public class TokenRequest {
      * The code verifier that was used to generate the challenge in the original authorization
      * request, if one was used.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7636#section-4.5">"Proof Key for Code Exchange
-     * by OAuth Public Clients" (RFC 7636), Section 4.5</a>
+     * @see "Proof Key for Code Exchange by OAuth Public Clients (RFC 7636), Section 4
+     * <https://tools.ietf.org/html/rfc7636#section-4>"
      */
     @Nullable
     public final String codeVerifier;
@@ -298,9 +292,8 @@ public class TokenRequest {
          * Specifies the encoded scope string, which is a space-delimited set of
          * case-sensitive scope identifiers. Replaces any previously specified scope.
          *
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3"> "The OAuth 2.0
-         * Authorization
-         * Framework" (RFC 6749), Section 3.3</a>
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.3
+         * <https://tools.ietf.org/html/rfc6749#section-3.3>"
          */
         @NonNull
         public Builder setScope(@Nullable String scope) {
@@ -316,14 +309,14 @@ public class TokenRequest {
          * Specifies the set of case-sensitive scopes. Replaces any previously specified set of
          * scopes. Individual scope strings cannot be null or empty.
          *
-         * <p>Scopes specified here are used to obtain a "down-scoped" access token, where the
-         * set of scopes specified <em>must</em> be a subset of those already granted in
-         * previous requests.</p>
+         * Scopes specified here are used to obtain a "down-scoped" access token, where the
+         * set of scopes specified _must_ be a subset of those already granted in
+         * previous requests.
          *
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3"> "The OAuth 2.0
-         * Authorization Framework" (RFC 6749), Section 3.3</a>
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-6"> "The OAuth 2.0
-         * Authorization Framework" (RFC 6749), Section 6</a>
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.3
+         * <https://tools.ietf.org/html/rfc6749#section-3.3>"
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 6
+         * <https://tools.ietf.org/html/rfc6749#section-6>"
          */
         @NonNull
         public Builder setScopes(String... scopes) {
@@ -338,15 +331,14 @@ public class TokenRequest {
          * Specifies the set of case-sensitive scopes. Replaces any previously specified set of
          * scopes. Individual scope strings cannot be null or empty.
          *
-         * <p>Scopes specified here are used to obtain a "down-scoped" access token, where the
-         * set of scopes specified <em>must</em> be a subset of those already granted in
-         * previous requests.</p>
+         * Scopes specified here are used to obtain a "down-scoped" access token, where the
+         * set of scopes specified _must_ be a subset of those already granted in
+         * previous requests.
          *
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3"> "The OAuth 2.0
-         * Authorization
-         * Framework" (RFC 6749), Section 3.3</a>
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-6"> "The OAuth 2.0
-         * Authorization Framework" (RFC 6749), Section 6</a>
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.3
+         * <https://tools.ietf.org/html/rfc6749#section-3.3>"
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 6
+         * <https://tools.ietf.org/html/rfc6749#section-6>"
          */
         @NonNull
         public Builder setScopes(@Nullable Iterable<String> scopes) {
@@ -358,9 +350,9 @@ public class TokenRequest {
          * Specifies the authorization code for the request. If provided, the authorization code
          * must not be empty.
          *
-         * <p>Specifying an authorization code normally implies that this is a request to exchange
+         * Specifying an authorization code normally implies that this is a request to exchange
          * this authorization code for one or more tokens. If this is not intended, the grant type
-         * should be explicitly set.</p>
+         * should be explicitly set.
          */
         @NonNull
         public Builder setAuthorizationCode(@Nullable String authorizationCode) {
@@ -373,9 +365,9 @@ public class TokenRequest {
          * Specifies the refresh token for the request. If a non-null value is provided, it must
          * not be empty.
          *
-         * <p>Specifying a refresh token normally implies that this is a request to exchange the
+         * Specifying a refresh token normally implies that this is a request to exchange the
          * refresh token for a new token. If this is not intended, the grant type should be
-         * explicit set.</p>
+         * explicit set.
          */
         @NonNull
         public Builder setRefreshToken(@Nullable String refreshToken) {
@@ -483,7 +475,7 @@ public class TokenRequest {
     /**
      * Derives the set of scopes from the consolidated, space-delimited scopes in the
      * {@link #scope} field. If no scopes were specified for this request, the method will
-     * return {@code null}.
+     * return `null`.
      */
     @Nullable
     public Set<String> getScopeSet() {

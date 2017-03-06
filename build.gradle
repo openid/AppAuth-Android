@@ -16,10 +16,8 @@ buildscript {
 subprojects {
     repositories {
         jcenter()
-
-        maven {
-            url "${rootProject.androidSdkDir}/extras/android/m2repository"
-        }
+        maven { url "${rootProject.androidSdkDir}/extras/android/m2repository" }
+        maven { url 'https://jitpack.io' }
     }
 }
 

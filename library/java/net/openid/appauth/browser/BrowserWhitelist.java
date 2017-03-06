@@ -20,11 +20,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * A whitelist of browsers which can be used as part of an authorization flows.
+ * A whitelist of browsers which can be used as part of an authorization flows. Examples:
  *
- * <p>Examples:
- *
- * <pre>{@code
+ * ```java
  * // only allow Chrome, and only as a standalone browser
  * new BrowserWhitelist(VersionedBrowserMatcher.CHROME_BROWSER);
  *
@@ -40,7 +38,7 @@ import java.util.List;
  *         Browsers.Chrome.SIGNATURE_SET,
  *         true,
  *         VersionRange.atLeast("45.3"));
- * }</pre>
+ * ```
  */
 public class BrowserWhitelist implements BrowserMatcher {
 

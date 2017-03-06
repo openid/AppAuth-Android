@@ -24,6 +24,11 @@ apply from: '../config/style.gradle'
 apply from: '../config/coverage.gradle'
 apply from: '../config/javadoc.gradle'
 
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
 bintray {
     user = System.getenv("BINTRAY_USER")
     key = System.getenv("BINTRAY_KEY")
