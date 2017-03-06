@@ -6,7 +6,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.android.tools.build:gradle:2.3.0'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.1'
         classpath 'org.ajoberstar:gradle-git:1.5.1'
@@ -33,10 +33,10 @@ if (project.ext.versionName == null) {
     project.ext.versionNme = 'DEV'
 }
 
-project.ext.minSdkVersion = 15
+project.ext.minSdkVersion = 16
 project.ext.compileSdkVersion = 25
 project.ext.buildToolsVersion = '25.0.1'
-project.ext.supportLibVersion = '25.1.0'
+project.ext.supportLibVersion = '25.2.0'
 
 task showVersion {
     doLast {

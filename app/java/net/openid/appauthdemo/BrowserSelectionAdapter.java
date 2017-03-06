@@ -41,7 +41,7 @@ import java.util.List;
 /**
  * Loads the list of browsers on the device for selection in a list or spinner.
  */
-public class BrowserSelectionAdapter extends BaseAdapter {
+public final class BrowserSelectionAdapter extends BaseAdapter {
 
     private static final int LOADER_ID = 101;
 
