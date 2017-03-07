@@ -135,7 +135,7 @@ public class AuthorizationServiceTest {
         when(mHttpConnection.getOutputStream()).thenReturn(mOutputStream);
         when(mContext.bindService(serviceIntentEq(), any(CustomTabsServiceConnection.class),
                 anyInt())).thenReturn(true);
-        when(mCustomTabManager.createCustomTabsIntentBuilder())
+        when(mCustomTabManager.createCustomTabsIntentBuilder(null))
                 .thenReturn(new CustomTabsIntent.Builder());
     }
 

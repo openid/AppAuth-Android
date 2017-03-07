@@ -25,6 +25,7 @@ import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.support.customtabs.CustomTabsCallback;
 import android.support.customtabs.CustomTabsIntent;
 import android.text.TextUtils;
 
@@ -114,9 +115,9 @@ public class AuthorizationService {
      * Creates a custom tab builder, that will use a tab session from an existing connection to
      * a web browser, if available.
      */
-    public CustomTabsIntent.Builder createCustomTabsIntentBuilder() {
+    public CustomTabsIntent.Builder createCustomTabsIntentBuilder(@Nullable CustomTabsCallback callback) {
         checkNotDisposed();
-        return mCustomTabManager.createCustomTabsIntentBuilder();
+        return mCustomTabManager.createCustomTabsIntentBuilder(callback);
     }
 
     /**
@@ -135,7 +136,7 @@ public class AuthorizationService {
                 request,
                 completedIntent,
                 null,
-                createCustomTabsIntentBuilder().build());
+                createCustomTabsIntentBuilder(null).build());
     }
 
     /**
@@ -156,7 +157,7 @@ public class AuthorizationService {
                 request,
                 completedIntent,
                 canceledIntent,
-                createCustomTabsIntentBuilder().build());
+                createCustomTabsIntentBuilder(null).build());
     }
 
     /**
@@ -169,7 +170,7 @@ public class AuthorizationService {
      *
      * @param customTabsIntent
      *     The intent that will be used to start the custom tab. It is recommended that this intent
-     *     be created with the help of {@link #createCustomTabsIntentBuilder()}, which will ensure
+     *     be created with the help of {@link #createCustomTabsIntentBuilder(CustomTabsCallback)} ()}, which will ensure
      *     that a warmed-up version of the browser will be used, minimizing latency.
      */
     public void performAuthorizationRequest(
@@ -194,7 +195,7 @@ public class AuthorizationService {
      *
      * @param customTabsIntent
      *     The intent that will be used to start the custom tab. It is recommended that this intent
-     *     be created with the help of {@link #createCustomTabsIntentBuilder()}, which will ensure
+     *     be created with the help of {@link #createCustomTabsIntentBuilder(CustomTabsCallback)} ()}, which will ensure
      *     that a warmed-up version of the browser will be used, minimizing latency.
      *
      * @throws android.content.ActivityNotFoundException if no suitable browser is available to
