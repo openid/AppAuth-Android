@@ -3,15 +3,15 @@
 This app demonstrates the AppAuth library by performing an authorization code
 flow with an authorization service. The configuration contained in `res/raw/idp_config.json`
 must be modified in order for the app to function. Warnings are supplied when the app is run
-if the configuration is invalid.
+with an invalid configuration.
 
 The configuration file MUST contain a JSON object. The following properties can be specified:
 
   - `redirect_uri` (required): The redirect URI to use for receiving the authorization response.
-    This can either be a custom scheme URI (example:/path) or an https app link
-    (https://www.example.com/path). Custom scheme URIs are better supported across all versions of
-    Android, however many authorization server implementations require an https URI. Consult the
-    documentation for your authorization server.
+    This can either be a custom scheme URI (com.example.app:/oauth2redirect/example-provider) or 
+    an https app link (https://www.example.com/path). Custom scheme URIs are better supported 
+    across all versions of Android, however many authorization server implementations require an 
+    https URI. Consult the documentation for your authorization server.
 
     The value specified here should match the value specified for `appAuthRedirectScheme` in the
     `build.gradle`, so that the demo app can capture the response.
