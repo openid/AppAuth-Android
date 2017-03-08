@@ -1,4 +1,4 @@
-# Configuring Google Sign In
+# Using AppAuth for Android with Google
 
 1. An OAuth2 client ID for Google Sign In must be created. The
    [quick-start configurator](https://goo.gl/pl2Fu2) can be used to generate this, or it can be
