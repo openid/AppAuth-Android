@@ -63,15 +63,14 @@ confidentiality of the client secrets may not work well.
 
 ### Prerequisites
 
-The project requires the Android SDK for API level 23 (Marshmallow) to build,
+The project requires the Android SDK for API level 25 (Nougat) to build,
 though the produced binaries only require API level 16 (Jellybean) to be
 used.
 
 ### Configure the Demo App
 
 Follow the instructions in [app/README.md](app/README.md) to configure the
-demo app with your own OAuth client (you need to update 3 configuration points
-with your client info to try the demo).
+demo app with your own OAuth client.
 
 ### Building from the Command line
 
@@ -404,8 +403,3 @@ state.performActionWithFreshTokens(service, new AuthStateAction() {
   }
 });
 ```
-
-## API Documentation
-
-Browse the [API documentation]
-(http://openid.github.io/AppAuth-Android/docs/latest/).

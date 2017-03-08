@@ -125,8 +125,6 @@ public class AuthorizationManagementActivity extends Activity {
     @VisibleForTesting
     static final String KEY_AUTHORIZATION_STARTED = "authStarted";
 
-    private Clock mClock = SystemClock.INSTANCE;
-
     private boolean mAuthorizationStarted = false;
     private Intent mAuthIntent;
     private AuthorizationRequest mAuthRequest;
@@ -288,7 +286,7 @@ public class AuthorizationManagementActivity extends Activity {
             return AuthorizationException.fromOAuthRedirect(responseUri).toIntent();
         } else {
             AuthorizationResponse response = new AuthorizationResponse.Builder(mAuthRequest)
-                    .fromUri(responseUri, mClock)
+                    .fromUri(responseUri)
                     .build();
 
             if (mAuthRequest.state == null && response.state != null

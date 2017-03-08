@@ -9,11 +9,20 @@ android {
         project.archivesBaseName = 'appauth-demoapp'
         vectorDrawables.useSupportLibrary = true
 
-        // replace the below string with your own Google client ID. Make sure this is consistent
-        // with the values used in idp_configs.xml
+        // Make sure this is consistent with the redirect URI used in res/raw/auth_config.json,
+        // or specify additional redirect URIs in AndroidManifest.xml
         manifestPlaceholders = [
-                'appAuthRedirectScheme': 'com.googleusercontent.apps.YOUR-ID'
+                'appAuthRedirectScheme': 'net.openid.appauthdemo'
         ]
+
+        jackOptions {
+            enabled true
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     signingConfigs {
@@ -41,6 +50,8 @@ dependencies {
     compile "com.android.support:appcompat-v7:${rootProject.supportLibVersion}"
     compile "com.android.support:design:${rootProject.supportLibVersion}"
     compile 'com.github.bumptech.glide:glide:3.7.0'
+    compile 'com.squareup.okio:okio:1.11.0'
+    compile 'joda-time:joda-time:2.9.7'
 }
 
 apply from: '../config/style.gradle'
