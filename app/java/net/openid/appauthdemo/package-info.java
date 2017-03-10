@@ -13,6 +13,7 @@
  */
 
 /**
- * App which demonstrates the use of the AppAuth library to authenticate a Google account.
+ * App which demonstrates the use of the AppAuth library to authenticate a user with an IDP
+ * configured in res/raw/auth_config.json.
  */
 package net.openid.appauthdemo;

@@ -56,11 +56,19 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Demonstrates the usage of the AppAuth library to connect to a set of pre-configured
- * OAuth2 providers.
+ * Demonstrates the usage of the AppAuth to authorize a user with an OAuth2 / OpenID Connect
+ * provider. Based on the configuration provided in `res/raw/auth_config.json`, the code
+ * contained here will:
+ *
+ * - Retrieve an OpenID Connect discovery document for the provider, or use a local static
+ *   configuration.
+ * - Utilize dynamic client registration, if no static client id is specified.
+ * - Initiate the authorization request using the built-in heuristics or a user-selected browser.
  *
  * _NOTE_: From a clean checkout of this project, the authorization service is not configured.
- * Edit `res/values/auth_config.xml` to provide the required configuration properties.
+ * Edit `res/values/auth_config.xml` to provide the required configuration properties. See the
+ * README.md in the app/ directory for configuration instructions, and the adjacent IDP-specific
+ * instructions.
  */
 public final class LoginActivity extends AppCompatActivity {
 
@@ -159,6 +167,10 @@ public final class LoginActivity extends AppCompatActivity {
         mExecutor.submit(() -> doAuth(loginHint));
     }
 
+    /**
+     * Initializes the authorization service configuration if necessary, either from the local
+     * static values or by retrieving an OpenID discovery document.
+     */
     @WorkerThread
     private void initializeAppAuth() {
         recreateAuthorizationService();
@@ -169,7 +181,7 @@ public final class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        // if we are not using discovery, so build the authorization service configuration directly
+        // if we are not using discovery, build the authorization service configuration directly
         // from the static configuration values.
         if (mConfiguration.getDiscoveryUri() == null) {
             AuthorizationServiceConfiguration config = new AuthorizationServiceConfiguration(
@@ -203,6 +215,10 @@ public final class LoginActivity extends AppCompatActivity {
         mExecutor.submit(this::initializeClient);
     }
 
+    /**
+     * Initiates a dynamic registration request if a client ID is not provided by the static
+     * configuration.
+     */
     @WorkerThread
     private void initializeClient() {
 
@@ -251,6 +267,11 @@ public final class LoginActivity extends AppCompatActivity {
         displayAuthOptions();
     }
 
+    /**
+     * Enumerates the browsers installed on the device and populates a spinner, allowing the
+     * demo user to easily test the authorization flow against different browser and custom
+     * tab configurations.
+     */
     @MainThread
     private void configureBrowserSelector() {
         Spinner spinner = (Spinner) findViewById(R.id.browser_selector);
@@ -277,6 +298,10 @@ public final class LoginActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Performs the authorization request, using the browser selected in the spinner,
+     * and a user-provided `login_hint` if available.
+     */
     @WorkerThread
     private void doAuth(@NonNull String loginHint) {
         AuthorizationRequest.Builder authRequestBuilder = new AuthorizationRequest.Builder(
