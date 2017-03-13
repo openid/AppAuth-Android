@@ -271,7 +271,7 @@ service.performAuthorizationRequest(
 We recommend using a custom scheme to send the OAuth redirect back to
 your app. 
 It is strongly recommended to use "reverse domain name notation" which is
-a naming convention based on the domain name system, but where where the 
+a naming convention based on the domain name system, but where the 
 domain components are reversed, for example 
 "app.example.com" becomes "com.example.app".
 The library configures the `RedirectUriReceiverActivity` to
