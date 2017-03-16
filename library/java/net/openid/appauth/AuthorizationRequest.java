@@ -42,18 +42,18 @@ import java.util.Set;
 /**
  * An OAuth2 authorization request.
  *
- * @see <a href="https://tools.ietf.org/html/rfc6749#section-4"> "The OAuth 2.0 Authorization
- * Framework" (RFC 6749), Section 4</a>
- * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.1"> "The OAuth 2.0 Authorization
- * Framework" (RFC 6749), Section 4.1.1</a>
+ * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4
+ * <https://tools.ietf.org/html/rfc6749#section-4>"
+ * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.1
+ * <https://tools.ietf.org/html/rfc6749#section-4.1.1>"
  */
 public class AuthorizationRequest {
 
     /**
      * SHA-256 based code verifier challenge method.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7636#section-4.3">"Proof Key for Code Exchange
-     * by OAuth Public Clients" (RFC 7636), Section 4.4</a>
+     * @see "Proof Key for Code Exchange by OAuth Public Clients (RFC 7636), Section 4.3
+     * <https://tools.ietf.org/html/rfc7636#section-4.3>"
      */
     public static final String CODE_CHALLENGE_METHOD_S256 = "S256";
 
@@ -61,16 +61,17 @@ public class AuthorizationRequest {
      * Plain-text code verifier challenge method. This is only used by AppAuth for Android if
      * SHA-256 is not supported on this platform.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7636#section-4.3">"Proof Key for Code Exchange
-     * by OAuth Public Clients" (RFC 7636), Section 4.4</a>
+     * @see "Proof Key for Code Exchange by OAuth Public Clients (RFC 7636), Section 4.4
+     * <https://tools.ietf.org/html/rfc7636#section-4.4>"
      */
     public static final String CODE_CHALLENGE_METHOD_PLAIN = "plain";
 
     /**
-     * All spec-defined values for the OpenID Connect 1.0 {@code display} parameter.
+     * All spec-defined values for the OpenID Connect 1.0 `display` parameter.
+     *
      * @see Builder#setDisplay(String)
-     * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
-     * Connect Core 1.0", Section 3.1.2.1</a>
+     * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
      */
     // SuppressWarnings justification: the constants defined are not directly used by the library,
     // existing only for convenience of the developer.
@@ -78,14 +79,14 @@ public class AuthorizationRequest {
     public static final class Display {
 
         /**
-         * The Authorization Server <em>SHOULD</em> display the authentication and consent UI
+         * The Authorization Server _SHOULD_ display the authentication and consent UI
          * consistent with a full User Agent page view. If the display parameter is not specified,
          * this is the default display mode.
          */
         public static final String PAGE = "page";
 
         /**
-         * The Authorization Server <em>SHOULD</em> display the authentication and consent UI
+         * The Authorization Server _SHOULD_ display the authentication and consent UI
          * consistent with a popup User Agent window. The popup User Agent window should be of an
          * appropriate size for a login-focused dialog and should not obscure the entire window that
          * it is popping up over.
@@ -93,23 +94,24 @@ public class AuthorizationRequest {
         public static final String POPUP = "popup";
 
         /**
-         * The Authorization Server <em>SHOULD</em> display the authentication and consent UI
+         * The Authorization Server _SHOULD_ display the authentication and consent UI
          * consistent with a device that leverages a touch interface.
          */
         public static final String TOUCH = "touch";
 
         /**
-         * The Authorization Server <em>SHOULD</em> display the authentication and consent UI
+         * The Authorization Server _SHOULD_ display the authentication and consent UI
          * consistent with a "feature phone" type display.
          */
         public static final String WAP = "wap";
     }
 
     /**
-     * All spec-defined values for the OpenID Connect 1.0 {@code prompt} parameter.
+     * All spec-defined values for the OpenID Connect 1.0 `prompt` parameter.
+     *
      * @see Builder#setPrompt(String)
-     * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
-     * Connect Core 1.0", Section 3.1.2.1</a>
+     * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
      */
     // SuppressWarnings justification: the constants defined are not directly used by the library,
     // existing only for convenience of the developer.
@@ -117,66 +119,67 @@ public class AuthorizationRequest {
     public static final class Prompt {
 
         /**
-         * The Authorization Server <em>MUST NOT</em> display any authentication or consent user
+         * The Authorization Server _MUST NOT_ display any authentication or consent user
          * interface pages. An error is returned if an End-User is not already authenticated or the
          * Client does not have pre-configured consent for the requested Claims or does not fulfill
          * other conditions for processing the request. The error code will typically be
-         * {@code login_required}, {@code interaction_required}, or another code defined in
-         * <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthError">Section
-         * 3.1.2.6</a>. This can be used as a method to check for existing
-         * authentication and/or consent.
+         * `login_required`, `interaction_required`, or another code defined in
+         * [OpenID Connect Core 1.0, Section 3.1.2.6](
+         * https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.6). This can be
+         * used as a method to check for existing authentication and/or consent.
          *
-         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
-         * Connect Core 1.0", Section 3.1.2.1</a>
-         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthError">"OpenID
-         * Connect Core 1.0", Section 3.1.2.6</a>
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.6
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.6>"
          */
         public static final String NONE = "none";
 
         /**
-         * The Authorization Server <em>SHOULD</em> prompt the End-User for re-authentication. If
-         * it cannot re-authenticate the End-User, it <em>MUST</em> return an error, typically
-         * {@code login_required}.
+         * The Authorization Server _SHOULD_ prompt the End-User for re-authentication. If
+         * it cannot re-authenticate the End-User, it _MUST_ return an error, typically
+         * `login_required`.
          *
-         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
-         * Connect Core 1.0", Section 3.1.2.1</a>
-         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthError">"OpenID
-         * Connect Core 1.0", Section 3.1.2.6</a>
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.6
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.6>"
          */
         public static final String LOGIN = "login";
 
         /**
-         * The Authorization Server <em>SHOULD</em> prompt the End-User for consent before
-         * returning information to the Client. If it cannot obtain consent, it <em>MUST</em>
-         * return an error, typically {@code consent_required}.
+         * The Authorization Server _SHOULD_ prompt the End-User for consent before
+         * returning information to the Client. If it cannot obtain consent, it _MUST_
+         * return an error, typically `consent_required`.
          *
-         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
-         * Connect Core 1.0", Section 3.1.2.1</a>
-         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthError">"OpenID
-         * Connect Core 1.0", Section 3.1.2.6</a>
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.6
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.6>"
          */
         public static final String CONSENT = "consent";
 
         /**
-         * The Authorization Server <em>SHOULD</em> prompt the End-User to select a user account.
+         * The Authorization Server _SHOULD_ prompt the End-User to select a user account.
          * This enables an End-User who has multiple accounts at the Authorization Server to select
          * amongst the multiple accounts that they might have current sessions for. If it cannot
          * obtain an account selection choice made by the End-User, it MUST return an error,
-         * typically {@code account_selection_required}.
+         * typically `account_selection_required`.
          *
-         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
-         * Connect Core 1.0", Section 3.1.2.1</a>
-         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthError">"OpenID
-         * Connect Core 1.0", Section 3.1.2.6</a>
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.6
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.6>"
          */
         public static final String SELECT_ACCOUNT = "select_account";
     }
 
     /**
-     * All spec-defined values for the OAuth2 / OpenID Connect 1.0 {@code scope} parameter.
+     * All spec-defined values for the OAuth2 / OpenID Connect 1.0 `scope` parameter.
+     *
      * @see Builder#setScope(String)
-     * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">"OpenID
-     * Connect Core 1.0", Section 5.4</a>
+     * @see "OpenID Connect Core 1.0, Section 5.4
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.5.4>"
      */
     // SuppressWarnings justification: the constants defined are not directly used by the library,
     // existing only for convenience of the developer.
@@ -184,15 +187,17 @@ public class AuthorizationRequest {
     public static final class Scope {
         /**
          * A scope for the authenticated user's mailing address.
-         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">"OpenID
-         * Connect Core 1.0", Section 5.4</a>
+         *
+         * @see "OpenID Connect Core 1.0, Section 5.4
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.5.4>"
          */
         public static final String ADDRESS = "address";
 
         /**
          * A scope for the authenticated user's email address.
-         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">"OpenID
-         * Connect Core 1.0", Section 5.4</a>
+         *
+         * @see "OpenID Connect Core 1.0, Section 5.4
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.5.4>"
          */
         public static final String EMAIL = "email";
 
@@ -200,40 +205,45 @@ public class AuthorizationRequest {
          * A scope for requesting an OAuth 2.0 refresh token to be issued, that can be used to
          * obtain an Access Token that grants access to the End-User's UserInfo Endpoint even
          * when the End-User is not present (not logged in).
-         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#OfflineAccess">
-         *     "OpenID Connect Core 1.0", Section 11</a>
+         *
+         * @see "OpenID Connect Core 1.0, Section 11
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.11>"
          */
         public static final String OFFLINE_ACCESS = "offline_access";
 
         /**
          * A scope for OpenID based authorization.
-         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
-         * Connect Core 1.0", Section 3.1.2.1</a>
+         *
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
          */
         public static final String OPENID = "openid";
 
         /**
          * A scope for the authenticated user's phone number.
-         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">"OpenID
-         * Connect Core 1.0", Section 5.4</a>
+         *
+         * @see "OpenID Connect Core 1.0, Section 5.4
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.5.4>"
          */
         public static final String PHONE = "phone";
 
         /**
          * A scope for the authenticated user's basic profile information.
-         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">"OpenID
-         * Connect Core 1.0", Section 5.4</a>
+         *
+         * @see "OpenID Connect Core 1.0, Section 5.4
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.5.4>"
          */
         public static final String PROFILE = "profile";
     }
 
     /**
-     * All spec-defined values for the OAuth2 / OpenID Connect {@code response_mode} parameter.
+     * All spec-defined values for the OAuth2 / OpenID Connect `response_mode` parameter.
+     *
      * @see Builder#setResponseMode(String)
-     * @see <a href="http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#ResponseModes">
-     * "OAuth 2.0 Multiple Response Type Encoding Practices", Section 2.1</a>
-     * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
-     * Connect Core 1.0", Section 3.1.2.1</a>
+     * @see "OAuth 2.0 Multiple Response Type Encoding Practices, Section 2.1
+     * <http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#rfc.section.2.1>"
+     * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
      */
     // SuppressWarnings justification: the constants defined are not directly used by the library,
     // existing only for convenience of the developer.
@@ -242,16 +252,17 @@ public class AuthorizationRequest {
         /**
          * Instructs the authorization server to send response parameters using
          * the query portion of the redirect URI.
-         * @see <a href="http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#ResponseModes">
-         * "OAuth 2.0 Multiple Response Type Encoding Practices", Section 2.1</a>
+         *
+         * @see "OAuth 2.0 Multiple Response Type Encoding Practices, Section 2.1
+         * <http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#rfc.section.2.1>"
          */
         public static final String QUERY = "query";
 
         /**
          * Instructs the authorization server to send response parameters using
          * the fragment portion of the redirect URI.
-         * @see <a href="http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#ResponseModes">
-         * "OAuth 2.0 Multiple Response Type Encoding Practices", Section 2.1</a>
+         * @see "OAuth 2.0 Multiple Response Type Encoding Practices, Section 2.1
+         * <http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#rfc.section.2.1>"
          */
         public static final String FRAGMENT = "fragment";
     }
@@ -339,44 +350,45 @@ public class AuthorizationRequest {
     /**
      * The client identifier.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4"> "The OAuth 2.0 Authorization
-     * Framework" (RFC 6749), Section 4</a>
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.1"> "The OAuth 2.0
-     * Authorization
-     * Framework" (RFC 6749), Section 4.1.1</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4
+     * <https://tools.ietf.org/html/rfc6749#section-4>"
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.1
+     * <https://tools.ietf.org/html/rfc6749#section-4.1.1>"
      */
     @NonNull
     public final String clientId;
 
-
     /**
-     * The OpenID Connect 1.0 {@code display} parameter. This is a string that specifies how the
+     * The OpenID Connect 1.0 `display` parameter. This is a string that specifies how the
      * Authorization Server displays the authentication and consent user interface pages to the
      * End-User.
+     *
+     * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
      */
     @Nullable
     public final String display;
 
 
     /**
-     * The OpenID Connect 1.0 {@code login_hint} parameter. This is a string hint to the
+     * The OpenID Connect 1.0 `login_hint` parameter. This is a string hint to the
      * Authorization Server about the login identifier the End-User might use to log in, typically
      * collected directly from the user in an identifier-first authentication flow.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
-     * Connect Core 1.0, Section 3.1.2.1</a>
+     * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
      */
     @Nullable
     public final String loginHint;
 
     /**
-     * The OpenID Connect 1.0 {@code prompt} parameter. This is a space delimited, case sensitive
+     * The OpenID Connect 1.0 `prompt` parameter. This is a space delimited, case sensitive
      * list of ASCII strings that specifies whether the Authorization Server prompts the End-User
      * for re-authentication and consent.
      *
      * @see Prompt
-     * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
-     * Connect Core 1.0", Section 3.1.2.1</a>
+     * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
      */
     @Nullable
     public final String prompt;
@@ -384,10 +396,10 @@ public class AuthorizationRequest {
     /**
      * The expected response type.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.1.1"> "The OAuth 2.0
-     * Authorization Framework" (RFC 6749), Section 3.1.1</a>
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3"> "OpenID
-     * Connect Core 1.0", Section 3</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.1.1
+     * <https://tools.ietf.org/html/rfc6749#section-3.1.1>"
+     * @see "OpenID Connect Core 1.0, Section 3
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3>"
      */
     @NonNull
     public final String responseType;
@@ -395,9 +407,8 @@ public class AuthorizationRequest {
     /**
      * The client's redirect URI.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.1.2"> "The OAuth 2.0
-     * Authorization
-     * Framework" (RFC 6749), Section 3.1.2</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.1.2
+     * <https://tools.ietf.org/html/rfc6749#section-3.1.2>"
      */
     @NonNull
     public final Uri redirectUri;
@@ -405,8 +416,10 @@ public class AuthorizationRequest {
     /**
      * The optional set of scopes expressed as a space-delimited, case-sensitive string.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3"> "The OAuth 2.0 Authorization
-     * Framework" (RFC 6749), Section 3.3</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.1.2
+     * <https://tools.ietf.org/html/rfc6749#section-3.1.2>"
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.3
+     * <https://tools.ietf.org/html/rfc6749#section-3.3>"
      */
     @Nullable
     public final String scope;
@@ -417,14 +430,12 @@ public class AuthorizationRequest {
      * appropriate  validation of the state in the authorization response. It is recommended that
      * the default implementation of this parameter be used wherever possible. Typically used to
      * prevent CSRF attacks, as recommended in
-     * <a href="https://tools.ietf.org/html/rfc6819#section-5.3.5">RFC6819 Section 5.3.5</a>.
+     * [RFC6819 Section 5.3.5](https://tools.ietf.org/html/rfc6819#section-5.3.5).
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.1"> "The OAuth 2.0
-     * Authorization
-     * Framework" (RFC 6749), Section 4.1.1</a>
-     * @see <a href="https://tools.ietf.org/html/rfc6819#section-5.3.5"> "The OAuth 2.0
-     * Authorization
-     * Framework" (RFC 6749), Section 5.3.5</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.1
+     * <https://tools.ietf.org/html/rfc6749#section-4.1.1>"
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 5.3.5
+     * <https://tools.ietf.org/html/rfc6749#section-5.3.5>"
      */
     @Nullable
     public final String state;
@@ -442,12 +453,12 @@ public class AuthorizationRequest {
      * request with a subsequent code exchange, in order to prevent any eavesdropping party from
      * intercepting and using the code before the original requestor. If PKCE is disabled due to
      * a non-compliant authorization server which rejects requests with PKCE parameters present,
-     * this value will be {@code null}.
+     * this value will be `null`.
      *
      * @see Builder#setCodeVerifier(String)
      * @see Builder#setCodeVerifier(String, String, String)
-     * @see <a href="https://tools.ietf.org/html/rfc7636">"Proof Key for Code Exchange by OAuth
-     * Public Clients" (RFC 7636)</a>
+     * @see "Proof Key for Code Exchange by OAuth Public Clients (RFC 7636)
+     * <https://tools.ietf.org/html/rfc7636>"
      */
     @Nullable
     public final String codeVerifier;
@@ -455,12 +466,12 @@ public class AuthorizationRequest {
     /**
      * The challenge derived from the {@link #codeVerifier code verifier}, using the
      * {@link #codeVerifierChallengeMethod challenge method}. If a code verifier is not being
-     * used for this request, this value will be {@code null}.
+     * used for this request, this value will be `null`.
      *
      * @see Builder#setCodeVerifier(String)
      * @see Builder#setCodeVerifier(String, String, String)
-     * @see <a href="https://tools.ietf.org/html/rfc7636">"Proof Key for Code Exchange by OAuth
-     * Public Clients" (RFC 7636)</a>
+     * @see "Proof Key for Code Exchange by OAuth Public Clients (RFC 7636)
+     * <https://tools.ietf.org/html/rfc7636>"
      */
     @Nullable
     public final String codeVerifierChallenge;
@@ -468,12 +479,12 @@ public class AuthorizationRequest {
     /**
      * The challenge method used to generate a {@link #codeVerifierChallenge challenge} from
      * the {@link #codeVerifier code verifier}. If a code verifier is not being used for this
-     * request, this value will be {@code null}.
+     * request, this value will be `null`.
      *
      * @see Builder#setCodeVerifier(String)
      * @see Builder#setCodeVerifier(String, String, String)
-     * @see <a href="https://tools.ietf.org/html/rfc7636">"Proof Key for Code Exchange by OAuth
-     * Public Clients" (RFC 7636)</a>
+     * @see "Proof Key for Code Exchange by OAuth Public Clients (RFC 7636)
+     * <https://tools.ietf.org/html/rfc7636>"
      */
     @Nullable
     public final String codeVerifierChallengeMethod;
@@ -481,11 +492,11 @@ public class AuthorizationRequest {
     /**
      * Instructs the authorization service on the mechanism to be used for returning
      * response parameters from the authorization endpoint. This use of this parameter is
-     * <em>not recommended</em> when the response mode that would be requested is the default mode
+     * _not recommended_ when the response mode that would be requested is the default mode
      * specified for the response type.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
-     * Connect Core 1.0", Section 3.1.2.1</a>
+     * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
      */
     @Nullable
     public final String responseMode;
@@ -493,8 +504,8 @@ public class AuthorizationRequest {
     /**
      * Additional parameters to be passed as part of the request.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.1"> "The OAuth 2.0 Authorization
-     * Framework" (RFC 6749), Section 3.1</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.1
+     * <https://tools.ietf.org/html/rfc6749#section-3.1>"
      */
     @NonNull
     public final Map<String, String> additionalParameters;
@@ -591,11 +602,10 @@ public class AuthorizationRequest {
         /**
          * Specifies the client ID. Cannot be null or empty.
          *
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-4"> "The OAuth 2.0
-         * Authorization
-         * Framework" (RFC 6749), Section 4</a>
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.1"> "The OAuth 2.0
-         * Authorization Framework" (RFC 6749), Section 4.1.1</a>
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4
+         * <https://tools.ietf.org/html/rfc6749#section-4>"
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.1
+         * <https://tools.ietf.org/html/rfc6749#section-4.1.1>"
          */
         @NonNull
         public Builder setClientId(@NonNull String clientId) {
@@ -604,10 +614,11 @@ public class AuthorizationRequest {
         }
 
         /**
-         * Specifies the OpenID Connect 1.0 {@code display} parameter.
+         * Specifies the OpenID Connect 1.0 `display` parameter.
+         *
          * @see Display
-         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
-         * Connect Core 1.0", Section 3.1.2.1</a>
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
          */
         public Builder setDisplay(@Nullable String display) {
             mDisplay = checkNullOrNotEmpty(display, "display must be null or not empty");
@@ -615,7 +626,10 @@ public class AuthorizationRequest {
         }
 
         /**
-         * Specifies the OpenID Connect 1.0 {@code login_hint} parameter.
+         * Specifies the OpenID Connect 1.0 `login_hint` parameter.
+         *
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
          */
         public Builder setLoginHint(@Nullable String loginHint) {
             mLoginHint = checkNullOrNotEmpty(loginHint, "login hint must be null or not empty");
@@ -623,13 +637,13 @@ public class AuthorizationRequest {
         }
 
         /**
-         * Specifies the encoded OpenID Connect 1.0 {@code prompt} parameter, which is a
+         * Specifies the encoded OpenID Connect 1.0 `prompt` parameter, which is a
          * space-delimited set of case sensitive ASCII prompt values. Replaces any previously
          * specified prompt values.
          *
          * @see Prompt
-         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
-         * Connect Core 1.0", Section 3.1.2.1</a>
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
          */
         @NonNull
         public Builder setPrompt(@Nullable String prompt) {
@@ -638,13 +652,13 @@ public class AuthorizationRequest {
         }
 
         /**
-         * Specifies the set of OpenID Connect 1.0 {@code prompt} parameter values, which are
+         * Specifies the set of OpenID Connect 1.0 `prompt` parameter values, which are
          * space-delimited, case sensitive ASCII prompt values. Replaces any previously
          * specified prompt values.
          *
          * @see Prompt
-         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
-         * Connect Core 1.0", Section 3.1.2.1</a>
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
          */
         @NonNull
         public Builder setPromptValues(@Nullable String... promptValues) {
@@ -657,13 +671,13 @@ public class AuthorizationRequest {
         }
 
         /**
-         * Specifies the set of OpenID Connect 1.0 {@code prompt} parameter values, which are
+         * Specifies the set of OpenID Connect 1.0 `prompt` parameter values, which are
          * space-delimited, case sensitive ASCII prompt values. Replaces any previously
          * specified prompt values.
          *
          * @see Prompt
-         * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
-         * Connect Core 1.0", Section 3.1.2.1</a>
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
          */
         @NonNull
         public Builder setPromptValues(@Nullable Iterable<String> promptValues) {
@@ -674,12 +688,10 @@ public class AuthorizationRequest {
         /**
          * Specifies the expected response type. Cannot be null or empty.
          *
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-2.2"> "The OAuth 2.0
-         * Authorization
-         * Framework" (RFC 6749), Section 2.2</a>
-         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3">
-         * "OpenID
-         * Connect Core 1.0", Section 3</a>
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 2.2
+         * <https://tools.ietf.org/html/rfc6749#section-2.2>"
+         * @see "OpenID Connect Core 1.0, Section 3
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3>"
          */
         @NonNull
         public Builder setResponseType(@NonNull String responseType) {
@@ -691,8 +703,8 @@ public class AuthorizationRequest {
         /**
          * Specifies the client's redirect URI. Cannot be null or empty.
          *
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.1.2"> "The OAuth 2.0
-         * Authorization Framework" (RFC 6749), Section 3.1.2</a>
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.1.2
+         * <https://tools.ietf.org/html/rfc6749#section-3.1.2>"
          */
         @NonNull
         public Builder setRedirectUri(@NonNull Uri redirectUri) {
@@ -704,9 +716,8 @@ public class AuthorizationRequest {
          * Specifies the encoded scope string, which is a space-delimited set of
          * case-sensitive scope identifiers. Replaces any previously specified scope.
          *
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3"> "The OAuth 2.0
-         * Authorization
-         * Framework" (RFC 6749), Section 3.3</a>
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.3
+         * <https://tools.ietf.org/html/rfc6749#section-3.3>"
          */
         @NonNull
         public Builder setScope(@Nullable String scope) {
@@ -720,12 +731,11 @@ public class AuthorizationRequest {
 
         /**
          * Specifies the set of case-sensitive scopes. Replaces any previously specified set of
-         * scopes. If no arguments are provided, the scope string will be set to {@code null}.
+         * scopes. If no arguments are provided, the scope string will be set to `null`.
          * Individual scope strings cannot be null or empty.
          *
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3"> "The OAuth 2.0
-         * Authorization
-         * Framework" (RFC 6749), Section 3.3</a>
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.3
+         * <https://tools.ietf.org/html/rfc6749#section-3.3>"
          */
         @NonNull
         public Builder setScopes(String... scopes) {
@@ -738,12 +748,11 @@ public class AuthorizationRequest {
 
         /**
          * Specifies the set of case-sensitive scopes. Replaces any previously specified set of
-         * scopes. If the iterable is empty, the scope string will be set to {@code null}.
+         * scopes. If the iterable is empty, the scope string will be set to `null`.
          * Individual scope strings cannot be null or empty.
          *
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.3"> "The OAuth 2.0
-         * Authorization
-         * Framework" (RFC 6749), Section 3.3</a>
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.3
+         * <https://tools.ietf.org/html/rfc6749#section-3.3>"
          */
         @NonNull
         public Builder setScopes(@Nullable Iterable<String> scopes) {
@@ -757,12 +766,12 @@ public class AuthorizationRequest {
          * and perform appropriate validation of the state in the authorization response. It is
          * recommended that the default implementation of this parameter be used wherever possible.
          * Typically used to prevent CSRF attacks, as recommended in
-         * <a href="https://tools.ietf.org/html/rfc6819#section-5.3.5">RFC6819 Section 5.3.5</a>.
+         * [RFC6819 Section 5.3.5](https://tools.ietf.org/html/rfc6819#section-5.3.5).
          *
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.1"> "The OAuth 2.0
-         * Authorization Framework" (RFC 6749), Section 4.1.1</a>
-         * @see <a href="https://tools.ietf.org/html/rfc6819#section-5.3.5"> "The OAuth 2.0
-         * Authorization Framework" (RFC 6749), Section 5.3.5</a>
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.1
+         * <https://tools.ietf.org/html/rfc6749#section-4.1.1>"
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 5.3.5
+         * <https://tools.ietf.org/html/rfc6749#section-5.3.5>"
          */
         @NonNull
         public Builder setState(@Nullable String state) {
@@ -786,7 +795,10 @@ public class AuthorizationRequest {
          * method (typically {@link #CODE_CHALLENGE_METHOD_S256}) implemented by
          * {@link CodeVerifierUtil} will be used, and a challenge will be generated using this
          * method. If the use of a code verifier is not desired, set the code verifier
-         * to {@code null}.
+         * to `null`.
+         *
+         * @see "Proof Key for Code Exchange by OAuth Public Clients (RFC 7636), Section 4.3
+         * <https://tools.ietf.org/html/rfc7636#section-4.3>"
          */
         @NonNull
         public Builder setCodeVerifier(@Nullable String codeVerifier) {
@@ -812,8 +824,8 @@ public class AuthorizationRequest {
          * the challenge and method must also be null. If a non-null code verifier is set, the
          * code verifier challenge and method must also be set.
          *
-         * @see <a href="https://tools.ietf.org/html/rfc7636">"Proof Key for Code Exchange by OAuth
-         * Public Clients" (RFC 7636)</a>
+         * @see "Proof Key for Code Exchange by OAuth Public Clients (RFC 7636), Section 4.3
+         * <https://tools.ietf.org/html/rfc7636#section-4.3>"
          */
         @NonNull
         public Builder setCodeVerifier(
@@ -844,10 +856,11 @@ public class AuthorizationRequest {
         /**
          * Specifies the response mode to be used for returning authorization response parameters
          * from the authorization endpoint.
-         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">"OpenID
-         * Connect Core 1.0", Section 3.1.2.1</a>
-         * @see <a href="http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#ResponseTypesAndModes">
-         * "OAuth 2.0 Multiple Response Type Encoding Practices", Section 2</a>
+         *
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
+         * @see "OAuth 2.0 Multiple Response Type Encoding Practices, Section 2
+         * <http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#rfc.section.2>"
          */
         @NonNull
         public Builder setResponseMode(@Nullable String responseMode) {
@@ -860,9 +873,8 @@ public class AuthorizationRequest {
          * Specifies additional parameters. Replaces any previously provided set of parameters.
          * Parameter keys and values cannot be null or empty.
          *
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.1"> "The OAuth 2.0
-         * Authorization
-         * Framework" (RFC 6749), Section 3.1</a>
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.1
+         * <https://tools.ietf.org/html/rfc6749#section-3.1>"
          */
         @NonNull
         public Builder setAdditionalParameters(@Nullable Map<String, String> additionalParameters) {
@@ -873,9 +885,12 @@ public class AuthorizationRequest {
         /**
          * Constructs the authorization request. At a minimum the following fields must have been
          * set:
-         * <ul> <li>The client ID</li> <li>The expected response type</li> <li>The redirect
-         * URI</li>
-         * </ul> Failure to specify any of these parameters will result in a runtime exception.
+         *
+         * - The client ID
+         * - The expected response type
+         * - The redirect URI
+         *
+         * Failure to specify any of these parameters will result in a runtime exception.
          */
         @NonNull
         public AuthorizationRequest build() {
@@ -937,7 +952,7 @@ public class AuthorizationRequest {
     /**
      * Derives the set of scopes from the consolidated, space-delimited scopes in the
      * {@link #scope} field. If no scopes were specified for this request, the method will
-     * return {@code null}.
+     * return `null`.
      */
     @Nullable
     public Set<String> getScopeSet() {
@@ -947,7 +962,7 @@ public class AuthorizationRequest {
     /**
      * Derives the set of prompt values from the consolidated, space-delimited prompt values in
      * the {@link #prompt} field. If no prompt values were specified for this request, the method
-     * will return {@code null}.
+     * will return `null`.
      */
     public Set<String> getPromptValues() {
         return AsciiStringListUtil.stringToSet(prompt);

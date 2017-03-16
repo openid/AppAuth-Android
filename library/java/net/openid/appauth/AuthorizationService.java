@@ -14,6 +14,8 @@
 
 package net.openid.appauth;
 
+import static net.openid.appauth.Preconditions.checkNotNull;
+
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -24,11 +26,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.customtabs.CustomTabsIntent;
-import android.util.Log;
+import android.text.TextUtils;
 
 import net.openid.appauth.AuthorizationException.GeneralErrors;
 import net.openid.appauth.AuthorizationException.RegistrationRequestErrors;
 import net.openid.appauth.AuthorizationException.TokenRequestErrors;
+
 import net.openid.appauth.browser.BrowserDescriptor;
 import net.openid.appauth.browser.BrowserSelector;
 
@@ -42,6 +45,7 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.URLConnection;
 import java.util.Calendar;
 import java.util.Map;
 
@@ -49,7 +53,7 @@ import static net.openid.appauth.Preconditions.checkNotNull;
 
 /**
  * Dispatches requests to an OAuth2 authorization service. Note that instances of this class
- * <em>must be manually disposed</em> when no longer required, to avoid leaks
+ * _must be manually disposed_ when no longer required, to avoid leaks
  * (see {@link #dispose()}.
  */
 public class AuthorizationService {
@@ -123,7 +127,7 @@ public class AuthorizationService {
 
     /**
      * Sends an authorization request to the authorization service, using a
-     * <a href="https://developer.chrome.com/multidevice/android/customtabs">custom tab</a>
+     * [custom tab](https://developer.chrome.com/multidevice/android/customtabs)
      * if available, or a browser instance.
      * The parameters of this request are determined by both the authorization service
      * configuration and the provided {@link AuthorizationRequest request object}. Upon completion
@@ -142,7 +146,7 @@ public class AuthorizationService {
 
     /**
      * Sends an authorization request to the authorization service, using a
-     * <a href="https://developer.chrome.com/multidevice/android/customtabs">custom tab</a>
+     * [custom tab](https://developer.chrome.com/multidevice/android/customtabs)
      * if available, or a browser instance.
      * The parameters of this request are determined by both the authorization service
      * configuration and the provided {@link AuthorizationRequest request object}. Upon completion
@@ -163,7 +167,7 @@ public class AuthorizationService {
 
     /**
      * Sends an authorization request to the authorization service, using a
-     * <a href="https://developer.chrome.com/multidevice/android/customtabs">custom tab</a>.
+     * [custom tab](https://developer.chrome.com/multidevice/android/customtabs).
      * The parameters of this request are determined by both the authorization service
      * configuration and the provided {@link AuthorizationRequest request object}. Upon completion
      * of this request, the provided {@link PendingIntent completion PendingIntent} will be invoked.
@@ -335,6 +339,7 @@ public class AuthorizationService {
                                 .openConnection(mRequest.configuration.tokenEndpoint);
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                addJsonToAcceptHeader(conn);
                 conn.setDoOutput(true);
 
                 Map<String, String> headers = mClientAuthentication
@@ -421,6 +426,18 @@ public class AuthorizationService {
             Logger.debug("Token exchange with %s completed",
                     mRequest.configuration.tokenEndpoint);
             mCallback.onTokenRequestCompleted(response, null);
+        }
+
+        /**
+         * GitHub will only return a spec-compliant response if JSON is explicitly defined
+         * as an acceptable response type. As this is essentially harmless for all other
+         * spec-compliant IDPs, we add this header if no existing Accept header has been set
+         * by the connection builder.
+         */
+        private void addJsonToAcceptHeader(URLConnection conn) {
+            if (TextUtils.isEmpty(conn.getRequestProperty("Accept"))) {
+                conn.setRequestProperty("Accept", "application/json");
+            }
         }
     }
 
@@ -540,24 +557,24 @@ public class AuthorizationService {
 
     /**
      * Callback interface for token endpoint requests.
-     *
      * @see AuthorizationService#performTokenRequest
      */
     public interface TokenResponseCallback {
         /**
          * Invoked when the request completes successfully or fails.
-         * <p>
-         * <p>Exactly one of {@code response} or {@code ex} will be non-null. If
-         * {@code response} is {@code null}, a failure occurred during the request. This can
-         * happen if a bad URI was provided, no connection to the server could be established, or
-         * the response JSON was incomplete or badly formatted.
          *
-         * @param response the retrieved token response, if successful; {@code null} otherwise.
-         * @param ex       a description of the failure, if one occurred: {@code null} otherwise.
+         * Exactly one of `response` or `ex` will be non-null. If `response` is `null`, a failure
+         * occurred during the request. This can happen if a bad URI was provided, no connection
+         * to the server could be established, or the response JSON was incomplete or incorrectly
+         * formatted.
+         *
+         * @param response the retrieved token response, if successful; `null` otherwise.
+         * @param ex a description of the failure, if one occurred: `null` otherwise.
+         *
          * @see AuthorizationException.TokenRequestErrors
          */
         void onTokenRequestCompleted(@Nullable TokenResponse response,
-                                     @Nullable AuthorizationException ex);
+                @Nullable AuthorizationException ex);
     }
 
     /**
@@ -604,8 +621,8 @@ public class AuthorizationService {
                         mClientConfiguration.getConnectionBuilder()
                                 .openConnection(mRequest.configuration.registrationEndpoint);
                 conn.setRequestMethod("POST");
-                conn.setDoOutput(true);
                 conn.setRequestProperty("Content-Type", "application/json");
+                conn.setDoOutput(true);
                 conn.setRequestProperty("Content-Length", String.valueOf(postData.length()));
                 OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
                 wr.write(postData);
@@ -686,14 +703,13 @@ public class AuthorizationService {
         /**
          * Invoked when the request completes successfully or fails.
          *
-         * <p>Exactly one of {@code response} or {@code ex} will be non-null. If
-         * {@code response} is {@code null}, a failure occurred during the request. This can
-         * happen if a bad URI was provided, no connection to the server could be established, or
-         * the response JSON was incomplete or badly formatted.</p>
+         * Exactly one of `response` or `ex` will be non-null. If `response` is `null`, a failure
+         * occurred during the request. This can happen if an invalid URI was provided, no
+         * connection to the server could be established, or the response JSON was incomplete or
+         * incorrectly formatted.
          *
-         * @param response the retrieved registration response, if successful; {@code null}
-         *                 otherwise.
-         * @param ex       a description of the failure, if one occurred: {@code null} otherwise.
+         * @param response the retrieved registration response, if successful; `null` otherwise.
+         * @param ex a description of the failure, if one occurred: `null` otherwise.
          * @see AuthorizationException.RegistrationRequestErrors
          */
         void onRegistrationRequestCompleted(@Nullable RegistrationResponse response,

@@ -25,15 +25,15 @@ import java.util.Map;
 /**
  * Implementation of the client authentication method 'client_secret_basic'.
  *
- * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">
- * "OpenID Connect Core 1.0", Section 9</a>
+ * @see "OpenID Connect Core 1.0, Section 9
+ * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.9>"
  */
 public class ClientSecretBasic implements ClientAuthentication {
     /**
      * Name of this authentication method.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">
-     * "OpenID Connect Core 1.0", Section 9</a>
+     * @see "OpenID Connect Core 1.0, Section 9
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.9>"
      */
     public static final String NAME = "client_secret_basic";
 
@@ -42,7 +42,7 @@ public class ClientSecretBasic implements ClientAuthentication {
 
     /**
      * Creates a {@link ClientAuthentication} which will use the client authentication method
-     * 'client_secret_basic'.
+     * `client_secret_basic`.
      */
     public ClientSecretBasic(@NonNull String clientSecret) {
         mClientSecret = checkNotNull(clientSecret, "mClientSecret cannot be null");

@@ -64,11 +64,9 @@ public class RegistrationResponse {
     /**
      * The registered client identifier.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4"> "The OAuth 2.0 Authorization
-     * Framework" (RFC 6749), Section 4</a>
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.1"> "The OAuth 2.0
-     * Authorization
-     * Framework" (RFC 6749), Section 4.1.1</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4
+     * <https://tools.ietf.org/html/rfc6749#section-4>"
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.1 <https://tools.ietf.org/html/rfc6749#section-4.1.1>"
      */
     @NonNull
     public final String clientId;
@@ -76,8 +74,8 @@ public class RegistrationResponse {
     /**
      * Timestamp of when the client identifier was issued, if provided.
      *
-     * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
-     * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+     * @see "OpenID Connect Dynamic Client Registration 1.0, Section 3.2
+     * <https://openid.net/specs/openid-connect-discovery-1_0.html#rfc.section.3.2>"
      */
     @Nullable
     public final Long clientIdIssuedAt;
@@ -85,8 +83,8 @@ public class RegistrationResponse {
     /**
      * The client secret, which is part of the client credentials, if provided.
      *
-     * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
-     * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+     * @see "OpenID Connect Dynamic Client Registration 1.0, Section 3.2
+     * <https://openid.net/specs/openid-connect-discovery-1_0.html#rfc.section.3.2>"
      */
     @Nullable
     public final String clientSecret;
@@ -94,8 +92,8 @@ public class RegistrationResponse {
     /**
      * Timestamp of when the client credentials expires, if provided.
      *
-     * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
-     * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+     * @see "OpenID Connect Dynamic Client Registration 1.0, Section 3.2
+     * <https://openid.net/specs/openid-connect-discovery-1_0.html#rfc.section.3.2>"
      */
     @Nullable
     public final Long clientSecretExpiresAt;
@@ -104,8 +102,8 @@ public class RegistrationResponse {
      * Client registration access token that can be used for subsequent operations upon the client
      * registration.
      *
-     * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
-     * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+     * @see "OpenID Connect Dynamic Client Registration 1.0, Section 3.2
+     * <https://openid.net/specs/openid-connect-discovery-1_0.html#rfc.section.3.2>"
      */
     @Nullable
     public final String registrationAccessToken;
@@ -113,8 +111,8 @@ public class RegistrationResponse {
     /**
      * Location of the client configuration endpoint, if provided.
      *
-     * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
-     * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+     * @see "OpenID Connect Dynamic Client Registration 1.0, Section 3.2
+     * <https://openid.net/specs/openid-connect-discovery-1_0.html#rfc.section.3.2>"
      */
     @Nullable
     public final Uri registrationClientUri;
@@ -122,8 +120,8 @@ public class RegistrationResponse {
     /**
      * Client authentication method to use at the token endpoint, if provided.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">
-     * "OpenID Connect Core 1.0", Section 9</a>
+     * @see "OpenID Connect Core 1.0, Section 9
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.9>"
      */
     @Nullable
     public final String tokenEndpointAuthMethod;
@@ -194,11 +192,10 @@ public class RegistrationResponse {
         /**
          * Specifies the client identifier.
          *
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-4"> "The OAuth 2.0 Authorization
-         * Framework" (RFC 6749), Section 4</a>
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.1"> "The OAuth 2.0
-         * Authorization
-         * Framework" (RFC 6749), Section 4.1.1</a>
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4
+         * <https://tools.ietf.org/html/rfc6749#section-4>"
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.1
+         * <https://tools.ietf.org/html/rfc6749#section-4.1.1>"
          */
         public Builder setClientId(@NonNull String clientId) {
             checkNotEmpty(clientId, "client ID cannot be null or empty");
@@ -209,8 +206,8 @@ public class RegistrationResponse {
         /**
          * Specifies the timestamp for when the client identifier was issued.
          *
-         * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
-         * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+         * @see "OpenID Connect Dynamic Client Registration 1.0, Section 3.2
+         * <https://openid.net/specs/openid-connect-discovery-1_0.html#rfc.section.3.2>"
          */
         public Builder setClientIdIssuedAt(@Nullable Long clientIdIssuedAt) {
             mClientIdIssuedAt = clientIdIssuedAt;
@@ -220,8 +217,8 @@ public class RegistrationResponse {
         /**
          * Specifies the client secret.
          *
-         * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
-         * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+         * @see "OpenID Connect Dynamic Client Registration 1.0, Section 3.2
+         * <https://openid.net/specs/openid-connect-discovery-1_0.html#rfc.section.3.2>"
          */
         public Builder setClientSecret(@Nullable String clientSecret) {
             mClientSecret = clientSecret;
@@ -231,8 +228,8 @@ public class RegistrationResponse {
         /**
          * Specifies the expiration time of the client secret.
          *
-         * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
-         * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+         * @see "OpenID Connect Dynamic Client Registration 1.0, Section 3.2
+         * <https://openid.net/specs/openid-connect-discovery-1_0.html#rfc.section.3.2>"
          */
         public Builder setClientSecretExpiresAt(@Nullable Long clientSecretExpiresAt) {
             mClientSecretExpiresAt = clientSecretExpiresAt;
@@ -242,8 +239,8 @@ public class RegistrationResponse {
         /**
          * Specifies the registration access token.
          *
-         * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
-         * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+         * @see "OpenID Connect Dynamic Client Registration 1.0, Section 3.2
+         * <https://openid.net/specs/openid-connect-discovery-1_0.html#rfc.section.3.2>"
          */
         public Builder setRegistrationAccessToken(@Nullable String registrationAccessToken) {
             mRegistrationAccessToken = registrationAccessToken;
@@ -261,8 +258,8 @@ public class RegistrationResponse {
         /**
          * Specifies the client configuration endpoint.
          *
-         * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse">
-         * "OpenID Connect Dynamic Client Registration 1.0", Section 3.2</a>
+         * @see "OpenID Connect Dynamic Client Registration 1.0, Section 3.2
+         * <https://openid.net/specs/openid-connect-discovery-1_0.html#rfc.section.3.2>"
          */
         public Builder setRegistrationClientUri(@Nullable Uri registrationClientUri) {
             mRegistrationClientUri = registrationClientUri;
@@ -298,7 +295,7 @@ public class RegistrationResponse {
          *
          * @throws JSONException if the JSON is malformed or has incorrect value types for fields.
          * @throws MissingArgumentException if the JSON is missing fields required by the
-         *                                  specification.
+         *     specification.
          */
         @NonNull
         public Builder fromResponseJsonString(@NonNull String jsonStr)
@@ -312,7 +309,7 @@ public class RegistrationResponse {
          *
          * @throws JSONException if the JSON is malformed or has incorrect value types for fields.
          * @throws MissingArgumentException if the JSON is missing fields required by the
-         *                                  specification.
+         *     specification.
          */
         @NonNull
         public Builder fromResponseJson(@NonNull JSONObject json)
@@ -380,7 +377,7 @@ public class RegistrationResponse {
      * Reads a registration response JSON string received from an authorization server,
      * and associates it with the provided request.
      *
-     * @throws JSONException            if the JSON is malformed or missing required fields.
+     * @throws JSONException if the JSON is malformed or missing required fields.
      * @throws MissingArgumentException if the JSON is missing fields required by the specification.
      */
     @NonNull
@@ -395,7 +392,7 @@ public class RegistrationResponse {
      * Reads a registration response JSON object received from an authorization server,
      * and associates it with the provided request.
      *
-     * @throws JSONException            if the JSON is malformed or missing required fields.
+     * @throws JSONException if the JSON is malformed or missing required fields.
      * @throws MissingArgumentException if the JSON is missing fields required by the specification.
      */
     @NonNull

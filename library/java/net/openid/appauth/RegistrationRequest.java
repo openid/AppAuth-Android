@@ -62,16 +62,16 @@ public class RegistrationRequest {
     /**
      * Instructs the authorization server to generate a pairwise subject identifier.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#SubjectIDTypes">
-     * "OpenID Connect Core 1.0", Section 8</a>
+     * @see "OpenID Connect Core 1.0, Section 8
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.8>"
      */
     public static final String SUBJECT_TYPE_PAIRWISE = "pairwise";
 
     /**
      * Instructs the authorization server to generate a public subject identifier.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#SubjectIDTypes">
-     * "OpenID Connect Core 1.0", Section 8</a>
+     * @see "OpenID Connect Core 1.0, Section 8
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.8>"
      */
     public static final String SUBJECT_TYPE_PUBLIC = "public";
 
@@ -91,9 +91,8 @@ public class RegistrationRequest {
     /**
      * The client's redirect URI's.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.1.2"> "The OAuth 2.0
-     * Authorization
-     * Framework" (RFC 6749), Section 3.1.2</a>
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.1.2
+     * <https://tools.ietf.org/html/rfc6749#section-3.1.2>"
      */
     @NonNull
     public final List<Uri> redirectUris;
@@ -107,8 +106,8 @@ public class RegistrationRequest {
     /**
      * The response types to use.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#Authentication">
-     * "OpenID Connect Core 1.0", Section 3</a>
+     * @see "OpenID Connect Core 1.0, Section 3
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3>"
      */
     @Nullable
     public final List<String> responseTypes;
@@ -116,8 +115,8 @@ public class RegistrationRequest {
     /**
      * The grant types to use.
      *
-     * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata">
-     * "OpenID Connect Dynamic Client Registration 1.0", Section 2</a>
+     * @see "OpenID Connect Dynamic Client Registration 1.0, Section 2
+     * <https://openid.net/specs/openid-connect-discovery-1_0.html#rfc.section.2>"
      */
     @Nullable
     public final List<String> grantTypes;
@@ -125,8 +124,7 @@ public class RegistrationRequest {
     /**
      * The subject type to use.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#SubjectIDTypes">
-     * "OpenID Connect Core 1.0", Section 8</a>
+     * @see "OpenID Connect Core 1.0, Section 8 <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.8>"
      */
     @Nullable
     public final String subjectType;
@@ -134,8 +132,7 @@ public class RegistrationRequest {
     /**
      * The client authentication method to use at the token endpoint.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">
-     * "OpenID Connect Core 1.0", Section 9</a>
+     * @see "OpenID Connect Core 1.0, Section 9 <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.9>"
      */
     @Nullable
     public final String tokenEndpointAuthenticationMethod;
@@ -206,8 +203,8 @@ public class RegistrationRequest {
         /**
          * Specifies the redirect URI's.
          *
-         * @see <a href="https://tools.ietf.org/html/rfc6749#section-3.1.2"> "The OAuth 2.0
-         * Authorization Framework" (RFC 6749), Section 3.1.2</a>
+         * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.1.2
+         * <https://tools.ietf.org/html/rfc6749#section-3.1.2>"
          */
         @NonNull
         public Builder setRedirectUriValues(@NonNull List<Uri> redirectUriValues) {
@@ -219,8 +216,8 @@ public class RegistrationRequest {
         /**
          * Specifies the response types.
          *
-         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#Authentication">
-         * "OpenID Connect Core 1.0", Section 3</a>
+         * @see "OpenID Connect Core 1.0, Section 3
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3>"
          */
         @NonNull
         public Builder setResponseTypeValues(@Nullable String... responseTypeValues) {
@@ -230,8 +227,8 @@ public class RegistrationRequest {
         /**
          * Specifies the response types.
          *
-         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#Authentication">
-         * "OpenID Connect Core 1.0", Section 3</a>
+         * @see "OpenID Connect Core 1.0, Section X
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.X>"
          */
         @NonNull
         public Builder setResponseTypeValues(@Nullable List<String> responseTypeValues) {
@@ -242,8 +239,8 @@ public class RegistrationRequest {
         /**
          * Specifies the grant types.
          *
-         * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata">
-         * "OpenID Connect Dynamic Client Registration 1.0", Section 2</a>
+         * @see "OpenID Connect Dynamic Client Registration 1.0, Section 2
+         * <https://openid.net/specs/openid-connect-discovery-1_0.html#rfc.section.2>"
          */
         @NonNull
         public Builder setGrantTypeValues(@Nullable String... grantTypeValues) {
@@ -253,8 +250,8 @@ public class RegistrationRequest {
         /**
          * Specifies the grant types.
          *
-         * @see <a href="https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata">
-         * "OpenID Connect Dynamic Client Registration 1.0", Section 2</a>
+         * @see "OpenID Connect Dynamic Client Registration 1.0, Section 2
+         * <https://openid.net/specs/openid-connect-discovery-1_0.html#rfc.section.2>"
          */
         @NonNull
         public Builder setGrantTypeValues(@Nullable List<String> grantTypeValues) {
@@ -265,8 +262,8 @@ public class RegistrationRequest {
         /**
          * Specifies the subject types.
          *
-         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#SubjectIDTypes">
-         * "OpenID Connect Core 1.0", Section 8</a>l
+         * @see "OpenID Connect Core 1.0, Section 8
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.8>"
          */
         @NonNull
         public Builder setSubjectType(@Nullable String subjectType) {
@@ -277,8 +274,8 @@ public class RegistrationRequest {
         /**
          * Specifies the client authentication method to use at the token endpoint.
          *
-         * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">
-         * "OpenID Connect Core 1.0", Section 9</a>
+         * @see "OpenID Connect Core 1.0, Section 9
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.9>"
          */
         @NonNull
         public Builder setTokenEndpointAuthenticationMethod(
@@ -298,10 +295,8 @@ public class RegistrationRequest {
         }
 
         /**
-         * Constructs the registration request. At a minimum the following fields must have been
-         * set:
-         * <ul> <li>The redirect URI's</li>
-         * </ul> Failure to specify any of these parameters will result in a runtime exception.
+         * Constructs the registration request. At a minimum, the redirect URI must have been
+         * set before calling this method.
          */
         @NonNull
         public RegistrationRequest build() {

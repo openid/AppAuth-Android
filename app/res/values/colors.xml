@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- OpenID gray -->
-    <color name="colorPrimary">#aeafb3</color>
-    <color name="colorPrimaryDark">#7c7d80</color>
-    <!-- AppAuth blue -->
-    <color name="colorAccent">#00aeef</color>
+    <color name="colorPrimary">#00aeef</color>
+    <color name="colorPrimaryDark">#00A2DF</color>
+    <color name="colorAccent">#FFAB00</color>
 </resources>

@@ -1,150 +1,54 @@
-AppAuth for Android - Demo App
-------------------------------
+# AppAuth for Android - Demo App
 
 This app demonstrates the AppAuth library by performing an authorization code
-flow with Google as the authorization service. While the app compiles without
-modification, some configuration is required in order to see Google as an
-authorization option
+flow with an authorization service. The configuration contained in `res/raw/idp_config.json`
+must be modified in order for the app to function. Warnings are supplied when the app is run
+with an invalid configuration.
 
-Configuring Google Sign In
-==========================
+The configuration file MUST contain a JSON object. The following properties can be specified:
 
-The configuration properties that must be modified can be found in
-[res/values/idp_configs.xml](res/values/idp_configs.xml).
-First, An OAuth2 client ID for Google Sign In must be created.
-The [quick-start configurator](https://goo.gl/pl2Fu2) can be used to
-generate this, or it can be done directly on the
-[Google Developer Console](https://console.developers.google.com/apis/credentials?project=_).
+  - `redirect_uri` (required): The redirect URI to use for receiving the authorization response.
+    This can either be a custom scheme URI (com.example.app:/oauth2redirect/example-provider) or 
+    an https app link (https://www.example.com/path). Custom scheme URIs are better supported 
+    across all versions of Android, however many authorization server implementations require an 
+    https URI. Consult the documentation for your authorization server.
 
-With either method, you will need the signature of the certificate used to
-sign the app. After building the app (`./gradlew assembleDebug`), the
-`appauth.keystore` file contains the certificate used and the signature
-can be displayed by running:
+    The value specified here should match the value specified for `appAuthRedirectScheme` in the
+    `build.gradle`, so that the demo app can capture the response.
 
-```
-keytool -list -v -keystore appauth.keystore -storepass appauth | \
-   grep SHA1\: | \
-   awk '{print $2}'
-```
+  - `authorization_scope` (required): The scope string to use for the authorization request.
+    For the purposes of the demo, we recommend the value "openid profile email", though any value
+    understood by your authorization server can be used.
 
-The created client ID should look something like:
+  - `client_id`: The OAuth2 client id used to identify the client to the authorization server.
+    If this property is omitted, or an empty value is provided, dynamic client
+    registration will be attempted using the registration URI in the discovery document referenced by
+    `discovery_uri` below, or in the value `registration_endpoint_uri`.
 
-```
-YOUR_CLIENT.apps.googleusercontent.com
-```
+  - `discovery_uri`: The OpenID Connect discovery URI for your authorization service, if available.
+    If the IDP you wish to test does not support discovery, this value can be omitted or set
+    to an empty string.
 
-Where `YOUR_CLIENT` is your client string provided by Google. This full string
-should be placed in the `google_client_id` string resource, and the reverse of
-it (i.e. `com.googleusercontent.apps.YOUR_CLIENT`) should be placed in
-`google_auth_redirect_uri`.
-After these values populated, set `google_enabled` to `true`.
+  - `authorization_endpoint_uri`: The authorization endpoint URI for your authorization service. If
+    `discovery_uri` above is not specified, then this value is required. Otherwise, it can be
+    omitted or set to an empty string.
 
-Additionally, to enable the capture of redirects to a custom scheme based on
-this client ID, modify the `build.gradle` to change the value of the
-`appAuthRedirectScheme` manifest placeholder.
+  - `token_endpoint_uri`: The token endpoint URI for your authorization service. If `discovery_uri`
+    above is not specified, then this value is required. Otherwise, it can be omitted or set to
+    an empty string.
 
-After this is done, recompile the app (`./gradlew assembleDebug`) and
-install it (`adb install -r -d app/build/outputs/apk/app-debug.apk`). A
-Google Sign In button should be displayed.
+  - `registration_endpoint_uri`: The dynamic client registration endpoint URI for your authorization
+    service. If client_id and discovery_uri above are not specified, this value MUST be specified.
 
+  - `https_required`: Whether HTTPS connections are required for registration and token requests.
+    If omitted, this defaults to true.
 
-Adding additional IDPs
-======================
+## Should I use this same configuration pattern in my own apps?
 
-Additional authorization services can be added to the demo app by defining
-additional instances of `IdentityProvider`. Assuming a service named
-`myauth`, the following steps would be taken:
+We (the AppAuth maintainers) have no strong opinion on this one way or another. Configuration files
+can be convenient when the data is likely to change, such as substituting a configuration file
+for development versus production builds.
 
-1. The name of the service should be defined in `myauth_name` in
-   `idp_configs_optional.xml`.
-
-2. If the service supports OpenID Connect, `myauth_discovery_uri` would be
-   defined in `idp_configs_optional.xml` and set to the discovery URI for
-   the service
-   (e.g. `https://www.myauth.com/.well-known/openid-configuration`).
-
-   Otherwise, `myauth_auth_endpoint_uri` and `myauth_token_endpoint_uri` would
-   be defined in `idp_configs_optional.xml` and set to the authorization and
-   token endpoint URIs respectively.
-
-4. The default scope string, `myauth_scope_string`, should be defined in
-   `idp_configs_optional.xml`.
-
-5. A placeholder for the client ID, `myauth_client_id`, should be defined in
-   `idp_configs.xml`.
-
-6. The redirect URI, `myauth_redirect_uri`, can either be defined in
-   `idp_configs_optional.xml` or `idp_configs.xml` dependent on whether this
-   redirect URI is client ID specific. For instance, if it were just a
-   web URL like `https://demo.myauth.com` then it could be placed in
-   the optional config file. If it is a custom scheme tied to the client ID,
-   similar to what Google defines, it should go in `idp_configs.xml`.
-
-7. An on-off toggle, `myauth_enabled`, should be defined in `idp_configs.xml`
-   and set to false by default.
-
-8. Button resources representing the IDP should be imported into the relevant
-   directories under `res`.
-
-This may result in an addition to `idp_configs.xml` that looks like:
-
-```
-<bool name="myauth_enabled">true</bool>
-<string name="myauth_client_id" translatable="false">YOUR_CLIENT_ID</string>
-```
-
-And an addition to `idp_configs_optional.xml` that looks like:
-
-```
-<string name="myauth_name">MyAuth</string>
-<string name="myauth_auth_endpoint_uri">https://www.myauth.com/auth</string>
-<string name="myauth_token_endpoint_uri">https://www.myauth.com/token</string>
-<string name="myauth_scope_string">profile payment location</string>
-<string name="myauth_redirect_uri">https://demo.myauth.com/callback</string>
-```
-
-With these properties defined, a new instance of IdentityProvider can be
-defined in `IdentityProvider`:
-
-```
-public static final MYAUTH = new IdentityProvider(
-    "MyAuth", // name of the provider, for debug strings
-    R.bool.myauth_enabled,
-    NOT_SPECIFIED, // discovery document not provided
-    R.string.myauth_auth_endpoint_uri,
-    R.string.myauth_token_endpoint_uri,
-    R.string.myauth_client_id,
-    R.string.myauth_auth_redirect_uri,
-    R.string.myauth_scope_string,
-    R.drawable.btn_myauth, // your button image asset
-    R.string.myauth_name,
-    android.R.color.black // text color on the button
-);
-```
-
-And added to `IdentityProvider`'s static list of IDPs, e.g.:
-
-```
-public static final List<IdentityProvider> PROVIDERS = Arrays.asList(MYAUTH)
-```
-
-Finally you need to add a new intent-filter to the
-`net.openid.appauth.RedirectUriReceiverActivity` activity section of
-the `AndroidManifest.xml`
-
-```
-<!-- Callback from authentication screen -->
-<activity android:name="net.openid.appauth.RedirectUriReceiverActivity">
-
-    <!-- redirect URI for your new IDP -->
-    <intent-filter>
-        <action android:name="android.intent.action.VIEW"/>
-        <category android:name="android.intent.category.DEFAULT"/>
-        <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="@string/your_idp_auth_redirect_scheme"/>
-    </intent-filter>
-</activity>
-```
-
-Make sure you've set `myauth_enabled` to true in the config, and your new IdP
-should show up in the list.
+Configurations such as this can also specified in multiple ways; this is just one example approach.
+There is also no real harm in hard-coding your configuration into your code, where such dynamic
+reconfiguration is unnecessary. Do what is best for your app and development process.

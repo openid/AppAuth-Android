@@ -14,30 +14,6 @@
 
 package net.openid.appauth;
 
-import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
-import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
-import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
-import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET_EXPIRES_AT;
-import static net.openid.appauth.TestValues.TEST_IDP_REGISTRATION_ENDPOINT;
-import static net.openid.appauth.TestValues.TEST_IDP_TOKEN_ENDPOINT;
-import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
-import static net.openid.appauth.TestValues.TEST_REFRESH_TOKEN;
-import static net.openid.appauth.TestValues.TEST_STATE;
-import static net.openid.appauth.TestValues.getTestAuthCodeExchangeRequest;
-import static net.openid.appauth.TestValues.getTestAuthRequestBuilder;
-import static net.openid.appauth.TestValues.getTestRegistrationRequest;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.android.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -47,21 +23,11 @@ import android.support.annotation.Nullable;
 import android.support.customtabs.CustomTabsClient;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.customtabs.CustomTabsServiceConnection;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLStreamHandler;
-import java.util.Map;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
+
 import net.openid.appauth.AuthorizationException.GeneralErrors;
 import net.openid.appauth.browser.Browsers;
 import net.openid.appauth.connectivity.ConnectionBuilder;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,6 +37,39 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.util.Map;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+
+import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
+import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
+import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
+import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET_EXPIRES_AT;
+import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
+import static net.openid.appauth.TestValues.TEST_REFRESH_TOKEN;
+import static net.openid.appauth.TestValues.TEST_STATE;
+import static net.openid.appauth.TestValues.getTestAuthCodeExchangeRequest;
+import static net.openid.appauth.TestValues.getTestAuthRequestBuilder;
+import static net.openid.appauth.TestValues.getTestRegistrationRequest;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk=16)
@@ -182,13 +181,35 @@ public class AuthorizationServiceTest {
     public void testTokenRequest() throws Exception {
         InputStream is = new ByteArrayInputStream(AUTH_CODE_EXCHANGE_RESPONSE_JSON.getBytes());
         when(mHttpConnection.getInputStream()).thenReturn(is);
+        when(mHttpConnection.getRequestProperty("Accept")).thenReturn(null);
         when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
         TokenRequest request = getTestAuthCodeExchangeRequest();
         mService.performTokenRequest(request, mAuthCallback);
         mAuthCallback.waitForCallback();
         assertTokenResponse(mAuthCallback.response, request);
         String postBody = mOutputStream.toString();
+
+        // by default, we set application/json as an acceptable response type if a value was not
+        // already set
+        verify(mHttpConnection).setRequestProperty("Accept", "application/json");
         assertThat(postBody).isEqualTo(UriUtil.formUrlEncode(request.getRequestParameters()));
+    }
+
+    @Test
+    public void testTokenRequest_leaveExistingAcceptUntouched() throws Exception {
+        InputStream is = new ByteArrayInputStream(AUTH_CODE_EXCHANGE_RESPONSE_JSON.getBytes());
+
+        // emulate some content types having already been set as an Accept value
+        when(mHttpConnection.getRequestProperty("Accept"))
+                .thenReturn("text/plain");
+
+        when(mHttpConnection.getInputStream()).thenReturn(is);
+        when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        TokenRequest request = getTestAuthCodeExchangeRequest();
+        mService.performTokenRequest(request, mAuthCallback);
+
+        // application/json should be added after the existing string
+        verify(mHttpConnection, never()).setRequestProperty(eq("Accept"), any(String.class));
     }
 
     @Test

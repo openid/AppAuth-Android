@@ -29,9 +29,9 @@
 
         <!-- Main activity -->
         <activity
-                android:name=".MainActivity"
-                android:label="@string/app_name_short"
-                android:theme="@style/AppTheme.NoActionBar"
+                android:name=".LoginActivity"
+                android:label="@string/login_header"
+                android:theme="@style/AppTheme"
                 android:windowSoftInputMode="stateHidden" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,7 +42,7 @@
         <activity
                 android:name=".TokenActivity"
                 android:label="@string/app_name_short"
-                android:theme="@style/AppTheme.NoActionBar"
+                android:theme="@style/AppTheme"
                 android:windowSoftInputMode="stateHidden" >
         </activity>
 
@@ -72,5 +72,4 @@
             </intent-filter>
         </activity>
     </application>
-
 </manifest>

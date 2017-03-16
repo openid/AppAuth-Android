@@ -22,8 +22,8 @@ import java.util.Map;
  * {@link AuthorizationService#performTokenRequest(TokenRequest,
  * AuthorizationService.TokenResponseCallback)}.
  *
- * @see @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">
- * "OpenID Connect Core 1.0", Section 9</a>
+ * @see "OpenID Connect Core 1.0, Section 9
+ * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.9>"
  */
 public class NoClientAuthentication implements ClientAuthentication {
     /**
@@ -32,7 +32,7 @@ public class NoClientAuthentication implements ClientAuthentication {
     public static final String NAME = "none";
 
     /**
-     * The default (singleton) instance of {@linke NoClientAuthentication}.
+     * The default (singleton) instance of {@link NoClientAuthentication}.
      */
     public static final NoClientAuthentication INSTANCE = new NoClientAuthentication();
 
@@ -43,7 +43,7 @@ public class NoClientAuthentication implements ClientAuthentication {
     /**
      * {@inheritDoc}
      *
-     * @return always null.
+     * @return always `null`.
      */
     @Override
     public Map<String, String> getRequestHeaders(String clientId) {
@@ -53,7 +53,7 @@ public class NoClientAuthentication implements ClientAuthentication {
     /**
      * {@inheritDoc}
      *
-     * @return always null.
+     * @return always `null`.
      */
     @Override
     public Map<String, String> getRequestParameters(String clientId) {

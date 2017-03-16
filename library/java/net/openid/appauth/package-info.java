@@ -28,7 +28,7 @@
  * including using
  * <a href="http://developer.android.com/tools/support-library/features.html#custom-tabs">Custom
  * Tabs</a> for the auth request. For this reason, {@link android.webkit.WebView} is explicitly
- * <em>not</em> supported due to usability and security reasons.
+ * _not_ supported due to usability and security reasons.
  *
  * <p>The library also supports the <a href="https://tools.ietf.org/html/rfc7636">PKCE</a> extension
  * to OAuth which was created to secure authorization codes in public clients when custom URI scheme

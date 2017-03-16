@@ -37,8 +37,8 @@ import java.util.List;
 /**
  * An OpenID Connect 1.0 Discovery Document.
  *
- * @see <a href=https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata>
- * "OpenID Provider Metadata", OpenID Connect Discovery 1.0, Section 3</a>
+ * @see "OpenID Connect discovery 1.0, Section 3
+ * <https://openid.net/specs/openid-connect-discovery-1_0.html#rfc.section.3>"
  */
 public class AuthorizationServiceDiscovery {
 
@@ -240,9 +240,6 @@ public class AuthorizationServiceDiscovery {
 
     /**
      * The asserted issuer identifier.
-     *
-     * @see <a href="https://openid.net/specs/openid-connect-discovery-1_0.html#IssuerDiscovery">
-     * "OpenID Connect Dynamic Client Registration 1.0"</a>
      */
     @NonNull
     public String getIssuer() {
@@ -251,9 +248,6 @@ public class AuthorizationServiceDiscovery {
 
     /**
      * The OAuth 2 authorization endpoint URI.
-     *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#AuthorizationEndpoint">
-     * "OpenID Connect Dynamic Client Registration 1.0"</a>
      */
     @NonNull
     public Uri getAuthorizationEndpoint() {
@@ -267,9 +261,6 @@ public class AuthorizationServiceDiscovery {
 
     /**
      * The OAuth 2 token endpoint URI. Not specified if only the implicit flow is used.
-     *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#TokenEndpoint">
-     * "OpenID Connect Dynamic Client Registration 1.0"</a>
      */
     @Nullable
     public Uri getTokenEndpoint() {
@@ -278,9 +269,6 @@ public class AuthorizationServiceDiscovery {
 
     /**
      * The OpenID Connect UserInfo endpoint URI.
-     *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#UserInfo">
-     * "OpenID Connect Dynamic Client Registration 1.0"</a>
      */
     @Nullable
     public Uri getUserinfoEndpoint() {
@@ -290,7 +278,7 @@ public class AuthorizationServiceDiscovery {
     /**
      * The JSON web key set document URI.
      *
-     * @see <a href="http://tools.ietf.org/html/rfc7517">"JSON Web Key (JWK)"</a>
+     * @see "JSON Web Key (RFC 7517) <http://tools.ietf.org/html/rfc7517>"
      */
     @NonNull
     public Uri getJwksUri() {
@@ -299,9 +287,6 @@ public class AuthorizationServiceDiscovery {
 
     /**
      * The dynamic client registration endpoint URI.
-     *
-     * @see <a href="http://openid.net/specs/openid-connect-registration-1_0.html">"OpenID Connect
-     * Dynamic Client Registration 1.0"</a>
      */
     @Nullable
     public Uri getRegistrationEndpoint() {
@@ -309,18 +294,17 @@ public class AuthorizationServiceDiscovery {
     }
 
     /**
-     * The OAuth 2 scope values supported.
+     * The OAuth 2 `scope` values supported.
      *
-     * @see <a href="http://tools.ietf.org/html/rfc6749#section-3.3">"The OAuth 2.0 Authorization
-     * Framework"</a>
+     * @see "OpenID Connect Dynamic Client Registration 1.0
+     * <https://openid.net/specs/openid-connect-discovery-1_0.html>"
      */
-
     public List<String> getScopesSupported() {
         return get(SCOPES_SUPPORTED);
     }
 
     /**
-     * The OAuth 2 {@code response_type} values supported.
+     * The OAuth 2 `response_type` values supported.
      */
     @NonNull
     public List<String> getResponseTypesSupported() {
@@ -328,10 +312,9 @@ public class AuthorizationServiceDiscovery {
     }
 
     /**
-     * The OAuth 2 {@code response_mode} values supported.
+     * The OAuth 2 `response_mode` values supported.
      *
-     * @see <a href="http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html">
-     * "OAuth 2.0 Multiple Response Type Encoding Practices"</a>
+     * @see "OAuth 2.0 Multiple Response Type Encoding Practices <http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html>"
      */
     @Nullable
     public List<String> getResponseModesSupported() {
@@ -339,9 +322,8 @@ public class AuthorizationServiceDiscovery {
     }
 
     /**
-     * The OAuth 2 {@code grant_type} values supported. Defaults to
-     * {@code authorization_code} and {@code implicit} if not specified in the discovery document,
-     * as suggested by the discovery specification.
+     * The OAuth 2 `grant_type` values supported. Defaults to `authorization_code` and `implicit`
+     * if not specified in the discovery document, as suggested by the discovery specification.
      */
     @NonNull
     public List<String> getGrantTypesSupported() {
@@ -366,7 +348,7 @@ public class AuthorizationServiceDiscovery {
     /**
      * The JWS signing algorithms (alg values) supported for encoding ID token claims.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7519">"JSON Web Token (JWT)"</a>
+     * @see "JSON Web Token (RFC 7519) <https://tools.ietf.org/html/rfc7519>"
      */
     @NonNull
     public List<String> getIdTokenSigningAlgorithmValuesSupported() {
@@ -376,7 +358,7 @@ public class AuthorizationServiceDiscovery {
     /**
      * The JWE encryption algorithms (alg values) supported for encoding ID token claims.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7519">"JSON Web Token (JWT)"</a>
+     * @see "JSON Web Token (RFC 7519) <https://tools.ietf.org/html/rfc7519>"
      */
     @Nullable
     public List<String> getIdTokenEncryptionAlgorithmValuesSupported() {
@@ -386,7 +368,7 @@ public class AuthorizationServiceDiscovery {
     /**
      * The JWE encryption encodings (enc values) supported for encoding ID token claims.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7519">"JSON Web Token (JWT)"</a>
+     * @see "JSON Web Token (RFC 7519) <https://tools.ietf.org/html/rfc7519>"
      */
     @Nullable
     public List<String> getIdTokenEncryptionEncodingValuesSupported() {
@@ -397,9 +379,9 @@ public class AuthorizationServiceDiscovery {
      * The JWS signing algorithms (alg values) supported by the UserInfo Endpoint
      * for encoding ID token claims.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7515">"JSON Web Signature (JWS)"</a>
-     * @see <a href="https://tools.ietf.org/html/rfc7518">"JSON Web Algorithms (JWA)"</a>
-     * @see <a href="https://tools.ietf.org/html/rfc7519">"JSON Web Token (JWT)"</a>
+     * @see "JSON Web Signature (RFC 7515) <https://tools.ietf.org/html/rfc7515>"
+     * @see "JSON Web Algorithms (RFC 7518) <https://tools.ietf.org/html/rfc7518>"
+     * @see "JSON Web Token (RFC 7519) <https://tools.ietf.org/html/rfc7519>"
      */
     @Nullable
     public List<String> getUserinfoSigningAlgorithmValuesSupported() {
@@ -410,9 +392,9 @@ public class AuthorizationServiceDiscovery {
      * The JWE encryption algorithms (alg values) supported by the UserInfo Endpoint
      * for encoding ID token claims.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7515">"JSON Web Signature (JWS)"</a>
-     * @see <a href="https://tools.ietf.org/html/rfc7518">"JSON Web Algorithms (JWA)"</a>
-     * @see <a href="https://tools.ietf.org/html/rfc7519">"JSON Web Token (JWT)"</a>
+     * @see "JSON Web Signature (RFC 7515) <https://tools.ietf.org/html/rfc7515>"
+     * @see "JSON Web Algorithms (RFC 7518) <https://tools.ietf.org/html/rfc7518>"
+     * @see "JSON Web Token (RFC 7519) <https://tools.ietf.org/html/rfc7519>"
      */
     @Nullable
     public List<String> getUserinfoEncryptionAlgorithmValuesSupported() {
@@ -423,7 +405,7 @@ public class AuthorizationServiceDiscovery {
      * The JWE encryption encodings (enc values) supported by the UserInfo Endpoint
      * for encoding ID token claims.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7519">"JSON Web Token (JWT)"</a>
+     * @see "JSON Web Token (RFC 7519) <https://tools.ietf.org/html/rfc7519>"
      */
     @Nullable
     public List<String> getUserinfoEncryptionEncodingValuesSupported() {
@@ -433,8 +415,8 @@ public class AuthorizationServiceDiscovery {
     /**
      * The JWS signing algorithms (alg values) supported for Request Objects.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#RequestObject">
-     * "OpenID Connect Core 1.0", Section 6.1</a>
+     * @see "OpenID Connect Core 1.0, Section 6.1
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.6.1>"
      */
     public List<String> getRequestObjectSigningAlgorithmValuesSupported() {
         return get(REQUEST_OBJECT_SIGNING_ALG_VALUES_SUPPORTED);
@@ -458,13 +440,13 @@ public class AuthorizationServiceDiscovery {
 
     /**
      * The client authentication methods supported by the token endpoint. Defaults to
-     * {@code client_secret_basic} if the discovery document does not specify a value, as suggested
+     * `client_secret_basic` if the discovery document does not specify a value, as suggested
      * by the discovery specification.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html">
-     * "OpenID Connect Core 1.0"</a>
-     * @see <a href="http://tools.ietf.org/html/rfc6749#section-2.3.1">
-     * "The OAuth 2.0 Authorization Framework"</a>
+     * @see "OpenID Connect Core 1.0, Section 9
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.9>"
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 2.3.1
+     * <https://tools.ietf.org/html/rfc6749#section-2.3.1>"
      */
     @NonNull
     public List<String> getTokenEndpointAuthMethodsSupported() {
@@ -473,10 +455,10 @@ public class AuthorizationServiceDiscovery {
 
     /**
      * The JWS signing algorithms (alg values) supported by the token endpoint for the signature on
-     * the JWT used to authenticate the client for the {@code private_key_jwt} and
-     * {@code client_secret_jwt} authentication methods.
+     * the JWT used to authenticate the client for the `private_key_jwt` and
+     * `client_secret_jwt` authentication methods.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7519">"JSON Web Token (JWT)"</a>
+     * @see "JSON Web Token (RFC 7519) <https://tools.ietf.org/html/rfc7519>"
      */
     @Nullable
     public List<String> getTokenEndpointAuthSigningAlgorithmValuesSupported() {
@@ -484,10 +466,10 @@ public class AuthorizationServiceDiscovery {
     }
 
     /**
-     * The {@code display} parameter values supported.
+     * The `display` parameter values supported.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#AuthRequest">
-     * "OpenID Connect Core 1.0"</a>
+     * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
      */
     @Nullable
     public List<String> getDisplayValuesSupported() {
@@ -495,18 +477,18 @@ public class AuthorizationServiceDiscovery {
     }
 
     /**
-     * The claim types supported. Defaults to {@code normal} if not specified by the discovery
+     * The claim types supported. Defaults to `normal` if not specified by the discovery
      * document JSON, as suggested by the discovery specification.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ClaimTypes">
-     * "OpenID Connect Core 1.0", Section 5.6</a>
+     * @see "OpenID Connect Core 1.0, Section 5.6
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.5.6>"
      */
     public List<String> getClaimTypesSupported() {
         return get(CLAIM_TYPES_SUPPORTED);
     }
 
     /**
-     * The claim names of the claims that the provider <em>may</em> be able to supply values for.
+     * The claim names of the claims that the provider _may_ be able to supply values for.
      */
     @Nullable
     public List<String> getClaimsSupported() {
@@ -526,7 +508,7 @@ public class AuthorizationServiceDiscovery {
      * Languages and scripts supported for values in claims being returned.
      * Represented as a list of BCP47 language tag values.
      *
-     * @see <a href="http://tools.ietf.org/html/rfc5646">"Tags for Identifying Languages"</a>
+     * @see "Tags for Identifying Languages (RFC 5646) <http://tools.ietf.org/html/rfc5646>"
      */
     @Nullable
     public List<String> getClaimsLocalesSupported() {
@@ -537,7 +519,7 @@ public class AuthorizationServiceDiscovery {
      * Languages and scripts supported for the user interface.
      * Represented as a list of BCP47 language tag values.
      *
-     * @see <a href="http://tools.ietf.org/html/rfc5646">"Tags for Identifying Languages"</a>
+     * @see "Tags for Identifying Languages (RFC 5646) <http://tools.ietf.org/html/rfc5646>"
      */
     @Nullable
     public List<String> getUiLocalesSupported() {
@@ -545,40 +527,40 @@ public class AuthorizationServiceDiscovery {
     }
 
     /**
-     * Specifies whether the {@code claims} parameter is supported for authorization requests.
+     * Specifies whether the `claims` parameter is supported for authorization requests.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter">
-     * "OpenID Connect Core 1.0", Section 5.5</a>
+     * @see "OpenID Connect Core 1.0, Section 5.5
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.5.5>"
      */
     public boolean isClaimsParameterSupported() {
         return get(CLAIMS_PARAMETER_SUPPORTED);
     }
 
     /**
-     * Specifies whether the {@code request} parameter is supported for authorization requests.
+     * Specifies whether the `request` parameter is supported for authorization requests.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#RequestObject">
-     * "OpenID Connect Core 1.0", Section 6.1</a>
+     * @see "OpenID Connect Core 1.0, Section 6.1
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.6.1>"
      */
     public boolean isRequestParameterSupported() {
         return get(REQUEST_PARAMETER_SUPPORTED);
     }
 
     /**
-     * Specifies whether the {@code request_uri} is supported for authorization requests.
+     * Specifies whether the `request_uri` parameter is supported for authorization requests.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#RequestUriParameter">
-     * "OpenID Connect Core 1.0", Section 6.2</a>
+     * @see "OpenID Connect Core 1.0, Section 6.2
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.6.2>"
      */
     public boolean isRequestUriParameterSupported() {
         return get(REQUEST_URI_PARAMETER_SUPPORTED);
     }
 
     /**
-     * Specifies whether {@code request_uri} values are required to be pre-registered before use.
+     * Specifies whether `request_uri` values are required to be pre-registered before use.
      *
-     * @see <a href="http://openid.net/specs/openid-connect-core-1_0.html#RequestUriParameter">
-     * "OpenID Connect Core 1.0", Section 6.2</a>
+     * @see "OpenID Connect Core 1.0, Section 6.2
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.6.2>"
      */
     public boolean requireRequestUriRegistration() {
         return get(REQUIRE_REQUEST_URI_REGISTRATION);

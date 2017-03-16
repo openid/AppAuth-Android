@@ -35,9 +35,9 @@ import org.json.JSONException;
  * to control the back stack, ensuring that the authorization activity will not be reachable
  * via the back button after the flow completes.
  *
- * <p>The following diagram illustrates the operation of the activity:
+ * The following diagram illustrates the operation of the activity:
  *
- * <pre>
+ * ```
  *                          Back Stack Towards Top
  *                +------------------------------------------>
  *
@@ -67,50 +67,46 @@ import org.json.JSONException;
  *                       |  Activity   |
  *                       |             |
  *                       +-------------+
- * </pre>
+ * ```
  *
- * <p>The process begins with an activity requesting that an authorization flow be started,
+ * The process begins with an activity requesting that an authorization flow be started,
  * using {@link AuthorizationService#performAuthorizationRequest}.
  *
- * <ul>
- *   <li>Step 1: Using an intent derived from {@link #createStartIntent}, this activity is
- *       started. The state delivered in this intent is recorded for future use.
- *   <li>Step 2: The authorization intent, typically a browser tab, is started. At this point,
- *       depending on user action, we will either end up in a "completion" flow (S) or
- *       "cancelation flow" (C).
+ * - Step 1: Using an intent derived from {@link #createStartIntent}, this activity is
+ *   started. The state delivered in this intent is recorded for future use.
  *
- *   <li>C flow:
+ * - Step 2: The authorization intent, typically a browser tab, is started. At this point,
+ *   depending on user action, we will either end up in a "completion" flow (S) or
+ *   "cancelation flow" (C).
  *
- *     <ul>
- *       <li>Step C1: If the user presses the back button or otherwise causes the
- *           authorization activity to finish, the AuthorizationManagementActivity will be
- *           recreated or restarted.
- *       <li>Step C2a: If a cancelation PendingIntent was provided in the call to
- *           {@link AuthorizationService#performAuthorizationRequest}, then this is
- *           used to invoke a cancelation activity.
- *       <li>Step C2b: If no cancelation PendingIntent was provided (legacy behavior), then
- *           the AuthorizationManagementActivity simply finishes, returning control
- *           to the activity above it in the back stack (typically, the
- *           initiating activity).
- *     </ul>
- *   <li>S flow:
- *     <ul>
- *       <li>Step S1: The authorization activity completes with a success of failure, and sends
- *           this result to {@link RedirectUriReceiverActivity}.
- *       <li>Step S2: {@link RedirectUriReceiverActivity} extracts the forwarded data, and
- *           invokes AuthorizationManagementActivity using an intent derived from
- *           {@link #createResponseHandlingIntent}. This intent has flag CLEAR_TOP set, which
- *           will result in both the authorization activity and
- *           {@link RedirectUriReceiverActivity} being destroyed, if necessary, such that
- *           AuthorizationManagementActivity is once again at the top of the back stack.
- *       <li>Step S3: The pending intent provided to
- *           {@link AuthorizationService#performAuthorizationRequest} for completion of the
- *           authorization flow is invoked, providing the decoded
- *           {@link AuthorizationResponse} or {@link AuthorizationException} as appropriate.
- *           The AuthorizationManagementActivity finishes, removing itself from the back
- *           stack.
- *     </ul>
- * </ul>
+ * - Cancelation (C) flow:
+ *     - Step C1: If the user presses the back button or otherwise causes the authorization
+ *       activity to finish, the AuthorizationManagementActivity will be recreated or restarted.
+ *
+ *     - Step C2a: If a cancelation PendingIntent was provided in the call to
+ *       {@link AuthorizationService#performAuthorizationRequest}, then this is
+ *       used to invoke a cancelation activity.
+ *
+ *     - Step C2b: If no cancelation PendingIntent was provided (legacy behavior), then the
+ *       AuthorizationManagementActivity simply finishes, returning control to the activity above
+ *       it in the back stack (typically, the initiating activity).
+ *
+ * - Completion (S) flow:
+ *     - Step S1: The authorization activity completes with a success of failure, and sends this
+ *       result to {@link RedirectUriReceiverActivity}.
+ *
+ *     - Step S2: {@link RedirectUriReceiverActivity} extracts the forwarded data, and invokes
+ *       AuthorizationManagementActivity using an intent derived from
+ *       {@link #createResponseHandlingIntent}. This intent has flag CLEAR_TOP set, which will
+ *       result in both the authorization activity and {@link RedirectUriReceiverActivity} being
+ *       destroyed, if necessary, such that AuthorizationManagementActivity is once again at the
+ *       top of the back stack.
+ *
+ *     - Step S3: The pending intent provided to
+ *       {@link AuthorizationService#performAuthorizationRequest} for completion of the
+ *       authorization flow is invoked, providing the decoded {@link AuthorizationResponse} or
+ *       {@link AuthorizationException} as appropriate. The AuthorizationManagementActivity
+ *       finishes, removing itself from the back stack.
  */
 public class AuthorizationManagementActivity extends Activity {
 
@@ -128,8 +124,6 @@ public class AuthorizationManagementActivity extends Activity {
 
     @VisibleForTesting
     static final String KEY_AUTHORIZATION_STARTED = "authStarted";
-
-    private Clock mClock = SystemClock.INSTANCE;
 
     private boolean mAuthorizationStarted = false;
     private Intent mAuthIntent;
@@ -292,7 +286,7 @@ public class AuthorizationManagementActivity extends Activity {
             return AuthorizationException.fromOAuthRedirect(responseUri).toIntent();
         } else {
             AuthorizationResponse response = new AuthorizationResponse.Builder(mAuthRequest)
-                    .fromUri(responseUri, mClock)
+                    .fromUri(responseUri)
                     .build();
 
             if (mAuthRequest.state == null && response.state != null

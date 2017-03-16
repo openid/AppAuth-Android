@@ -45,6 +45,7 @@ public class AuthState {
      */
     public static final int EXPIRY_TIME_TOLERANCE_MS = 60000;
 
+    private static final String KEY_CONFIG = "config";
     private static final String KEY_REFRESH_TOKEN = "refreshToken";
     private static final String KEY_SCOPE = "scope";
     private static final String KEY_LAST_AUTHORIZATION_RESPONSE = "lastAuthorizationResponse";
@@ -57,6 +58,9 @@ public class AuthState {
 
     @Nullable
     private String mScope;
+
+    @Nullable
+    private AuthorizationServiceConfiguration mConfig;
 
     @Nullable
     private AuthorizationResponse mLastAuthorizationResponse;
@@ -76,6 +80,14 @@ public class AuthState {
      * Creates an empty, unauthenticated {@link AuthState}.
      */
     public AuthState() {}
+
+    /**
+     * Creates an unauthenticated {@link AuthState}, with the service configuration retained
+     * for convenience.
+     */
+    public AuthState(@NonNull AuthorizationServiceConfiguration config) {
+        mConfig = config;
+    }
 
     /**
      * Creates an {@link AuthState} based on an authorization exchange.
@@ -184,7 +196,8 @@ public class AuthState {
         if (mLastAuthorizationResponse != null) {
             return mLastAuthorizationResponse.request.configuration;
         }
-        return null;
+
+        return mConfig;
     }
 
     /**
@@ -296,7 +309,7 @@ public class AuthState {
 
     /**
      * Determines whether the access token is considered to have expired. If no refresh token
-     * has been acquired, then this method will always return {@code false}. A token refresh
+     * has been acquired, then this method will always return `false`. A token refresh
      * can be forced, regardless of the validity of any currently acquired access token, by
      * calling {@link #setNeedsTokenRefresh(boolean) setNeedsTokenRefresh(true)}.
      */
@@ -330,7 +343,7 @@ public class AuthState {
 
     /**
     * Determines whether the client credentials is considered to have expired. If no client
-    * credentials have been acquired, then this method will always return {@code false}
+    * credentials have been acquired, then this method will always return `false`
     */
     public boolean hasClientSecretExpired() {
         return hasClientSecretExpired(SystemClock.INSTANCE);
@@ -364,6 +377,7 @@ public class AuthState {
         // the last token response and refresh token are now stale, as they are associated with
         // any previous authorization response
         mLastAuthorizationResponse = authResponse;
+        mConfig = null;
         mLastTokenResponse = null;
         mRefreshToken = null;
         mAuthorizationException = null;
@@ -415,7 +429,11 @@ public class AuthState {
      */
     public void update(@Nullable RegistrationResponse regResponse) {
         mLastRegistrationResponse = regResponse;
-        /* a new client registration will have a new client id, so invalidate the current session */
+
+        // a new client registration will have a new client id, so invalidate the current session.
+        // Note however that we do not discard the configuration; this is likely still applicable.
+        mConfig = getAuthorizationServiceConfiguration();
+
         mRefreshToken = null;
         mScope = null;
         mLastAuthorizationResponse = null;
@@ -530,6 +548,10 @@ public class AuthState {
         JsonUtil.putIfNotNull(json, KEY_REFRESH_TOKEN, mRefreshToken);
         JsonUtil.putIfNotNull(json, KEY_SCOPE, mScope);
 
+        if (mConfig != null) {
+            JsonUtil.put(json, KEY_CONFIG, mConfig.toJson());
+        }
+
         if (mAuthorizationException != null) {
             JsonUtil.put(json, KEY_AUTHORIZATION_EXCEPTION, mAuthorizationException.toJson());
         }
@@ -540,18 +562,21 @@ public class AuthState {
                     KEY_LAST_AUTHORIZATION_RESPONSE,
                     mLastAuthorizationResponse.jsonSerialize());
         }
+
         if (mLastTokenResponse != null) {
             JsonUtil.put(
                     json,
                     KEY_LAST_TOKEN_RESPONSE,
                     mLastTokenResponse.jsonSerialize());
         }
+
         if (mLastRegistrationResponse != null) {
             JsonUtil.put(
                     json,
                     KEY_LAST_REGISTRATION_RESPONSE,
                     mLastRegistrationResponse.jsonSerialize());
         }
+
         return json;
     }
 
@@ -575,18 +600,27 @@ public class AuthState {
         AuthState state = new AuthState();
         state.mRefreshToken = JsonUtil.getStringIfDefined(json, KEY_REFRESH_TOKEN);
         state.mScope = JsonUtil.getStringIfDefined(json, KEY_SCOPE);
+
+        if (json.has(KEY_CONFIG)) {
+            state.mConfig = AuthorizationServiceConfiguration.fromJson(
+                    json.getJSONObject(KEY_CONFIG));
+        }
+
         if (json.has(KEY_AUTHORIZATION_EXCEPTION)) {
             state.mAuthorizationException = AuthorizationException.fromJson(
                     json.getJSONObject(KEY_AUTHORIZATION_EXCEPTION));
         }
+
         if (json.has(KEY_LAST_AUTHORIZATION_RESPONSE)) {
             state.mLastAuthorizationResponse = AuthorizationResponse.jsonDeserialize(
                     json.getJSONObject(KEY_LAST_AUTHORIZATION_RESPONSE));
         }
+
         if (json.has(KEY_LAST_TOKEN_RESPONSE)) {
             state.mLastTokenResponse = TokenResponse.jsonDeserialize(
                     json.getJSONObject(KEY_LAST_TOKEN_RESPONSE));
         }
+
         if (json.has(KEY_LAST_REGISTRATION_RESPONSE)) {
             state.mLastRegistrationResponse = RegistrationResponse.jsonDeserialize(
                     json.getJSONObject(KEY_LAST_REGISTRATION_RESPONSE));

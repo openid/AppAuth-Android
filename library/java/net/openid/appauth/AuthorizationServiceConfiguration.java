@@ -40,8 +40,9 @@ public class AuthorizationServiceConfiguration {
 
     /**
      * The standard base path for well-known resources on domains.
-     * @see <a href="https://tools.ietf.org/html/rfc5785">RFC 5785: Defining Well-Known Uniform
-     * Resource Identifiers</a>
+     *
+     * @see "Defining Well-Known Uniform Resource Identifiers (RFC 5785)
+     * <https://tools.ietf.org/html/rfc5785>"
      */
     public static final String WELL_KNOWN_PATH =
             ".well-known";
@@ -49,8 +50,9 @@ public class AuthorizationServiceConfiguration {
     /**
      * The standard resource under {@link #WELL_KNOWN_PATH .well-known} at which an OpenID Connect
      * discovery document can be found under an issuer's base URI.
-     * @see <a href="https://openid.net/specs/openid-connect-discovery-1_0.html">"OpenID Connect
-     * discovery"</a>
+     *
+     * @see "OpenID Connect discovery 1.0
+     * <https://openid.net/specs/openid-connect-discovery-1_0.html>"
      */
     public static final String OPENID_CONFIGURATION_RESOURCE =
             "openid-configuration";
@@ -87,10 +89,13 @@ public class AuthorizationServiceConfiguration {
 
     /**
      * Creates a service configuration for a basic OAuth2 provider.
-     * @param authorizationEndpoint The <a href="https://tools.ietf.org/html/rfc6749#section-3.1">
-     *     authorization endpoint</a> URI for the service.
-     * @param tokenEndpoint The <a href="https://tools.ietf.org/html/rfc6749#section-3.2">token
-     *     endpoint</a> URI for the service.
+     *
+     * @param authorizationEndpoint The
+     *     [authorization endpoint URI](https://tools.ietf.org/html/rfc6749#section-3.1)
+     *     for the service.
+     * @param tokenEndpoint The
+     *     [token endpoint URI](https://tools.ietf.org/html/rfc6749#section-3.2)
+     *     for the service.
      */
     public AuthorizationServiceConfiguration(
             @NonNull Uri authorizationEndpoint,
@@ -105,6 +110,7 @@ public class AuthorizationServiceConfiguration {
     /**
      * Creates an service configuration for an OpenID Connect provider, based on its
      * {@link AuthorizationServiceDiscovery discovery document}.
+     *
      * @param discoveryDoc The OpenID Connect discovery document which describes this service.
      */
     public AuthorizationServiceConfiguration(
@@ -144,6 +150,7 @@ public class AuthorizationServiceConfiguration {
     /**
      * Reads an Authorization service configuration from a JSON representation produced by the
      * {@link #toJson()} method or some other equivalent producer.
+     *
      * @throws JSONException if the provided JSON does not match the expected structure.
      */
     @NonNull
@@ -173,6 +180,7 @@ public class AuthorizationServiceConfiguration {
     /**
      * Reads an Authorization service configuration from a JSON representation produced by the
      * {@link #toJson()} method or some other equivalent producer.
+     *
      * @throws JSONException if the provided JSON does not match the expected structure.
      */
     public static AuthorizationServiceConfiguration fromJson(@NonNull String jsonStr)
@@ -186,10 +194,12 @@ public class AuthorizationServiceConfiguration {
      * This method is equivalent to {@link #fetchFromUrl(Uri, RetrieveConfigurationCallback)},
      * but automatically appends the OpenID connect well-known configuration path to the
      * URI.
+     *
      * @param openIdConnectIssuerUri The issuer URI, e.g. "https://accounts.google.com"
      * @param callback The callback to invoke upon completion.
-     * @see <a href="https://openid.net/specs/openid-connect-discovery-1_0.html">"OpenID Connect
-     * discovery"</a>
+     *
+     * @see "OpenID Connect discovery 1.0
+     * <https://openid.net/specs/openid-connect-discovery-1_0.html>"
      */
     public static void fetchFromIssuer(@NonNull Uri openIdConnectIssuerUri,
             @NonNull RetrieveConfigurationCallback callback) {
@@ -206,10 +216,12 @@ public class AuthorizationServiceConfiguration {
     /**
      * Fetch a AuthorizationServiceConfiguration from an OpenID Connect discovery URI, using
      * the {@link DefaultConnectionBuilder default connection builder}.
+     *
      * @param openIdConnectDiscoveryUri The OpenID Connect discovery URI
      * @param callback A callback to invoke upon completion
-     * @see <a href="https://openid.net/specs/openid-connect-discovery-1_0.html">"OpenID Connect
-     * discovery"</a>
+     *
+     * @see "OpenID Connect discovery 1.0
+     * <https://openid.net/specs/openid-connect-discovery-1_0.html>"
      */
     public static void fetchFromUrl(@NonNull Uri openIdConnectDiscoveryUri,
             @NonNull RetrieveConfigurationCallback callback) {
@@ -220,12 +232,14 @@ public class AuthorizationServiceConfiguration {
 
     /**
      * Fetch a AuthorizationServiceConfiguration from an OpenID Connect discovery URI.
+     *
      * @param openIdConnectDiscoveryUri The OpenID Connect discovery URI
      * @param connectionBuilder The connection builder that is used to establish a connection
      *     to the resource server.
      * @param callback A callback to invoke upon completion
-     * @see <a href="https://openid.net/specs/openid-connect-discovery-1_0.html">"OpenID Connect
-     * discovery"</a>
+     *
+     * @see "OpenID Connect discovery 1.0
+     * <https://openid.net/specs/openid-connect-discovery-1_0.html>"
      */
     public static void fetchFromUrl(
             @NonNull Uri openIdConnectDiscoveryUri,
@@ -249,15 +263,14 @@ public class AuthorizationServiceConfiguration {
         /**
          * Invoked when the retrieval of the discovery doc completes successfully or fails.
          *
-         * <p>Exactly one of {@code serviceConfiguration} or {@code ex} will be non-null. If
-         * {@code serviceConfiguration} is {@code null}, a failure occurred during the request. This
+         * <p>Exactly one of `serviceConfiguration` or `ex` will be non-null. If
+         * `serviceConfiguration` is `null`, a failure occurred during the request. This
          * can happen if a bad URL was provided, no connection to the server could be established,
          * or the retrieved JSON is incomplete or badly formatted.
          *
          * @param serviceConfiguration the service configuration that can be used to initialize
-         *     the {@link AuthorizationService}, if retrieval was successful;
-         *     {@code null} otherwise
-         * @param ex the exception that caused an error
+         *     the {@link AuthorizationService}, if retrieval was successful; `null` otherwise.
+         * @param ex the exception that caused an error.
          */
         void onFetchConfigurationCompleted(
                 @Nullable AuthorizationServiceConfiguration serviceConfiguration,
