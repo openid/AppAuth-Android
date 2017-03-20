@@ -51,7 +51,7 @@ public class ClientSecretPost implements ClientAuthentication {
     }
 
     @Override
-    public final Map<String, String> getRequestParameters(String clientId) {
+    public final Map<String, String> getRequestParameters(@NonNull String clientId) {
         Map<String, String> additionalParameters = new HashMap<>();
         additionalParameters.put(PARAM_CLIENT_ID, clientId);
         additionalParameters.put(PARAM_CLIENT_SECRET, mClientSecret);
@@ -59,7 +59,7 @@ public class ClientSecretPost implements ClientAuthentication {
     }
 
     @Override
-    public final Map<String, String> getRequestHeaders(String clientId) {
+    public final Map<String, String> getRequestHeaders(@NonNull String clientId) {
         return null;
     }
 }
