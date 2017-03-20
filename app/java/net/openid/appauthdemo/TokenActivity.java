@@ -58,8 +58,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Displays the authorized state of the user. This activity is provided with the outcome of the
- * authorization flow, which is uses to negotiate the final authorized state of the user and then
- * provide additional post-authorization operations, such as fetching user info and refreshing
+ * authorization flow, which it uses to negotiate the final authorized state,
+ * by performing an authorization code exchange if necessary. After this, the activity provides
+ * additional post-authorization operations if available, such as fetching user info and refreshing
  * access tokens.
  */
 public class TokenActivity extends AppCompatActivity {
@@ -121,8 +122,8 @@ public class TokenActivity extends AppCompatActivity {
             return;
         }
 
-        // stored state is not authorized, so we may be receiving the result of the
-        // authorization flow
+        // the stored AuthState is incomplete, so check if we are currently receiving the result of
+        // the authorization flow from the browser.
         AuthorizationResponse response = AuthorizationResponse.fromIntent(getIntent());
         AuthorizationException ex = AuthorizationException.fromIntent(getIntent());
 
@@ -143,6 +144,9 @@ public class TokenActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle state) {
+        // user info is retained to survive activity restarts, such as when rotating the
+        // device or switching apps. This isn't essential, but it helps provide a less
+        // jarring UX when these events occur - data does not just disappear from the view.
         if (mUserInfoJson.get() != null) {
             state.putString(KEY_USER_INFO, mUserInfoJson.toString());
         }
@@ -316,6 +320,11 @@ public class TokenActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Demonstrates the use of {@link AuthState#performActionWithFreshTokens} to retrieve
+     * user info from the IDP's user info endpoint. This callback will negotiate a new access
+     * token / id token for use in a follow-up action, or provide an error if this fails.
+     */
     @MainThread
     private void fetchUserInfo() {
         displayLoading("Fetching user info");
