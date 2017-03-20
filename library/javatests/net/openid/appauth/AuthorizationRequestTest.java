@@ -453,6 +453,7 @@ public class AuthorizationRequestTest {
                         AuthorizationRequest.PARAM_RESPONSE_TYPE,
                         AuthorizationRequest.PARAM_REDIRECT_URI,
                         AuthorizationRequest.PARAM_STATE,
+                        AuthorizationRequest.PARAM_NONCE,
                         AuthorizationRequest.PARAM_CODE_CHALLENGE,
                         AuthorizationRequest.PARAM_CODE_CHALLENGE_METHOD)));
 
@@ -464,6 +465,8 @@ public class AuthorizationRequestTest {
                 .isEqualTo(TEST_APP_REDIRECT_URI.toString());
         assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_STATE))
                 .isEqualTo(request.state);
+        assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_NONCE))
+                .isEqualTo(request.nonce);
         assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_CODE_CHALLENGE))
                 .isEqualTo(request.codeVerifierChallenge);
         assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_CODE_CHALLENGE_METHOD))

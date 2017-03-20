@@ -134,6 +134,7 @@ public class TokenActivity extends AppCompatActivity {
         if (response != null && response.authorizationCode != null) {
             // authorization code exchange is required
             mStateManager.updateAfterAuthorization(response, ex);
+            AuthState.sNonce = response.request.nonce;
             exchangeAuthorizationCode(response);
         } else if (ex != null) {
             displayNotAuthorized("Authorization flow failed: " + ex.getMessage());
@@ -294,6 +295,27 @@ public class TokenActivity extends AppCompatActivity {
                 callback);
     }
 
+    @MainThread
+    private void performTokenValidation(
+            TokenResponse response,
+            AuthorizationService.TokenValidationResponseCallback callback) {
+        ClientAuthentication clientAuthentication;
+        try {
+            clientAuthentication = mStateManager.getCurrent().getClientAuthentication();
+        } catch (ClientAuthentication.UnsupportedAuthenticationMethod ex) {
+            Log.d(TAG, "Token validation request cannot be made, "
+                    + "client authentication for the token "
+                    + "endpoint could not be constructed (%s)", ex);
+            displayNotAuthorized("Client authentication method is unsupported");
+            return;
+        }
+
+        mAuthService.performTokenValidation(
+                response,
+                clientAuthentication,
+                callback);
+    }
+
     @WorkerThread
     private void handleAccessTokenResponse(
             @Nullable TokenResponse tokenResponse,
@@ -302,7 +324,7 @@ public class TokenActivity extends AppCompatActivity {
         runOnUiThread(this::displayAuthorized);
     }
 
-    @WorkerThread
+    @MainThread
     private void handleCodeExchangeResponse(
             @Nullable TokenResponse tokenResponse,
             @Nullable AuthorizationException authException) {
@@ -316,7 +338,35 @@ public class TokenActivity extends AppCompatActivity {
             //noinspection WrongThread
             runOnUiThread(() -> displayNotAuthorized(message));
         } else {
+            if (tokenResponse != null
+                    && tokenResponse.idToken != null
+                    && tokenResponse.idToken.length() > 0
+                    && tokenResponse.request.configuration.discoveryDoc != null) {
+                performTokenValidation(
+                        tokenResponse,
+                        this::handleTokenValidationResponse);
+            } else {
+                final String message = "Failed to get token";
+
+                // WrongThread inference is incorrect for lambdas
+                //noinspection WrongThread
+                runOnUiThread(() -> displayNotAuthorized(message));
+            }
+        }
+    }
+
+    @WorkerThread
+    private void handleTokenValidationResponse(
+            boolean isTokenValid,
+            @Nullable AuthorizationException authException) {
+        if (isTokenValid) {
             runOnUiThread(this::displayAuthorized);
+        } else {
+            final String message = "Invalid id_token";
+
+            // WrongThread inference is incorrect for lambdas
+            //noinspection WrongThread
+            runOnUiThread(() -> displayNotAuthorized(message));
         }
     }
 

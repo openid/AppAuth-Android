@@ -67,8 +67,8 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="appscheme"
-                  android:host="client.example.com"/>
+                <data android:scheme="put scheme here"
+                  android:host="put host here"/>
             </intent-filter>
         </activity>
     </application>

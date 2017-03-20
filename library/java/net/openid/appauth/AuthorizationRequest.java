@@ -441,10 +441,11 @@ public class AuthorizationRequest {
     public final String state;
 
     /**
-     * String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
-     * The value is passed through unmodified from the Authentication Request to the ID Token.
-     * Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.
-     * */
+     * String value used to associate a Client session with an ID Token, and to mitigate
+     * replay attacks. The value is passed through unmodified from the Authentication Request
+     * to the ID Token. Sufficient entropy MUST be present in the nonce values used to prevent
+     * attackers from guessing values.
+     */
     @Nullable
     public final String nonce;
 
@@ -780,10 +781,11 @@ public class AuthorizationRequest {
         }
 
         /**
-         * Specifies the String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
-         * The value is passed through unmodified from the Authentication Request to the ID Token.
-         * Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.
-         * */
+         * Specifies the String value used to associate a Client session with an ID Token, and
+         * to mitigate replay attacks. The value is passed through unmodified from the
+         * Authentication Request to the ID Token. Sufficient entropy MUST be present in the nonce
+         * values used to prevent attackers from guessing values.
+         */
         @NonNull
         public Builder setNonce(@Nullable String nonce) {
             mNonce = checkNullOrNotEmpty(nonce, "nonce cannot be empty if defined");
@@ -942,7 +944,7 @@ public class AuthorizationRequest {
         this.prompt = prompt;
         this.scope = scope;
         this.state = state;
-        this.nonce=nonce;
+        this.nonce = nonce;
         this.codeVerifier = codeVerifier;
         this.codeVerifierChallenge = codeVerifierChallenge;
         this.codeVerifierChallengeMethod = codeVerifierChallengeMethod;

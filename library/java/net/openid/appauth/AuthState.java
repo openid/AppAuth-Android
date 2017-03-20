@@ -77,6 +77,11 @@ public class AuthState {
     private boolean mNeedsTokenRefreshOverride;
 
     /**
+     * sNonce value to be stored in order to validate ID token.
+     */
+    public static String sNonce;
+
+    /**
      * Creates an empty, unauthenticated {@link AuthState}.
      */
     public AuthState() {}

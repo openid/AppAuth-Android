@@ -49,8 +49,6 @@ import java.net.URLConnection;
 import java.util.Calendar;
 import java.util.Map;
 
-import static net.openid.appauth.Preconditions.checkNotNull;
-
 /**
  * Dispatches requests to an OAuth2 authorization service. Note that instances of this class
  * _must be manually disposed_ when no longer required, to avoid leaks
@@ -272,7 +270,10 @@ public class AuthorizationService {
                 .execute();
     }
 
-    public void performTokenValidationRequest(
+    /**
+     * Performs ID token validation.
+     */
+    public void performTokenValidation(
             @NonNull TokenResponse response,
             @NonNull ClientAuthentication clientAuthentication,
             @NonNull TokenValidationResponseCallback callback) {
@@ -444,15 +445,16 @@ public class AuthorizationService {
 
     private class TokenValidationRequestTask
             extends AsyncTask<Void, Void, JSONObject> {
-        private TokenResponse response;
+        private TokenResponse mResponse;
         private TokenValidationResponseCallback mCallback;
         private ClientAuthentication mClientAuthentication;
 
         private AuthorizationException mException;
 
-        TokenValidationRequestTask(TokenResponse request, @NonNull ClientAuthentication clientAuthentication,
+        TokenValidationRequestTask(TokenResponse request,
+                                   @NonNull ClientAuthentication clientAuthentication,
                                    TokenValidationResponseCallback callback) {
-            response = request;
+            mResponse = request;
             mCallback = callback;
             mClientAuthentication = clientAuthentication;
         }
@@ -461,12 +463,12 @@ public class AuthorizationService {
         protected JSONObject doInBackground(Void... voids) {
             InputStream is = null;
             try {
-                Uri uri = (response.request.configuration.discoveryDoc.getJwksUri());
+                Uri uri = (mResponse.request.configuration.discoveryDoc.getJwksUri());
                 HttpURLConnection conn =
                         mClientConfiguration.getConnectionBuilder()
                                 .openConnection(uri);
                 conn.setRequestMethod("GET");
-//                conn.setDoOutput(true);
+                //conn.setDoOutput(true);
 
                 is = new BufferedInputStream(conn.getInputStream());
                 // readStream(in);
@@ -491,65 +493,51 @@ public class AuthorizationService {
             JSONObject requiredJson = null;
 
             try {
-                String[] split = response.idToken.split("\\.");
-                Log.d("JWT_DECODED", "Header: " + JsonUtil.decodeBase64(split[0]));
-                Log.d("JWT_DECODED", "Body: " + JsonUtil.decodeBase64(split[1]));
+                String[] split = mResponse.idToken.split("\\.");
 
-                String decodeToken_Header = JsonUtil.decodeBase64(split[0]);
-                String decodeToken_Body = JsonUtil.decodeBase64(split[1]);
+                String decodeTokenHeader = Utils.decodeBase64urlNoPadding(split[0]);
+                String decodeTokenBody = Utils.decodeBase64urlNoPadding(split[1]);
 
-                Log.d("decodeToken ", decodeToken_Body);
-                JSONObject jsonObject_header = new JSONObject(decodeToken_Header);
-                JSONObject jsonObject_body = new JSONObject(decodeToken_Body);
+                JSONObject jsonObjectHeader = new JSONObject(decodeTokenHeader);
+                JSONObject jsonObjectBody = new JSONObject(decodeTokenBody);
+
 
                 JSONArray jsonArray = json.getJSONArray("keys");
 
                 for (int i = 0; i < jsonArray.length(); i++) {
-                    if (jsonArray.getJSONObject(i).optString("alg").contains(jsonObject_header.getString("alg"))) {
+                    if (jsonArray.getJSONObject(i).optString("alg")
+                            .contains(jsonObjectHeader.getString("alg"))) {
                         requiredJson = jsonArray.getJSONObject(i);
                         break;
                     }
                 }
 
-                if (requiredJson != null) {
-                    if (jsonObject_header.getString("kid").equals(requiredJson.getString("kid"))) {
-                        if (jsonObject_body.getString("aud").equals(response.request.getRequestParameters().get("client_id"))) {
-                            Calendar c = Calendar.getInstance();
-                            c.setTimeInMillis(Long.parseLong(jsonObject_body.getString("exp")) * 1000);
-                            c.getTimeInMillis();
+                Logger.debug("Token validation with %s completed",
+                        this.mResponse.request.configuration
+                                .discoveryDoc.getValidateTokenEndpoint());
 
-                            if ((c.getTimeInMillis() > System.currentTimeMillis()) && jsonObject_body.getString("nonce").equals(response.request.getRequestParameters().get("nonce"))) {
-                                mCallback.onTokenValidationRequestCompleted(true, null);
-                            } else {
-                                mCallback.onTokenValidationRequestCompleted(false, mException);
-                            }
-                        } else {
-                            mCallback.onTokenValidationRequestCompleted(false, mException);
-                        }
-                    } else {
-                        mCallback.onTokenValidationRequestCompleted(false, mException);
-                    }
+                if (mException != null
+                        || requiredJson == null
+                        || !json.optString("error", "").equals("")
+                        || !jsonObjectHeader.getString("kid").equals(requiredJson.getString("kid"))
+                        || !jsonObjectBody.getString("aud").equals(mResponse.request
+                        .getRequestParameters().get("client_id"))) {
+                    mCallback.onTokenValidationRequestCompleted(false, mException);
+                    return;
+                }
+
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(Long.parseLong(jsonObjectBody.getString("exp"))
+                        * Long.parseLong("1000"));
+                calendar.getTimeInMillis();
+
+                if ((calendar.getTimeInMillis() > System.currentTimeMillis())
+                        && jsonObjectBody.getString("nonce").equals(AuthState.sNonce)) {
+                    mCallback.onTokenValidationRequestCompleted(true, null);
                 } else {
                     mCallback.onTokenValidationRequestCompleted(false, mException);
                 }
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-                mCallback.onTokenValidationRequestCompleted(false, mException);
-            } catch (JSONException e) {
-                e.printStackTrace();
-                mCallback.onTokenValidationRequestCompleted(false, mException);
-            }
-
-            if (mException != null || requiredJson == null) {
-                mCallback.onTokenValidationRequestCompleted(false, mException);
-                return;
-            }
-            Logger.debug("Token validation with %s completed",
-                    this.response.request.configuration.discoveryDoc.getValidateTokenEndpoint());
-
-            if (json.optString("error", "").equals("")) {
-                mCallback.onTokenValidationRequestCompleted(true, null);
-            } else {
+            } catch (UnsupportedEncodingException | JSONException e) {
                 mCallback.onTokenValidationRequestCompleted(false, mException);
             }
         }
@@ -578,21 +566,20 @@ public class AuthorizationService {
     }
 
     /**
-     * Callback interface for token endpoint validation.
-     *
-     * @see AuthorizationService#performTokenValidationRequest
+     * Callback interface for token validation endpoint.
+     * @see AuthorizationService#performTokenValidation
      */
     public interface TokenValidationResponseCallback {
         /**
          * Invoked when the request completes successfully.
-         * <p>
-         * <p>Exactly one of {@code response} or {@code ex} will be non-null. If
-         * {@code response} is {@code null}, a failure occurred during the request. This can
-         * happen if a bad URI was provided, no connection to the server could be established, or
-         * the response JSON was incomplete or badly formatted.
+         *
+         * Exactly one of `isTokenValid` or `ex` will be non-null. If `isTokenValid` is `null`,
+         * a failure occurred during the request. This can happen if a bad URI was provided,
+         * no connection to the server could be established, or the JSON was incomplete or
+         * incorrectly formatted.
          *
          * @param isTokenValid the boolean value which represents if a token is valid or not.
-         * @param ex           a description of the failure, if one occurred: {@code null} otherwise.
+         * @param ex a description of the failure, if one occurred: `null` otherwise.
          * @see AuthorizationException.TokenRequestErrors
          */
         void onTokenValidationRequestCompleted(boolean isTokenValid,

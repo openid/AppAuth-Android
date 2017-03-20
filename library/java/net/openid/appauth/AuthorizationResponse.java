@@ -110,13 +110,6 @@ public class AuthorizationResponse {
     public final String state;
 
     /**
-     * The returned nonce parameter, which must match the value returned in the id_token in
-     * order to validate id_token.
-     */
-    @Nullable
-    public final String nonce;
-
-    /**
      * The type of the retrieved token. Typically this is "Bearer" when present. Otherwise,
      * another token_type value that the Client has negotiated with the Authorization Server.
      *
@@ -404,7 +397,6 @@ public class AuthorizationResponse {
             return new AuthorizationResponse(
                     mRequest,
                     mState,
-                    mNonce,
                     mTokenType,
                     mAuthorizationCode,
                     mAccessToken,
@@ -418,7 +410,6 @@ public class AuthorizationResponse {
     private AuthorizationResponse(
             @NonNull AuthorizationRequest request,
             @Nullable String state,
-            @Nullable String nonce,
             @Nullable String tokenType,
             @Nullable String authorizationCode,
             @Nullable String accessToken,
@@ -428,7 +419,6 @@ public class AuthorizationResponse {
             @NonNull Map<String, String> additionalParameters) {
         this.request = request;
         this.state = state;
-        this.nonce=nonce;
         this.tokenType = tokenType;
         this.authorizationCode = authorizationCode;
         this.accessToken = accessToken;
@@ -492,7 +482,6 @@ public class AuthorizationResponse {
                 .setCodeVerifier(request.codeVerifier)
                 .setAuthorizationCode(authorizationCode)
                 .setAdditionalParameters(additionalExchangeParameters)
-                .setNonce(request.nonce)
                 .build();
     }
 
@@ -505,7 +494,6 @@ public class AuthorizationResponse {
         JSONObject json = new JSONObject();
         JsonUtil.put(json, KEY_REQUEST, request.jsonSerialize());
         JsonUtil.putIfNotNull(json, KEY_STATE, state);
-        JsonUtil.putIfNotNull(json, KEY_NONCE, nonce);
         JsonUtil.putIfNotNull(json, KEY_TOKEN_TYPE, tokenType);
         JsonUtil.putIfNotNull(json, KEY_AUTHORIZATION_CODE, authorizationCode);
         JsonUtil.putIfNotNull(json, KEY_ACCESS_TOKEN, accessToken);
