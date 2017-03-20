@@ -244,10 +244,7 @@ public class AuthorizationService {
     public void performTokenRequest(
             @NonNull TokenRequest request,
             @NonNull TokenResponseCallback callback) {
-        checkNotDisposed();
-        Logger.debug("Initiating code exchange request to %s",
-                request.configuration.tokenEndpoint);
-        new TokenRequestTask(request, NoClientAuthentication.INSTANCE, callback).execute();
+        performTokenRequest(request, NoClientAuthentication.INSTANCE, callback);
     }
 
     /**

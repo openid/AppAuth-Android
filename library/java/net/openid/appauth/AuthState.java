@@ -447,7 +447,27 @@ public class AuthState {
     public void performActionWithFreshTokens(
             @NonNull AuthorizationService service,
             @NonNull AuthStateAction action) {
-        performActionWithFreshTokens(service, Collections.<String, String>emptyMap(), action);
+        performActionWithFreshTokens(
+                service,
+                NoClientAuthentication.INSTANCE,
+                Collections.<String, String>emptyMap(),
+                SystemClock.INSTANCE,
+                action);
+    }
+
+    /**
+     * Ensures that a non-expired access token is available before invoking the provided action.
+     */
+    public void performActionWithFreshTokens(
+            @NonNull AuthorizationService service,
+            @NonNull ClientAuthentication clientAuth,
+            @NonNull AuthStateAction action) {
+        performActionWithFreshTokens(
+                service,
+                clientAuth,
+                Collections.<String, String>emptyMap(),
+                SystemClock.INSTANCE,
+                action);
     }
 
     /**
@@ -459,8 +479,33 @@ public class AuthState {
             @NonNull AuthorizationService service,
             @NonNull Map<String, String> refreshTokenAdditionalParams,
             @NonNull AuthStateAction action) {
+        try {
+            performActionWithFreshTokens(
+                    service,
+                    getClientAuthentication(),
+                    refreshTokenAdditionalParams,
+                    SystemClock.INSTANCE,
+                    action);
+        } catch (ClientAuthentication.UnsupportedAuthenticationMethod ex) {
+            action.execute(null, null,
+                    AuthorizationException.fromTemplate(
+                            AuthorizationException.TokenRequestErrors.CLIENT_ERROR, ex));
+        }
+    }
+
+    /**
+     * Ensures that a non-expired access token is available before invoking the provided action.
+     * If a token refresh is required, the provided additional parameters will be included in this
+     * refresh request.
+     */
+    public void performActionWithFreshTokens(
+            @NonNull AuthorizationService service,
+            @NonNull ClientAuthentication clientAuth,
+            @NonNull Map<String, String> refreshTokenAdditionalParams,
+            @NonNull AuthStateAction action) {
         performActionWithFreshTokens(
                 service,
+                clientAuth,
                 refreshTokenAdditionalParams,
                 SystemClock.INSTANCE,
                 action);
@@ -469,10 +514,12 @@ public class AuthState {
     @VisibleForTesting
     void performActionWithFreshTokens(
             @NonNull final AuthorizationService service,
+            @NonNull final ClientAuthentication clientAuth,
             @NonNull final Map<String, String> refreshTokenAdditionalParams,
             @NonNull final Clock clock,
             @NonNull final AuthStateAction action) {
         checkNotNull(service, "service cannot be null");
+        checkNotNull(clientAuth, "client authentication cannot be null");
         checkNotNull(refreshTokenAdditionalParams,
                 "additional params cannot be null");
         checkNotNull(clock, "clock cannot be null");
@@ -491,7 +538,9 @@ public class AuthState {
             return;
         }
 
-        service.performTokenRequest(createTokenRefreshRequest(refreshTokenAdditionalParams),
+        service.performTokenRequest(
+                createTokenRefreshRequest(refreshTokenAdditionalParams),
+                clientAuth,
                 new AuthorizationService.TokenResponseCallback() {
                     @Override
                     public void onTokenRequestCompleted(
