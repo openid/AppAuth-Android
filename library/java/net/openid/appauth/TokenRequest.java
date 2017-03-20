@@ -63,8 +63,7 @@ public class TokenRequest {
     @VisibleForTesting
     static final String KEY_ADDITIONAL_PARAMETERS = "additionalParameters";
 
-    @VisibleForTesting
-    static final String PARAM_CLIENT_ID = "client_id";
+    public static final String PARAM_CLIENT_ID = "client_id";
 
     @VisibleForTesting
     static final String PARAM_CODE = "code";
@@ -490,7 +489,6 @@ public class TokenRequest {
     public Map<String, String> getRequestParameters() {
         Map<String, String> params = new HashMap<>();
         params.put(PARAM_GRANT_TYPE, grantType);
-        params.put(PARAM_CLIENT_ID, clientId);
         putIfNotNull(params, PARAM_REDIRECT_URI, redirectUri);
         putIfNotNull(params, PARAM_CODE, authorizationCode);
         putIfNotNull(params, PARAM_REFRESH_TOKEN, refreshToken);

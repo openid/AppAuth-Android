@@ -49,14 +49,14 @@ public class ClientSecretBasic implements ClientAuthentication {
     }
 
     @Override
-    public final Map<String, String> getRequestHeaders(String clientId) {
+    public final Map<String, String> getRequestHeaders(@NonNull String clientId) {
         String credentials = clientId + ":" + mClientSecret;
         String basicAuth = Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
         return Collections.singletonMap("Authorization", "Basic " + basicAuth);
     }
 
     @Override
-    public final Map<String, String> getRequestParameters(String clientId) {
+    public final Map<String, String> getRequestParameters(@NonNull String clientId) {
         return null;
     }
 }
