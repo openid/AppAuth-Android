@@ -28,6 +28,7 @@ import static net.openid.appauth.TestValues.getTestAuthResponseBuilder;
 import static net.openid.appauth.TestValues.getTestRegistrationResponse;
 import static net.openid.appauth.TestValues.getTestRegistrationResponseBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
@@ -419,6 +420,7 @@ public class AuthStateTest {
         mClock.currentTime.set(ONE_SECOND);
         state.performActionWithFreshTokens(
                 service,
+                NoClientAuthentication.INSTANCE,
                 Collections.<String, String>emptyMap(),
                 mClock,
                 action);
@@ -456,6 +458,7 @@ public class AuthStateTest {
         mClock.currentTime.set(TWO_MINUTES - AuthState.EXPIRY_TIME_TOLERANCE_MS + ONE_SECOND);
         state.performActionWithFreshTokens(
                 service,
+                NoClientAuthentication.INSTANCE,
                 Collections.<String, String>emptyMap(),
                 mClock,
                 action);
@@ -466,6 +469,7 @@ public class AuthStateTest {
                 ArgumentCaptor.forClass(AuthorizationService.TokenResponseCallback.class);
         verify(service, times(1)).performTokenRequest(
                 requestCaptor.capture(),
+                any(ClientAuthentication.class),
                 callbackCaptor.capture());
 
         assertThat(requestCaptor.getValue().refreshToken).isEqualTo(tokenResp.refreshToken);
