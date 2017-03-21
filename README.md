@@ -269,13 +269,18 @@ service.performAuthorizationRequest(
 ### Handling the Redirect
 
 We recommend using a custom scheme to send the OAuth redirect back to
-your app. The library configures the `RedirectUriReceiverActivity` to
+your app. 
+It is strongly recommended to use "reverse domain name notation" which is
+a naming convention based on the domain name system, but where the 
+domain components are reversed, for example 
+"app.example.com" becomes "com.example.app".
+The library configures the `RedirectUriReceiverActivity` to
 handle a custom scheme defined as a "manifest placeholder" which can be
 replaced by adding the following to your `build.gradle`:
 
 ```groovy
 android.defaultConfig.manifestPlaceholders = [
-  'appAuthRedirectScheme': 'your-custom-scheme'
+  'appAuthRedirectScheme': 'com.example.app'
 ]
 ```
 
@@ -290,7 +295,7 @@ following to your `AndroidManifest.xml`:
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="com.yourapp"/>
+        <data android:scheme="com.example.app"/>
     </intent-filter>
 </activity>
 ```
@@ -306,7 +311,7 @@ This latter option can also be used to capture HTTP(S) redirects if necessary:
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="https"
-              android:host="www.example.com"
+              android:host="app.example.com"
               android:path="/oauth2redirect"/>
     </intent-filter>
 </activity>

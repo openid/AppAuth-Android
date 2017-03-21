@@ -1,3 +1,7 @@
+plugins {
+    id "me.tatarka.retrolambda" version "3.6.0"
+}
+
 apply plugin: 'com.android.application'
 apply plugin: 'checkstyle'
 apply from: '../config/android-common.gradle'
@@ -14,15 +18,6 @@ android {
         manifestPlaceholders = [
                 'appAuthRedirectScheme': 'net.openid.appauthdemo'
         ]
-
-        jackOptions {
-            enabled true
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     signingConfigs {
@@ -32,6 +27,11 @@ android {
             keyAlias "appauth"
             keyPassword "appauth"
         }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     buildTypes {
