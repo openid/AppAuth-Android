@@ -34,14 +34,19 @@ import net.openid.appauth.AuthorizationException.TokenRequestErrors;
 
 import net.openid.appauth.browser.BrowserDescriptor;
 import net.openid.appauth.browser.BrowserSelector;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URLConnection;
+import java.util.Calendar;
 import java.util.Map;
 
 
@@ -277,6 +282,19 @@ public class AuthorizationService {
         Logger.debug("Initiating dynamic client registration %s",
                 request.configuration.registrationEndpoint.toString());
         new RegistrationRequestTask(request, callback).execute();
+    }
+
+    /**
+     * Performs ID token validation.
+     */
+    public void performTokenValidation(
+            @NonNull TokenResponse response,
+            @NonNull TokenValidationResponseCallback callback) {
+        checkNotDisposed();
+        Logger.debug("Initiating token validation request to %s",
+                response.request.configuration.discoveryDoc.getJwksUri());
+        new TokenValidationRequestTask(response, callback)
+            .execute();
     }
 
     /**
@@ -562,4 +580,121 @@ public class AuthorizationService {
         void onRegistrationRequestCompleted(@Nullable RegistrationResponse response,
                                             @Nullable AuthorizationException ex);
     }
+
+    private class TokenValidationRequestTask
+            extends AsyncTask<Void, Void, JSONObject> {
+        private TokenResponse mResponse;
+        private TokenValidationResponseCallback mCallback;
+
+        private AuthorizationException mException;
+
+        TokenValidationRequestTask(TokenResponse request,
+                                   TokenValidationResponseCallback callback) {
+            mResponse = request;
+            mCallback = callback;
+        }
+
+        @Override
+        protected JSONObject doInBackground(Void... voids) {
+            InputStream is = null;
+            try {
+                Uri uri = (mResponse.request.configuration.discoveryDoc.getJwksUri());
+                HttpURLConnection conn =
+                        mClientConfiguration.getConnectionBuilder()
+                        .openConnection(uri);
+                conn.setRequestMethod("GET");
+                //conn.setDoOutput(true);
+
+                is = new BufferedInputStream(conn.getInputStream());
+                // readStream(in);
+                String response = Utils.readInputStream(is);
+                return new JSONObject(response);
+            } catch (IOException ex) {
+                Logger.debugWithStack(ex, "Failed to complete token validation request");
+                mException = AuthorizationException.fromTemplate(
+                    GeneralErrors.NETWORK_ERROR, ex);
+            } catch (JSONException ex) {
+                Logger.debugWithStack(ex, "Failed to complete token validation request");
+                mException = AuthorizationException.fromTemplate(
+                    GeneralErrors.JSON_DESERIALIZATION_ERROR, ex);
+            } finally {
+                Utils.closeQuietly(is);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject json) {
+            JSONObject requiredJson = null;
+
+            try {
+                String[] split = mResponse.idToken.split("\\.");
+
+                String decodeTokenHeader = Utils.decodeBase64urlNoPadding(split[0]);
+                String decodeTokenBody = Utils.decodeBase64urlNoPadding(split[1]);
+
+                JSONObject jsonObjectHeader = new JSONObject(decodeTokenHeader);
+                JSONObject jsonObjectBody = new JSONObject(decodeTokenBody);
+
+                JSONArray jsonArray = json.getJSONArray("keys");
+
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    if (jsonArray.getJSONObject(i).optString("alg")
+                            .contains(jsonObjectHeader.getString("alg"))) {
+                        requiredJson = jsonArray.getJSONObject(i);
+                        break;
+                    }
+                }
+
+                Logger.debug("Token validation with %s completed",
+                        this.mResponse.request.configuration
+                            .discoveryDoc.getJwksUri());
+
+                if (mException != null
+                        || requiredJson == null
+                        || !json.optString("error", "").equals("")
+                        || !jsonObjectHeader.getString("kid").equals(requiredJson.getString("kid"))
+                        || !jsonObjectBody.getString("aud").equals(mResponse.request
+                        .getRequestParameters().get("client_id"))) {
+                    mCallback.onTokenValidationRequestCompleted(false, mException);
+                    return;
+                }
+
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(Long.parseLong(jsonObjectBody.getString("exp"))
+                        * Long.parseLong("1000"));
+                calendar.getTimeInMillis();
+
+                if (calendar.getTimeInMillis() > System.currentTimeMillis()) {
+                    mCallback.onTokenValidationRequestCompleted(true, null);
+                } else {
+                    mCallback.onTokenValidationRequestCompleted(false, mException);
+                }
+            } catch (UnsupportedEncodingException | JSONException e) {
+                mCallback.onTokenValidationRequestCompleted(false, mException);
+            }
+        }
+    }
+
+    /**
+     * Callback interface for token validation endpoint.
+     * @see AuthorizationService#performTokenValidation
+     */
+    public interface TokenValidationResponseCallback {
+        /**
+         * Invoked when the request completes successfully.
+         *
+         * Exactly one of `isTokenValid` or `ex` will be non-null. If `isTokenValid` is `null`,
+         * a failure occurred during the request. This can happen if a bad URI was provided,
+         * no connection to the server could be established, or the JSON was incomplete or
+         * incorrectly formatted.
+         *
+         * @param isTokenValid the boolean value which represents if a token is valid or not.
+         * @param ex a description of the failure, if one occurred: `null` otherwise.
+         * @see AuthorizationException.TokenRequestErrors
+         */
+        void onTokenValidationRequestCompleted(boolean isTokenValid,
+                                               @Nullable AuthorizationException ex);
+    }
+
 }
