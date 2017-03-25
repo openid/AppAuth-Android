@@ -1,7 +1,7 @@
 # AppAuth for Android - Demo App
 
 This app demonstrates the AppAuth library by performing an authorization code
-flow with an authorization service. The configuration contained in `res/raw/idp_config.json`
+flow with an authorization service. The configuration contained in `res/raw/auth_config.json`
 must be modified in order for the app to function. Warnings are supplied when the app is run
 with an invalid configuration.
 
@@ -14,7 +14,7 @@ The configuration file MUST contain a JSON object. The following properties can 
     https URI. Consult the documentation for your authorization server.
 
     The value specified here should match the value specified for `appAuthRedirectScheme` in the
-    `build.gradle`, so that the demo app can capture the response.
+    `build.gradle` (Module: app), so that the demo app can capture the response.
 
   - `authorization_scope` (required): The scope string to use for the authorization request.
     For the purposes of the demo, we recommend the value "openid profile email", though any value
