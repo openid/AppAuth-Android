@@ -49,6 +49,9 @@ public class AuthorizationServiceDiscovery {
     static final UriField AUTHORIZATION_ENDPOINT = uri("authorization_endpoint");
 
     @VisibleForTesting
+    static final UriField VALIDATE_TOKEN_ENDPOINT = uri("validate_token_endpoint");
+
+    @VisibleForTesting
     static final UriField TOKEN_ENDPOINT = uri("token_endpoint");
 
     @VisibleForTesting
@@ -249,6 +252,11 @@ public class AuthorizationServiceDiscovery {
     @NonNull
     public Uri getAuthorizationEndpoint() {
         return get(AUTHORIZATION_ENDPOINT);
+    }
+
+    @NonNull
+    public Uri getValidateTokenEndpoint() {
+        return get(VALIDATE_TOKEN_ENDPOINT);
     }
 
     /**

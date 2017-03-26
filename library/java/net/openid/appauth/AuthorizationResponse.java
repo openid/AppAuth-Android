@@ -71,6 +71,8 @@ public class AuthorizationResponse {
     @VisibleForTesting
     static final String KEY_STATE = "state";
     @VisibleForTesting
+    static final String KEY_NONCE = "nonce";
+    @VisibleForTesting
     static final String KEY_TOKEN_TYPE = "token_type";
     @VisibleForTesting
     static final String KEY_AUTHORIZATION_CODE = "code";
@@ -87,6 +89,7 @@ public class AuthorizationResponse {
             new HashSet<>(Arrays.asList(
                     KEY_TOKEN_TYPE,
                     KEY_STATE,
+                    KEY_NONCE,
                     KEY_AUTHORIZATION_CODE,
                     KEY_ACCESS_TOKEN,
                     KEY_EXPIRES_IN,
@@ -183,6 +186,9 @@ public class AuthorizationResponse {
         private String mState;
 
         @Nullable
+        private String mNonce;
+
+        @Nullable
         private String mTokenType;
 
         @Nullable
@@ -223,6 +229,7 @@ public class AuthorizationResponse {
         @VisibleForTesting
         Builder fromUri(@NonNull Uri uri, @NonNull Clock clock) {
             setState(uri.getQueryParameter(KEY_STATE));
+            setNonce(uri.getQueryParameter(KEY_NONCE));
             setTokenType(uri.getQueryParameter(KEY_TOKEN_TYPE));
             setAuthorizationCode(uri.getQueryParameter(KEY_AUTHORIZATION_CODE));
             setAccessToken(uri.getQueryParameter(KEY_ACCESS_TOKEN));
@@ -240,6 +247,16 @@ public class AuthorizationResponse {
         public Builder setState(@Nullable String state) {
             checkNullOrNotEmpty(state, "state must not be empty");
             mState = state;
+            return this;
+        }
+
+        /**
+         * Specifies the OAuth 2 nonce.
+         */
+        @NonNull
+        public Builder setNonce(@Nullable String nonce) {
+            checkNullOrNotEmpty(nonce, "nonce must not be empty");
+            mNonce = nonce;
             return this;
         }
 
@@ -522,6 +539,7 @@ public class AuthorizationResponse {
                 .setIdToken(JsonUtil.getStringIfDefined(json, KEY_ID_TOKEN))
                 .setScope(JsonUtil.getStringIfDefined(json, KEY_SCOPE))
                 .setState(JsonUtil.getStringIfDefined(json, KEY_STATE))
+                .setNonce(JsonUtil.getStringIfDefined(json, KEY_NONCE))
                 .setAccessTokenExpirationTime(JsonUtil.getLongIfDefined(json, KEY_EXPIRES_AT))
                 .setAdditionalParameters(
                         JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS))

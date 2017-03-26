@@ -1,6 +1,6 @@
 {
   "client_id": "",
-  "redirect_uri": "net.openid.appauthdemo:/oauth2redirect",
+  "redirect_uri": "",
   "authorization_scope": "openid email profile",
   "discovery_uri": "",
   "authorization_endpoint_uri": "",

@@ -68,8 +68,8 @@
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="https"
-                  android:host="appauth.demo-app.io"
-                  android:path="/oauth2redirect"/>
+                    android:host="appauth.demo-app.io"
+                    android:path="/oauth2redirect"/>
             </intent-filter>
         </activity>
     </application>

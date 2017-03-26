@@ -300,6 +300,9 @@ public class AuthorizationRequest {
     @VisibleForTesting
     static final String PARAM_STATE = "state";
 
+    @VisibleForTesting
+    static final String PARAM_NONCE = "nonce";
+
     private static final Set<String> BUILT_IN_PARAMS = builtInParams(
             PARAM_CLIENT_ID,
             PARAM_CODE_CHALLENGE,
@@ -311,7 +314,8 @@ public class AuthorizationRequest {
             PARAM_RESPONSE_MODE,
             PARAM_RESPONSE_TYPE,
             PARAM_SCOPE,
-            PARAM_STATE);
+            PARAM_STATE,
+            PARAM_NONCE);
 
     private static final String KEY_CONFIGURATION = "configuration";
     private static final String KEY_CLIENT_ID = "clientId";
@@ -322,12 +326,14 @@ public class AuthorizationRequest {
     private static final String KEY_REDIRECT_URI = "redirectUri";
     private static final String KEY_SCOPE = "scope";
     private static final String KEY_STATE = "state";
+    private static final String KEY_NONCE = "nonce";
     private static final String KEY_CODE_VERIFIER = "codeVerifier";
     private static final String KEY_CODE_VERIFIER_CHALLENGE = "codeVerifierChallenge";
     private static final String KEY_CODE_VERIFIER_CHALLENGE_METHOD = "codeVerifierChallengeMethod";
     private static final String KEY_RESPONSE_MODE = "responseMode";
     private static final String KEY_ADDITIONAL_PARAMETERS = "additionalParameters";
     private static final int STATE_LENGTH = 16;
+    private static final int NONCE_LENGTH = 12;
 
     /**
      * The service's {@link AuthorizationServiceConfiguration configuration}.
@@ -433,6 +439,15 @@ public class AuthorizationRequest {
      */
     @Nullable
     public final String state;
+
+    /**
+     * String value used to associate a Client session with an ID Token, and to mitigate
+     * replay attacks. The value is passed through unmodified from the Authentication Request
+     * to the ID Token. Sufficient entropy MUST be present in the nonce values used to prevent
+     * attackers from guessing values.
+     */
+    @Nullable
+    public final String nonce;
 
     /**
      * The proof key for code exchange. This is an opaque value used to associate an authorization
@@ -541,6 +556,9 @@ public class AuthorizationRequest {
         private String mState;
 
         @Nullable
+        private String mNonce;
+
+        @Nullable
         private String mCodeVerifier;
 
         @Nullable
@@ -568,6 +586,7 @@ public class AuthorizationRequest {
             setResponseType(responseType);
             setRedirectUri(redirectUri);
             setState(AuthorizationRequest.generateRandomState());
+            setNonce(AuthorizationRequest.generateRandomNonce());
             setCodeVerifier(CodeVerifierUtil.generateRandomCodeVerifier());
         }
 
@@ -762,6 +781,18 @@ public class AuthorizationRequest {
         }
 
         /**
+         * Specifies the String value used to associate a Client session with an ID Token, and
+         * to mitigate replay attacks. The value is passed through unmodified from the
+         * Authentication Request to the ID Token. Sufficient entropy MUST be present in the nonce
+         * values used to prevent attackers from guessing values.
+         */
+        @NonNull
+        public Builder setNonce(@Nullable String nonce) {
+            mNonce = checkNullOrNotEmpty(nonce, "nonce cannot be empty if defined");
+            return this;
+        }
+
+        /**
          * Specifies the code verifier to use for this authorization request. The default challenge
          * method (typically {@link #CODE_CHALLENGE_METHOD_S256}) implemented by
          * {@link CodeVerifierUtil} will be used, and a challenge will be generated using this
@@ -875,6 +906,7 @@ public class AuthorizationRequest {
                     mPrompt,
                     mScope,
                     mState,
+                    mNonce,
                     mCodeVerifier,
                     mCodeVerifierChallenge,
                     mCodeVerifierChallengeMethod,
@@ -893,6 +925,7 @@ public class AuthorizationRequest {
             @Nullable String prompt,
             @Nullable String scope,
             @Nullable String state,
+            @Nullable String nonce,
             @Nullable String codeVerifier,
             @Nullable String codeVerifierChallenge,
             @Nullable String codeVerifierChallengeMethod,
@@ -911,6 +944,7 @@ public class AuthorizationRequest {
         this.prompt = prompt;
         this.scope = scope;
         this.state = state;
+        this.nonce = nonce;
         this.codeVerifier = codeVerifier;
         this.codeVerifierChallenge = codeVerifierChallenge;
         this.codeVerifierChallengeMethod = codeVerifierChallengeMethod;
@@ -950,6 +984,7 @@ public class AuthorizationRequest {
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_LOGIN_HINT, loginHint);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_PROMPT, prompt);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_STATE, state);
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_NONCE, nonce);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_SCOPE, scope);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_RESPONSE_MODE, responseMode);
 
@@ -981,6 +1016,7 @@ public class AuthorizationRequest {
         JsonUtil.putIfNotNull(json, KEY_SCOPE, scope);
         JsonUtil.putIfNotNull(json, KEY_PROMPT, prompt);
         JsonUtil.putIfNotNull(json, KEY_STATE, state);
+        JsonUtil.putIfNotNull(json, KEY_NONCE, nonce);
         JsonUtil.putIfNotNull(json, KEY_CODE_VERIFIER, codeVerifier);
         JsonUtil.putIfNotNull(json, KEY_CODE_VERIFIER_CHALLENGE, codeVerifierChallenge);
         JsonUtil.putIfNotNull(json, KEY_CODE_VERIFIER_CHALLENGE_METHOD,
@@ -1018,6 +1054,7 @@ public class AuthorizationRequest {
                 .setLoginHint(JsonUtil.getStringIfDefined(json, KEY_LOGIN_HINT))
                 .setPrompt(JsonUtil.getStringIfDefined(json, KEY_PROMPT))
                 .setState(JsonUtil.getStringIfDefined(json, KEY_STATE))
+                .setNonce(JsonUtil.getStringIfDefined(json, KEY_NONCE))
                 .setCodeVerifier(
                         JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER),
                         JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER_CHALLENGE),
@@ -1047,6 +1084,13 @@ public class AuthorizationRequest {
     private static String generateRandomState() {
         SecureRandom sr = new SecureRandom();
         byte[] random = new byte[STATE_LENGTH];
+        sr.nextBytes(random);
+        return Base64.encodeToString(random, Base64.NO_WRAP | Base64.NO_PADDING | Base64.URL_SAFE);
+    }
+
+    private static String generateRandomNonce() {
+        SecureRandom sr = new SecureRandom();
+        byte[] random = new byte[NONCE_LENGTH];
         sr.nextBytes(random);
         return Base64.encodeToString(random, Base64.NO_WRAP | Base64.NO_PADDING | Base64.URL_SAFE);
     }
