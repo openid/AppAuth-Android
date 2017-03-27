@@ -23,6 +23,7 @@ import android.support.annotation.Nullable;
 import android.support.customtabs.CustomTabsClient;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.customtabs.CustomTabsServiceConnection;
+import android.support.v4.util.Pair;
 
 import net.openid.appauth.AuthorizationException.GeneralErrors;
 import net.openid.appauth.browser.Browsers;
@@ -44,6 +45,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -192,7 +194,35 @@ public class AuthorizationServiceTest {
         // by default, we set application/json as an acceptable response type if a value was not
         // already set
         verify(mHttpConnection).setRequestProperty("Accept", "application/json");
-        assertThat(postBody).isEqualTo(UriUtil.formUrlEncode(request.getRequestParameters()));
+
+        Map<String, String> params = UriUtil.formUrlDecodeUnique(postBody);
+
+        for (Map.Entry<String, String> requestParam : request.getRequestParameters().entrySet()) {
+            assertThat(params).containsEntry(requestParam.getKey(), requestParam.getValue());
+        }
+
+        assertThat(params).containsEntry(TokenRequest.PARAM_CLIENT_ID, request.clientId);
+    }
+
+    @Test
+    public void testTokenRequest_clientSecretBasicAuth() throws Exception {
+        InputStream is = new ByteArrayInputStream(AUTH_CODE_EXCHANGE_RESPONSE_JSON.getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(is);
+        when(mHttpConnection.getRequestProperty("Accept")).thenReturn(null);
+        when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        TokenRequest request = getTestAuthCodeExchangeRequest();
+
+        ClientSecretBasic clientAuth = new ClientSecretBasic("SUPER_SECRET");
+        mService.performTokenRequest(request, clientAuth, mAuthCallback);
+        mAuthCallback.waitForCallback();
+        assertTokenResponse(mAuthCallback.response, request);
+        String postBody = mOutputStream.toString();
+
+
+        // client secret basic does not send the client ID in the body - explicitly check for
+        // this as a possible regression, as this can break integration with IDPs if present.
+        Map<String, String> params = UriUtil.formUrlDecodeUnique(postBody);
+        assertThat(params).doesNotContainKey(TokenRequest.PARAM_CLIENT_ID);
     }
 
     @Test

@@ -14,6 +14,9 @@
 
 package net.openid.appauth;
 
+import android.support.annotation.NonNull;
+
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -46,17 +49,18 @@ public class NoClientAuthentication implements ClientAuthentication {
      * @return always `null`.
      */
     @Override
-    public Map<String, String> getRequestHeaders(String clientId) {
+    public Map<String, String> getRequestHeaders(@NonNull String clientId) {
         return null;
     }
 
     /**
      * {@inheritDoc}
      *
-     * @return always `null`.
+     * Where no alternative form of client authentication is used, the client_id is simply
+     * sent as a client identity assertion.
      */
     @Override
-    public Map<String, String> getRequestParameters(String clientId) {
-        return null;
+    public Map<String, String> getRequestParameters(@NonNull String clientId) {
+        return Collections.singletonMap(TokenRequest.PARAM_CLIENT_ID, clientId);
     }
 }

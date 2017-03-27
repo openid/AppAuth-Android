@@ -124,9 +124,6 @@ public class TokenRequestTest {
                 TokenRequest.PARAM_GRANT_TYPE,
                 GrantTypeValues.AUTHORIZATION_CODE);
         assertThat(params).containsEntry(
-                TokenRequest.PARAM_CLIENT_ID,
-                TEST_CLIENT_ID);
-        assertThat(params).containsEntry(
                 TokenRequest.PARAM_CODE,
                 TEST_AUTHORIZATION_CODE);
         assertThat(params).containsEntry(
@@ -144,9 +141,6 @@ public class TokenRequestTest {
         assertThat(params).containsEntry(
                 TokenRequest.PARAM_GRANT_TYPE,
                 GrantTypeValues.REFRESH_TOKEN);
-        assertThat(params).containsEntry(
-                TokenRequest.PARAM_CLIENT_ID,
-                TEST_CLIENT_ID);
         assertThat(params).containsEntry(
                 TokenRequest.PARAM_REFRESH_TOKEN,
                 TEST_REFRESH_TOKEN);

@@ -15,6 +15,7 @@
 package net.openid.appauth;
 
 
+import org.assertj.core.data.MapEntry;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -26,11 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk=16)
 public class NoClientAuthenticationTest {
-    @Test
-    public void testGetInstance() {
-        assertThat(NoClientAuthentication.INSTANCE)
-                .isSameAs(NoClientAuthentication.INSTANCE);
-    }
 
     @Test
     public void testGetRequestHeaders() {
@@ -40,6 +36,6 @@ public class NoClientAuthenticationTest {
     @Test
     public void testGetRequestParameters() {
         assertThat(NoClientAuthentication.INSTANCE.getRequestParameters(TEST_CLIENT_ID))
-                .isNull();
+                .containsExactly(MapEntry.entry(TokenRequest.PARAM_CLIENT_ID, TEST_CLIENT_ID));
     }
 }
