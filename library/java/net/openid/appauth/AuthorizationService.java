@@ -627,8 +627,8 @@ public class AuthorizationService {
             try {
                 String[] split = mResponse.idToken.split("\\.");
 
-                String decodeTokenHeader = Utils.decodeBase64urlNoPadding(split[0]);
-                String decodeTokenBody = Utils.decodeBase64urlNoPadding(split[1]);
+                String decodeTokenHeader = Utils.decodeBase64url(split[0]);
+                String decodeTokenBody = Utils.decodeBase64url(split[1]);
 
                 JSONObject jsonObjectHeader = new JSONObject(decodeTokenHeader);
                 JSONObject jsonObjectBody = new JSONObject(decodeTokenBody);
@@ -651,8 +651,7 @@ public class AuthorizationService {
                         || requiredJson == null
                         || !json.optString("error", "").equals("")
                         || !jsonObjectHeader.getString("kid").equals(requiredJson.getString("kid"))
-                        || !jsonObjectBody.getString("aud").equals(mResponse.request
-                        .getRequestParameters().get("client_id"))) {
+                        || !jsonObjectBody.getString("aud").equals(mResponse.request.clientId)) {
                     mCallback.onTokenValidationRequestCompleted(false, mException);
                     return;
                 }
