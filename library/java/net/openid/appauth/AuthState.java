@@ -23,6 +23,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
+import net.openid.appauth.internal.Logger;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 

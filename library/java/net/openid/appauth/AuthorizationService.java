@@ -34,6 +34,10 @@ import net.openid.appauth.AuthorizationException.TokenRequestErrors;
 
 import net.openid.appauth.browser.BrowserDescriptor;
 import net.openid.appauth.browser.BrowserSelector;
+import net.openid.appauth.browser.CustomTabManager;
+import net.openid.appauth.internal.Logger;
+import net.openid.appauth.internal.UriUtil;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -110,13 +114,17 @@ public class AuthorizationService {
         }
     }
 
+    public CustomTabManager getCustomTabManager() {
+        return mCustomTabManager;
+    }
+
     /**
      * Creates a custom tab builder, that will use a tab session from an existing connection to
      * a web browser, if available.
      */
-    public CustomTabsIntent.Builder createCustomTabsIntentBuilder() {
+    public CustomTabsIntent.Builder createCustomTabsIntentBuilder(Uri... possibleUris) {
         checkNotDisposed();
-        return mCustomTabManager.createCustomTabsIntentBuilder();
+        return mCustomTabManager.createTabBuilder(possibleUris);
     }
 
     /**
@@ -169,8 +177,8 @@ public class AuthorizationService {
      *
      * @param customTabsIntent
      *     The intent that will be used to start the custom tab. It is recommended that this intent
-     *     be created with the help of {@link #createCustomTabsIntentBuilder()}, which will ensure
-     *     that a warmed-up version of the browser will be used, minimizing latency.
+     *     be created with the help of {@link #createCustomTabsIntentBuilder(Uri[])}, which will
+     *     ensure that a warmed-up version of the browser will be used, minimizing latency.
      */
     public void performAuthorizationRequest(
             @NonNull AuthorizationRequest request,
@@ -194,8 +202,8 @@ public class AuthorizationService {
      *
      * @param customTabsIntent
      *     The intent that will be used to start the custom tab. It is recommended that this intent
-     *     be created with the help of {@link #createCustomTabsIntentBuilder()}, which will ensure
-     *     that a warmed-up version of the browser will be used, minimizing latency.
+     *     be created with the help of {@link #createCustomTabsIntentBuilder(Uri[])}, which will
+     *     ensure that a warmed-up version of the browser will be used, minimizing latency.
      *
      * @throws android.content.ActivityNotFoundException if no suitable browser is available to
      *     perform the authorization flow.
@@ -285,7 +293,7 @@ public class AuthorizationService {
         if (mDisposed) {
             return;
         }
-        mCustomTabManager.unbind();
+        mCustomTabManager.dispose();
         mDisposed = true;
     }
 
