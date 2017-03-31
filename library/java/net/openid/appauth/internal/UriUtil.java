@@ -12,13 +12,17 @@
  * limitations under the License.
  */
 
-package net.openid.appauth;
+package net.openid.appauth.internal;
 
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.customtabs.CustomTabsService;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
+
+import net.openid.appauth.Preconditions;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -32,7 +36,7 @@ import java.util.Map;
 /**
  * Utility methods for extracting parameters from Uri objects.
  */
-class UriUtil {
+public final class UriUtil {
 
     private UriUtil() {
         throw new IllegalStateException("This type is not intended to be instantiated");
@@ -68,6 +72,27 @@ class UriUtil {
             return Long.parseLong(valueStr);
         }
         return null;
+    }
+
+    public static List<Bundle> toCustomTabUriBundle(Uri[] uris, int startIndex) {
+        Preconditions.checkArgument(startIndex >= 0, "startIndex must be positive");
+        if (uris == null || uris.length <= startIndex) {
+            return Collections.emptyList();
+        }
+
+        List<Bundle> uriBundles = new ArrayList<>(uris.length - startIndex);
+        for (int i = startIndex; i < uris.length; i++) {
+            if (uris[i] == null) {
+                Logger.warn("Null URI in possibleUris list - ignoring");
+                continue;
+            }
+
+            Bundle uriBundle = new Bundle();
+            uriBundle.putParcelable(CustomTabsService.KEY_URL, uris[i]);
+            uriBundles.add(uriBundle);
+        }
+
+        return uriBundles;
     }
 
     public static String formUrlEncode(Map<String, String> parameters) {

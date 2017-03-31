@@ -12,9 +12,15 @@
  * limitations under the License.
  */
 
-package net.openid.appauth;
+package net.openid.appauth.internal;
 
+import android.net.Uri;
 import android.net.UrlQuerySanitizer;
+import android.os.Bundle;
+import android.support.customtabs.CustomTabsService;
+
+import net.openid.appauth.BuildConfig;
+import net.openid.appauth.internal.UriUtil;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,6 +29,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -75,5 +82,59 @@ public class UriUtilTest {
     @Test
     public void testFormUrlEncode_withEmpty() {
         assertThat(UriUtil.formUrlEncode(new HashMap<String, String>())).isEqualTo("");
+    }
+
+    @Test
+    public void testToCustomTabUri() {
+        Uri exampleUri = Uri.parse("https://www.example.com");
+        Uri anotherExampleUri = Uri.parse("https://another.example.com");
+
+        List<Bundle> bundles = UriUtil.toCustomTabUriBundle(
+            new Uri[] { exampleUri, anotherExampleUri },
+            0);
+
+        assertThat(bundles).hasSize(2);
+        assertThat(bundles.get(0).keySet()).contains(CustomTabsService.KEY_URL);
+        assertThat(bundles.get(0).get(CustomTabsService.KEY_URL)).isEqualTo(exampleUri);
+        assertThat(bundles.get(1).keySet()).contains(CustomTabsService.KEY_URL);
+        assertThat(bundles.get(1).get(CustomTabsService.KEY_URL)).isEqualTo(anotherExampleUri);
+    }
+
+    @Test
+    public void testToCustomTabUri_startIndex() {
+        Uri anotherExampleUri = Uri.parse("https://another.example.com");
+
+        List<Bundle> bundles = UriUtil.toCustomTabUriBundle(
+            new Uri[] {
+                Uri.parse("https://www.example.com"),
+                anotherExampleUri
+            },
+            1);
+
+        assertThat(bundles).hasSize(1);
+        assertThat(bundles.get(0).keySet()).contains(CustomTabsService.KEY_URL);
+        assertThat(bundles.get(0).get(CustomTabsService.KEY_URL)).isEqualTo(anotherExampleUri);
+    }
+
+    @Test
+    public void testToCustomTabUriBundle_emptyArray() {
+        assertThat(UriUtil.toCustomTabUriBundle(new Uri[0], 0)).isEmpty();
+    }
+
+    @Test
+    public void testToCustomTabUriBundle_nullArray() {
+        assertThat(UriUtil.toCustomTabUriBundle(null, 0)).isEmpty();
+    }
+
+    @Test
+    public void testToCustomTabUriBundle_startIndexOutsideArray() {
+        List<Bundle> bundles = UriUtil.toCustomTabUriBundle(
+            new Uri[] {
+                Uri.parse("https://www.example.com"),
+                Uri.parse("https://another.example.com")
+            },
+            2);
+
+        assertThat(bundles).hasSize(0);
     }
 }

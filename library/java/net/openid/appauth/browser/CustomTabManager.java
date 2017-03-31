@@ -12,17 +12,26 @@
  * limitations under the License.
  */
 
-package net.openid.appauth;
+package net.openid.appauth.browser;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.WorkerThread;
+import android.support.customtabs.CustomTabsCallback;
 import android.support.customtabs.CustomTabsClient;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.customtabs.CustomTabsServiceConnection;
 import android.support.customtabs.CustomTabsSession;
 
+import net.openid.appauth.internal.Logger;
+import net.openid.appauth.internal.UriUtil;
+
+import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -31,7 +40,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Hides the details of establishing connections and sessions with custom tabs, to make testing
  * easier.
  */
-class CustomTabManager {
+public class CustomTabManager {
 
     /**
      * Wait for at most this amount of time for the browser connection to be established.
@@ -39,7 +48,7 @@ class CustomTabManager {
     private static final long CLIENT_WAIT_TIME = 1L;
 
     @NonNull
-    private final Context mContext;
+    private final WeakReference<Context> mContextRef;
 
     @NonNull
     private final AtomicReference<CustomTabsClient> mClient;
@@ -50,8 +59,8 @@ class CustomTabManager {
     @Nullable
     private CustomTabsServiceConnection mConnection;
 
-    CustomTabManager(@NonNull Context context) {
-        mContext = context;
+    public CustomTabManager(@NonNull Context context) {
+        mContextRef = new WeakReference<>(context);
         mClient = new AtomicReference<>();
         mClientLatch = new CountDownLatch(1);
     }
@@ -82,8 +91,9 @@ class CustomTabManager {
             }
         };
 
-        if (!CustomTabsClient.bindCustomTabsService(
-                mContext,
+        Context context = mContextRef.get();
+        if (context == null || !CustomTabsClient.bindCustomTabsService(
+                context,
                 browserPackage,
                 mConnection)) {
             // this is expected if the browser does not support custom tabs
@@ -92,21 +102,64 @@ class CustomTabManager {
         }
     }
 
-    public CustomTabsIntent.Builder createCustomTabsIntentBuilder() {
-        return new CustomTabsIntent.Builder(createSession());
+    /**
+     * Creates a {@link android.support.customtabs.CustomTabsIntent.Builder custom tab builder},
+     * with an optional list of optional URIs that may be requested. The URI list
+     * should be ordered such that the most likely URI to be requested is first. If the selected
+     * browser does not support custom tabs, then the URI list has no effect.
+     */
+    @WorkerThread
+    @NonNull
+    public CustomTabsIntent.Builder createTabBuilder(@Nullable Uri... possibleUris) {
+        return new CustomTabsIntent.Builder(createSession(null, possibleUris));
     }
 
-    public synchronized void unbind() {
+    public synchronized void dispose() {
         if (mConnection == null) {
             return;
         }
 
-        mContext.unbindService(mConnection);
+        Context context = mContextRef.get();
+        if (context != null) {
+            context.unbindService(mConnection);
+        }
+
         mClient.set(null);
         Logger.debug("CustomTabsService is disconnected");
     }
 
-    private CustomTabsSession createSession() {
+    /**
+     * Creates a {@link android.support.customtabs.CustomTabsSession custom tab session} for
+     * use with a custom tab intent, with optional callbacks and optional list of URIs that may
+     * be requested. The URI list should be ordered such that the most likely URI to be requested
+     * is first. If no custom tab supporting browser is available, this will return {@code null}.
+     */
+    @WorkerThread
+    @Nullable
+    public CustomTabsSession createSession(
+            @Nullable CustomTabsCallback callbacks,
+            @Nullable Uri... possibleUris) {
+        CustomTabsClient client = getClient();
+        if (client == null) {
+            return null;
+        }
+
+        CustomTabsSession session = client.newSession(callbacks);
+
+        if (possibleUris != null && possibleUris.length > 0) {
+            List<Bundle> additionalUris = UriUtil.toCustomTabUriBundle(possibleUris, 1);
+            session.mayLaunchUrl(possibleUris[0], null, additionalUris);
+        }
+
+        return session;
+    }
+
+    /**
+     * Retrieve the custom tab client used to communicate with the custom tab supporting browser,
+     * if available.
+     */
+    @WorkerThread
+    public CustomTabsClient getClient() {
         try {
             mClientLatch.await(CLIENT_WAIT_TIME, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
@@ -114,11 +167,6 @@ class CustomTabManager {
             mClientLatch.countDown();
         }
 
-        CustomTabsClient client = mClient.get();
-        if (client != null) {
-            return client.newSession(null);
-        }
-
-        return null;
+        return mClient.get();
     }
 }
