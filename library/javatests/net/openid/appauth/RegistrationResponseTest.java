@@ -131,6 +131,18 @@ public class RegistrationResponseTest {
         }
 
         @Test
+        public void testSerialization_doesNotChange() throws Exception {
+            mJson.put(RegistrationResponse.KEY_REQUEST,
+                getTestRegistrationRequest().jsonSerialize());
+            RegistrationResponse response = RegistrationResponse.jsonDeserialize(mJson);
+
+            String firstOutput = response.jsonSerializeString();
+            String secondOutput = RegistrationResponse.jsonDeserialize(mJson).jsonSerializeString();
+
+            assertThat(secondOutput).isEqualTo(firstOutput);
+        }
+
+        @Test
         public void testHasExpired_withValidClientSecret() throws Exception {
             RegistrationResponse response = RegistrationResponse
                     .fromJson(getTestRegistrationRequest(), mJson);
@@ -155,9 +167,6 @@ public class RegistrationResponseTest {
             assertThat(response.registrationClientUri)
                     .isEqualTo(Uri.parse(TEST_REGISTRATION_CLIENT_URI));
             assertThat(response.tokenEndpointAuthMethod).isEqualTo(TEST_TOKEN_ENDPOINT_AUTH_METHOD);
-            assertThat(response.additionalParameters)
-                    .containsEntry(RegistrationRequest.PARAM_APPLICATION_TYPE,
-                            RegistrationRequest.APPLICATION_TYPE_NATIVE);
         }
     }
 

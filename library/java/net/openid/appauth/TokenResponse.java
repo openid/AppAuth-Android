@@ -471,7 +471,13 @@ public class TokenResponse {
         }
         return new TokenResponse.Builder(
                 TokenRequest.jsonDeserialize(json.getJSONObject(KEY_REQUEST)))
-                .fromResponseJson(json)
+                .setTokenType(JsonUtil.getStringIfDefined(json, KEY_TOKEN_TYPE))
+                .setAccessToken(JsonUtil.getStringIfDefined(json, KEY_ACCESS_TOKEN))
+                .setAccessTokenExpirationTime(JsonUtil.getLongIfDefined(json, KEY_EXPIRES_AT))
+                .setIdToken(JsonUtil.getStringIfDefined(json, KEY_ID_TOKEN))
+                .setRefreshToken(JsonUtil.getStringIfDefined(json, KEY_REFRESH_TOKEN))
+                .setScope(JsonUtil.getStringIfDefined(json, KEY_SCOPE))
+                .setAdditionalParameters(JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS))
                 .build();
     }
 
