@@ -213,29 +213,20 @@ public class TokenResponse {
          */
         @NonNull
         public Builder fromResponseJson(@NonNull JSONObject json) throws JSONException {
-            try {
-                setTokenType(JsonUtil.getString(json, KEY_TOKEN_TYPE));
-                setAccessToken(JsonUtil.getStringIfDefined(json, KEY_ACCESS_TOKEN));
-                if (json.has(KEY_EXPIRES_AT)) {
-                    setAccessTokenExpirationTime(json.getLong(KEY_EXPIRES_AT));
-                }
-                if (json.has(KEY_EXPIRES_IN)) {
-                    setAccessTokenExpiresIn(json.getLong(KEY_EXPIRES_IN));
-                }
-                setRefreshToken(JsonUtil.getStringIfDefined(json, KEY_REFRESH_TOKEN));
-                setIdToken(JsonUtil.getStringIfDefined(json, KEY_ID_TOKEN));
-                setScope(JsonUtil.getStringIfDefined(json, KEY_SCOPE));
-                setAdditionalParameters(extractAdditionalParams(json, BUILT_IN_PARAMS));
-
-                return this;
-            } catch (JSONException ex) {
-                // JSONException should only be thrown if a get() call is made for a key which
-                // cannot be found. As all calls are guarded by has() calls, this exception should
-                // therefore not be thrown.
-                throw new IllegalStateException(
-                        "JSONException thrown in violation of contract",
-                        ex);
+            setTokenType(JsonUtil.getString(json, KEY_TOKEN_TYPE));
+            setAccessToken(JsonUtil.getStringIfDefined(json, KEY_ACCESS_TOKEN));
+            if (json.has(KEY_EXPIRES_AT)) {
+                setAccessTokenExpirationTime(json.getLong(KEY_EXPIRES_AT));
             }
+            if (json.has(KEY_EXPIRES_IN)) {
+                setAccessTokenExpiresIn(json.getLong(KEY_EXPIRES_IN));
+            }
+            setRefreshToken(JsonUtil.getStringIfDefined(json, KEY_REFRESH_TOKEN));
+            setIdToken(JsonUtil.getStringIfDefined(json, KEY_ID_TOKEN));
+            setScope(JsonUtil.getStringIfDefined(json, KEY_SCOPE));
+            setAdditionalParameters(extractAdditionalParams(json, BUILT_IN_PARAMS));
+
+            return this;
         }
 
         /**
