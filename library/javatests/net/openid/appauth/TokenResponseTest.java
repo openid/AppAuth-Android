@@ -119,9 +119,9 @@ public class TokenResponseTest {
             new HashSet<>(Arrays.asList(TEST_KEY_SCOPE_1, TEST_KEY_SCOPE_2, TEST_KEY_SCOPE_3)));
     }
 
-    @Test
-    public void testBuilder_fromResponseJsonStringWithoutScope() throws JSONException{
-        TokenResponse tokenResponse = mMinimalBuilder.fromResponseJsonString(TEST_JSON_WITHOUT_SCOPE).build();
+    @Test(expected = JSONException.class)
+    public void testBuilder_fromResponseJsonString_emptyJson() throws JSONException{
+        TokenResponse tokenResponse = mMinimalBuilder.fromResponseJsonString("{}").build();
 
         assertNotNull(tokenResponse);
 
