@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
  * @see "Proof Key for Code Exchange by OAuth Public Clients (RFC 7636)
  * <https://tools.ietf.org/html/rfc7636>"
  */
-public class CodeVerifierUtil {
+public final class CodeVerifierUtil {
 
     /**
      * The minimum permitted length for a code verifier.
