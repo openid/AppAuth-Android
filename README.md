@@ -616,23 +616,7 @@ The library AAR files are output to `library/build/outputs/aar`, while the
 demo app is output to `app/build/outputs/apk`.
 In order to run the tests and code analysis, run `./gradlew check`.
 
-The build script attempts
-to guess the location of your SDK by looking at the values of $ANDROID_SDK_HOME
-and $ANDROID_HOME. If neither of these are defined or are not the SDK you
-wish to use, you must create a `local.properties` file in the project root.
-This file must define a property `sdk.dir` that points to your SDK root
-directory. For example:
-
-```
-sdk.dir=/path/to/android-sdk
-```
-
 ### Building from Android Studio
 
 In AndroidStudio, File -> New -> Import project. Select the root folder
 (the one with the `build.gradle` file).
-
-If you get an error like:
-`Error:Could not find com.android.support:customtabs:23.2.0.` then be sure you
-have installed the Android Support Library from the Android SDK Manager.
-Follow the Android Studio prompts to resolve the dependencies automatically.
