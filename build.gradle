@@ -22,14 +22,20 @@ subprojects {
 
 ext.verifyKeystore()
 
-def grgit = org.ajoberstar.grgit.Grgit.open(dir: '.')
-def lastCommit = grgit.head()
+try {
+    def grgit = org.ajoberstar.grgit.Grgit.open(dir: '.')
+    def lastCommit = grgit.head()
 
-project.ext.versionNum = grgit.log(includes:['HEAD']).size()
-project.ext.versionName = grgit.describe()
-project.ext.versionDate = lastCommit.getDate()
-if (project.ext.versionName == null) {
-    project.ext.versionNme = 'DEV'
+    project.ext.versionNum = grgit.log(includes:['HEAD']).size()
+    project.ext.versionName = grgit.describe()
+    project.ext.versionDate = lastCommit.getDate()
+    if (project.ext.versionName == null) {
+        project.ext.versionNme = 'DEV'
+    }
+} catch (Exception ex) {
+    project.ext.versionNum = 0
+    project.ext.versionName = 'DEV'
+    project.ext.versionDate = new Date()
 }
 
 project.ext.minSdkVersion = 16
