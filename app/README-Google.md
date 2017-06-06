@@ -29,7 +29,7 @@
    ```
 
 3. Finally, replace the `appAuthRedirectScheme` manifest placeholder in `build.gradle` (for Module: app) with
-   `PREFIX.apps.googleusercontent.com`.
+   `com.googleusercontent.apps.PREFIX`.
 
 After this is done, install the app (`./gradlew :app:installDebug`). Authorizing a Google account
 and retrieving user info should now work.
