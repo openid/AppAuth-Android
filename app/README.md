@@ -43,6 +43,14 @@ The configuration file MUST contain a JSON object. The following properties can 
   - `https_required`: Whether HTTPS connections are required for registration and token requests.
     If omitted, this defaults to true.
 
+## IDP-specific configuration instructions
+
+Each identity provider is free to submit a set of instructions for configuring this demo app to
+interact with their authorization endpoints. Those who have submitted instructions are listed
+below:
+
+- [Google](README-Google.md)
+
 ## Should I use this same configuration pattern in my own apps?
 
 We (the AppAuth maintainers) have no strong opinion on this one way or another. Configuration files
