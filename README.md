@@ -143,9 +143,8 @@ registration" for more info):
 ```java
 AuthorizationServiceConfiguration serviceConfig =
     new AuthorizationServiceConfiguration(
-        "https://idp.example.com/auth", // authorization endpoint
-        "https://idp.example.com/token", // token endpoint,
-        null); // registration endpoint, if supported and necessary
+        Uri.parse("https://idp.example.com/auth"), // authorization endpoint
+        Uri.parse("https://idp.example.com/token")); // token endpoint
 ```
 
 Alternatively, the configuration can be retrieved from an OpenID Connect
@@ -154,7 +153,19 @@ discovery document:
 ```java
 AuthorizationServiceConfiguration serviceConfig =
     AuthorizationServiceConfiguration.fetchFromIssuer(
-        "https://idp.example.com")
+        Uri.parse("https://idp.example.com"),
+        new RetrieveConfigurationCallback() {
+          void onFetchConfigurationCompleted(
+              @Nullable AuthorizationServiceConfiguration serviceConfiguration,
+              @Nullable AuthorizationException ex) {
+            if (ex != null) {
+              Log.e(TAG, "failed to fetch configuration");
+              return;
+            }
+            
+            // use serviceConfiguration as needed
+          }
+        });
 ```
 
 This will attempt to download a discovery document from the standard location
@@ -166,7 +177,7 @@ provide the full URI as follows:
 ```java
 AuthorizationServiceConfiguration serviceConfig =
     AuthorizationServiceConfiguration.fetchFromUri(
-        "https://idp.example.com/exampletenant/openid-config");
+        Uri.parse("https://idp.example.com/exampletenant/openid-config"));
 ```
 
 If desired, this configuration can be used to seed an AuthState instance,
