@@ -50,6 +50,7 @@ interact with their authorization endpoints. Those who have submitted instructio
 below:
 
 - [Google](README-Google.md)
+- [Okta](README-Okta.md)
 
 ## Should I use this same configuration pattern in my own apps?
 
