@@ -176,7 +176,7 @@ provide the full URI as follows:
 
 ```java
 AuthorizationServiceConfiguration serviceConfig =
-    AuthorizationServiceConfiguration.fetchFromUri(
+    AuthorizationServiceConfiguration.fetchFromUrl(
         Uri.parse("https://idp.example.com/exampletenant/openid-config"));
 ```
 
