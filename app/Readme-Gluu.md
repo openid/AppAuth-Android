@@ -101,37 +101,8 @@ To pass client secret with token refresh we need to change some minor changes in
 #
 # Gluu AppAuth Dynamic Registration.
 
-### changes in xml file: 
+### changes in auth_config.json file: 
 
 > If we keep  **client_id** and **client_secret** blank string in  ``res/raw/auth_config.json`` application will automatically register new client to dynamic registration end point. 
 
 
-We need to add header in library in request in the method RegistrationRequestTask in the file called AuthorizationService.java
-Path to the file is /library/java/net/openid/appauth/AuthorizationService.java.
-
-```java
-conn.setRequestProperty("Content-Type", "application/json");
-```
-
----
-
-
-And also change the manifest file and change the activity tag to
-
-
-```xml
-<activity android:name="net.openid.appauth.RedirectUriReceiverActivity">
-    <intent-filter>
-        <action android:name="android.intent.action.VIEW" />
-        <category android:name="android.intent.category.DEFAULT" />
-        <category android:name="android.intent.category.BROWSABLE" />
-        <data android:scheme="http" />
-        <data android:scheme="https" />
-        <data android:host="example.gluu.org" />
-    </intent-filter>
-</activity>
-```
-
-
-
-So that all the URIs that matches "example.gluu.org" are opened in the app itself
