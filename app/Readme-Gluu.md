@@ -15,7 +15,7 @@ First of all install and login to your gluu server than follow steps below:-
   1. Redirect URIs can be like this (**"appscheme://client.example.com"**)
   1. Populate your new OpenID Connect application with values similar to:
   1. Copy the **Client ID**, as it will be needed for the client configuration.
-  1. Click **Finish** to redirect back to the *General Settings* of your application.
+  1. Click **Add** to creat a new client
   
   
 **Note:-** You can also create OpenID Clients by using gluu's oxAuth-rp client
