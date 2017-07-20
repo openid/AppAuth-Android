@@ -15,21 +15,21 @@
        awk '{print $2}'
    ```
 
-2. The created client ID should look something like `YOUR_CLIENT.apps.googleusercontent.com`,
-   where `YOUR_CLIENT` is your client string provided by Google. Replace the `auth_config.json`
+2. The created client ID should look something like `PREFIX.apps.googleusercontent.com`,
+   where `PREFIX` is an alphanumeric string unique to your client ID. Replace the `auth_config.json`
    file contents with:
 
    ```json
    {
-     "client_id": "YOUR_CLIENT.apps.googleusercontent.com",
-     "redirect_uri": "com.googleusercontent.apps.YOUR_CLIENT:/oauth2redirect",
+     "client_id": "PREFIX.apps.googleusercontent.com",
+     "redirect_uri": "com.googleusercontent.apps.PREFIX:/oauth2redirect",
      "authorization_scope": "openid email profile",
      "discovery_uri": "https://accounts.google.com/.well-known/openid-configuration"
    }
    ```
 
 3. Finally, replace the `appAuthRedirectScheme` manifest placeholder in `build.gradle` (for Module: app) with
-   `YOUR_CLIENT.apps.googleusercontent.com`.
+   `com.googleusercontent.apps.PREFIX`.
 
 After this is done, install the app (`./gradlew :app:installDebug`). Authorizing a Google account
 and retrieving user info should now work.

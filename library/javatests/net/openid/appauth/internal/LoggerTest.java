@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package net.openid.appauth;
+package net.openid.appauth.internal;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -22,6 +22,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.util.Log;
+
+import net.openid.appauth.BuildConfig;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

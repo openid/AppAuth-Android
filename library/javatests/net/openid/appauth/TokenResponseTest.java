@@ -32,6 +32,9 @@ import static junit.framework.Assert.assertNull;
 import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
 import static net.openid.appauth.TestValues.TEST_AUTH_CODE;
 import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
+import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
+import static net.openid.appauth.TestValues.TEST_REFRESH_TOKEN;
+import static net.openid.appauth.TestValues.TEST_SCOPE;
 import static net.openid.appauth.TestValues.getTestServiceConfig;
 import static net.openid.appauth.TokenResponse.KEY_ACCESS_TOKEN;
 import static net.openid.appauth.TokenResponse.KEY_EXPIRES_AT;
@@ -39,10 +42,10 @@ import static net.openid.appauth.TokenResponse.KEY_ID_TOKEN;
 import static net.openid.appauth.TokenResponse.KEY_REFRESH_TOKEN;
 import static net.openid.appauth.TokenResponse.KEY_SCOPE;
 import static net.openid.appauth.TokenResponse.KEY_TOKEN_TYPE;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
-import static org.junit.Assert.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk=16)
@@ -101,7 +104,6 @@ public class TokenResponseTest {
 
     @Test
     public void testBuilder_fromResponseJsonStringWithScope() throws JSONException{
-        System.out.println(TEST_JSON_WITH_SCOPE);
         TokenResponse tokenResponse = mMinimalBuilder.fromResponseJsonString(TEST_JSON_WITH_SCOPE).build();
 
         assertNotNull(tokenResponse);
@@ -113,13 +115,13 @@ public class TokenResponseTest {
         assertEquals(TEST_KEY_KEY_EXPIRES_AT, tokenResponse.accessTokenExpirationTime);
 
         assertEquals(TEST_KEY_SCOPES, tokenResponse.scope);
-        assertThat(tokenResponse.getScopeSet(), is(equalTo((Set) new HashSet<>(Arrays.asList(TEST_KEY_SCOPE_1, TEST_KEY_SCOPE_2, TEST_KEY_SCOPE_3)))));
+        assertThat(tokenResponse.getScopeSet()).isEqualTo(
+            new HashSet<>(Arrays.asList(TEST_KEY_SCOPE_1, TEST_KEY_SCOPE_2, TEST_KEY_SCOPE_3)));
     }
 
-    @Test
-    public void testBuilder_fromResponseJsonStringWithoutScope() throws JSONException{
-        System.out.println(TEST_JSON_WITHOUT_SCOPE);
-        TokenResponse tokenResponse = mMinimalBuilder.fromResponseJsonString(TEST_JSON_WITHOUT_SCOPE).build();
+    @Test(expected = JSONException.class)
+    public void testBuilder_fromResponseJsonString_emptyJson() throws JSONException{
+        TokenResponse tokenResponse = mMinimalBuilder.fromResponseJsonString("{}").build();
 
         assertNotNull(tokenResponse);
 
@@ -129,13 +131,12 @@ public class TokenResponseTest {
         assertEquals(TEST_KEY_ID_TOKEN, tokenResponse.idToken);
         assertEquals(TEST_KEY_KEY_EXPIRES_AT, tokenResponse.accessTokenExpirationTime);
 
-        assertThat(tokenResponse.scope, isEmptyOrNullString());
+        assertThat(tokenResponse.scope).isNullOrEmpty();
         assertNull(tokenResponse.getScopeSet());
     }
 
     @Test
     public void testBuilder_fromResponseJsonStringWithoutScopeField() throws JSONException{
-        System.out.println(TEST_JSON_WITHOUT_SCOPE_FIELD);
         TokenResponse tokenResponse = mMinimalBuilder.fromResponseJsonString(TEST_JSON_WITHOUT_SCOPE_FIELD).build();
 
         assertNotNull(tokenResponse);
@@ -146,7 +147,39 @@ public class TokenResponseTest {
         assertEquals(TEST_KEY_ID_TOKEN, tokenResponse.idToken);
         assertEquals(TEST_KEY_KEY_EXPIRES_AT, tokenResponse.accessTokenExpirationTime);
 
-        assertThat(tokenResponse.scope, isEmptyOrNullString());
+        assertThat(tokenResponse.scope).isNullOrEmpty();
         assertNull(tokenResponse.getScopeSet());
+    }
+
+    @Test
+    public void testJsonSerialization() throws JSONException {
+        TokenResponse response = mMinimalBuilder
+            .setAccessToken(TEST_KEY_ACCESS_TOKEN)
+            .setAccessTokenExpirationTime(TEST_KEY_KEY_EXPIRES_AT)
+            .setIdToken(TEST_ID_TOKEN)
+            .setRefreshToken(TEST_REFRESH_TOKEN)
+            .setScope(TEST_SCOPE)
+            .setTokenType(TEST_KEY_TOKEN_TYPE)
+            .build();
+
+        String output = response.jsonSerializeString();
+        TokenResponse input = TokenResponse.jsonDeserialize(output);
+
+        assertThat(input.accessToken).isEqualTo(response.accessToken);
+        assertThat(input.accessTokenExpirationTime).isEqualTo(response.accessTokenExpirationTime);
+        assertThat(input.idToken).isEqualTo(response.idToken);
+        assertThat(input.refreshToken).isEqualTo(response.refreshToken);
+        assertThat(input.scope).isEqualTo(response.scope);
+        assertThat(input.tokenType).isEqualTo(response.tokenType);
+    }
+
+    @Test
+    public void testJsonSerialization_doesNotChange() throws Exception {
+        TokenResponse tokenResponse = mMinimalBuilder.fromResponseJsonString(TEST_JSON_WITH_SCOPE).build();
+
+        String firstOutput = tokenResponse.jsonSerializeString();
+        String secondOutput = TokenResponse.jsonDeserialize(firstOutput).jsonSerializeString();
+
+        assertThat(secondOutput).isEqualTo(firstOutput);
     }
 }

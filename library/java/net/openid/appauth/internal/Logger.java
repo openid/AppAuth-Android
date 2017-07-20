@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package net.openid.appauth;
+package net.openid.appauth.internal;
 
 import static net.openid.appauth.Preconditions.checkNotNull;
 
@@ -26,7 +26,7 @@ import android.util.Log;
  * the logging tag once and uses this to determine whether logging should proceed. This minimizes
  * the number of native calls made as part of logging.
  */
-class Logger {
+public final class Logger {
 
     @VisibleForTesting
     static final String LOG_TAG = "AppAuth";
@@ -47,7 +47,7 @@ class Logger {
     }
 
     @VisibleForTesting
-    static synchronized void setInstance(Logger logger) {
+    public static synchronized void setInstance(Logger logger) {
         sInstance = logger;
     }
 
@@ -126,7 +126,7 @@ class Logger {
      * allow easier mock testing.
      */
     @VisibleForTesting
-    interface LogWrapper {
+    public interface LogWrapper {
         void println(int level, String tag, String message);
 
         boolean isLoggable(String tag, int level);

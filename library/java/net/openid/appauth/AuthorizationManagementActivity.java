@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.support.annotation.VisibleForTesting;
 
 import net.openid.appauth.AuthorizationException.AuthorizationRequestErrors;
+import net.openid.appauth.internal.Logger;
 
 import org.json.JSONException;
 

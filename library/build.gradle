@@ -52,3 +52,37 @@ bintray {
     }
     configurations = ["archives"]
 }
+
+install {
+    repositories.mavenInstaller {
+        pom {
+            project {
+                packaging 'aar'
+                name 'AppAuth for Android'
+                description 'OAuth2 / OpenID Connect client for Android apps'
+                url 'https://github.com/openid/AppAuth-Android'
+                licenses {
+                    license {
+                        name "The Apache Software License, Version 2.0"
+                        url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                        distribution "repo"
+                    }
+                }
+
+                developers {
+                    developer {
+                        id "iainmcgin"
+                        name "Iain McGinniss"
+                        email "iainmcgin@google.com"
+                    }
+                }
+
+                scm {
+                    connection "https://github.com/openid/AppAuth-Android.git"
+                    developerConnection "https://github.com/openid/AppAuth-Android.git"
+                    url 'https://github.com/openid/AppAuth-Android'
+                }
+            }
+        }
+    }
+}

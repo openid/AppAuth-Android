@@ -19,6 +19,8 @@ import static net.openid.appauth.Preconditions.checkNotNull;
 
 import android.util.Base64;
 
+import net.openid.appauth.internal.Logger;
+
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -32,7 +34,7 @@ import java.util.regex.Pattern;
  * @see "Proof Key for Code Exchange by OAuth Public Clients (RFC 7636)
  * <https://tools.ietf.org/html/rfc7636>"
  */
-public class CodeVerifierUtil {
+public final class CodeVerifierUtil {
 
     /**
      * The minimum permitted length for a code verifier.

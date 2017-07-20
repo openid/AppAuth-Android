@@ -26,6 +26,8 @@ import net.openid.appauth.AuthorizationException.GeneralErrors;
 
 import net.openid.appauth.connectivity.ConnectionBuilder;
 import net.openid.appauth.connectivity.DefaultConnectionBuilder;
+import net.openid.appauth.internal.Logger;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -89,12 +91,30 @@ public class AuthorizationServiceConfiguration {
 
     /**
      * Creates a service configuration for a basic OAuth2 provider.
+     * @param authorizationEndpoint The
+     *     [authorization endpoint URI](https://tools.ietf.org/html/rfc6749#section-3.1)
+     *     for the service.
+     * @param tokenEndpoint The
+     *     [token endpoint URI](https://tools.ietf.org/html/rfc6749#section-3.2)
+     *     for the service.
+     */
+    public AuthorizationServiceConfiguration(
+            @NonNull Uri authorizationEndpoint,
+            @NonNull Uri tokenEndpoint) {
+        this(authorizationEndpoint, tokenEndpoint, null);
+    }
+
+    /**
+     * Creates a service configuration for a basic OAuth2 provider.
      *
      * @param authorizationEndpoint The
      *     [authorization endpoint URI](https://tools.ietf.org/html/rfc6749#section-3.1)
      *     for the service.
      * @param tokenEndpoint The
      *     [token endpoint URI](https://tools.ietf.org/html/rfc6749#section-3.2)
+     *     for the service.
+     * @param registrationEndpoint The optional
+     *     [client registration endpoint URI](https://tools.ietf.org/html/rfc7591#section-3)
      *     for the service.
      */
     public AuthorizationServiceConfiguration(

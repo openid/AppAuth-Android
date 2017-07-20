@@ -1,4 +1,3 @@
-apply from: 'config/localprops.gradle'
 apply from: 'config/keystore.gradle'
 
 buildscript {
@@ -6,7 +5,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.0'
+        classpath 'com.android.tools.build:gradle:2.3.1'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.1'
         classpath 'org.ajoberstar:gradle-git:1.5.1'
@@ -16,27 +15,33 @@ buildscript {
 subprojects {
     repositories {
         jcenter()
-        maven { url "${rootProject.androidSdkDir}/extras/android/m2repository" }
+        maven { url 'https://maven.google.com' }
         maven { url 'https://jitpack.io' }
     }
 }
 
 ext.verifyKeystore()
 
-def grgit = org.ajoberstar.grgit.Grgit.open(dir: '.')
-def lastCommit = grgit.head()
+try {
+    def grgit = org.ajoberstar.grgit.Grgit.open(dir: '.')
+    def lastCommit = grgit.head()
 
-project.ext.versionNum = grgit.log(includes:['HEAD']).size()
-project.ext.versionName = grgit.describe()
-project.ext.versionDate = lastCommit.getDate()
-if (project.ext.versionName == null) {
-    project.ext.versionNme = 'DEV'
+    project.ext.versionNum = grgit.log(includes:['HEAD']).size()
+    project.ext.versionName = grgit.describe()
+    project.ext.versionDate = lastCommit.getDate()
+    if (project.ext.versionName == null) {
+        project.ext.versionNme = 'DEV'
+    }
+} catch (Exception ex) {
+    project.ext.versionNum = 0
+    project.ext.versionName = 'DEV'
+    project.ext.versionDate = new Date()
 }
 
 project.ext.minSdkVersion = 16
 project.ext.compileSdkVersion = 25
-project.ext.buildToolsVersion = '25.0.1'
-project.ext.supportLibVersion = '25.2.0'
+project.ext.buildToolsVersion = '25.0.2'
+project.ext.supportLibVersion = '25.3.1'
 
 task showVersion {
     doLast {
