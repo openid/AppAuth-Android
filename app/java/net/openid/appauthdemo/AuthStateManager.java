@@ -153,11 +153,11 @@ public class AuthStateManager {
         try {
             SharedPreferences.Editor editor = mPrefs.edit();
             if (state == null) {
-               editor.remove(KEY_STATE);
+                editor.remove(KEY_STATE);
             } else {
                 editor.putString(KEY_STATE, state.jsonSerializeString());
             }
-            
+
             if (!editor.commit()) {
                 throw new IllegalStateException("Failed to write state to shared prefs");
             }
