@@ -30,7 +30,7 @@ try {
     project.ext.versionName = grgit.describe()
     project.ext.versionDate = lastCommit.getDate()
     if (project.ext.versionName == null) {
-        project.ext.versionNme = 'DEV'
+        project.ext.versionName = 'DEV'
     }
 } catch (Exception ex) {
     project.ext.versionNum = 0
