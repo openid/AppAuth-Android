@@ -213,6 +213,11 @@ public class AuthorizationService {
             @NonNull PendingIntent completedIntent,
             @Nullable PendingIntent canceledIntent,
             @NonNull CustomTabsIntent customTabsIntent) {
+        checkNotDisposed();
+        checkNotNull(request);
+        checkNotNull(completedIntent);
+        checkNotNull(customTabsIntent);
+
         Intent authIntent = prepareAuthorizationRequestIntent(request, customTabsIntent);
         mContext.startActivity(AuthorizationManagementActivity.createStartIntent(
                 mContext,
