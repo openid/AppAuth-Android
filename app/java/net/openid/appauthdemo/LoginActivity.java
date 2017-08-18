@@ -325,6 +325,8 @@ public final class LoginActivity extends AppCompatActivity {
                 }
 
                 recreateAuthorizationService();
+                createAuthRequest(getLoginHint());
+                warmUpBrowser();
             }
 
             @Override
