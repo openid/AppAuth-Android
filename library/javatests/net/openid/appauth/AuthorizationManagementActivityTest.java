@@ -62,56 +62,56 @@ public class AuthorizationManagementActivityTest {
         mAuthIntent = new Intent("AUTH");
         mCompleteIntent = new Intent("COMPLETE");
         mCompletePendingIntent =
-            PendingIntent.getActivity(RuntimeEnvironment.application, 0, mCompleteIntent, 0);
+                PendingIntent.getActivity(RuntimeEnvironment.application, 0, mCompleteIntent, 0);
         mCancelIntent = new Intent("CANCEL");
         mCancelPendingIntent =
-            PendingIntent.getActivity(RuntimeEnvironment.application, 0, mCancelIntent, 0);
+                PendingIntent.getActivity(RuntimeEnvironment.application, 0, mCancelIntent, 0);
 
         mStartIntentWithPendings =
-            createStartIntentWithPendingIntents(mAuthRequest, mCancelPendingIntent);
+                createStartIntentWithPendingIntents(mAuthRequest, mCancelPendingIntent);
         mStartIntentWithPendingsWithoutCancel =
-            createStartIntentWithPendingIntents(mAuthRequest, null);
+                createStartIntentWithPendingIntents(mAuthRequest, null);
         mStartForResultIntent = createStartForResultIntent(mAuthRequest);
 
         mSuccessAuthRedirect = mAuthRequest.redirectUri.buildUpon()
-            .appendQueryParameter(AuthorizationResponse.KEY_STATE, mAuthRequest.state)
-            .appendQueryParameter(AuthorizationResponse.KEY_AUTHORIZATION_CODE, "12345")
-            .build();
+                .appendQueryParameter(AuthorizationResponse.KEY_STATE, mAuthRequest.state)
+                .appendQueryParameter(AuthorizationResponse.KEY_AUTHORIZATION_CODE, "12345")
+                .build();
 
         mErrorAuthRedirect = mAuthRequest.redirectUri.buildUpon()
-            .appendQueryParameter(
-                AuthorizationException.PARAM_ERROR,
-                AuthorizationRequestErrors.ACCESS_DENIED.error)
-            .appendQueryParameter(
-                AuthorizationException.PARAM_ERROR_DESCRIPTION,
-                AuthorizationRequestErrors.ACCESS_DENIED.errorDescription)
-            .build();
+                .appendQueryParameter(
+                    AuthorizationException.PARAM_ERROR,
+                    AuthorizationRequestErrors.ACCESS_DENIED.error)
+                .appendQueryParameter(
+                    AuthorizationException.PARAM_ERROR_DESCRIPTION,
+                    AuthorizationRequestErrors.ACCESS_DENIED.errorDescription)
+                .build();
 
         instantiateActivity(mStartIntentWithPendings);
     }
 
     private Intent createStartIntentWithPendingIntents(
-        AuthorizationRequest authRequest,
-        PendingIntent cancelIntent) {
+            AuthorizationRequest authRequest,
+            PendingIntent cancelIntent) {
         return AuthorizationManagementActivity.createStartIntent(
-            RuntimeEnvironment.application,
-            authRequest,
-            mAuthIntent,
-            mCompletePendingIntent,
-            cancelIntent);
+                RuntimeEnvironment.application,
+                authRequest,
+                mAuthIntent,
+                mCompletePendingIntent,
+                cancelIntent);
     }
 
     private Intent createStartForResultIntent(
-        AuthorizationRequest authRequest) {
+            AuthorizationRequest authRequest) {
         return AuthorizationManagementActivity.createStartForResultIntent(
-            RuntimeEnvironment.application,
-            authRequest,
-            mAuthIntent);
+                RuntimeEnvironment.application,
+                authRequest,
+                mAuthIntent);
     }
 
     private void instantiateActivity(Intent managementIntent) {
         mController = Robolectric.buildActivity(AuthorizationManagementActivity.class)
-            .withIntent(managementIntent);
+                .withIntent(managementIntent);
 
         mActivity = mController.get();
         mActivityShadow = shadowOf(mActivity);
@@ -133,17 +133,17 @@ public class AuthorizationManagementActivityTest {
         // on completion of the authorization activity, the result will be forwarded to the
         // management activity via newIntent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-            RuntimeEnvironment.application,
-            mSuccessAuthRedirect));
+                RuntimeEnvironment.application,
+                mSuccessAuthRedirect));
 
         // the management activity is then resumed
         mController.resume();
 
         // after which the completion intent should be fired
         assertThat(mActivityShadow.getNextStartedActivity())
-            .hasAction("COMPLETE")
-            .hasData(mSuccessAuthRedirect)
-            .hasExtra(AuthorizationResponse.EXTRA_RESPONSE);
+                .hasAction("COMPLETE")
+                .hasData(mSuccessAuthRedirect)
+                .hasExtra(AuthorizationResponse.EXTRA_RESPONSE);
         assertThat(mActivity).isFinishing();
     }
 
@@ -163,8 +163,8 @@ public class AuthorizationManagementActivityTest {
         // on completion of the authorization activity, the result will be forwarded to the
         // management activity via newIntent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-            RuntimeEnvironment.application,
-            mSuccessAuthRedirect));
+                RuntimeEnvironment.application,
+                mSuccessAuthRedirect));
 
         // the management activity is then resumed
         mController.resume();
@@ -194,17 +194,17 @@ public class AuthorizationManagementActivityTest {
 
         // the authorization redirect will be forwarded via a new intent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-            RuntimeEnvironment.application,
-            mSuccessAuthRedirect));
+                RuntimeEnvironment.application,
+                mSuccessAuthRedirect));
 
         // the management activity is then resumed
         mController.resume();
 
         // after which the completion intent should be fired
         assertThat(mActivityShadow.getNextStartedActivity())
-            .hasAction("COMPLETE")
-            .hasData(mSuccessAuthRedirect)
-            .hasExtra(AuthorizationResponse.EXTRA_RESPONSE);
+                .hasAction("COMPLETE")
+                .hasData(mSuccessAuthRedirect)
+                .hasExtra(AuthorizationResponse.EXTRA_RESPONSE);
         assertThat(mActivity).isFinishing();
     }
 
@@ -228,8 +228,8 @@ public class AuthorizationManagementActivityTest {
 
         // the authorization redirect will be forwarded via a new intent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-            RuntimeEnvironment.application,
-            mSuccessAuthRedirect));
+                RuntimeEnvironment.application,
+                mSuccessAuthRedirect));
 
         // the management activity is then resumed
         mController.resume();
@@ -254,17 +254,17 @@ public class AuthorizationManagementActivityTest {
 
         // the authorization redirect will be forwarded via a new intent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-            RuntimeEnvironment.application,
-            mErrorAuthRedirect));
+                RuntimeEnvironment.application,
+                mErrorAuthRedirect));
 
         // the management activity is then resumed
         mController.resume();
 
         // after which the completion intent should be fired
         assertThat(mActivityShadow.getNextStartedActivity())
-            .hasAction("COMPLETE")
-            .hasData(mErrorAuthRedirect)
-            .hasExtra(AuthorizationException.EXTRA_EXCEPTION);
+                .hasAction("COMPLETE")
+                .hasData(mErrorAuthRedirect)
+                .hasExtra(AuthorizationException.EXTRA_EXCEPTION);
         assertThat(mActivity).isFinishing();
     }
 
@@ -283,8 +283,8 @@ public class AuthorizationManagementActivityTest {
 
         // the authorization redirect will be forwarded via a new intent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-            RuntimeEnvironment.application,
-            mErrorAuthRedirect));
+                RuntimeEnvironment.application,
+                mErrorAuthRedirect));
 
         // the management activity is then resumed
         mController.resume();
@@ -301,23 +301,23 @@ public class AuthorizationManagementActivityTest {
         emulateFlowToAuthorizationActivityLaunch(mStartIntentWithPendings);
 
         Uri authResponseUri = mAuthRequest.redirectUri.buildUpon()
-            .appendQueryParameter(AuthorizationResponse.KEY_STATE, "differentState")
-            .appendQueryParameter(AuthorizationResponse.KEY_AUTHORIZATION_CODE, "12345")
-            .build();
+                .appendQueryParameter(AuthorizationResponse.KEY_STATE, "differentState")
+                .appendQueryParameter(AuthorizationResponse.KEY_AUTHORIZATION_CODE, "12345")
+                .build();
 
         Intent nextStartedActivity = emulateAuthorizationResponseReceived(
-            AuthorizationManagementActivity.createResponseHandlingIntent(
-                RuntimeEnvironment.application,
-                authResponseUri));
+                AuthorizationManagementActivity.createResponseHandlingIntent(
+                        RuntimeEnvironment.application,
+                        authResponseUri));
 
         // the next activity should be from the completion intent, carrying an error
         assertThat(nextStartedActivity)
-            .hasAction("COMPLETE")
-            .hasData(authResponseUri)
-            .hasExtra(AuthorizationException.EXTRA_EXCEPTION);
+                .hasAction("COMPLETE")
+                .hasData(authResponseUri)
+                .hasExtra(AuthorizationException.EXTRA_EXCEPTION);
 
         assertThat(AuthorizationException.fromIntent(nextStartedActivity))
-            .isEqualTo(AuthorizationRequestErrors.STATE_MISMATCH);
+                .isEqualTo(AuthorizationRequestErrors.STATE_MISMATCH);
     }
 
     @Test
@@ -325,14 +325,14 @@ public class AuthorizationManagementActivityTest {
         emulateFlowToAuthorizationActivityLaunch(mStartForResultIntent);
 
         Uri authResponseUri = mAuthRequest.redirectUri.buildUpon()
-            .appendQueryParameter(AuthorizationResponse.KEY_STATE, "differentState")
-            .appendQueryParameter(AuthorizationResponse.KEY_AUTHORIZATION_CODE, "12345")
-            .build();
+                .appendQueryParameter(AuthorizationResponse.KEY_STATE, "differentState")
+                .appendQueryParameter(AuthorizationResponse.KEY_AUTHORIZATION_CODE, "12345")
+                .build();
 
         // the authorization redirect will be forwarded via a new intent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-            RuntimeEnvironment.application,
-            authResponseUri));
+                RuntimeEnvironment.application,
+                authResponseUri));
 
         // the management activity is then resumed
         mController.resume();
@@ -342,70 +342,70 @@ public class AuthorizationManagementActivityTest {
         Intent resultIntent = mActivityShadow.getResultIntent();
 
         assertThat(resultIntent)
-            .hasData(authResponseUri)
-            .hasExtra(AuthorizationException.EXTRA_EXCEPTION);
+                .hasData(authResponseUri)
+                .hasExtra(AuthorizationException.EXTRA_EXCEPTION);
 
         assertThat(AuthorizationException.fromIntent(resultIntent))
-            .isEqualTo(AuthorizationRequestErrors.STATE_MISMATCH);
+                .isEqualTo(AuthorizationRequestErrors.STATE_MISMATCH);
     }
 
     @Test
     public void testMismatchedState_withPendingIntentsAndNoStateInRequestWithStateInResponse() {
         AuthorizationRequest request = new AuthorizationRequest.Builder(
-            TestValues.getTestServiceConfig(),
-            TestValues.TEST_CLIENT_ID,
-            ResponseTypeValues.CODE,
-            TestValues.TEST_APP_REDIRECT_URI)
-            .setState(null)
-            .build();
+                TestValues.getTestServiceConfig(),
+                TestValues.TEST_CLIENT_ID,
+                ResponseTypeValues.CODE,
+                TestValues.TEST_APP_REDIRECT_URI)
+                .setState(null)
+                .build();
 
         Intent startIntent = createStartIntentWithPendingIntents(request, mCancelPendingIntent);
         emulateFlowToAuthorizationActivityLaunch(startIntent);
 
         Uri authResponseUri = mAuthRequest.redirectUri.buildUpon()
-            .appendQueryParameter(AuthorizationResponse.KEY_STATE, "differentState")
-            .appendQueryParameter(AuthorizationResponse.KEY_AUTHORIZATION_CODE, "12345")
-            .build();
+                .appendQueryParameter(AuthorizationResponse.KEY_STATE, "differentState")
+                .appendQueryParameter(AuthorizationResponse.KEY_AUTHORIZATION_CODE, "12345")
+                .build();
 
         // the next activity should be from the completion intent, carrying an error
         Intent nextStartedActivity = emulateAuthorizationResponseReceived(
-            AuthorizationManagementActivity.createResponseHandlingIntent(
-                RuntimeEnvironment.application,
-                authResponseUri));
+                AuthorizationManagementActivity.createResponseHandlingIntent(
+                        RuntimeEnvironment.application,
+                        authResponseUri));
 
         assertThat(AuthorizationException.fromIntent(nextStartedActivity))
-            .isEqualTo(AuthorizationRequestErrors.STATE_MISMATCH);
+                .isEqualTo(AuthorizationRequestErrors.STATE_MISMATCH);
     }
 
     @Test
     public void testMismatchedState_withoutPendingIntentsAndNoStateInRequestWithStateInResponse() {
         AuthorizationRequest request = new AuthorizationRequest.Builder(
-            TestValues.getTestServiceConfig(),
-            TestValues.TEST_CLIENT_ID,
-            ResponseTypeValues.CODE,
-            TestValues.TEST_APP_REDIRECT_URI)
-            .setState(null)
-            .build();
+                TestValues.getTestServiceConfig(),
+                TestValues.TEST_CLIENT_ID,
+                ResponseTypeValues.CODE,
+                TestValues.TEST_APP_REDIRECT_URI)
+                .setState(null)
+                .build();
 
         Intent startIntent = createStartForResultIntent(request);
         emulateFlowToAuthorizationActivityLaunch(startIntent);
 
         Uri authResponseUri = mAuthRequest.redirectUri.buildUpon()
-            .appendQueryParameter(AuthorizationResponse.KEY_STATE, "differentState")
-            .appendQueryParameter(AuthorizationResponse.KEY_AUTHORIZATION_CODE, "12345")
-            .build();
+                .appendQueryParameter(AuthorizationResponse.KEY_STATE, "differentState")
+                .appendQueryParameter(AuthorizationResponse.KEY_AUTHORIZATION_CODE, "12345")
+                .build();
 
         // the authorization redirect will be forwarded via a new intent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-            RuntimeEnvironment.application,
-            authResponseUri));
+                RuntimeEnvironment.application,
+                authResponseUri));
 
         // the management activity is then resumed
         mController.resume();
 
         Intent resultIntent = mActivityShadow.getResultIntent();
         assertThat(AuthorizationException.fromIntent(resultIntent))
-            .isEqualTo(AuthorizationRequestErrors.STATE_MISMATCH);
+                .isEqualTo(AuthorizationRequestErrors.STATE_MISMATCH);
     }
 
     @Test
@@ -413,9 +413,9 @@ public class AuthorizationManagementActivityTest {
         emulateFlowToAuthorizationActivityLaunch(mStartIntentWithPendings);
 
         Uri authResponseUri = mAuthRequest.redirectUri.buildUpon()
-            .appendQueryParameter(AuthorizationResponse.KEY_STATE, "differentState")
-            .appendQueryParameter(AuthorizationResponse.KEY_AUTHORIZATION_CODE, "12345")
-            .build();
+                .appendQueryParameter(AuthorizationResponse.KEY_STATE, "differentState")
+                .appendQueryParameter(AuthorizationResponse.KEY_AUTHORIZATION_CODE, "12345")
+                .build();
     }
 
     @Test

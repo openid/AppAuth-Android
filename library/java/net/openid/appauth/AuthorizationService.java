@@ -31,6 +31,7 @@ import android.text.TextUtils;
 import net.openid.appauth.AuthorizationException.GeneralErrors;
 import net.openid.appauth.AuthorizationException.RegistrationRequestErrors;
 import net.openid.appauth.AuthorizationException.TokenRequestErrors;
+
 import net.openid.appauth.browser.BrowserDescriptor;
 import net.openid.appauth.browser.BrowserSelector;
 import net.openid.appauth.browser.CustomTabManager;
@@ -88,11 +89,11 @@ public class AuthorizationService {
             @NonNull Context context,
             @NonNull AppAuthConfiguration clientConfiguration) {
         this(context,
-            clientConfiguration,
-            BrowserSelector.select(
-                context,
-                clientConfiguration.getBrowserMatcher()),
-            new CustomTabManager(context));
+                clientConfiguration,
+                BrowserSelector.select(
+                        context,
+                        clientConfiguration.getBrowserMatcher()),
+                new CustomTabManager(context));
     }
 
     /**
@@ -100,9 +101,9 @@ public class AuthorizationService {
      */
     @VisibleForTesting
     AuthorizationService(@NonNull Context context,
-            @NonNull AppAuthConfiguration clientConfiguration,
-            @Nullable BrowserDescriptor browser,
-            @NonNull CustomTabManager customTabManager) {
+                         @NonNull AppAuthConfiguration clientConfiguration,
+                         @Nullable BrowserDescriptor browser,
+                         @NonNull CustomTabManager customTabManager) {
         mContext = checkNotNull(context);
         mClientConfiguration = clientConfiguration;
         mCustomTabManager = customTabManager;
@@ -251,9 +252,9 @@ public class AuthorizationService {
 
         Intent authIntent = prepareAuthorizationRequestIntent(request, customTabsIntent);
         return AuthorizationManagementActivity.createStartForResultIntent(
-            mContext,
-            request,
-            authIntent);
+                mContext,
+                request,
+                authIntent);
     }
 
     /**
@@ -377,10 +378,9 @@ public class AuthorizationService {
 
         private AuthorizationException mException;
 
-        TokenRequestTask(
-                TokenRequest request,
-                @NonNull ClientAuthentication clientAuthentication,
-                TokenResponseCallback callback) {
+        TokenRequestTask(TokenRequest request,
+                         @NonNull ClientAuthentication clientAuthentication,
+                         TokenResponseCallback callback) {
             mRequest = request;
             mCallback = callback;
             mClientAuthentication = clientAuthentication;
@@ -392,7 +392,7 @@ public class AuthorizationService {
             try {
                 HttpURLConnection conn =
                         mClientConfiguration.getConnectionBuilder()
-                            .openConnection(mRequest.configuration.tokenEndpoint);
+                                .openConnection(mRequest.configuration.tokenEndpoint);
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 addJsonToAcceptHeader(conn);
@@ -431,11 +431,11 @@ public class AuthorizationService {
             } catch (IOException ex) {
                 Logger.debugWithStack(ex, "Failed to complete exchange request");
                 mException = AuthorizationException.fromTemplate(
-                    GeneralErrors.NETWORK_ERROR, ex);
+                        GeneralErrors.NETWORK_ERROR, ex);
             } catch (JSONException ex) {
                 Logger.debugWithStack(ex, "Failed to complete exchange request");
                 mException = AuthorizationException.fromTemplate(
-                    GeneralErrors.JSON_DESERIALIZATION_ERROR, ex);
+                        GeneralErrors.JSON_DESERIALIZATION_ERROR, ex);
             } finally {
                 Utils.closeQuietly(is);
             }
@@ -458,7 +458,7 @@ public class AuthorizationService {
                             error,
                             json.optString(AuthorizationException.PARAM_ERROR_DESCRIPTION, null),
                             UriUtil.parseUriIfAvailable(
-                                json.optString(AuthorizationException.PARAM_ERROR_URI)));
+                                    json.optString(AuthorizationException.PARAM_ERROR_URI)));
                 } catch (JSONException jsonEx) {
                     ex = AuthorizationException.fromTemplate(
                             GeneralErrors.JSON_DESERIALIZATION_ERROR,
@@ -474,8 +474,8 @@ public class AuthorizationService {
             } catch (JSONException jsonEx) {
                 mCallback.onTokenRequestCompleted(null,
                         AuthorizationException.fromTemplate(
-                            GeneralErrors.JSON_DESERIALIZATION_ERROR,
-                            jsonEx));
+                                GeneralErrors.JSON_DESERIALIZATION_ERROR,
+                                jsonEx));
                 return;
             }
 
@@ -515,8 +515,7 @@ public class AuthorizationService {
          *
          * @see AuthorizationException.TokenRequestErrors
          */
-        void onTokenRequestCompleted(
-                @Nullable TokenResponse response,
+        void onTokenRequestCompleted(@Nullable TokenResponse response,
                 @Nullable AuthorizationException ex);
     }
 
@@ -527,8 +526,7 @@ public class AuthorizationService {
 
         private AuthorizationException mException;
 
-        RegistrationRequestTask(
-                RegistrationRequest request,
+        RegistrationRequestTask(RegistrationRequest request,
                 RegistrationResponseCallback callback) {
             mRequest = request;
             mCallback = callback;
@@ -541,7 +539,7 @@ public class AuthorizationService {
             try {
                 HttpURLConnection conn =
                         mClientConfiguration.getConnectionBuilder()
-                            .openConnection(mRequest.configuration.registrationEndpoint);
+                                .openConnection(mRequest.configuration.registrationEndpoint);
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json");
                 conn.setDoOutput(true);
@@ -583,7 +581,7 @@ public class AuthorizationService {
                             error,
                             json.getString(AuthorizationException.PARAM_ERROR_DESCRIPTION),
                             UriUtil.parseUriIfAvailable(
-                                json.getString(AuthorizationException.PARAM_ERROR_URI)));
+                                    json.getString(AuthorizationException.PARAM_ERROR_URI)));
                 } catch (JSONException jsonEx) {
                     ex = AuthorizationException.fromTemplate(
                             GeneralErrors.JSON_DESERIALIZATION_ERROR,
@@ -600,8 +598,8 @@ public class AuthorizationService {
             } catch (JSONException jsonEx) {
                 mCallback.onRegistrationRequestCompleted(null,
                         AuthorizationException.fromTemplate(
-                            GeneralErrors.JSON_DESERIALIZATION_ERROR,
-                            jsonEx));
+                                GeneralErrors.JSON_DESERIALIZATION_ERROR,
+                                jsonEx));
                 return;
             } catch (RegistrationResponse.MissingArgumentException ex) {
                 Logger.errorWithStack(ex, "Malformed registration response");
@@ -634,8 +632,7 @@ public class AuthorizationService {
          * @param ex a description of the failure, if one occurred: `null` otherwise.
          * @see AuthorizationException.RegistrationRequestErrors
          */
-        void onRegistrationRequestCompleted(
-                @Nullable RegistrationResponse response,
-                @Nullable AuthorizationException ex);
+        void onRegistrationRequestCompleted(@Nullable RegistrationResponse response,
+                                            @Nullable AuthorizationException ex);
     }
 }

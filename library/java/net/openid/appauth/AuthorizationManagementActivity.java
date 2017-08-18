@@ -299,8 +299,8 @@ public class AuthorizationManagementActivity extends Activity {
         try {
             String authRequestJson = state.getString(KEY_AUTH_REQUEST, null);
             mAuthRequest = authRequestJson != null
-                ? AuthorizationRequest.jsonDeserialize(authRequestJson)
-                : null;
+                    ? AuthorizationRequest.jsonDeserialize(authRequestJson)
+                    : null;
         } catch (JSONException ex) {
             throw new IllegalStateException("Unable to deserialize authorization request", ex);
         }
@@ -317,8 +317,7 @@ public class AuthorizationManagementActivity extends Activity {
                     .build();
 
             if (mAuthRequest.state == null && response.state != null
-                    || (mAuthRequest.state != null
-                    && !mAuthRequest.state.equals(response.state))) {
+                    || (mAuthRequest.state != null && !mAuthRequest.state.equals(response.state))) {
 
                 Logger.warn("State returned in authorization response (%s) does not match state "
                         + "from request (%s) - discarding response",

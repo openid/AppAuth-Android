@@ -147,8 +147,8 @@ public final class LoginActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
         if (mExecutor.isShutdown()) {
             mExecutor = Executors.newSingleThreadExecutor();
         }
@@ -447,9 +447,9 @@ public final class LoginActivity extends AppCompatActivity {
 
     private void displayAuthCancelled() {
         Snackbar.make(findViewById(R.id.coordinator),
-            "Authorization canceled",
-            Snackbar.LENGTH_SHORT)
-            .show();
+                "Authorization canceled",
+                Snackbar.LENGTH_SHORT)
+                .show();
     }
 
     private void warmUpBrowser() {
@@ -482,9 +482,9 @@ public final class LoginActivity extends AppCompatActivity {
 
     private String getLoginHint() {
         return ((EditText)findViewById(R.id.login_hint_value))
-            .getText()
-            .toString()
-            .trim();
+                .getText()
+                .toString()
+                .trim();
     }
 
     @TargetApi(Build.VERSION_CODES.M)

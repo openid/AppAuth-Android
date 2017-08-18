@@ -93,28 +93,28 @@ public class AuthorizationServiceTest {
     private static final String TEST_BROWSER_PACKAGE = "com.browser.test";
 
     private static final String AUTH_CODE_EXCHANGE_RESPONSE_JSON = "{\n"
-        + "  \"refresh_token\": \"" + TEST_REFRESH_TOKEN + "\",\n"
-        + "  \"access_token\": \"" + TEST_ACCESS_TOKEN + "\",\n"
-        + "  \"expires_in\": \"" + TEST_EXPIRES_IN + "\",\n"
-        + "  \"id_token\": \"" + TEST_ID_TOKEN + "\",\n"
-        + "  \"token_type\": \"" + AuthorizationResponse.TOKEN_TYPE_BEARER + "\"\n"
-        + "}";
+            + "  \"refresh_token\": \"" + TEST_REFRESH_TOKEN + "\",\n"
+            + "  \"access_token\": \"" + TEST_ACCESS_TOKEN + "\",\n"
+            + "  \"expires_in\": \"" + TEST_EXPIRES_IN + "\",\n"
+            + "  \"id_token\": \"" + TEST_ID_TOKEN + "\",\n"
+            + "  \"token_type\": \"" + AuthorizationResponse.TOKEN_TYPE_BEARER + "\"\n"
+            + "}";
 
     private static final String REGISTRATION_RESPONSE_JSON = "{\n"
-        + " \"client_id\": \"" + TEST_CLIENT_ID + "\",\n"
-        + " \"client_secret\": \"" + TEST_CLIENT_SECRET + "\",\n"
-        + " \"client_secret_expires_at\": \"" + TEST_CLIENT_SECRET_EXPIRES_AT + "\",\n"
-        + " \"application_type\": " + RegistrationRequest.APPLICATION_TYPE_NATIVE + "\n"
-        + "}";
+            + " \"client_id\": \"" + TEST_CLIENT_ID + "\",\n"
+            + " \"client_secret\": \"" + TEST_CLIENT_SECRET + "\",\n"
+            + " \"client_secret_expires_at\": \"" + TEST_CLIENT_SECRET_EXPIRES_AT + "\",\n"
+            + " \"application_type\": " + RegistrationRequest.APPLICATION_TYPE_NATIVE + "\n"
+            + "}";
 
     private static final String INVALID_GRANT_RESPONSE_JSON = "{\n"
-        + "  \"error\": \"invalid_grant\",\n"
-        + "  \"error_description\": \"invalid_grant description\"\n"
-        + "}";
+            + "  \"error\": \"invalid_grant\",\n"
+            + "  \"error_description\": \"invalid_grant description\"\n"
+            + "}";
 
     private static final String INVALID_GRANT_NO_DESC_RESPONSE_JSON = "{\n"
-        + "  \"error\": \"invalid_grant\"\n"
-        + "}";
+            + "  \"error\": \"invalid_grant\"\n"
+            + "}";
 
     private static final int TEST_INVALID_GRANT_CODE = 2002;
 
@@ -136,27 +136,27 @@ public class AuthorizationServiceTest {
         mAuthCallback = new AuthorizationCallback();
         mRegistrationCallback = new RegistrationCallback();
         AppAuthConfiguration appAuthConfiguration = new Builder()
-            .setConnectionBuilder(mConnectionBuilder)
-            .build();
+                .setConnectionBuilder(mConnectionBuilder)
+                .build();
         mService = new AuthorizationService(
-            mContext,
-            appAuthConfiguration,
-            Browsers.Chrome.customTab("46"),
-            mCustomTabManager);
+                mContext,
+                appAuthConfiguration,
+                Browsers.Chrome.customTab("46"),
+                mCustomTabManager);
         mOutputStream = new ByteArrayOutputStream();
         when(mConnectionBuilder.openConnection(any(Uri.class))).thenReturn(mHttpConnection);
         when(mHttpConnection.getOutputStream()).thenReturn(mOutputStream);
         when(mContext.bindService(serviceIntentEq(), any(CustomTabsServiceConnection.class),
-            anyInt())).thenReturn(true);
+                anyInt())).thenReturn(true);
         when(mCustomTabManager.createTabBuilder())
-            .thenReturn(new CustomTabsIntent.Builder());
+                .thenReturn(new CustomTabsIntent.Builder());
     }
 
     @Test
     public void testAuthorizationRequest_withSpecifiedState() throws Exception {
         AuthorizationRequest request = getTestAuthRequestBuilder()
-            .setState(TEST_STATE)
-            .build();
+                .setState(TEST_STATE)
+                .build();
         mService.performAuthorizationRequest(request, mPendingIntent);
         Intent intent = captureAuthRequestIntent();
         assertRequestIntent(intent, null);
@@ -174,12 +174,12 @@ public class AuthorizationServiceTest {
     @Test
     public void testAuthorizationRequest_customization() throws Exception {
         CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
-            .setToolbarColor(Color.GREEN)
-            .build();
+                .setToolbarColor(Color.GREEN)
+                .build();
         mService.performAuthorizationRequest(
-            getTestAuthRequestBuilder().build(),
-            mPendingIntent,
-            customTabsIntent);
+                getTestAuthRequestBuilder().build(),
+                mPendingIntent,
+                customTabsIntent);
         Intent intent = captureAuthRequestIntent();
         assertColorMatch(intent, Color.GREEN);
     }
@@ -196,7 +196,7 @@ public class AuthorizationServiceTest {
         Intent intent = mService.getAuthorizationRequestIntent(request);
         assertThat(intent.hasExtra(KEY_AUTH_INTENT)).isTrue();
         assertThat(intent.getStringExtra(KEY_AUTH_REQUEST))
-            .isEqualTo(request.jsonSerializeString());
+                .isEqualTo(request.jsonSerializeString());
     }
 
     @Test
@@ -213,8 +213,8 @@ public class AuthorizationServiceTest {
         AuthorizationRequest request = getTestAuthRequestBuilder().build();
         @ColorInt int toolbarColor = Color.GREEN;
         CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
-            .setToolbarColor(toolbarColor)
-            .build();
+                .setToolbarColor(toolbarColor)
+                .build();
 
         Intent intent = mService.getAuthorizationRequestIntent(request, customTabsIntent);
         Intent actualAuthIntent = intent.getParcelableExtra(KEY_AUTH_INTENT);
@@ -273,7 +273,7 @@ public class AuthorizationServiceTest {
 
         // emulate some content types having already been set as an Accept value
         when(mHttpConnection.getRequestProperty("Accept"))
-            .thenReturn("text/plain");
+                .thenReturn("text/plain");
 
         when(mHttpConnection.getInputStream()).thenReturn(is);
         when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
@@ -297,7 +297,7 @@ public class AuthorizationServiceTest {
         String postBody = mOutputStream.toString();
         assertTokenRequestBody(postBody, request.getRequestParameters());
         verify(mHttpConnection).setRequestProperty("Authorization",
-            csb.getRequestHeaders(TEST_CLIENT_ID).get("Authorization"));
+                csb.getRequestHeaders(TEST_CLIENT_ID).get("Authorization"));
     }
 
     @Test
@@ -404,8 +404,8 @@ public class AuthorizationServiceTest {
 
         // the real auth intent is wrapped in the intent by AuthorizationManagementActivity
         return intentCaptor
-            .getValue()
-            .getParcelableExtra(KEY_AUTH_INTENT);
+                .getValue()
+                .getParcelableExtra(KEY_AUTH_INTENT);
     }
 
     private void assertTokenResponse(TokenResponse response, TokenRequest expectedRequest) {
@@ -434,7 +434,7 @@ public class AuthorizationServiceTest {
     }
 
     private void assertRegistrationResponse(RegistrationResponse response,
-        RegistrationRequest expectedRequest) {
+                                            RegistrationRequest expectedRequest) {
         assertThat(response).isNotNull();
         assertThat(response.request).isEqualTo(expectedRequest);
         assertThat(response.clientId).isEqualTo(TEST_CLIENT_ID);
@@ -443,7 +443,7 @@ public class AuthorizationServiceTest {
     }
 
     private void assertTokenRequestBody(
-        String requestBody, Map<String, String> expectedParameters) {
+            String requestBody, Map<String, String> expectedParameters) {
         Uri postBody = new Uri.Builder().encodedQuery(requestBody).build();
         for (Map.Entry<String, String> param : expectedParameters.entrySet()) {
             assertThat(postBody.getQueryParameter(param.getKey())).isEqualTo(param.getValue());
@@ -451,15 +451,15 @@ public class AuthorizationServiceTest {
     }
 
     private static class AuthorizationCallback implements
-        AuthorizationService.TokenResponseCallback {
+            AuthorizationService.TokenResponseCallback {
         private Semaphore mSemaphore = new Semaphore(0);
         public TokenResponse response;
         public AuthorizationException error;
 
         @Override
         public void onTokenRequestCompleted(
-            @Nullable TokenResponse tokenResponse,
-            @Nullable AuthorizationException ex) {
+                @Nullable TokenResponse tokenResponse,
+                @Nullable AuthorizationException ex) {
             assertTrue((tokenResponse == null) ^ (ex == null));
             this.response = tokenResponse;
             this.error = ex;
@@ -468,20 +468,20 @@ public class AuthorizationServiceTest {
 
         public void waitForCallback() throws Exception {
             assertTrue(mSemaphore.tryAcquire(CALLBACK_TIMEOUT_MILLIS,
-                TimeUnit.MILLISECONDS));
+                    TimeUnit.MILLISECONDS));
         }
     }
 
     private static class RegistrationCallback implements
-        AuthorizationService.RegistrationResponseCallback {
+            AuthorizationService.RegistrationResponseCallback {
         private Semaphore mSemaphore = new Semaphore(0);
         public RegistrationResponse response;
         public AuthorizationException error;
 
         @Override
         public void onRegistrationRequestCompleted(
-            @Nullable RegistrationResponse registrationResponse,
-            @Nullable AuthorizationException ex) {
+                @Nullable RegistrationResponse registrationResponse,
+                @Nullable AuthorizationException ex) {
             assertTrue((registrationResponse == null) ^ (ex == null));
             this.response = registrationResponse;
             this.error = ex;
@@ -490,7 +490,7 @@ public class AuthorizationServiceTest {
 
         public void waitForCallback() throws Exception {
             assertTrue(mSemaphore.tryAcquire(CALLBACK_TIMEOUT_MILLIS,
-                TimeUnit.MILLISECONDS));
+                    TimeUnit.MILLISECONDS));
         }
     }
 
