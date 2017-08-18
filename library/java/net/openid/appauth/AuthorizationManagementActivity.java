@@ -42,32 +42,32 @@ import org.json.JSONException;
  *                          Back Stack Towards Top
  *                +------------------------------------------>
  *
- * +------------+       +---------------+      +----------------+      +--------------+
- * |            |  (1)  |               | (2)  |                | (S1) |              |
- * | Initiating +------>| Authorization +----->| Authorization  +----->| Redirect URI |
- * |  Activity  |       |  Management   |      |   Activity     |      |   Receiver   |
- * |            |<------+   Activity    |<-----+ (e.g. browser) |      |   Activity   |
- * |            | (C2b) |               | (C1) |                |      |              |
- * +------------+       +-+--+----------+      +----------------+      +-------+------+
- *                        |  |  ^                                              |
- *                        |  |  |                                              |
- *                +-------+  |  |                      (S2)                    |
- *                |          |  +----------------------------------------------+
- *                |          |
- *                |          v (S3)
- *          (C2a) |      +------------+
- *                |      |            |
- *                |      | Completion |
- *                |      |  Activity  |
- *                |      |            |
- *                |      +------------+
- *                |
- *                |      +-------------+
- *                |      |             |
- *                +----->| Cancelation |
- *                       |  Activity   |
- *                       |             |
- *                       +-------------+
+ * +------------+            +---------------+      +----------------+      +--------------+
+ * |            |     (1)    |               | (2)  |                | (S1) |              |
+ * | Initiating +----------->| Authorization +----->| Authorization  +----->| Redirect URI |
+ * |  Activity  |            |  Management   |      |   Activity     |      |   Receiver   |
+ * |            |<-----------+   Activity    |<-----+ (e.g. browser) |      |   Activity   |
+ * |            | (C2b, S3b) |               | (C1) |                |      |              |
+ * +------------+            +-+---+---------+      +----------------+      +-------+------+
+ *                           |  |  ^                                              |
+ *                           |  |  |                                              |
+ *                   +-------+  |  |                      (S2)                    |
+ *                   |          |  +----------------------------------------------+
+ *                   |          |
+ *                   |          v (S3a)
+ *             (C2a) |      +------------+
+ *                   |      |            |
+ *                   |      | Completion |
+ *                   |      |  Activity  |
+ *                   |      |            |
+ *                   |      +------------+
+ *                   |
+ *                   |      +-------------+
+ *                   |      |             |
+ *                   +----->| Cancelation |
+ *                          |  Activity   |
+ *                          |             |
+ *                          +-------------+
  * ```
  *
  * The process begins with an activity requesting that an authorization flow be started,
@@ -88,7 +88,9 @@ import org.json.JSONException;
  *       {@link AuthorizationService#performAuthorizationRequest}, then this is
  *       used to invoke a cancelation activity.
  *
- *     - Step C2b: If no cancellation PendingIntent was provided (legacy behavior), then the
+ *     - Step C2b: If no cancellation PendingIntent was provided (legacy behavior, or
+ *       AuthorizationManagementActivity was started with an intent from
+ *       {@link AuthorizationService#getAuthorizationRequestIntent}), then the
  *       AuthorizationManagementActivity simply finishes after calling {@link Activity#setResult},
  *       with {@link Activity#RESULT_CANCELED}, returning control to the activity above
  *       it in the back stack (typically, the initiating activity).

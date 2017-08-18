@@ -224,10 +224,7 @@ public class AuthorizationService {
 
     /**
      * Constructs an intent that encapsulates the provided request and custom tabs intent,
-     * and is intended to be launched via {@link Activity#startActivityForResult}
-     * When started, the intent launches an {@link Activity} that sends an authorization request
-     * to the authorization service, using a
-     * [custom tab](https://developer.chrome.com/multidevice/android/customtabs).
+     * and is intended to be launched via {@link Activity#startActivityForResult}.
      * The parameters of this request are determined by both the authorization service
      * configuration and the provided {@link AuthorizationRequest request object}. Upon completion
      * of this request, the activity that gets launched will call {@link Activity#setResult} with
