@@ -113,9 +113,15 @@
                     android:labelFor="@+id/browser_selector"/>
 
                 <Spinner
-                  android:id="@+id/browser_selector"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content" />
+                    android:id="@+id/browser_selector"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/pending_intents_checkbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/use_pending_intents"/>
 
 
                 <TextView

@@ -31,7 +31,6 @@ import android.text.TextUtils;
 import net.openid.appauth.AuthorizationException.GeneralErrors;
 import net.openid.appauth.AuthorizationException.RegistrationRequestErrors;
 import net.openid.appauth.AuthorizationException.TokenRequestErrors;
-
 import net.openid.appauth.browser.BrowserDescriptor;
 import net.openid.appauth.browser.BrowserSelector;
 import net.openid.appauth.browser.CustomTabManager;
@@ -89,11 +88,11 @@ public class AuthorizationService {
             @NonNull Context context,
             @NonNull AppAuthConfiguration clientConfiguration) {
         this(context,
-                clientConfiguration,
-                BrowserSelector.select(
-                        context,
-                        clientConfiguration.getBrowserMatcher()),
-                new CustomTabManager(context));
+            clientConfiguration,
+            BrowserSelector.select(
+                context,
+                clientConfiguration.getBrowserMatcher()),
+            new CustomTabManager(context));
     }
 
     /**
@@ -101,9 +100,9 @@ public class AuthorizationService {
      */
     @VisibleForTesting
     AuthorizationService(@NonNull Context context,
-                         @NonNull AppAuthConfiguration clientConfiguration,
-                         @Nullable BrowserDescriptor browser,
-                         @NonNull CustomTabManager customTabManager) {
+            @NonNull AppAuthConfiguration clientConfiguration,
+            @Nullable BrowserDescriptor browser,
+            @NonNull CustomTabManager customTabManager) {
         mContext = checkNotNull(context);
         mClientConfiguration = clientConfiguration;
         mCustomTabManager = customTabManager;
@@ -213,35 +212,72 @@ public class AuthorizationService {
             @NonNull PendingIntent completedIntent,
             @Nullable PendingIntent canceledIntent,
             @NonNull CustomTabsIntent customTabsIntent) {
-        checkNotDisposed();
-
-        if (mBrowser == null) {
-            throw new ActivityNotFoundException();
-        }
-
-        Uri requestUri = request.toUri();
-        Intent intent;
-        if (mBrowser.useCustomTab) {
-            intent = customTabsIntent.intent;
-        } else {
-            intent = new Intent(Intent.ACTION_VIEW);
-        }
-        intent.setPackage(mBrowser.packageName);
-        intent.setData(requestUri);
-
-        Logger.debug("Using %s as browser for auth, custom tab = %s",
-                intent.getPackage(),
-                mBrowser.useCustomTab.toString());
-        intent.putExtra(CustomTabsIntent.EXTRA_TITLE_VISIBILITY_STATE, CustomTabsIntent.NO_TITLE);
-
-        Logger.debug("Initiating authorization request to %s",
-                request.configuration.authorizationEndpoint);
+        Intent authIntent = prepareAuthorizationRequestIntent(request, customTabsIntent);
         mContext.startActivity(AuthorizationManagementActivity.createStartIntent(
                 mContext,
                 request,
-                intent,
+                authIntent,
                 completedIntent,
                 canceledIntent));
+    }
+
+    /**
+     * Constructs an intent that encapsulates the provided request and custom tabs intent,
+     * and is intended to be launched via {@link Activity#startActivityForResult}
+     * When started, the intent launches an {@link Activity} that sends an authorization request
+     * to the authorization service, using a
+     * [custom tab](https://developer.chrome.com/multidevice/android/customtabs).
+     * The parameters of this request are determined by both the authorization service
+     * configuration and the provided {@link AuthorizationRequest request object}. Upon completion
+     * of this request, the activity that gets launched will call {@link Activity#setResult} with
+     * {@link Activity#RESULT_OK} and an {@link Intent} containing authorization completion
+     * information. If the user presses the back button or closes the browser tab, the launched
+     * activity will call {@link Activity#setResult} with
+     * {@link Activity#RESULT_CANCELED} without a data {@link Intent}. Note that
+     * {@link Activity#RESULT_OK} indicates the authorization request completed,
+     * not necessarily that it was a successful authorization.
+     *
+     * @param customTabsIntent
+     *     The intent that will be used to start the custom tab. It is recommended that this intent
+     *     be created with the help of {@link #createCustomTabsIntentBuilder(Uri[])}, which will
+     *     ensure that a warmed-up version of the browser will be used, minimizing latency.
+     *
+     * @throws android.content.ActivityNotFoundException if no suitable browser is available to
+     *     perform the authorization flow.
+     */
+    public Intent getAuthorizationRequestIntent(
+            @NonNull AuthorizationRequest request,
+            @NonNull CustomTabsIntent customTabsIntent) {
+
+        Intent authIntent = prepareAuthorizationRequestIntent(request, customTabsIntent);
+        return AuthorizationManagementActivity.createStartForResultIntent(
+            mContext,
+            request,
+            authIntent);
+    }
+
+    /**
+     * Constructs an intent that encapsulates the provided request and a default custom tabs intent,
+     * and is intended to be launched via {@link Activity#startActivityForResult}
+     * When started, the intent launches an {@link Activity} that sends an authorization request
+     * to the authorization service, using a
+     * [custom tab](https://developer.chrome.com/multidevice/android/customtabs).
+     * The parameters of this request are determined by both the authorization service
+     * configuration and the provided {@link AuthorizationRequest request object}. Upon completion
+     * of this request, the activity that gets launched will call {@link Activity#setResult} with
+     * {@link Activity#RESULT_OK} and an {@link Intent} containing authorization completion
+     * information. If the user presses the back button or closes the browser tab, the launched
+     * activity will call {@link Activity#setResult} with
+     * {@link Activity#RESULT_CANCELED} without a data {@link Intent}. Note that
+     * {@link Activity#RESULT_OK} indicates the authorization request completed,
+     * not necessarily that it was a successful authorization.
+     *
+     * @throws android.content.ActivityNotFoundException if no suitable browser is available to
+     *     perform the authorization flow.
+     */
+    public Intent getAuthorizationRequestIntent(
+            @NonNull AuthorizationRequest request) {
+        return getAuthorizationRequestIntent(request, createCustomTabsIntentBuilder().build());
     }
 
     /**
@@ -303,6 +339,36 @@ public class AuthorizationService {
         }
     }
 
+    private Intent prepareAuthorizationRequestIntent(
+            AuthorizationRequest request,
+            CustomTabsIntent customTabsIntent) {
+        checkNotDisposed();
+
+        if (mBrowser == null) {
+            throw new ActivityNotFoundException();
+        }
+
+        Uri requestUri = request.toUri();
+        Intent intent;
+        if (mBrowser.useCustomTab) {
+            intent = customTabsIntent.intent;
+        } else {
+            intent = new Intent(Intent.ACTION_VIEW);
+        }
+        intent.setPackage(mBrowser.packageName);
+        intent.setData(requestUri);
+
+        Logger.debug("Using %s as browser for auth, custom tab = %s",
+                intent.getPackage(),
+                mBrowser.useCustomTab.toString());
+        intent.putExtra(CustomTabsIntent.EXTRA_TITLE_VISIBILITY_STATE, CustomTabsIntent.NO_TITLE);
+
+        Logger.debug("Initiating authorization request to %s",
+                request.configuration.authorizationEndpoint);
+
+        return intent;
+    }
+
     private class TokenRequestTask
             extends AsyncTask<Void, Void, JSONObject> {
         private TokenRequest mRequest;
@@ -311,8 +377,10 @@ public class AuthorizationService {
 
         private AuthorizationException mException;
 
-        TokenRequestTask(TokenRequest request, @NonNull ClientAuthentication clientAuthentication,
-                         TokenResponseCallback callback) {
+        TokenRequestTask(
+                TokenRequest request,
+                @NonNull ClientAuthentication clientAuthentication,
+                TokenResponseCallback callback) {
             mRequest = request;
             mCallback = callback;
             mClientAuthentication = clientAuthentication;
@@ -324,7 +392,7 @@ public class AuthorizationService {
             try {
                 HttpURLConnection conn =
                         mClientConfiguration.getConnectionBuilder()
-                                .openConnection(mRequest.configuration.tokenEndpoint);
+                            .openConnection(mRequest.configuration.tokenEndpoint);
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 addJsonToAcceptHeader(conn);
@@ -363,11 +431,11 @@ public class AuthorizationService {
             } catch (IOException ex) {
                 Logger.debugWithStack(ex, "Failed to complete exchange request");
                 mException = AuthorizationException.fromTemplate(
-                        GeneralErrors.NETWORK_ERROR, ex);
+                    GeneralErrors.NETWORK_ERROR, ex);
             } catch (JSONException ex) {
                 Logger.debugWithStack(ex, "Failed to complete exchange request");
                 mException = AuthorizationException.fromTemplate(
-                        GeneralErrors.JSON_DESERIALIZATION_ERROR, ex);
+                    GeneralErrors.JSON_DESERIALIZATION_ERROR, ex);
             } finally {
                 Utils.closeQuietly(is);
             }
@@ -390,7 +458,7 @@ public class AuthorizationService {
                             error,
                             json.optString(AuthorizationException.PARAM_ERROR_DESCRIPTION, null),
                             UriUtil.parseUriIfAvailable(
-                                    json.optString(AuthorizationException.PARAM_ERROR_URI)));
+                                json.optString(AuthorizationException.PARAM_ERROR_URI)));
                 } catch (JSONException jsonEx) {
                     ex = AuthorizationException.fromTemplate(
                             GeneralErrors.JSON_DESERIALIZATION_ERROR,
@@ -406,8 +474,8 @@ public class AuthorizationService {
             } catch (JSONException jsonEx) {
                 mCallback.onTokenRequestCompleted(null,
                         AuthorizationException.fromTemplate(
-                                GeneralErrors.JSON_DESERIALIZATION_ERROR,
-                                jsonEx));
+                            GeneralErrors.JSON_DESERIALIZATION_ERROR,
+                            jsonEx));
                 return;
             }
 
@@ -447,7 +515,8 @@ public class AuthorizationService {
          *
          * @see AuthorizationException.TokenRequestErrors
          */
-        void onTokenRequestCompleted(@Nullable TokenResponse response,
+        void onTokenRequestCompleted(
+                @Nullable TokenResponse response,
                 @Nullable AuthorizationException ex);
     }
 
@@ -458,8 +527,9 @@ public class AuthorizationService {
 
         private AuthorizationException mException;
 
-        RegistrationRequestTask(RegistrationRequest request,
-                                RegistrationResponseCallback callback) {
+        RegistrationRequestTask(
+                RegistrationRequest request,
+                RegistrationResponseCallback callback) {
             mRequest = request;
             mCallback = callback;
         }
@@ -471,7 +541,7 @@ public class AuthorizationService {
             try {
                 HttpURLConnection conn =
                         mClientConfiguration.getConnectionBuilder()
-                                .openConnection(mRequest.configuration.registrationEndpoint);
+                            .openConnection(mRequest.configuration.registrationEndpoint);
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json");
                 conn.setDoOutput(true);
@@ -513,7 +583,7 @@ public class AuthorizationService {
                             error,
                             json.getString(AuthorizationException.PARAM_ERROR_DESCRIPTION),
                             UriUtil.parseUriIfAvailable(
-                                    json.getString(AuthorizationException.PARAM_ERROR_URI)));
+                                json.getString(AuthorizationException.PARAM_ERROR_URI)));
                 } catch (JSONException jsonEx) {
                     ex = AuthorizationException.fromTemplate(
                             GeneralErrors.JSON_DESERIALIZATION_ERROR,
@@ -530,8 +600,8 @@ public class AuthorizationService {
             } catch (JSONException jsonEx) {
                 mCallback.onRegistrationRequestCompleted(null,
                         AuthorizationException.fromTemplate(
-                                GeneralErrors.JSON_DESERIALIZATION_ERROR,
-                                jsonEx));
+                            GeneralErrors.JSON_DESERIALIZATION_ERROR,
+                            jsonEx));
                 return;
             } catch (RegistrationResponse.MissingArgumentException ex) {
                 Logger.errorWithStack(ex, "Malformed registration response");
@@ -564,7 +634,8 @@ public class AuthorizationService {
          * @param ex a description of the failure, if one occurred: `null` otherwise.
          * @see AuthorizationException.RegistrationRequestErrors
          */
-        void onRegistrationRequestCompleted(@Nullable RegistrationResponse response,
-                                            @Nullable AuthorizationException ex);
+        void onRegistrationRequestCompleted(
+                @Nullable RegistrationResponse response,
+                @Nullable AuthorizationException ex);
     }
 }
