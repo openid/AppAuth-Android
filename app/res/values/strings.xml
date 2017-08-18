@@ -27,4 +27,5 @@
     <string name="no_access_token_expiry">Access time has no defined expiry</string>
     <string name="access_token_expired">Access token has expired</string>
     <string name="auth_settings">Authorization settings in use:</string>
+    <string name="use_pending_intents">Use PendingIntent\'s for completion</string>
 </resources>

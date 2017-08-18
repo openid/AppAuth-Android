@@ -42,32 +42,32 @@ import org.json.JSONException;
  *                          Back Stack Towards Top
  *                +------------------------------------------>
  *
- * +------------+       +---------------+      +----------------+      +--------------+
- * |            |  (1)  |               | (2)  |                | (S1) |              |
- * | Initiating +------>| Authorization +----->| Authorization  +----->| Redirect URI |
- * |  Activity  |       |  Management   |      |   Activity     |      |   Receiver   |
- * |            |<------+   Activity    |<-----+ (e.g. browser) |      |   Activity   |
- * |            | (C2b) |               | (C1) |                |      |              |
- * +------------+       +-+--+----------+      +----------------+      +-------+------+
- *                        |  |  ^                                              |
- *                        |  |  |                                              |
- *                +-------+  |  |                      (S2)                    |
- *                |          |  +----------------------------------------------+
- *                |          |
- *                |          v (C2)
- *           (S3) |      +------------+
- *                |      |            |
- *                |      | Completion |
- *                |      |  Activity  |
- *                |      |            |
- *                |      +------------+
- *                |
- *                |      +-------------+
- *                |      |             |
- *                +----->| Cancelation |
- *                       |  Activity   |
- *                       |             |
- *                       +-------------+
+ * +------------+            +---------------+      +----------------+      +--------------+
+ * |            |     (1)    |               | (2)  |                | (S1) |              |
+ * | Initiating +----------->| Authorization +----->| Authorization  +----->| Redirect URI |
+ * |  Activity  |            |  Management   |      |   Activity     |      |   Receiver   |
+ * |            |<-----------+   Activity    |<-----+ (e.g. browser) |      |   Activity   |
+ * |            | (C2b, S3b) |               | (C1) |                |      |              |
+ * +------------+            +-+---+---------+      +----------------+      +-------+------+
+ *                           |  |  ^                                              |
+ *                           |  |  |                                              |
+ *                   +-------+  |  |                      (S2)                    |
+ *                   |          |  +----------------------------------------------+
+ *                   |          |
+ *                   |          v (S3a)
+ *             (C2a) |      +------------+
+ *                   |      |            |
+ *                   |      | Completion |
+ *                   |      |  Activity  |
+ *                   |      |            |
+ *                   |      +------------+
+ *                   |
+ *                   |      +-------------+
+ *                   |      |             |
+ *                   +----->| Cancelation |
+ *                          |  Activity   |
+ *                          |             |
+ *                          +-------------+
  * ```
  *
  * The process begins with an activity requesting that an authorization flow be started,
@@ -84,16 +84,19 @@ import org.json.JSONException;
  *     - Step C1: If the user presses the back button or otherwise causes the authorization
  *       activity to finish, the AuthorizationManagementActivity will be recreated or restarted.
  *
- *     - Step C2a: If a cancelation PendingIntent was provided in the call to
+ *     - Step C2a: If a cancellation PendingIntent was provided in the call to
  *       {@link AuthorizationService#performAuthorizationRequest}, then this is
  *       used to invoke a cancelation activity.
  *
- *     - Step C2b: If no cancelation PendingIntent was provided (legacy behavior), then the
- *       AuthorizationManagementActivity simply finishes, returning control to the activity above
+ *     - Step C2b: If no cancellation PendingIntent was provided (legacy behavior, or
+ *       AuthorizationManagementActivity was started with an intent from
+ *       {@link AuthorizationService#getAuthorizationRequestIntent}), then the
+ *       AuthorizationManagementActivity simply finishes after calling {@link Activity#setResult},
+ *       with {@link Activity#RESULT_CANCELED}, returning control to the activity above
  *       it in the back stack (typically, the initiating activity).
  *
  * - Completion (S) flow:
- *     - Step S1: The authorization activity completes with a success of failure, and sends this
+ *     - Step S1: The authorization activity completes with a success or failure, and sends this
  *       result to {@link RedirectUriReceiverActivity}.
  *
  *     - Step S2: {@link RedirectUriReceiverActivity} extracts the forwarded data, and invokes
@@ -103,11 +106,18 @@ import org.json.JSONException;
  *       destroyed, if necessary, such that AuthorizationManagementActivity is once again at the
  *       top of the back stack.
  *
- *     - Step S3: The pending intent provided to
- *       {@link AuthorizationService#performAuthorizationRequest} for completion of the
- *       authorization flow is invoked, providing the decoded {@link AuthorizationResponse} or
- *       {@link AuthorizationException} as appropriate. The AuthorizationManagementActivity
- *       finishes, removing itself from the back stack.
+ *     - Step S3a: If this activity was invoked via
+ *       {@link AuthorizationService#performAuthorizationRequest}, then the pending intent provided
+ *       for completion of the authorization flow is invoked, providing the decoded
+ *       {@link AuthorizationResponse} or {@link AuthorizationException} as appropriate.
+ *       The AuthorizationManagementActivity finishes, removing itself from the back stack.
+ *
+ *     - Step S3b: If this activity was invoked via an intent returned by
+ *       {@link AuthorizationService#getAuthorizationRequestIntent}, then this activity
+ *       calls {@link Activity#setResult(int, Intent)} with {@link Activity#RESULT_OK}
+ *       and a data intent containing the {@link AuthorizationResponse} or
+ *       {@link AuthorizationException} as appropriate.
+ *       The AuthorizationManagementActivity finishes, removing itself from the back stack.
  */
 public class AuthorizationManagementActivity extends Activity {
 
@@ -152,6 +162,19 @@ public class AuthorizationManagementActivity extends Activity {
         intent.putExtra(KEY_COMPLETE_INTENT, completeIntent);
         intent.putExtra(KEY_CANCEL_INTENT, cancelIntent);
         return intent;
+    }
+
+    /**
+     * Creates an intent to start an authorization flow.
+     * @param context the package context for the app.
+     * @param request the authorization request which is to be sent.
+     * @param authIntent the intent to be used to get authorization from the user.
+     */
+    public static Intent createStartForResultIntent(
+            Context context,
+            AuthorizationRequest request,
+            Intent authIntent) {
+        return createStartIntent(context, request, authIntent, null, null);
     }
 
     /**
@@ -240,11 +263,15 @@ public class AuthorizationManagementActivity extends Activity {
         }
         responseData.setData(responseUri);
 
-        Logger.debug("Authorization complete - invoking completion intent");
-        try {
-            mCompleteIntent.send(this, 0, responseData);
-        } catch (CanceledException ex) {
-            Logger.error("Failed to send completion intent", ex);
+        if (mCompleteIntent != null) {
+            Logger.debug("Authorization complete - invoking completion intent");
+            try {
+                mCompleteIntent.send(this, 0, responseData);
+            } catch (CanceledException ex) {
+                Logger.error("Failed to send completion intent", ex);
+            }
+        } else {
+            setResult(RESULT_OK, responseData);
         }
     }
 
@@ -257,6 +284,7 @@ public class AuthorizationManagementActivity extends Activity {
                 Logger.error("Failed to send cancel intent", ex);
             }
         } else {
+            setResult(RESULT_CANCELED);
             Logger.debug("No cancel intent set - will return to previous activity");
         }
     }
@@ -292,6 +320,7 @@ public class AuthorizationManagementActivity extends Activity {
 
             if (mAuthRequest.state == null && response.state != null
                     || (mAuthRequest.state != null && !mAuthRequest.state.equals(response.state))) {
+
                 Logger.warn("State returned in authorization response (%s) does not match state "
                         + "from request (%s) - discarding response",
                         response.state,

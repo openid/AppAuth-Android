@@ -37,6 +37,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -82,6 +83,7 @@ public final class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
     private static final String EXTRA_FAILED = "failed";
+    private static final int RC_AUTH = 100;
 
     private AuthorizationService mAuthService;
     private AuthStateManager mAuthStateManager;
@@ -92,6 +94,8 @@ public final class LoginActivity extends AppCompatActivity {
     private final AtomicReference<CustomTabsIntent> mAuthIntent = new AtomicReference<>();
     private CountDownLatch mAuthIntentLatch = new CountDownLatch(1);
     private ExecutorService mExecutor;
+
+    private boolean mUsePendingIntents;
 
     @NonNull
     private BrowserMatcher mBrowserMatcher = AnyBrowserMatcher.INSTANCE;
@@ -135,10 +139,7 @@ public final class LoginActivity extends AppCompatActivity {
         }
 
         if (getIntent().getBooleanExtra(EXTRA_FAILED, false)) {
-            Snackbar.make(findViewById(R.id.coordinator),
-                    "Authorization canceled",
-                    Snackbar.LENGTH_SHORT)
-                    .show();
+            displayAuthCancelled();
         }
 
         displayLoading("Initializing");
@@ -168,9 +169,23 @@ public final class LoginActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        displayAuthOptions();
+        if (resultCode == RESULT_CANCELED) {
+            displayAuthCancelled();
+        } else {
+            Intent intent = new Intent(this, TokenActivity.class);
+            intent.putExtras(data.getExtras());
+            startActivity(intent);
+        }
+    }
+
     @MainThread
     void startAuth() {
         displayLoading("Making authorization request");
+
+        mUsePendingIntents = ((CheckBox) findViewById(R.id.pending_intents_checkbox)).isChecked();
 
         // WrongThread inference is incorrect for lambdas
         // noinspection WrongThread
@@ -219,7 +234,8 @@ public final class LoginActivity extends AppCompatActivity {
 
     @MainThread
     private void handleConfigurationRetrievalResult(
-            AuthorizationServiceConfiguration config, AuthorizationException ex) {
+            AuthorizationServiceConfiguration config,
+            AuthorizationException ex) {
         if (config == null) {
             Log.i(TAG, "Failed to retrieve discovery document", ex);
             displayError("Failed to retrieve discovery document: " + ex.getMessage(), true);
@@ -330,16 +346,23 @@ public final class LoginActivity extends AppCompatActivity {
             Log.w(TAG, "Interrupted while waiting for auth intent");
         }
 
-        Intent completionIntent = new Intent(this, TokenActivity.class);
-        Intent cancelIntent = new Intent(this, LoginActivity.class);
-        cancelIntent.putExtra(EXTRA_FAILED, true);
-        cancelIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if (mUsePendingIntents) {
+            Intent completionIntent = new Intent(this, TokenActivity.class);
+            Intent cancelIntent = new Intent(this, LoginActivity.class);
+            cancelIntent.putExtra(EXTRA_FAILED, true);
+            cancelIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-        mAuthService.performAuthorizationRequest(
-                mAuthRequest.get(),
-                PendingIntent.getActivity(this, 0, completionIntent, 0),
-                PendingIntent.getActivity(this, 0, cancelIntent, 0),
-                mAuthIntent.get());
+            mAuthService.performAuthorizationRequest(
+                    mAuthRequest.get(),
+                    PendingIntent.getActivity(this, 0, completionIntent, 0),
+                    PendingIntent.getActivity(this, 0, cancelIntent, 0),
+                    mAuthIntent.get());
+        } else {
+            Intent intent = mAuthService.getAuthorizationRequestIntent(
+                    mAuthRequest.get(),
+                    mAuthIntent.get());
+            startActivityForResult(intent, RC_AUTH);
+        }
     }
 
     private void recreateAuthorizationService() {
@@ -420,6 +443,13 @@ public final class LoginActivity extends AppCompatActivity {
         }
         clientIdStr += mClientId;
         ((TextView)findViewById(R.id.client_id)).setText(clientIdStr);
+    }
+
+    private void displayAuthCancelled() {
+        Snackbar.make(findViewById(R.id.coordinator),
+                "Authorization canceled",
+                Snackbar.LENGTH_SHORT)
+                .show();
     }
 
     private void warmUpBrowser() {
