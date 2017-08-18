@@ -80,11 +80,11 @@ public class AuthorizationManagementActivityTest {
 
         mErrorAuthRedirect = mAuthRequest.redirectUri.buildUpon()
                 .appendQueryParameter(
-                    AuthorizationException.PARAM_ERROR,
-                    AuthorizationRequestErrors.ACCESS_DENIED.error)
+                        AuthorizationException.PARAM_ERROR,
+                        AuthorizationRequestErrors.ACCESS_DENIED.error)
                 .appendQueryParameter(
-                    AuthorizationException.PARAM_ERROR_DESCRIPTION,
-                    AuthorizationRequestErrors.ACCESS_DENIED.errorDescription)
+                        AuthorizationException.PARAM_ERROR_DESCRIPTION,
+                        AuthorizationRequestErrors.ACCESS_DENIED.errorDescription)
                 .build();
 
         instantiateActivity(mStartIntentWithPendings);

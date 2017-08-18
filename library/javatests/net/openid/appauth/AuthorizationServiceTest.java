@@ -15,7 +15,6 @@
 package net.openid.appauth;
 
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -26,7 +25,6 @@ import android.support.customtabs.CustomTabsClient;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.customtabs.CustomTabsServiceConnection;
 
-import android.test.mock.MockContext;
 import net.openid.appauth.AppAuthConfiguration.Builder;
 import net.openid.appauth.AuthorizationException.GeneralErrors;
 import net.openid.appauth.browser.Browsers;
@@ -42,7 +40,6 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayInputStream;
@@ -55,7 +52,6 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import static android.support.customtabs.CustomTabsIntent.EXTRA_ENABLE_INSTANT_APPS;
 import static android.support.customtabs.CustomTabsIntent.EXTRA_TOOLBAR_COLOR;
 import static net.openid.appauth.AuthorizationManagementActivity.KEY_AUTH_INTENT;
 import static net.openid.appauth.AuthorizationManagementActivity.KEY_AUTH_REQUEST;
@@ -135,12 +131,11 @@ public class AuthorizationServiceTest {
         MockitoAnnotations.initMocks(this);
         mAuthCallback = new AuthorizationCallback();
         mRegistrationCallback = new RegistrationCallback();
-        AppAuthConfiguration appAuthConfiguration = new Builder()
-                .setConnectionBuilder(mConnectionBuilder)
-                .build();
         mService = new AuthorizationService(
                 mContext,
-                appAuthConfiguration,
+                new Builder()
+                        .setConnectionBuilder(mConnectionBuilder)
+                        .build(),
                 Browsers.Chrome.customTab("46"),
                 mCustomTabManager);
         mOutputStream = new ByteArrayOutputStream();
