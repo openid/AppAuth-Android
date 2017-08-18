@@ -37,6 +37,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -82,6 +83,7 @@ public final class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
     private static final String EXTRA_FAILED = "failed";
+    private static final int RC_AUTH = 100;
 
     private AuthorizationService mAuthService;
     private AuthStateManager mAuthStateManager;
@@ -92,6 +94,8 @@ public final class LoginActivity extends AppCompatActivity {
     private final AtomicReference<CustomTabsIntent> mAuthIntent = new AtomicReference<>();
     private CountDownLatch mAuthIntentLatch = new CountDownLatch(1);
     private ExecutorService mExecutor;
+
+    private boolean mUsePendingIntents;
 
     @NonNull
     private BrowserMatcher mBrowserMatcher = AnyBrowserMatcher.INSTANCE;
@@ -105,7 +109,7 @@ public final class LoginActivity extends AppCompatActivity {
         mConfiguration = Configuration.getInstance(this);
 
         if (mAuthStateManager.getCurrent().isAuthorized()
-                && !mConfiguration.hasConfigurationChanged()) {
+            && !mConfiguration.hasConfigurationChanged()) {
             Log.i(TAG, "User is already authenticated, proceeding to token activity");
             startActivity(new Intent(this, TokenActivity.class));
             finish();
@@ -115,11 +119,11 @@ public final class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         findViewById(R.id.retry).setOnClickListener((View view) ->
-                mExecutor.submit(this::initializeAppAuth));
+            mExecutor.submit(this::initializeAppAuth));
         findViewById(R.id.start_auth).setOnClickListener((View view) -> startAuth());
 
         ((EditText)findViewById(R.id.login_hint_value)).addTextChangedListener(
-                new LoginHintChangeHandler());
+            new LoginHintChangeHandler());
 
         if (!mConfiguration.isValid()) {
             displayError(mConfiguration.getConfigurationError(), false);
@@ -135,10 +139,7 @@ public final class LoginActivity extends AppCompatActivity {
         }
 
         if (getIntent().getBooleanExtra(EXTRA_FAILED, false)) {
-            Snackbar.make(findViewById(R.id.coordinator),
-                    "Authorization canceled",
-                    Snackbar.LENGTH_SHORT)
-                    .show();
+            displayAuthCancelled();
         }
 
         displayLoading("Initializing");
@@ -146,8 +147,8 @@ public final class LoginActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onResume() {
+        super.onResume();
         if (mExecutor.isShutdown()) {
             mExecutor = Executors.newSingleThreadExecutor();
         }
@@ -168,9 +169,23 @@ public final class LoginActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        displayAuthOptions();
+        if (resultCode == RESULT_CANCELED) {
+            displayAuthCancelled();
+        } else {
+            Intent intent = new Intent(this, TokenActivity.class);
+            intent.putExtras(data.getExtras());
+            startActivity(intent);
+        }
+    }
+
     @MainThread
     void startAuth() {
         displayLoading("Making authorization request");
+
+        mUsePendingIntents = ((CheckBox) findViewById(R.id.pending_intents_checkbox)).isChecked();
 
         // WrongThread inference is incorrect for lambdas
         // noinspection WrongThread
@@ -198,9 +213,9 @@ public final class LoginActivity extends AppCompatActivity {
         if (mConfiguration.getDiscoveryUri() == null) {
             Log.i(TAG, "Creating auth config from res/raw/auth_config.json");
             AuthorizationServiceConfiguration config = new AuthorizationServiceConfiguration(
-                    mConfiguration.getAuthEndpointUri(),
-                    mConfiguration.getTokenEndpointUri(),
-                    mConfiguration.getRegistrationEndpointUri());
+                mConfiguration.getAuthEndpointUri(),
+                mConfiguration.getTokenEndpointUri(),
+                mConfiguration.getRegistrationEndpointUri());
 
             mAuthStateManager.replace(new AuthState(config));
             initializeClient();
@@ -212,14 +227,14 @@ public final class LoginActivity extends AppCompatActivity {
         runOnUiThread(() -> displayLoading("Retrieving discovery document"));
         Log.i(TAG, "Retrieving OpenID discovery doc");
         AuthorizationServiceConfiguration.fetchFromUrl(
-                mConfiguration.getDiscoveryUri(),
-                this::handleConfigurationRetrievalResult,
-                mConfiguration.getConnectionBuilder());
+            mConfiguration.getDiscoveryUri(),
+            this::handleConfigurationRetrievalResult,
+            mConfiguration.getConnectionBuilder());
     }
 
     @MainThread
     private void handleConfigurationRetrievalResult(
-            AuthorizationServiceConfiguration config, AuthorizationException ex) {
+        AuthorizationServiceConfiguration config, AuthorizationException ex) {
         if (config == null) {
             Log.i(TAG, "Failed to retrieve discovery document", ex);
             displayError("Failed to retrieve discovery document: " + ex.getMessage(), true);
@@ -246,7 +261,7 @@ public final class LoginActivity extends AppCompatActivity {
         }
 
         RegistrationResponse lastResponse =
-                mAuthStateManager.getCurrent().getLastRegistrationResponse();
+            mAuthStateManager.getCurrent().getLastRegistrationResponse();
         if (lastResponse != null) {
             Log.i(TAG, "Using dynamic client ID: " + lastResponse.clientId);
             // already dynamically registered a client ID
@@ -261,20 +276,20 @@ public final class LoginActivity extends AppCompatActivity {
         Log.i(TAG, "Dynamically registering client");
 
         RegistrationRequest registrationRequest = new RegistrationRequest.Builder(
-                mAuthStateManager.getCurrent().getAuthorizationServiceConfiguration(),
-                Collections.singletonList(mConfiguration.getRedirectUri()))
-                .setTokenEndpointAuthenticationMethod(ClientSecretBasic.NAME)
-                .build();
+            mAuthStateManager.getCurrent().getAuthorizationServiceConfiguration(),
+            Collections.singletonList(mConfiguration.getRedirectUri()))
+            .setTokenEndpointAuthenticationMethod(ClientSecretBasic.NAME)
+            .build();
 
         mAuthService.performRegistrationRequest(
-                registrationRequest,
-                this::handleRegistrationResponse);
+            registrationRequest,
+            this::handleRegistrationResponse);
     }
 
     @MainThread
     private void handleRegistrationResponse(
-            RegistrationResponse response,
-            AuthorizationException ex) {
+        RegistrationResponse response,
+        AuthorizationException ex) {
         mAuthStateManager.updateAfterRegistration(response, ex);
         if (response == null) {
             Log.i(TAG, "Failed to dynamically register client", ex);
@@ -330,16 +345,23 @@ public final class LoginActivity extends AppCompatActivity {
             Log.w(TAG, "Interrupted while waiting for auth intent");
         }
 
-        Intent completionIntent = new Intent(this, TokenActivity.class);
-        Intent cancelIntent = new Intent(this, LoginActivity.class);
-        cancelIntent.putExtra(EXTRA_FAILED, true);
-        cancelIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if (mUsePendingIntents) {
+            Intent completionIntent = new Intent(this, TokenActivity.class);
+            Intent cancelIntent = new Intent(this, LoginActivity.class);
+            cancelIntent.putExtra(EXTRA_FAILED, true);
+            cancelIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-        mAuthService.performAuthorizationRequest(
+            mAuthService.performAuthorizationRequest(
                 mAuthRequest.get(),
                 PendingIntent.getActivity(this, 0, completionIntent, 0),
                 PendingIntent.getActivity(this, 0, cancelIntent, 0),
                 mAuthIntent.get());
+        } else {
+            Intent intent = mAuthService.getAuthorizationRequestIntent(
+                mAuthRequest.get(),
+                mAuthIntent.get());
+            startActivityForResult(intent, RC_AUTH);
+        }
     }
 
     private void recreateAuthorizationService() {
@@ -422,12 +444,19 @@ public final class LoginActivity extends AppCompatActivity {
         ((TextView)findViewById(R.id.client_id)).setText(clientIdStr);
     }
 
+    private void displayAuthCancelled() {
+        Snackbar.make(findViewById(R.id.coordinator),
+            "Authorization canceled",
+            Snackbar.LENGTH_SHORT)
+            .show();
+    }
+
     private void warmUpBrowser() {
         mAuthIntentLatch = new CountDownLatch(1);
         mExecutor.execute(() -> {
             Log.i(TAG, "Warming up browser instance for auth request");
             CustomTabsIntent.Builder intentBuilder =
-                    mAuthService.createCustomTabsIntentBuilder(mAuthRequest.get().toUri());
+                mAuthService.createCustomTabsIntentBuilder(mAuthRequest.get().toUri());
             intentBuilder.setToolbarColor(getColorCompat(R.color.colorPrimary));
             mAuthIntent.set(intentBuilder.build());
             mAuthIntentLatch.countDown();
@@ -437,11 +466,11 @@ public final class LoginActivity extends AppCompatActivity {
     private void createAuthRequest(@Nullable String loginHint) {
         Log.i(TAG, "Creating auth request for login hint: " + loginHint);
         AuthorizationRequest.Builder authRequestBuilder = new AuthorizationRequest.Builder(
-                mAuthStateManager.getCurrent().getAuthorizationServiceConfiguration(),
-                mClientId.get(),
-                ResponseTypeValues.CODE,
-                mConfiguration.getRedirectUri())
-                .setScope(mConfiguration.getScope());
+            mAuthStateManager.getCurrent().getAuthorizationServiceConfiguration(),
+            mClientId.get(),
+            ResponseTypeValues.CODE,
+            mConfiguration.getRedirectUri())
+            .setScope(mConfiguration.getScope());
 
         if (!TextUtils.isEmpty(loginHint)) {
             authRequestBuilder.setLoginHint(loginHint);
@@ -452,9 +481,9 @@ public final class LoginActivity extends AppCompatActivity {
 
     private String getLoginHint() {
         return ((EditText)findViewById(R.id.login_hint_value))
-                .getText()
-                .toString()
-                .trim();
+            .getText()
+            .toString()
+            .trim();
     }
 
     @TargetApi(Build.VERSION_CODES.M)
