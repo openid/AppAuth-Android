@@ -455,6 +455,13 @@ public class AuthorizationManagementActivityTest {
 
         // at which point the cancel intent should be fired
         assertThat(mActivityShadow.getResultCode()).isEqualTo(RESULT_CANCELED);
+
+        Intent resultIntent = mActivityShadow.getResultIntent();
+        assertThat(resultIntent).hasExtra(AuthorizationException.EXTRA_EXCEPTION);
+
+        assertThat(AuthorizationException.fromIntent(resultIntent))
+            .isEqualTo(AuthorizationException.GeneralErrors.USER_CANCELED_AUTH_FLOW);
+
         assertThat(mActivity).isFinishing();
     }
 

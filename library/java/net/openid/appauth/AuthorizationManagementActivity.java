@@ -277,14 +277,18 @@ public class AuthorizationManagementActivity extends Activity {
 
     private void handleAuthorizationCanceled() {
         Logger.debug("Authorization flow canceled by user");
+        Intent cancelData = AuthorizationException.fromTemplate(
+                AuthorizationException.GeneralErrors.USER_CANCELED_AUTH_FLOW,
+                null)
+                .toIntent();
         if (mCancelIntent != null) {
             try {
-                mCancelIntent.send();
+                mCancelIntent.send(this, 0, cancelData);
             } catch (CanceledException ex) {
                 Logger.error("Failed to send cancel intent", ex);
             }
         } else {
-            setResult(RESULT_CANCELED);
+            setResult(RESULT_CANCELED, cancelData);
             Logger.debug("No cancel intent set - will return to previous activity");
         }
     }
