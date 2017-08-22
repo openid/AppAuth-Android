@@ -59,7 +59,7 @@ install {
             project {
                 packaging 'aar'
                 name 'AppAuth for Android'
-                description 'OAuth2 / OpenID Connect client for Android apps'
+                description = 'OAuth2 / OpenID Connect client for Android apps'
                 url 'https://github.com/openid/AppAuth-Android'
                 licenses {
                     license {
