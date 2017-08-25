@@ -502,13 +502,12 @@ public class AuthorizationServiceTest {
     /**
      * Custom matcher for verifying the intent fired during token request.
      */
-    private static class CustomTabsServiceMatcher extends ArgumentMatcher<Intent> {
+    private static class CustomTabsServiceMatcher implements ArgumentMatcher<Intent> {
 
         CustomTabsServiceMatcher() { }
 
         @Override
-        public boolean matches(Object actual) {
-            Intent intent = (Intent) actual;
+        public boolean matches(Intent intent) {
             assertNotNull(intent);
             return TEST_BROWSER_PACKAGE.equals(intent.getPackage());
         }
