@@ -29,8 +29,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-
 import net.openid.appauth.AppAuthConfiguration;
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -244,7 +242,7 @@ public class TokenActivity extends AppCompatActivity {
                 ((TextView) findViewById(R.id.userinfo_name)).setText(name);
 
                 if (userInfo.has("picture")) {
-                    Glide.with(TokenActivity.this)
+                    GlideApp.with(TokenActivity.this)
                             .load(Uri.parse(userInfo.getString("picture")))
                             .fitCenter()
                             .into((ImageView) findViewById(R.id.userinfo_profile));

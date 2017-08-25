@@ -49,10 +49,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowIntentFilterFixed;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk=16, shadows = ShadowIntentFilterFixed.class)
+@Config(constants = BuildConfig.class, sdk=16)
 public class BrowserSelectorTest {
 
     private static final String SCHEME_HTTP = "http";
@@ -364,7 +363,7 @@ public class BrowserSelectorTest {
     /**
      * Custom matcher for verifying the intent fired during token request.
      */
-    private static class ServiceIntentMatcher extends ArgumentMatcher<Intent> {
+    private static class ServiceIntentMatcher implements ArgumentMatcher<Intent> {
 
         private String mPackage;
 
@@ -373,8 +372,7 @@ public class BrowserSelectorTest {
         }
 
         @Override
-        public boolean matches(Object actual) {
-            Intent intent = (Intent) actual;
+        public boolean matches(Intent intent) {
             return (intent != null)
                     && (BrowserSelector.ACTION_CUSTOM_TABS_CONNECTION.equals(
                             intent.getAction()))
