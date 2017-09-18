@@ -13,7 +13,7 @@ android.defaultConfig.project.archivesBaseName = 'appauth'
 // libraries or apps.
 android.buildTypes.debug.manifestPlaceholders = [
     'appAuthRedirectScheme': 'net.openid.appauth.test'
-];
+]
 
 dependencies {
     api "com.android.support:customtabs:${rootProject.supportLibVersion}"
