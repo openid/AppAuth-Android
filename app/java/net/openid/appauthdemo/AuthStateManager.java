@@ -151,10 +151,15 @@ public class AuthStateManager {
     private void writeState(@Nullable AuthState state) {
         mPrefsLock.lock();
         try {
+            SharedPreferences.Editor editor = mPrefs.edit();
             if (state == null) {
-                if (!mPrefs.edit().remove(KEY_STATE).commit()) {
-                    throw new IllegalStateException("Failed to write state to shared prefs");
-                }
+                editor.remove(KEY_STATE);
+            } else {
+                editor.putString(KEY_STATE, state.jsonSerializeString());
+            }
+
+            if (!editor.commit()) {
+                throw new IllegalStateException("Failed to write state to shared prefs");
             }
         } finally {
             mPrefsLock.unlock();

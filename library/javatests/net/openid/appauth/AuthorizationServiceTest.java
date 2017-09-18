@@ -19,11 +19,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.support.customtabs.CustomTabsClient;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.customtabs.CustomTabsServiceConnection;
 
+import net.openid.appauth.AppAuthConfiguration.Builder;
 import net.openid.appauth.AuthorizationException.GeneralErrors;
 import net.openid.appauth.browser.Browsers;
 import net.openid.appauth.browser.CustomTabManager;
@@ -50,6 +52,11 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import static android.support.customtabs.CustomTabsIntent.EXTRA_TOOLBAR_COLOR;
+import static net.openid.appauth.AuthorizationManagementActivity.KEY_AUTH_INTENT;
+import static net.openid.appauth.AuthorizationManagementActivity.KEY_AUTH_REQUEST;
+import static net.openid.appauth.AuthorizationManagementActivity.KEY_CANCEL_INTENT;
+import static net.openid.appauth.AuthorizationManagementActivity.KEY_COMPLETE_INTENT;
 import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
 import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
 import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
@@ -116,8 +123,7 @@ public class AuthorizationServiceTest {
     @Mock PendingIntent mPendingIntent;
     @Mock Context mContext;
     @Mock CustomTabsClient mClient;
-    @Mock
-    CustomTabManager mCustomTabManager;
+    @Mock CustomTabManager mCustomTabManager;
 
     @Before
     @SuppressWarnings("ResourceType")
@@ -125,10 +131,9 @@ public class AuthorizationServiceTest {
         MockitoAnnotations.initMocks(this);
         mAuthCallback = new AuthorizationCallback();
         mRegistrationCallback = new RegistrationCallback();
-
         mService = new AuthorizationService(
                 mContext,
-                new AppAuthConfiguration.Builder()
+                new Builder()
                         .setConnectionBuilder(mConnectionBuilder)
                         .build(),
                 Browsers.Chrome.customTab("46"),
@@ -178,6 +183,37 @@ public class AuthorizationServiceTest {
     public void testAuthorizationRequest_afterDispose() throws Exception {
         mService.dispose();
         mService.performAuthorizationRequest(getTestAuthRequestBuilder().build(), mPendingIntent);
+    }
+
+    @Test
+    public void testGetAuthorizationRequestIntent_preservesRequest() {
+        AuthorizationRequest request = getTestAuthRequestBuilder().build();
+        Intent intent = mService.getAuthorizationRequestIntent(request);
+        assertThat(intent.hasExtra(KEY_AUTH_INTENT)).isTrue();
+        assertThat(intent.getStringExtra(KEY_AUTH_REQUEST))
+                .isEqualTo(request.jsonSerializeString());
+    }
+
+    @Test
+    public void testGetAuthorizationRequestIntent_doesNotInitPendingIntents() {
+        AuthorizationRequest request = getTestAuthRequestBuilder().build();
+        Intent intent = mService.getAuthorizationRequestIntent(request);
+        Intent actualAuthIntent = intent.getParcelableExtra(KEY_AUTH_INTENT);
+        assertThat(actualAuthIntent.getParcelableExtra(KEY_COMPLETE_INTENT)).isNull();
+        assertThat(actualAuthIntent.getParcelableExtra(KEY_CANCEL_INTENT)).isNull();
+    }
+
+    @Test
+    public void testGetAuthorizationRequestIntent_withCustomTabs_preservesTabSettings() {
+        AuthorizationRequest request = getTestAuthRequestBuilder().build();
+        @ColorInt int toolbarColor = Color.GREEN;
+        CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
+                .setToolbarColor(toolbarColor)
+                .build();
+
+        Intent intent = mService.getAuthorizationRequestIntent(request, customTabsIntent);
+        Intent actualAuthIntent = intent.getParcelableExtra(KEY_AUTH_INTENT);
+        assertThat(actualAuthIntent.getIntExtra(EXTRA_TOOLBAR_COLOR, 0)).isEqualTo(toolbarColor);
     }
 
     @Test
@@ -364,7 +400,7 @@ public class AuthorizationServiceTest {
         // the real auth intent is wrapped in the intent by AuthorizationManagementActivity
         return intentCaptor
                 .getValue()
-                .getParcelableExtra(AuthorizationManagementActivity.KEY_AUTH_INTENT);
+                .getParcelableExtra(KEY_AUTH_INTENT);
     }
 
     private void assertTokenResponse(TokenResponse response, TokenRequest expectedRequest) {
@@ -466,13 +502,12 @@ public class AuthorizationServiceTest {
     /**
      * Custom matcher for verifying the intent fired during token request.
      */
-    private static class CustomTabsServiceMatcher extends ArgumentMatcher<Intent> {
+    private static class CustomTabsServiceMatcher implements ArgumentMatcher<Intent> {
 
         CustomTabsServiceMatcher() { }
 
         @Override
-        public boolean matches(Object actual) {
-            Intent intent = (Intent) actual;
+        public boolean matches(Intent intent) {
             assertNotNull(intent);
             return TEST_BROWSER_PACKAGE.equals(intent.getPackage());
         }

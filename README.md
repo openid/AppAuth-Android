@@ -1,6 +1,7 @@
 ![AppAuth for Android](https://rawgit.com/openid/AppAuth-Android/master/appauth_lockup.svg)
 
 [![Download](https://api.bintray.com/packages/openid/net.openid/appauth/images/download.svg) ](https://bintray.com/openid/net.openid/appauth/_latestVersion)
+[![Javadocs](http://javadoc.io/badge/net.openid/appauth.svg)](http://javadoc.io/doc/net.openid/appauth)
 [![Build Status](https://www.bitrise.io/app/a09572dde99baf30.svg?token=DROliGDWTq1SbhaHTid9fw&branch=master)](https://www.bitrise.io/app/a09572dde99baf30)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/321412eec811478085ec6c4c923ad8a1)](https://www.codacy.com/app/iainmcgin/AppAuth-Android)
 [![codecov.io](https://codecov.io/github/openid/AppAuth-Android/coverage.svg?branch=master)](https://codecov.io/github/openid/AppAuth-Android?branch=master)
@@ -162,7 +163,7 @@ AuthorizationServiceConfiguration serviceConfig =
               Log.e(TAG, "failed to fetch configuration");
               return;
             }
-            
+
             // use serviceConfiguration as needed
           }
         });
@@ -216,19 +217,44 @@ AuthorizationRequest authRequest = authRequestBuilder
     .build();
 ```
 
-This request can then be dispatched using
-performAuthorizationRequest on an AuthorizationService instance. When calling
-this method, two Intent instances can be provided to indicate which activities
-should be triggered when the authorization request is completed or canceled:
+This request can then be dispatched using one of two approaches.
+
+a `startActivityForResult` call using an Intent returned from the
+`AuthorizationService`, or by calling `performAuthorizationRequest` and
+providing pending intent for completion and cancelation handling activities.
+
+The `startActivityForResult` approach is simpler to use but may require
+more processing of the result:
 
 ```java
-AuthorizationService authService = new AuthorizationService(
-    mContext); // an android Context, typically from the current activity
+private void doAuthorization() {
+  AuthorizationService authService = new AuthorizationService(this);
+  Intent authIntent = authService.getAuthorizationRequestIntent(authRequest);
+  startActivityForResult(authIntent, RC_AUTH);
+}
+
+@Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+  if (requestCode == RC_AUTH) {
+    AuthorizationResponse resp = AuthorizationResponse.fromIntent(data);
+    AuthorizationException ex = AuthorizationException.fromIntent(data);
+    // ... process the response or exception ...
+  } else {
+    // ...
+  }
+}
+```
+
+If instead you wish to directly transition to another activity on completion
+or cancelation, you can use `performAuthorizationRequest`:
+
+```java
+AuthorizationService authService = new AuthorizationService(this);
 
 authService.performAuthorizationRequest(
     authRequest,
-    new Intent(mContext, MyAuthCompleteActivity.class),
-    new Intent(mContext, MyAuthCanceledActivity.class));
+    PendingIntent.getActivity(this, 0, new Intent(this, MyAuthCompleteActivity.class), 0),
+    PendingIntent.getActivity(this, 0, new Intent(this, MyAuthCanceledActivity.class), 0));
 ```
 
 The intents may be customized to carry any additional data or flags required

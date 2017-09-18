@@ -23,8 +23,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
-import org.robolectric.util.ActivityController;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk=16)
@@ -37,8 +37,7 @@ public class RedirectUriReceiverActivityTest {
         redirectIntent.setData(redirectUri);
 
         ActivityController redirectController =
-                Robolectric.buildActivity(RedirectUriReceiverActivity.class)
-                        .withIntent(redirectIntent)
+                Robolectric.buildActivity(RedirectUriReceiverActivity.class, redirectIntent)
                         .create();
 
         RedirectUriReceiverActivity redirectActivity =

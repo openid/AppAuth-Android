@@ -3,19 +3,20 @@ apply from: 'config/keystore.gradle'
 buildscript {
     repositories {
         jcenter()
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.1'
+        classpath 'com.android.tools.build:gradle:3.0.0-beta2'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.1'
-        classpath 'org.ajoberstar:gradle-git:1.5.1'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+        classpath 'org.ajoberstar:gradle-git:1.7.1'
     }
 }
 
 subprojects {
     repositories {
         jcenter()
-        maven { url 'https://maven.google.com' }
+        google()
         maven { url 'https://jitpack.io' }
     }
 }
@@ -30,7 +31,7 @@ try {
     project.ext.versionName = grgit.describe()
     project.ext.versionDate = lastCommit.getDate()
     if (project.ext.versionName == null) {
-        project.ext.versionNme = 'DEV'
+        project.ext.versionName = 'DEV'
     }
 } catch (Exception ex) {
     project.ext.versionNum = 0
@@ -39,9 +40,9 @@ try {
 }
 
 project.ext.minSdkVersion = 16
-project.ext.compileSdkVersion = 25
-project.ext.buildToolsVersion = '25.0.2'
-project.ext.supportLibVersion = '25.3.1'
+project.ext.compileSdkVersion = 26
+project.ext.buildToolsVersion = '26.0.1'
+project.ext.supportLibVersion = '26.0.1'
 
 task showVersion {
     doLast {
