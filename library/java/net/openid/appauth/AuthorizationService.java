@@ -157,10 +157,9 @@ public class AuthorizationService {
      * If the user cancels the authorization request, the provided
      * {@link PendingIntent cancel PendingIntent} will be invoked.
      */
-    public void performAuthorizationRequest(
-                                               @NonNull AuthorizationRequest request,
-                                               @NonNull PendingIntent completedIntent,
-                                               @NonNull PendingIntent canceledIntent) {
+    public void performAuthorizationRequest(@NonNull AuthorizationRequest request,
+                                            @NonNull PendingIntent completedIntent,
+                                            @NonNull PendingIntent canceledIntent) {
         performAuthorizationRequest(request,
                                     completedIntent,
                                     canceledIntent,
@@ -182,10 +181,9 @@ public class AuthorizationService {
      *                         ensure that a warmed-up version of the browser will be used,
      *                         minimizing latency.
      */
-    public void performAuthorizationRequest(
-                                               @NonNull AuthorizationRequest request,
-                                               @NonNull PendingIntent completedIntent,
-                                               @NonNull CustomTabsIntent customTabsIntent) {
+    public void performAuthorizationRequest(@NonNull AuthorizationRequest request,
+                                            @NonNull PendingIntent completedIntent,
+                                            @NonNull CustomTabsIntent customTabsIntent) {
         performAuthorizationRequest(request,
                                     completedIntent,
                                     null,
@@ -319,9 +317,8 @@ public class AuthorizationService {
      * Sends a request to the authorization service to dynamically register a client.
      * The result of this request will be sent to the provided callback handler.
      */
-    public void performRegistrationRequest(
-                                              @NonNull RegistrationRequest request,
-                                              @NonNull RegistrationResponseCallback callback) {
+    public void performRegistrationRequest(@NonNull RegistrationRequest request,
+                                           @NonNull RegistrationResponseCallback callback) {
         checkNotDisposed();
         Logger.debug("Initiating dynamic client registration %s",
                      request.configuration.registrationEndpoint.toString());
