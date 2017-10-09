@@ -16,7 +16,7 @@ raw protocol flows, convenience methods are available to assist with common
 tasks like performing an action with fresh tokens.
 
 The library follows the best practices set out in
-[OAuth 2.0 for Native Apps](https://tools.ietf.org/html/draft-ietf-oauth-native-apps),
+[RFC 8252 - OAuth 2.0 for Native Apps](https://tools.ietf.org/html/rfc8252),
 including using
 [Custom Tabs](http://developer.android.com/tools/support-library/features.html#custom-tabs)
 for authorization requests. For this reason,
@@ -46,7 +46,7 @@ Both Custom URI Schemes (all supported versions of Android) and App Links (Andro
 be used with the library.
 
 In general, AppAuth can work with any Authorization Server (AS) that supports
-[native apps](https://tools.ietf.org/html/draft-ietf-oauth-native-apps),
+native apps as documented in [RFC 8252](https://tools.ietf.org/html/rfc8252),
 either through custom URI scheme redirects, or App Links.
 AS's that assume all clients are web-based or require clients to maintain
 confidentiality of the client secrets may not work well.

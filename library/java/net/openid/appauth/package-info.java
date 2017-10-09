@@ -24,7 +24,7 @@
  * fresh tokens.
  *
  * <p>The library follows the best practices set out in
- * <a href="https://tools.ietf.org/html/draft-ietf-oauth-native-apps">OAuth 2.0 for Native Apps</a>
+ * <a href="https://tools.ietf.org/html/rfc8252">RFC 8252 - OAuth 2.0 for Native Apps</a>
  * including using
  * <a href="http://developer.android.com/tools/support-library/features.html#custom-tabs">Custom
  * Tabs</a> for the auth request. For this reason, {@link android.webkit.WebView} is explicitly
