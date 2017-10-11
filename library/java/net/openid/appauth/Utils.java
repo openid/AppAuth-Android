@@ -14,10 +14,13 @@
 
 package net.openid.appauth;
 
+import android.util.Base64;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Utility class for common operations.
@@ -53,6 +56,19 @@ class Utils {
             }
         } catch (IOException ignored) {
             // deliberately do nothing
+        }
+    }
+
+    /**
+     * Decodes Base 64 url.
+     */
+    public static String decodeBase64url(String strEncoded)
+        throws UnsupportedEncodingException {
+        if (strEncoded != null) {
+            byte[] decodedBytes = Base64.decode(strEncoded, Base64.NO_PADDING | Base64.URL_SAFE);
+            return new String(decodedBytes, "UTF-8");
+        } else {
+            return "";
         }
     }
 }

@@ -293,6 +293,16 @@ public class TokenActivity extends AppCompatActivity {
                 callback);
     }
 
+    @MainThread
+    private void performTokenValidation(
+            TokenResponse response,
+            AuthorizationService.TokenValidationResponseCallback callback) {
+
+        mAuthService.performTokenValidation(
+                response,
+                callback);
+    }
+
     @WorkerThread
     private void handleAccessTokenResponse(
             @Nullable TokenResponse tokenResponse,
@@ -301,7 +311,7 @@ public class TokenActivity extends AppCompatActivity {
         runOnUiThread(this::displayAuthorized);
     }
 
-    @WorkerThread
+    @MainThread
     private void handleCodeExchangeResponse(
             @Nullable TokenResponse tokenResponse,
             @Nullable AuthorizationException authException) {
@@ -315,7 +325,34 @@ public class TokenActivity extends AppCompatActivity {
             //noinspection WrongThread
             runOnUiThread(() -> displayNotAuthorized(message));
         } else {
+            if (tokenResponse != null
+                    && tokenResponse.idToken != null
+                    && tokenResponse.request.configuration.discoveryDoc != null) {
+                performTokenValidation(
+                        tokenResponse,
+                        this::handleTokenValidationResponse);
+            } else {
+                final String message = "Failed to perform id_token validation";
+
+                // WrongThread inference is incorrect for lambdas
+                //noinspection WrongThread
+                runOnUiThread(() -> displayNotAuthorized(message));
+            }
+        }
+    }
+
+    @WorkerThread
+    private void handleTokenValidationResponse(
+            boolean isTokenValid,
+            @Nullable AuthorizationException authException) {
+        if (isTokenValid) {
             runOnUiThread(this::displayAuthorized);
+        } else {
+            final String message = "Invalid id_token";
+
+            // WrongThread inference is incorrect for lambdas
+            //noinspection WrongThread
+            runOnUiThread(() -> displayNotAuthorized(message));
         }
     }
 
