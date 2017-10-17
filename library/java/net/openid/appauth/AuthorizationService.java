@@ -16,12 +16,14 @@ package net.openid.appauth;
 
 import static net.openid.appauth.Preconditions.checkNotNull;
 
+import android.annotation.TargetApi;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -249,6 +251,7 @@ public class AuthorizationService {
      * @throws android.content.ActivityNotFoundException if no suitable browser is available to
      *     perform the authorization flow.
      */
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public Intent getAuthorizationRequestIntent(
             @NonNull AuthorizationRequest request,
             @NonNull CustomTabsIntent customTabsIntent) {
@@ -279,6 +282,7 @@ public class AuthorizationService {
      * @throws android.content.ActivityNotFoundException if no suitable browser is available to
      *     perform the authorization flow.
      */
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public Intent getAuthorizationRequestIntent(
             @NonNull AuthorizationRequest request) {
         return getAuthorizationRequestIntent(request, createCustomTabsIntentBuilder().build());
