@@ -427,12 +427,12 @@ storing the authorization state in SharedPreferences or some other persistent
 store private to the app:
 
 ```java
-@NonNull public AuthState readAuthState() {
+@NonNull public AuthState readAuthState() throws JSONException {
   SharedPreferences authPrefs = getSharedPreferences("auth", MODE_PRIVATE);
   String stateJson = authPrefs.getString("stateJson");
   AuthState state;
-  if (stateStr != null) {
-    return AuthState.fromJsonString(stateJson);
+  if (stateJson != null) {
+    return AuthState.jsonDeserialize(stateJson);
   } else {
     return new AuthState();
   }
@@ -441,7 +441,7 @@ store private to the app:
 public void writeAuthState(@NonNull AuthState state) {
   SharedPreferences authPrefs = getSharedPreferences("auth", MODE_PRIVATE);
   authPrefs.edit()
-      .putString("stateJson", state.toJsonString())
+      .putString("stateJson", state.jsonSerializeString())
       .apply();
 }
 ```
