@@ -430,7 +430,6 @@ store private to the app:
 @NonNull public AuthState readAuthState() throws JSONException {
   SharedPreferences authPrefs = getSharedPreferences("auth", MODE_PRIVATE);
   String stateJson = authPrefs.getString("stateJson");
-  AuthState state;
   if (stateJson != null) {
     return AuthState.jsonDeserialize(stateJson);
   } else {
