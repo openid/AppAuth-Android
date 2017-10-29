@@ -80,6 +80,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * instructions.
  */
 public final class LoginActivity extends AppCompatActivity {
+    private static final boolean useROPC = true;
 
     private static final String TAG = "LoginActivity";
     private static final String EXTRA_FAILED = "failed";
@@ -183,9 +184,11 @@ public final class LoginActivity extends AppCompatActivity {
 
     @MainThread
     void startAuth() {
-        displayLoading("Making authorization request");
+        if (!useROPC) {
+            displayLoading("Making authorization request");
 
-        mUsePendingIntents = ((CheckBox) findViewById(R.id.pending_intents_checkbox)).isChecked();
+            mUsePendingIntents = ((CheckBox) findViewById(R.id.pending_intents_checkbox)).isChecked();
+        }
 
         // WrongThread inference is incorrect for lambdas
         // noinspection WrongThread
@@ -346,6 +349,15 @@ public final class LoginActivity extends AppCompatActivity {
             mAuthIntentLatch.await();
         } catch (InterruptedException ex) {
             Log.w(TAG, "Interrupted while waiting for auth intent");
+        }
+
+        if (useROPC)
+        {
+            Log.i(TAG, "Proceeding to token activity for ROPC call");
+            Intent ropcIntent = new Intent(this, TokenActivity.class);
+            startActivity(ropcIntent);
+            finish();
+            return;
         }
 
         if (mUsePendingIntents) {

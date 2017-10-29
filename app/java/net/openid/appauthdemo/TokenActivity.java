@@ -34,8 +34,10 @@ import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
+import net.openid.appauth.AuthorizationServiceConfiguration;
 import net.openid.appauth.AuthorizationServiceDiscovery;
 import net.openid.appauth.ClientAuthentication;
+import net.openid.appauth.GrantTypeValues;
 import net.openid.appauth.TokenRequest;
 import net.openid.appauth.TokenResponse;
 
@@ -50,6 +52,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.LinkedHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
@@ -62,6 +65,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * access tokens.
  */
 public class TokenActivity extends AppCompatActivity {
+    private static final boolean useROPC = true;
+
     private static final String TAG = "TokenActivity";
 
     private static final String KEY_USER_INFO = "userInfo";
@@ -71,6 +76,8 @@ public class TokenActivity extends AppCompatActivity {
     private final AtomicReference<JSONObject> mUserInfoJson = new AtomicReference<>();
     private ExecutorService mExecutor;
 
+    private Configuration config;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,7 +85,7 @@ public class TokenActivity extends AppCompatActivity {
         mStateManager = AuthStateManager.getInstance(this);
         mExecutor = Executors.newSingleThreadExecutor();
 
-        Configuration config = Configuration.getInstance(this);
+        config = Configuration.getInstance(this);
         if (config.hasConfigurationChanged()) {
             Toast.makeText(
                     this,
@@ -136,8 +143,40 @@ public class TokenActivity extends AppCompatActivity {
         } else if (ex != null) {
             displayNotAuthorized("Authorization flow failed: " + ex.getMessage());
         } else {
-            displayNotAuthorized("No authorization state retained - reauthorization required");
+            if (!useROPC){
+                displayNotAuthorized("No authorization state retained - reauthorization required");
+            }
+            else {
+                callROPC();
+            }
         }
+    }
+
+    @MainThread
+    private void callROPC() {
+        displayLoading("Calling ROPC");
+
+        AuthStateManager authStateManager = AuthStateManager.getInstance(this);
+        AuthorizationServiceConfiguration authServiceConfig = authStateManager.getCurrent().getAuthorizationServiceConfiguration();
+
+        LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
+        params.put("username", "demob2cuser@outlook.com");
+        params.put("password", "");
+        params.put("resource", "abc");
+        params.put("response_type", "token id_token");
+
+        TokenRequest ropcRequest = new TokenRequest.Builder(
+            authServiceConfig,
+            config.getClientId())
+            .setGrantType("Password")
+            .setRedirectUri(config.getRedirectUri())
+            .setScope(config.getScope())
+            .setAdditionalParameters(params)
+            .build();
+
+        performTokenRequest(
+            ropcRequest,
+            this::handleCodeExchangeResponse);
     }
 
     @Override
@@ -268,6 +307,7 @@ public class TokenActivity extends AppCompatActivity {
     @MainThread
     private void exchangeAuthorizationCode(AuthorizationResponse authorizationResponse) {
         displayLoading("Exchanging authorization code");
+
         performTokenRequest(
                 authorizationResponse.createTokenExchangeRequest(),
                 this::handleCodeExchangeResponse);
