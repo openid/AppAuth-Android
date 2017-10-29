@@ -2,7 +2,7 @@
   "client_id": "b35a3d9b-cf71-45ab-bbc7-8a239b9c181b",
   "redirect_uri": "MSALb35a3d9b://Redirect/path",
   "authorization_scope": "openid",
-  "discovery_uri": "https://login.microsoftonline.com/tfp/potterworld.onmicrosoft.com/B2C_1A_ResourceOwner/v2.0/.well-known/openid-configuration",
+  "discovery_uri": "https://login.microsoftonline.com/tfp/potterworld.onmicrosoft.com/B2C_1A_ResourceOwner/.well-known/openid-configuration",
   "authorization_endpoint_uri": "",
   "token_endpoint_uri": "",
   "registration_endpoint_uri": "",
