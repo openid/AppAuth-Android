@@ -65,6 +65,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * access tokens.
  */
 public class TokenActivity extends AppCompatActivity {
+    private static final boolean useROPC = true;
+
     private static final String TAG = "TokenActivity";
 
     private static final String KEY_USER_INFO = "userInfo";
@@ -141,9 +143,12 @@ public class TokenActivity extends AppCompatActivity {
         } else if (ex != null) {
             displayNotAuthorized("Authorization flow failed: " + ex.getMessage());
         } else {
-            //displayNotAuthorized("No authorization state retained - reauthorization required");
-            callROPC();
-//            parakh();
+            if (!useROPC){
+                displayNotAuthorized("No authorization state retained - reauthorization required");
+            }
+            else {
+                callROPC();
+            }
         }
     }
 
