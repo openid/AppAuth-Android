@@ -66,6 +66,7 @@ public final class Configuration {
     private Uri mAuthEndpointUri;
     private Uri mTokenEndpointUri;
     private Uri mRegistrationEndpointUri;
+    private Uri mUserInfoEndpointUri;
     private boolean mHttpsRequired;
 
     public static Configuration getInstance(Context context) {
@@ -156,6 +157,11 @@ public final class Configuration {
         return mRegistrationEndpointUri;
     }
 
+    @Nullable
+    public Uri getUserInfoEndpointUri() {
+        return mUserInfoEndpointUri;
+    }
+
     public boolean isHttpsRequired() {
         return mHttpsRequired;
     }
@@ -203,6 +209,7 @@ public final class Configuration {
             mAuthEndpointUri = getRequiredConfigWebUri("authorization_endpoint_uri");
 
             mTokenEndpointUri = getRequiredConfigWebUri("token_endpoint_uri");
+            mUserInfoEndpointUri = getRequiredConfigWebUri("user_info_endpoint_uri");
 
             if (mClientId == null) {
                 mRegistrationEndpointUri = getRequiredConfigWebUri("registration_endpoint_uri");

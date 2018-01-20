@@ -70,13 +70,15 @@ public class TokenActivity extends AppCompatActivity {
     private AuthStateManager mStateManager;
     private final AtomicReference<JSONObject> mUserInfoJson = new AtomicReference<>();
     private ExecutorService mExecutor;
-
+    private Configuration mConfiguration;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mStateManager = AuthStateManager.getInstance(this);
         mExecutor = Executors.newSingleThreadExecutor();
+        mConfiguration = Configuration.getInstance(this);
 
         Configuration config = Configuration.getInstance(this);
         if (config.hasConfigurationChanged()) {
@@ -221,7 +223,8 @@ public class TokenActivity extends AppCompatActivity {
 
         AuthorizationServiceDiscovery discoveryDoc =
                 state.getAuthorizationServiceConfiguration().discoveryDoc;
-        if (discoveryDoc == null || discoveryDoc.getUserinfoEndpoint() == null) {
+        if ((discoveryDoc == null || discoveryDoc.getUserinfoEndpoint() == null)
+                && mConfiguration.getUserInfoEndpointUri() == null) {
             viewProfileButton.setVisibility(View.GONE);
         } else {
             viewProfileButton.setVisibility(View.VISIBLE);
@@ -346,7 +349,10 @@ public class TokenActivity extends AppCompatActivity {
 
         URL userInfoEndpoint;
         try {
-            userInfoEndpoint = new URL(discovery.getUserinfoEndpoint().toString());
+            userInfoEndpoint =
+                    mConfiguration.getUserInfoEndpointUri() != null
+                        ? new URL(mConfiguration.getUserInfoEndpointUri().toString())
+                        : new URL(discovery.getUserinfoEndpoint().toString());
         } catch (MalformedURLException urlEx) {
             Log.e(TAG, "Failed to construct user info endpoint URL", urlEx);
             mUserInfoJson.set(null);
