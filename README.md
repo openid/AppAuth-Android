@@ -134,7 +134,7 @@ with the result to help with tracking the state of the flow.
 
 ### Authorization service configuration
 
-First, AppAuth must first be instructed how to interact with the authorization
+First, AppAuth must be instructed how to interact with the authorization
 service. This can be done either by directly creating an
 [AuthorizationServiceConfiguration](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AuthorizationServiceConfiguration.java#L102)
 instance, providing the URIs of the authorization endpoint and token endpoint,
