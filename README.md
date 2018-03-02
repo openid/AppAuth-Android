@@ -137,7 +137,10 @@ with the result to help with tracking the state of the flow.
 First, AppAuth must be instructed how to interact with the authorization
 service. This can be done either by directly creating an
 [AuthorizationServiceConfiguration](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AuthorizationServiceConfiguration.java#L102)
-instance, providing the URIs of the authorization endpoint and token endpoint,
+instance, or by retrieving an OpenID Connect discovery document.
+
+Directly specifying an AuthorizationServiceConfiguration involves
+providing the URIs of the authorization endpoint and token endpoint,
 and optionally a dynamic client registration endpoint (see "Dynamic client
 registration" for more info):
 
@@ -148,8 +151,7 @@ AuthorizationServiceConfiguration serviceConfig =
         Uri.parse("https://idp.example.com/token")); // token endpoint
 ```
 
-Alternatively, the configuration can be retrieved from an OpenID Connect
-discovery document:
+Where available, using an OpenID Connect discovery document is preferable:
 
 ```java
 AuthorizationServiceConfiguration serviceConfig =
