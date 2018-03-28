@@ -22,7 +22,7 @@
    ```json
    {
      "client_id": "PREFIX.apps.googleusercontent.com",
-     "redirect_uri": "com.googleusercontent.apps.PREFIX:/oauth2redirect",
+     "redirect_uri": "net.openid.appauthdemo:/oauth2redirect",
      "authorization_scope": "openid email profile",
      "discovery_uri": "https://accounts.google.com/.well-known/openid-configuration"
    }
