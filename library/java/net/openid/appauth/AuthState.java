@@ -539,16 +539,16 @@ public class AuthState {
 
         if (mRefreshToken == null) {
             AuthorizationException ex = AuthorizationException.fromTemplate(
-                AuthorizationRequestErrors.CLIENT_ERROR,
-                new IllegalStateException("No refresh token available and token have expired"));
+                    AuthorizationRequestErrors.CLIENT_ERROR,
+                    new IllegalStateException("No refresh token available and token have expired"));
             action.execute(null, null, ex);
             return;
         }
 
         checkNotNull(mPendingActionsSyncObject, "pending actions sync object cannot be null");
         synchronized (mPendingActionsSyncObject) {
-            //if a token refresh request is currently executing, add the current action to the list of pending actions to be executed when it is completed.
-            if(mPendingActions != null) {
+            //if a token request is currently executing, queue the actions instead
+            if (mPendingActions != null) {
                 mPendingActions.add(action);
                 return;
             }
@@ -564,11 +564,12 @@ public class AuthState {
                 new AuthorizationService.TokenResponseCallback() {
                     @Override
                     public void onTokenRequestCompleted(
-                        @Nullable TokenResponse response,
-                        @Nullable AuthorizationException ex) {
+                            @Nullable TokenResponse response,
+                            @Nullable AuthorizationException ex) {
                         update(response, ex);
 
-                        String accessToken = null, idToken = null;
+                        String accessToken = null;
+                        String idToken = null;
                         AuthorizationException exception = null;
 
                         if (ex == null) {
@@ -579,13 +580,13 @@ public class AuthState {
                             exception = ex;
                         }
 
-                        //sets pending queue to null and processes all actions that were in the queue
+                        //sets pending queue to null and processes all actions in the queue
                         List<AuthStateAction> actionsToProcess;
                         synchronized (mPendingActionsSyncObject) {
                             actionsToProcess = mPendingActions;
                             mPendingActions = null;
                         }
-                        for(AuthStateAction action : actionsToProcess) {
+                        for (AuthStateAction action : actionsToProcess) {
                             action.execute(accessToken, idToken, exception);
                         }
                     }
