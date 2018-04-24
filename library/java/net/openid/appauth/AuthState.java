@@ -28,7 +28,9 @@ import net.openid.appauth.internal.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -76,6 +78,8 @@ public class AuthState {
     @Nullable
     private AuthorizationException mAuthorizationException;
 
+    private Object mPendingActionsSyncObject = new Object();
+    private List<AuthStateAction> mPendingActions;
     private boolean mNeedsTokenRefreshOverride;
 
     /**
@@ -98,6 +102,7 @@ public class AuthState {
             @Nullable AuthorizationException authError) {
         checkArgument(authResponse != null ^ authError != null,
                 "exactly one of authResponse or authError should be non-null");
+        mPendingActions = null;
         update(authResponse, authError);
     }
 
@@ -534,10 +539,23 @@ public class AuthState {
 
         if (mRefreshToken == null) {
             AuthorizationException ex = AuthorizationException.fromTemplate(
-                    AuthorizationRequestErrors.CLIENT_ERROR,
-                    new IllegalStateException("No refresh token available and token have expired"));
+                AuthorizationRequestErrors.CLIENT_ERROR,
+                new IllegalStateException("No refresh token available and token have expired"));
             action.execute(null, null, ex);
             return;
+        }
+
+        checkNotNull(mPendingActionsSyncObject, "pending actions sync object cannot be null");
+        synchronized (mPendingActionsSyncObject) {
+            //if a token refresh request is currently executing, add the current action to the list of pending actions to be executed when it is completed.
+            if(mPendingActions != null) {
+                mPendingActions.add(action);
+                return;
+            }
+
+            //creates a list of pending actions, starting with the current action
+            mPendingActions = new ArrayList();
+            mPendingActions.add(action);
         }
 
         service.performTokenRequest(
@@ -546,14 +564,29 @@ public class AuthState {
                 new AuthorizationService.TokenResponseCallback() {
                     @Override
                     public void onTokenRequestCompleted(
-                            @Nullable TokenResponse response,
-                            @Nullable AuthorizationException ex) {
+                        @Nullable TokenResponse response,
+                        @Nullable AuthorizationException ex) {
                         update(response, ex);
+
+                        String accessToken = null, idToken = null;
+                        AuthorizationException exception = null;
+
                         if (ex == null) {
                             mNeedsTokenRefreshOverride = false;
-                            action.execute(getAccessToken(), getIdToken(), null);
+                            accessToken = getAccessToken();
+                            idToken = getIdToken();
                         } else {
-                            action.execute(null, null, ex);
+                            exception = ex;
+                        }
+
+                        //sets pending queue to null and processes all actions that were in the queue
+                        List<AuthStateAction> actionsToProcess;
+                        synchronized (mPendingActionsSyncObject) {
+                            actionsToProcess = mPendingActions;
+                            mPendingActions = null;
+                        }
+                        for(AuthStateAction action : actionsToProcess) {
+                            action.execute(accessToken, idToken, exception);
                         }
                     }
                 });
