@@ -249,11 +249,15 @@ final class JsonUtil {
             throws JSONException {
         checkNotNull(json, "json must not be null");
         checkNotNull(field, "field must not be null");
-        if (!json.has(field)) {
+        if (!json.has(field) || json.isNull(field)) {
             return null;
         }
 
-        return json.getLong(field);
+        try {
+            return json.getLong(field);
+        } catch (JSONException e) {
+            return null;
+        }
     }
 
     @NonNull

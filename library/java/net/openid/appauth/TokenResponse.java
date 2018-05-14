@@ -215,9 +215,7 @@ public class TokenResponse {
         public Builder fromResponseJson(@NonNull JSONObject json) throws JSONException {
             setTokenType(JsonUtil.getString(json, KEY_TOKEN_TYPE));
             setAccessToken(JsonUtil.getStringIfDefined(json, KEY_ACCESS_TOKEN));
-            if (json.has(KEY_EXPIRES_AT)) {
-                setAccessTokenExpirationTime(json.getLong(KEY_EXPIRES_AT));
-            }
+            setAccessTokenExpirationTime(JsonUtil.getLongIfDefined(json, KEY_EXPIRES_AT));
             if (json.has(KEY_EXPIRES_IN)) {
                 setAccessTokenExpiresIn(json.getLong(KEY_EXPIRES_IN));
             }
