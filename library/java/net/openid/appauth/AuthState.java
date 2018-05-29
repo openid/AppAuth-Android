@@ -562,6 +562,7 @@ public class AuthState {
     /**
      * Creates a token request for new tokens using the current refresh token.
      */
+    @NonNull
     public TokenRequest createTokenRefreshRequest() {
         return createTokenRefreshRequest(Collections.<String, String>emptyMap());
     }
@@ -570,6 +571,7 @@ public class AuthState {
      * Creates a token request for new tokens using the current refresh token, adding the
      * specified additional parameters.
      */
+    @NonNull
     public TokenRequest createTokenRefreshRequest(
             @NonNull Map<String, String> additionalParameters) {
         if (mRefreshToken == null) {
@@ -707,6 +709,7 @@ public class AuthState {
                 @Nullable String idToken,
                 @Nullable AuthorizationException ex);
     }
+
     /**
      * Creates the required client authentication for the token endpoint based on information
      * in the most recent registration response (if it is set).

@@ -40,16 +40,18 @@ android {
     }
 }
 
+project.ext.glideVersion = '4.7.1'
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':library')
     implementation "com.android.support:appcompat-v7:${rootProject.supportLibVersion}"
     implementation "com.android.support:design:${rootProject.supportLibVersion}"
-    implementation 'com.github.bumptech.glide:glide:4.0.0'
-    implementation 'com.squareup.okio:okio:1.13.0'
+    implementation "com.github.bumptech.glide:glide:${project.glideVersion}"
+    implementation 'com.squareup.okio:okio:1.14.1'
     implementation 'joda-time:joda-time:2.9.9'
 
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0'
+    annotationProcessor "com.github.bumptech.glide:compiler:${project.glideVersion}"
 }
 
 apply from: '../config/style.gradle'
