@@ -47,6 +47,7 @@ public class ClientSecretBasicTest {
         assertThat(csb.getRequestParameters(TEST_CLIENT_ID)).isNull();
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void testConstructor_withNull() {
         new ClientSecretBasic(null);

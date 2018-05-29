@@ -110,8 +110,9 @@ public class AuthorizationManagementActivityTest {
     }
 
     private void instantiateActivity(Intent managementIntent) {
-        mController = Robolectric.buildActivity(AuthorizationManagementActivity.class)
-                .withIntent(managementIntent);
+        mController = Robolectric.buildActivity(
+                AuthorizationManagementActivity.class,
+                managementIntent);
 
         mActivity = mController.get();
         mActivityShadow = shadowOf(mActivity);

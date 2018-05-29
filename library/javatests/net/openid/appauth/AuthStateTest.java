@@ -28,20 +28,19 @@ import static net.openid.appauth.TestValues.getTestAuthResponseBuilder;
 import static net.openid.appauth.TestValues.getTestRegistrationResponse;
 import static net.openid.appauth.TestValues.getTestRegistrationResponseBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.util.Collections;
-import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -433,7 +432,7 @@ public class AuthStateTest {
         verify(action, times(1)).execute(
                 eq(TEST_ACCESS_TOKEN),
                 eq(TEST_ID_TOKEN),
-                isNull(AuthorizationException.class));
+                ArgumentMatchers.<AuthorizationException>isNull());
     }
 
     @Test
@@ -496,7 +495,7 @@ public class AuthStateTest {
         verify(action, times(1)).execute(
                 eq(freshAccessToken),
                 eq(freshIdToken),
-                isNull(AuthorizationException.class));
+                ArgumentMatchers.<AuthorizationException>isNull());
 
         // additionally, the auth state should be updated with the new token values
         assertThat(state.getAccessToken()).isEqualTo(freshAccessToken);

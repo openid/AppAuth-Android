@@ -62,9 +62,10 @@ public class BrowserDescriptorTest {
     @Test
     public void testEquals_differentSignatures() {
         BrowserDescriptor a = Browsers.Chrome.standaloneBrowser("45");
+        @SuppressWarnings("unchecked")
         BrowserDescriptor b = new BrowserDescriptor(
                 a.packageName,
-                Collections.<String>singleton("DIFFERENT_SIGNATURE"),
+                Collections.singleton("DIFFERENT_SIGNATURE"),
                 a.version,
                 a.useCustomTab);
         assertThat(a).isNotEqualTo(b);
