@@ -9,11 +9,18 @@ version = rootProject.versionName
 
 android.defaultConfig.project.archivesBaseName = 'appauth'
 
-// Define a default value for building the tests. This is not used when building any dependent
-// libraries or apps.
-android.buildTypes.debug.manifestPlaceholders = [
-    'appAuthRedirectScheme': 'net.openid.appauth.test'
-];
+// use a separate build type for unit tests, so that we can configure the manifest placeholder
+// without interfering with other builds.
+android.buildTypes {
+    forTests {
+        initWith debug
+        manifestPlaceholders = [
+            'appAuthRedirectScheme': 'net.openid.appauth.test'
+        ]
+    }
+}
+
+android.testBuildType "forTests"
 
 dependencies {
     api "com.android.support:customtabs:${rootProject.supportLibVersion}"
