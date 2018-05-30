@@ -21,7 +21,6 @@ import android.util.Base64;
 
 import net.openid.appauth.internal.UriUtil;
 
-import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.Map;
 
