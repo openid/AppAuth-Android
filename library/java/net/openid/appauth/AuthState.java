@@ -78,7 +78,7 @@ public class AuthState {
     @Nullable
     private AuthorizationException mAuthorizationException;
 
-    private Object mPendingActionsSyncObject = new Object();
+    private final Object mPendingActionsSyncObject = new Object();
     private List<AuthStateAction> mPendingActions;
     private boolean mNeedsTokenRefreshOverride;
 
@@ -554,7 +554,7 @@ public class AuthState {
             }
 
             //creates a list of pending actions, starting with the current action
-            mPendingActions = new ArrayList();
+            mPendingActions = new ArrayList<>();
             mPendingActions.add(action);
         }
 

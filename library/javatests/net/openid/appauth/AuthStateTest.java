@@ -571,7 +571,7 @@ public class AuthStateTest {
         verify(action, times(2)).execute(
             eq(freshAccessToken),
             eq(freshIdToken),
-            isNull(AuthorizationException.class));
+            ArgumentMatchers.<AuthorizationException>isNull());
 
         // additionally, the auth state should be updated with the new token values
         assertThat(state.getRefreshToken()).isEqualTo(freshRefreshToken);
