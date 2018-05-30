@@ -42,6 +42,21 @@ public class ClientSecretBasicTest {
     }
 
     @Test
+    public void getGetRequestHeaders_idAndSecretAreUrlEncoded() {
+        String secretThatChangesWhenEncoded = "1/2_3+4";
+        String idThatChangesWhenEncoded = "0!1*$$";
+        ClientSecretBasic csb = new ClientSecretBasic(secretThatChangesWhenEncoded);
+
+
+        csb.getRequestHeaders(idThatChangesWhenEncoded);
+        String expectedAuthzHeader = "Basic MCUyMTEqJTI0JTI0OjElMkYyXzMlMkI0";
+
+        Map<String, String> headers = csb.getRequestHeaders(idThatChangesWhenEncoded);
+        assertThat(headers.size()).isEqualTo(1);
+        assertThat(headers).containsEntry("Authorization", expectedAuthzHeader);
+    }
+
+    @Test
     public void testGetRequestParameters() {
         ClientSecretBasic csb = new ClientSecretBasic(TEST_CLIENT_SECRET);
         assertThat(csb.getRequestParameters(TEST_CLIENT_ID)).isNull();
