@@ -42,17 +42,42 @@ public class ClientSecretBasicTest {
     }
 
     @Test
-    public void getGetRequestHeaders_idAndSecretAreUrlEncoded() {
+    public void testGetRequestHeaders_idAndSecretAreUrlEncoded() {
         String secretThatChangesWhenEncoded = "1/2_3+4";
         String idThatChangesWhenEncoded = "0!1*$$";
         ClientSecretBasic csb = new ClientSecretBasic(secretThatChangesWhenEncoded);
 
-
-        csb.getRequestHeaders(idThatChangesWhenEncoded);
         String expectedAuthzHeader = "Basic MCUyMTEqJTI0JTI0OjElMkYyXzMlMkI0";
 
         Map<String, String> headers = csb.getRequestHeaders(idThatChangesWhenEncoded);
-        assertThat(headers.size()).isEqualTo(1);
+        assertThat(headers).containsEntry("Authorization", expectedAuthzHeader);
+    }
+
+    @Test
+    public void testGetRequestHeaders_testValuesFromIssue337() {
+        // see: https://github.com/openid/AppAuth-Android/issues/337
+
+        String secret = "z/tZ9VwFZqApmIQ+ZH1I5pLk/uB4ud:X2/8bL+wfFTt1rFw=";
+        String id = "1PpG/Q 1";
+        ClientSecretBasic csb = new ClientSecretBasic(secret);
+
+        String expectedAuthzHeader = "Basic " +
+            "MVBwRyUyRlErMTp6JTJGdFo5VndGWnFBcG1JUSUyQlpIMUk1cExrJTJGdUI0dWQl" +
+            "M0FYMiUyRjhiTCUyQndmRlR0MXJGdyUzRA==";
+
+        assertThat(csb.getRequestHeaders(id)).containsEntry("Authorization", expectedAuthzHeader);
+    }
+
+    @Test
+    public void testGetRequestHeaders_idAndSecretWithAllReservedCharacters() {
+        String secretWithSpaces = "i am a secret";
+        String idWithSpaces = "i am an ID";
+
+        ClientSecretBasic csb = new ClientSecretBasic(secretWithSpaces);
+
+        String expectedAuthzHeader = "Basic ";
+
+        Map<String, String> headers = csb.getRequestHeaders(idWithSpaces);
         assertThat(headers).containsEntry("Authorization", expectedAuthzHeader);
     }
 
