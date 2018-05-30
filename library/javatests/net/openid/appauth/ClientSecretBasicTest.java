@@ -31,12 +31,9 @@ public class ClientSecretBasicTest {
     @Test
     public void testGetRequestHeaders() {
         ClientSecretBasic csb = new ClientSecretBasic(TEST_CLIENT_SECRET);
-
         Map<String, String> headers = csb.getRequestHeaders(TEST_CLIENT_ID);
 
-        String credentials = TEST_CLIENT_ID + ":" + TEST_CLIENT_SECRET;
-        String authz = Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
-        String expectedAuthzHeader = "Basic " + authz;
+        String expectedAuthzHeader = "Basic dGVzdF9jbGllbnRfaWQ6dGVzdF9jbGllbnRfc2VjcmV0";
         assertThat(headers.size()).isEqualTo(1);
         assertThat(headers).containsEntry("Authorization", expectedAuthzHeader);
     }
@@ -69,15 +66,25 @@ public class ClientSecretBasicTest {
     }
 
     @Test
-    public void testGetRequestHeaders_idAndSecretWithAllReservedCharacters() {
-        String secretWithSpaces = "i am a secret";
-        String idWithSpaces = "i am an ID";
+    public void testGetRequestHeaders_encodingTests() {
+        // the set of characters that must be transformed is defined in the WHATWG URL spec here:
+        // https://url.spec.whatwg.org/#urlencoded-serializing
 
-        ClientSecretBasic csb = new ClientSecretBasic(secretWithSpaces);
+        // based on the above, let the secret be the string containing all the ascii characters that
+        // are not encoded ...
+        String secret = "*-._0123456789abcdefghijklmnoprstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-        String expectedAuthzHeader = "Basic ";
+        // ... and let the id contain a selection of characters that do require encoding
+        String id = "!@#$%^&()_=+µΩß¡";
 
-        Map<String, String> headers = csb.getRequestHeaders(idWithSpaces);
+        ClientSecretBasic csb = new ClientSecretBasic(secret);
+
+        String expectedAuthzHeader = "Basic " +
+            "JTIxJTQwJTIzJTI0JTI1JTVFJTI2JTI4JTI5XyUzRCUyQiVDMiVCNSVDRSVBOSVD" +
+            "MyU5RiVDMiVBMToqLS5fMDEyMzQ1Njc4OWFiY2RlZmdoaWprbG1ub3Byc3R1dnd4" +
+            "eXpBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWg==";
+
+        Map<String, String> headers = csb.getRequestHeaders(id);
         assertThat(headers).containsEntry("Authorization", expectedAuthzHeader);
     }
 
