@@ -95,21 +95,28 @@ public final class UriUtil {
         return uriBundles;
     }
 
-    public static String formUrlEncode(Map<String, String> parameters) {
+    @NonNull
+    public static String formUrlEncode(@Nullable Map<String, String> parameters) {
         if (parameters == null) {
             return "";
         }
 
         List<String> queryParts = new ArrayList<>();
         for (Map.Entry<String, String> param : parameters.entrySet()) {
-            try {
-                queryParts.add(param.getKey() + "=" + URLEncoder.encode(param.getValue(), "utf-8"));
-            } catch (UnsupportedEncodingException e) {
-                // Should not end up here
-                Logger.error("Could not utf-8 encode.");
-            }
+            queryParts.add(param.getKey() + "=" + formUrlEncodeValue(param.getValue()));
         }
         return TextUtils.join("&", queryParts);
+    }
+
+    @NonNull
+    public static String formUrlEncodeValue(@NonNull String value) {
+        Preconditions.checkNotNull(value);
+        try {
+            return URLEncoder.encode(value, "utf-8");
+        } catch (UnsupportedEncodingException ex) {
+            // utf-8 should always be supported
+            throw new IllegalStateException("Unable to encode using UTF-8");
+        }
     }
 
     public static List<Pair<String, String>> formUrlDecode(String encoded) {

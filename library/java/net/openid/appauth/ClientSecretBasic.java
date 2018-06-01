@@ -19,6 +19,8 @@ import static net.openid.appauth.Preconditions.checkNotNull;
 import android.support.annotation.NonNull;
 import android.util.Base64;
 
+import net.openid.appauth.internal.UriUtil;
+
 import java.util.Collections;
 import java.util.Map;
 
@@ -50,7 +52,11 @@ public class ClientSecretBasic implements ClientAuthentication {
 
     @Override
     public final Map<String, String> getRequestHeaders(@NonNull String clientId) {
-        String credentials = clientId + ":" + mClientSecret;
+        // From the OAuth2 RFC, client ID and secret should be encoded prior to concatenation and
+        // conversion to Base64: https://tools.ietf.org/html/rfc6749#section-2.3.1
+        String encodedClientId = UriUtil.formUrlEncodeValue(clientId);
+        String encodedClientSecret = UriUtil.formUrlEncodeValue(mClientSecret);
+        String credentials = encodedClientId + ":" + encodedClientSecret;
         String basicAuth = Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
         return Collections.singletonMap("Authorization", "Basic " + basicAuth);
     }
