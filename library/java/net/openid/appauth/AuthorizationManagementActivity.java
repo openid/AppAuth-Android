@@ -215,6 +215,11 @@ public class AuthorizationManagementActivity extends Activity {
          */
 
         if (!mAuthorizationStarted) {
+            if (mAuthIntent == null) {
+                finish();
+                return;
+            }
+
             startActivity(mAuthIntent);
             mAuthorizationStarted = true;
             return;
