@@ -253,7 +253,13 @@ public class AuthorizationManagementActivity extends Activity {
         outState.putParcelable(KEY_COMPLETE_INTENT, mCompleteIntent);
         outState.putParcelable(KEY_CANCEL_INTENT, mCancelIntent);
     }
-
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            extractState(savedInstanceState);
+        }
+    }
     private void handleAuthorizationComplete() {
         Uri responseUri = getIntent().getData();
         Intent responseData = extractResponseData(responseUri);
