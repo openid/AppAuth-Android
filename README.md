@@ -201,7 +201,7 @@ AuthorizationRequest.Builder authRequestBuilder =
     new AuthorizationRequest.Builder(
         serviceConfig, // the authorization service configuration
         MY_CLIENT_ID, // the client ID, typically pre-registered and static
-        ResponseTypeValues.CODE // the response_type value: we want a code
+        ResponseTypeValues.CODE, // the response_type value: we want a code
         MY_REDIRECT_URI); // the redirect URI to which the auth response is sent
 ```
 
@@ -214,7 +214,7 @@ are specified through set methods on the builder:
 
 ```java
 AuthorizationRequest authRequest = authRequestBuilder
-    .setScope("email profile https://idp.example.com/custom-scope")
+    .setScope("openid email profile https://idp.example.com/custom-scope")
     .setLoginHint("jdoe@user.example.com")
     .build();
 ```
