@@ -145,6 +145,10 @@ public class CustomTabManager {
         }
 
         CustomTabsSession session = client.newSession(callbacks);
+        if (session == null) {
+            Logger.warn("Failed to create custom tabs session through custom tabs client");
+            return null;
+        }
 
         if (possibleUris != null && possibleUris.length > 0) {
             List<Bundle> additionalUris = UriUtil.toCustomTabUriBundle(possibleUris, 1);
