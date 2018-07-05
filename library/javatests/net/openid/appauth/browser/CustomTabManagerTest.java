@@ -117,6 +117,19 @@ public class CustomTabManagerTest {
     }
 
     @Test
+    public void testCreateSession_creationFails() {
+        startBind(true);
+        provideClient();
+
+        // Emulate session creation failure - annoyingly the contract for this is just to return
+        // null, rather than an exception with some useful context.
+        CustomTabsCallback mockCallbacks = Mockito.mock(CustomTabsCallback.class);
+        Mockito.doReturn(null).when(mClient).newSession(mockCallbacks);
+
+        assertThat(mManager.createSession(mockCallbacks)).isNull();
+    }
+
+    @Test
     public void testDispose() {
         startBind(true);
 
