@@ -49,7 +49,7 @@ dependencies {
     implementation "com.android.support:design:${rootProject.supportLibVersion}"
     implementation "com.github.bumptech.glide:glide:${project.glideVersion}"
     implementation 'com.squareup.okio:okio:1.14.1'
-    implementation 'joda-time:joda-time:2.9.9'
+    implementation 'joda-time:joda-time:2.10'
 
     annotationProcessor "com.github.bumptech.glide:compiler:${project.glideVersion}"
 }

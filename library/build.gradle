@@ -80,7 +80,7 @@ install {
                     developer {
                         id "iainmcgin"
                         name "Iain McGinniss"
-                        email "iainmcgin@google.com"
+                        email "iain.mcginniss@wework.com"
                     }
                 }
 
