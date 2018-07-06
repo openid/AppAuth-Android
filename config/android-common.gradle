@@ -17,6 +17,10 @@ android {
         test.setRoot('javatests');
         test.java.srcDir('javatests');
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     lintOptions {
         warningsAsErrors true
         disable 'InvalidPackage', 'TrulyRandom', 'UseCompoundDrawables', 'GradleDependency'
