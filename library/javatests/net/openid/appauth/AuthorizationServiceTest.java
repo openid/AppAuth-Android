@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import static android.support.customtabs.CustomTabsIntent.EXTRA_TITLE_VISIBILITY_STATE;
 import static android.support.customtabs.CustomTabsIntent.EXTRA_TOOLBAR_COLOR;
 import static net.openid.appauth.AuthorizationManagementActivity.KEY_AUTH_INTENT;
 import static net.openid.appauth.AuthorizationManagementActivity.KEY_AUTH_REQUEST;
@@ -209,11 +210,14 @@ public class AuthorizationServiceTest {
         @ColorInt int toolbarColor = Color.GREEN;
         CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
                 .setToolbarColor(toolbarColor)
+                .setShowTitle(true)
                 .build();
 
         Intent intent = mService.getAuthorizationRequestIntent(request, customTabsIntent);
         Intent actualAuthIntent = intent.getParcelableExtra(KEY_AUTH_INTENT);
         assertThat(actualAuthIntent.getIntExtra(EXTRA_TOOLBAR_COLOR, 0)).isEqualTo(toolbarColor);
+        assertThat(actualAuthIntent.getIntExtra(EXTRA_TITLE_VISIBILITY_STATE, 0))
+            .isEqualTo(CustomTabsIntent.SHOW_PAGE_TITLE);
     }
 
     @Test

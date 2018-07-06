@@ -377,7 +377,6 @@ public class AuthorizationService {
         Logger.debug("Using %s as browser for auth, custom tab = %s",
                 intent.getPackage(),
                 mBrowser.useCustomTab.toString());
-        intent.putExtra(CustomTabsIntent.EXTRA_TITLE_VISIBILITY_STATE, CustomTabsIntent.NO_TITLE);
 
         Logger.debug("Initiating authorization request to %s",
                 request.configuration.authorizationEndpoint);
