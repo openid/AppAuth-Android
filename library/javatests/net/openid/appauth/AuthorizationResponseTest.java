@@ -16,16 +16,22 @@ package net.openid.appauth;
 
 import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
 import static net.openid.appauth.TestValues.TEST_AUTH_CODE;
+import static net.openid.appauth.TestValues.TEST_CODE_VERIFIER;
 import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
 import static net.openid.appauth.TestValues.TEST_STATE;
+import static net.openid.appauth.TestValues.getMinimalAuthRequestBuilder;
 import static net.openid.appauth.TestValues.getTestAuthRequest;
 import static net.openid.appauth.TestValues.getTestAuthRequestBuilder;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.net.Uri;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -118,6 +124,49 @@ public class AuthorizationResponseTest {
         String json = mAuthorizationResponse.jsonSerializeString();
         AuthorizationResponse authResponse = AuthorizationResponse.jsonDeserialize(json);
         checkExpectedFields(authResponse);
+    }
+
+    @Test
+    public void testCreateTokenExchangeRequest() {
+        TokenRequest tokenExchangeRequest = mAuthorizationResponse.createTokenExchangeRequest();
+        assertThat(tokenExchangeRequest.grantType)
+            .isEqualTo(GrantTypeValues.AUTHORIZATION_CODE);
+        assertThat(tokenExchangeRequest.codeVerifier)
+            .isEqualTo(TEST_CODE_VERIFIER);
+        assertThat(tokenExchangeRequest.authorizationCode)
+            .isEqualTo(TEST_AUTH_CODE);
+    }
+
+    @Test
+    public void testCreateTokenExchangeRequest_failsForImplicitFlowResponse() {
+        // simulate an implicit flow request and response
+        AuthorizationRequest request = getMinimalAuthRequestBuilder(ResponseTypeValues.TOKEN).build();
+        AuthorizationResponse response = new AuthorizationResponse.Builder(request)
+            .setAccessToken("token")
+            .setTokenType(AuthorizationResponse.TOKEN_TYPE_BEARER)
+            .setAccessTokenExpiresIn(TimeUnit.DAYS.toSeconds(30))
+            .setState(request.state)
+            .build();
+
+        // as there is no authorization code in the response, this will fail
+        assertThatExceptionOfType(IllegalStateException.class)
+            .isThrownBy(response::createTokenExchangeRequest)
+            .withMessage("authorizationCode not available for exchange request");
+    }
+
+    @Test
+    public void testCreateTokenExchangeRequest_failsForImplicitResponse() {
+
+    }
+
+    @Test
+    public void testCreateTokenExchangeRequest_authResponseScopesAreIgnored() {
+        AuthorizationResponse response = mAuthorizationResponseBuilder
+            .setScopes(AuthorizationRequest.Scope.EMAIL)
+            .build();
+
+        TokenRequest tokenExchangeRequest = response.createTokenExchangeRequest();
+        assertThat(tokenExchangeRequest.scope).isNull();
     }
 
     private void checkExpectedFields(AuthorizationResponse authResponse) {

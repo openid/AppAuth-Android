@@ -463,7 +463,6 @@ public class AuthorizationResponse {
                 request.clientId)
                 .setGrantType(GrantTypeValues.AUTHORIZATION_CODE)
                 .setRedirectUri(request.redirectUri)
-                .setScope(request.scope)
                 .setCodeVerifier(request.codeVerifier)
                 .setAuthorizationCode(authorizationCode)
                 .setAdditionalParameters(additionalExchangeParameters)
