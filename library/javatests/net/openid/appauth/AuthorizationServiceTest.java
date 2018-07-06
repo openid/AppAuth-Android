@@ -199,8 +199,8 @@ public class AuthorizationServiceTest {
         AuthorizationRequest request = getTestAuthRequestBuilder().build();
         Intent intent = mService.getAuthorizationRequestIntent(request);
         Intent actualAuthIntent = intent.getParcelableExtra(KEY_AUTH_INTENT);
-        assertThat(actualAuthIntent.getParcelableExtra(KEY_COMPLETE_INTENT)).isNull();
-        assertThat(actualAuthIntent.getParcelableExtra(KEY_CANCEL_INTENT)).isNull();
+        assertThat(actualAuthIntent.<Intent>getParcelableExtra(KEY_COMPLETE_INTENT)).isNull();
+        assertThat(actualAuthIntent.<Intent>getParcelableExtra(KEY_CANCEL_INTENT)).isNull();
     }
 
     @Test
