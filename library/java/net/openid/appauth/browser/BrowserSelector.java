@@ -82,7 +82,8 @@ public final class BrowserSelector {
         if (VERSION.SDK_INT >= VERSION_CODES.M) {
             queryFlag |= PackageManager.MATCH_ALL;
         }
-        ResolveInfo resolvedDefaultActivity = pm.resolveActivity(BROWSER_INTENT, 0);
+        ResolveInfo resolvedDefaultActivity =
+            pm.resolveActivity(BROWSER_INTENT, 0);
         if (resolvedDefaultActivity != null) {
             defaultBrowserPackage = resolvedDefaultActivity.activityInfo.packageName;
         }
@@ -102,7 +103,8 @@ public final class BrowserSelector {
                         PackageManager.GET_SIGNATURES);
 
                 if (hasWarmupService(pm, info.activityInfo.packageName)) {
-                    BrowserDescriptor customTabBrowserDescriptor = new BrowserDescriptor(packageInfo, true);
+                    BrowserDescriptor customTabBrowserDescriptor =
+                        new BrowserDescriptor(packageInfo, true);
                     if (info.activityInfo.packageName.equals(defaultBrowserPackage)) {
                         browsers.add(defaultBrowserIndex, customTabBrowserDescriptor);
                         defaultBrowserIndex++;
@@ -111,7 +113,8 @@ public final class BrowserSelector {
                     }
                 }
 
-                BrowserDescriptor fullBrowserDescriptor = new BrowserDescriptor(packageInfo, false);
+                BrowserDescriptor fullBrowserDescriptor =
+                    new BrowserDescriptor(packageInfo, false);
                 if (info.activityInfo.packageName.equals(defaultBrowserPackage)) {
                     browsers.add(defaultBrowserIndex, fullBrowserDescriptor);
                 } else {
