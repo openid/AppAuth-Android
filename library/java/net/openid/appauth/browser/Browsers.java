@@ -62,7 +62,7 @@ public final class Browsers {
         }
 
         /**
-         * Creates a browser descriptor fot the specified version of Chrome, when used as
+         * Creates a browser descriptor for the specified version of Chrome, when used as
          * a custom tab.
          */
         public static BrowserDescriptor customTab(@NonNull String version) {
@@ -98,11 +98,25 @@ public final class Browsers {
                 Collections.singleton(SIGNATURE_HASH);
 
         /**
+         * The version in which Custom Tabs were introduced in Firefox.
+         */
+        public static final DelimitedVersion MINIMUM_VERSION_FOR_CUSTOM_TAB =
+                DelimitedVersion.parse("57");
+
+        /**
          * Creates a browser descriptor for the specified version of Firefox, when used
          * as a standalone browser.
          */
         public static BrowserDescriptor standaloneBrowser(@NonNull String version) {
             return new BrowserDescriptor(PACKAGE_NAME, SIGNATURE_SET, version, false);
+        }
+
+        /**
+         * Creates a browser descriptor for the specified version of Firefox, when used as
+         * a custom tab.
+         */
+        public static BrowserDescriptor customTab(@NonNull String version) {
+            return new BrowserDescriptor(PACKAGE_NAME, SIGNATURE_SET, version, true);
         }
 
         private Firefox() {

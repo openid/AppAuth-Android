@@ -31,7 +31,8 @@ import java.util.List;
  *
  * // blacklist Firefox
  * new BrowserBlacklist(
- *     VersionedBrowserMatcher.FIREFOX_BROWSER);
+ *     VersionedBrowserMatcher.FIREFOX_BROWSER,
+ *     VersionedBrowserMatcher.FIREFOX_CUSTOM_TAB);
  *
  * // blacklist Dolphin Browser
  * new BrowserBlacklist(

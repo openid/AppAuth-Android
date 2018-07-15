@@ -44,6 +44,15 @@ public class VersionedBrowserMatcher implements BrowserMatcher {
             VersionRange.ANY_VERSION);
 
     /**
+     * Matches any version of Firefox for use as a custom tab.
+     */
+    public static final VersionedBrowserMatcher FIREFOX_CUSTOM_TAB = new VersionedBrowserMatcher(
+            Browsers.Firefox.PACKAGE_NAME,
+            Browsers.Firefox.SIGNATURE_SET,
+            true,
+            VersionRange.atLeast(Browsers.Firefox.MINIMUM_VERSION_FOR_CUSTOM_TAB));
+
+    /**
      * Matches any version of Mozilla Firefox.
      */
     public static final VersionedBrowserMatcher FIREFOX_BROWSER = new VersionedBrowserMatcher(
