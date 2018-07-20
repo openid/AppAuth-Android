@@ -131,6 +131,15 @@ public class AuthorizationService {
     }
 
     /**
+     * Creates a CustomTabsIntent, where the package is set to the one of the BrowserDescriptor.
+     */
+    public CustomTabsIntent createCustomTabsIntent(Uri... possibleUris) {
+        CustomTabsIntent customTabsIntent = createCustomTabsIntentBuilder(possibleUris).build();
+        customTabsIntent.intent.setPackage(mBrowser.packageName);
+        return customTabsIntent;
+    }
+
+    /**
      * Sends an authorization request to the authorization service, using a
      * [custom tab](https://developer.chrome.com/multidevice/android/customtabs)
      * if available, or a browser instance.
