@@ -62,7 +62,8 @@ public class BrowserWhitelistTest {
         assertThat(whitelist.matches(Browsers.Chrome.customTab("46"))).isFalse();
         assertThat(whitelist.matches(Browsers.Firefox.standaloneBrowser("10"))).isTrue();
         assertThat(whitelist.matches(Browsers.SBrowser.standaloneBrowser("10"))).isTrue();
-        assertThat(whitelist.matches(Browsers.SBrowser.customTab("10"))).isTrue();
+        assertThat(whitelist.matches(Browsers.SBrowser.customTab("4.0"))).isTrue();
+        assertThat(whitelist.matches(Browsers.SBrowser.customTab("3.9"))).isFalse();
     }
 
 }
