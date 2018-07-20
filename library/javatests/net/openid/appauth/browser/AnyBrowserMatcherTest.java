@@ -34,5 +34,7 @@ public class AnyBrowserMatcherTest {
                 .isTrue();
         assertThat(AnyBrowserMatcher.INSTANCE.matches(Browsers.SBrowser.standaloneBrowser("2.1")))
                 .isTrue();
+        assertThat(AnyBrowserMatcher.INSTANCE.matches(Browsers.SBrowser.customTab("4.0")))
+                .isTrue();
     }
 }
