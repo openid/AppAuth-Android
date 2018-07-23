@@ -25,6 +25,7 @@ class TestValues {
 
     public static final String TEST_CLIENT_ID = "test_client_id";
     public static final String TEST_STATE = "$TAT3";
+    public static final String TEST_NONCE = "NONC3";
     public static final String TEST_APP_SCHEME = "com.test.app";
     public static final Uri TEST_APP_REDIRECT_URI = Uri.parse(TEST_APP_SCHEME + ":/oidc_callback");
     public static final String TEST_SCOPE = "openid email";

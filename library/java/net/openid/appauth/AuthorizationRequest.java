@@ -437,6 +437,19 @@ public class AuthorizationRequest {
     public final String state;
 
     /**
+     * String value used to associate a Client session with an ID Token, and to mitigate replay
+     * attacks. The value is passed through unmodified from the Authentication Request to the ID
+     * Token. If this value is not explicitly set, this library will automatically add nonce and
+     * perform appropriate validation of the ID Token. It is recommended that the default
+     * implementation of this parameter be used wherever possible.
+     *
+     * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
+     */
+    @Nullable
+    public final String nonce;
+
+    /**
      * The proof key for code exchange. This is an opaque value used to associate an authorization
      * request with a subsequent code exchange, in order to prevent any eavesdropping party from
      * intercepting and using the code before the original requestor. If PKCE is disabled due to
@@ -543,6 +556,9 @@ public class AuthorizationRequest {
         private String mState;
 
         @Nullable
+        private String mNonce;
+
+        @Nullable
         private String mCodeVerifier;
 
         @Nullable
@@ -570,6 +586,7 @@ public class AuthorizationRequest {
             setResponseType(responseType);
             setRedirectUri(redirectUri);
             setState(AuthorizationRequest.generateRandomState());
+            setNonce(AuthorizationRequest.generateRandomState());
             setCodeVerifier(CodeVerifierUtil.generateRandomCodeVerifier());
         }
 
@@ -763,6 +780,12 @@ public class AuthorizationRequest {
             return this;
         }
 
+        @NonNull
+        public Builder setNonce(@Nullable String nonce) {
+            mNonce = checkNullOrNotEmpty(nonce, "state cannot be empty if defined");
+            return this;
+        }
+
         /**
          * Specifies the code verifier to use for this authorization request. The default challenge
          * method (typically {@link #CODE_CHALLENGE_METHOD_S256}) implemented by
@@ -877,6 +900,7 @@ public class AuthorizationRequest {
                     mPrompt,
                     mScope,
                     mState,
+                    mNonce,
                     mCodeVerifier,
                     mCodeVerifierChallenge,
                     mCodeVerifierChallengeMethod,
@@ -895,6 +919,7 @@ public class AuthorizationRequest {
             @Nullable String prompt,
             @Nullable String scope,
             @Nullable String state,
+            @Nullable String nonce,
             @Nullable String codeVerifier,
             @Nullable String codeVerifierChallenge,
             @Nullable String codeVerifierChallengeMethod,
@@ -913,6 +938,7 @@ public class AuthorizationRequest {
         this.prompt = prompt;
         this.scope = scope;
         this.state = state;
+        this.nonce = nonce;
         this.codeVerifier = codeVerifier;
         this.codeVerifierChallenge = codeVerifierChallenge;
         this.codeVerifierChallengeMethod = codeVerifierChallengeMethod;

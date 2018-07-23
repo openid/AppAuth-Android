@@ -63,6 +63,7 @@ import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
 import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
 import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET_EXPIRES_AT;
 import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
+import static net.openid.appauth.TestValues.TEST_NONCE;
 import static net.openid.appauth.TestValues.TEST_REFRESH_TOKEN;
 import static net.openid.appauth.TestValues.TEST_STATE;
 import static net.openid.appauth.TestValues.getTestAuthCodeExchangeRequest;
@@ -160,7 +161,18 @@ public class AuthorizationServiceTest {
     }
 
     @Test
-    public void testAuthorizationRequest_withDefaultRandomState() throws Exception {
+    public void testAuthorizationRequest_withSpecifiedNonce() throws Exception {
+        AuthorizationRequest request = getTestAuthRequestBuilder()
+            .setNonce(TEST_NONCE)
+            .build();
+        mService.performAuthorizationRequest(request, mPendingIntent);
+        Intent intent = captureAuthRequestIntent();
+        assertRequestIntent(intent, null);
+        assertEquals(request.toUri().toString(), intent.getData().toString());
+    }
+
+    @Test
+    public void testAuthorizationRequest_withDefaultRandomStateAndNonce() throws Exception {
         AuthorizationRequest request = getTestAuthRequestBuilder().build();
         mService.performAuthorizationRequest(request, mPendingIntent);
         Intent intent = captureAuthRequestIntent();
