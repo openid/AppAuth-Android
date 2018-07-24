@@ -17,6 +17,7 @@ package net.openid.appauth;
 import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
 import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
 import static net.openid.appauth.TestValues.TEST_EMAIL_ADDRESS;
+import static net.openid.appauth.TestValues.TEST_NONCE;
 import static net.openid.appauth.TestValues.TEST_STATE;
 import static net.openid.appauth.TestValues.getTestServiceConfig;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -459,6 +460,7 @@ public class AuthorizationRequestTest {
                         AuthorizationRequest.PARAM_RESPONSE_TYPE,
                         AuthorizationRequest.PARAM_REDIRECT_URI,
                         AuthorizationRequest.PARAM_STATE,
+                        AuthorizationRequest.PARAM_NONCE,
                         AuthorizationRequest.PARAM_CODE_CHALLENGE,
                         AuthorizationRequest.PARAM_CODE_CHALLENGE_METHOD)));
 
@@ -470,6 +472,8 @@ public class AuthorizationRequestTest {
                 .isEqualTo(TEST_APP_REDIRECT_URI.toString());
         assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_STATE))
                 .isEqualTo(request.state);
+        assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_NONCE))
+                .isEqualTo(request.nonce);
         assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_CODE_CHALLENGE))
                 .isEqualTo(request.codeVerifierChallenge);
         assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_CODE_CHALLENGE_METHOD))
@@ -563,6 +567,25 @@ public class AuthorizationRequestTest {
         AuthorizationRequest req = mRequestBuilder.setState(null).build();
         assertThat(req.toUri().getQueryParameterNames())
                 .doesNotContain(AuthorizationRequest.PARAM_STATE);
+    }
+
+    @Test
+    public void testToUri_nonceParam() {
+        Uri uri = mRequestBuilder
+            .setNonce(TEST_NONCE)
+            .build()
+            .toUri();
+        assertThat(uri.getQueryParameterNames())
+            .contains(AuthorizationRequest.PARAM_NONCE);
+        assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_NONCE))
+            .isEqualTo(TEST_NONCE);
+    }
+
+    @Test
+    public void testToUri_noNonceParam() throws Exception {
+        AuthorizationRequest req = mRequestBuilder.setNonce(null).build();
+        assertThat(req.toUri().getQueryParameterNames())
+            .doesNotContain(AuthorizationRequest.PARAM_NONCE);
     }
 
     @Test

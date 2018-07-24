@@ -302,6 +302,9 @@ public class AuthorizationRequest {
     @VisibleForTesting
     static final String PARAM_STATE = "state";
 
+    @VisibleForTesting
+    static final String PARAM_NONCE = "nonce";
+
     private static final Set<String> BUILT_IN_PARAMS = builtInParams(
             PARAM_CLIENT_ID,
             PARAM_CODE_CHALLENGE,
@@ -324,6 +327,7 @@ public class AuthorizationRequest {
     private static final String KEY_REDIRECT_URI = "redirectUri";
     private static final String KEY_SCOPE = "scope";
     private static final String KEY_STATE = "state";
+    private static final String KEY_NONCE = "nonce";
     private static final String KEY_CODE_VERIFIER = "codeVerifier";
     private static final String KEY_CODE_VERIFIER_CHALLENGE = "codeVerifierChallenge";
     private static final String KEY_CODE_VERIFIER_CHALLENGE_METHOD = "codeVerifierChallengeMethod";
@@ -978,6 +982,7 @@ public class AuthorizationRequest {
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_LOGIN_HINT, loginHint);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_PROMPT, prompt);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_STATE, state);
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_NONCE, nonce);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_SCOPE, scope);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_RESPONSE_MODE, responseMode);
 
@@ -1009,6 +1014,7 @@ public class AuthorizationRequest {
         JsonUtil.putIfNotNull(json, KEY_SCOPE, scope);
         JsonUtil.putIfNotNull(json, KEY_PROMPT, prompt);
         JsonUtil.putIfNotNull(json, KEY_STATE, state);
+        JsonUtil.putIfNotNull(json, KEY_NONCE, nonce);
         JsonUtil.putIfNotNull(json, KEY_CODE_VERIFIER, codeVerifier);
         JsonUtil.putIfNotNull(json, KEY_CODE_VERIFIER_CHALLENGE, codeVerifierChallenge);
         JsonUtil.putIfNotNull(json, KEY_CODE_VERIFIER_CHALLENGE_METHOD,
@@ -1046,6 +1052,7 @@ public class AuthorizationRequest {
                 .setLoginHint(JsonUtil.getStringIfDefined(json, KEY_LOGIN_HINT))
                 .setPrompt(JsonUtil.getStringIfDefined(json, KEY_PROMPT))
                 .setState(JsonUtil.getStringIfDefined(json, KEY_STATE))
+                .setNonce(JsonUtil.getStringIfDefined(json, KEY_NONCE))
                 .setCodeVerifier(
                         JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER),
                         JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER_CHALLENGE),
