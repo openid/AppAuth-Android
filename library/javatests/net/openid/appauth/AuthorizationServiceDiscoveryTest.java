@@ -33,10 +33,11 @@ import org.robolectric.annotation.Config;
 @Config(constants = BuildConfig.class, sdk=16)
 public class AuthorizationServiceDiscoveryTest {
     // ToDo: add more tests for remaining getters
-    private static final String TEST_ISSUER = "test_issuer";
+    static final String TEST_ISSUER = "test_issuer";
     private static final String TEST_AUTHORIZATION_ENDPOINT = "http://test.openid.com/o/oauth/auth";
     private static final String TEST_TOKEN_ENDPOINT = "http://test.openid.com/o/oauth/token";
     private static final String TEST_USERINFO_ENDPOINT = "http://test.openid.com/o/oauth/userinfo";
+    private static final String TEST_REGISTRATION_ENDPOINT = "http://test.openid.com/o/oauth/register";
     private static final String TEST_JWKS_URI = "http://test.openid.com/o/oauth/jwks";
     private static final List<String> TEST_RESPONSE_TYPE_SUPPORTED = Arrays.asList("code", "token");
     private static final List<String> TEST_SUBJECT_TYPES_SUPPORTED = Arrays.asList("public");
@@ -46,11 +47,12 @@ public class AuthorizationServiceDiscoveryTest {
             = Arrays.asList("client_secret_post", "client_secret_basic");
     private static final List<String> TEST_CLAIMS_SUPPORTED = Arrays.asList("aud", "exp");
 
-    private static final String TEST_JSON = "{\n"
+    static final String TEST_JSON = "{\n"
             + " \"issuer\": \"" + TEST_ISSUER + "\",\n"
             + " \"authorization_endpoint\": \"" + TEST_AUTHORIZATION_ENDPOINT + "\",\n"
             + " \"token_endpoint\": \"" + TEST_TOKEN_ENDPOINT + "\",\n"
             + " \"userinfo_endpoint\": \"" + TEST_USERINFO_ENDPOINT + "\",\n"
+            + " \"registration_endpoint\": \"" + TEST_REGISTRATION_ENDPOINT + "\",\n"
             + " \"jwks_uri\": \"" + TEST_JWKS_URI + "\",\n"
             + " \"response_types_supported\": " + toJson(TEST_RESPONSE_TYPE_SUPPORTED) + ",\n"
             + " \"subject_types_supported\": " + toJson(TEST_SUBJECT_TYPES_SUPPORTED) + ",\n"

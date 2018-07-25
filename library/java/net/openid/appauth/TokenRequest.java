@@ -51,6 +51,8 @@ public class TokenRequest {
     @VisibleForTesting
     static final String KEY_CLIENT_ID = "clientId";
     @VisibleForTesting
+    static final String KEY_NONCE = "nonce";
+    @VisibleForTesting
     static final String KEY_GRANT_TYPE = "grantType";
     @VisibleForTesting
     static final String KEY_REDIRECT_URI = "redirectUri";
@@ -124,6 +126,12 @@ public class TokenRequest {
      */
     @NonNull
     public final AuthorizationServiceConfiguration configuration;
+
+    /**
+     * The (optional) nonce associated with the current session.
+     */
+    @Nullable
+    public final String nonce;
 
     /**
      * The client identifier.
@@ -215,6 +223,9 @@ public class TokenRequest {
         private String mClientId;
 
         @Nullable
+        private String mNonce;
+
+        @Nullable
         private String mGrantType;
 
         @Nullable
@@ -262,6 +273,19 @@ public class TokenRequest {
         @NonNull
         public Builder setClientId(@NonNull String clientId) {
             mClientId = checkNotEmpty(clientId, "clientId cannot be null or empty");
+            return this;
+        }
+
+        /**
+         * Specifies the (optional) nonce for the current session.
+         */
+        @NonNull
+        public Builder setNonce(@Nullable String nonce) {
+            if (TextUtils.isEmpty(nonce)) {
+                mNonce = null;
+            } else {
+                this.mNonce = nonce;
+            }
             return this;
         }
 
@@ -428,6 +452,7 @@ public class TokenRequest {
             return new TokenRequest(
                     mConfiguration,
                     mClientId,
+                    mNonce,
                     grantType,
                     mRedirectUri,
                     mScope,
@@ -453,6 +478,7 @@ public class TokenRequest {
     private TokenRequest(
             @NonNull AuthorizationServiceConfiguration configuration,
             @NonNull String clientId,
+            @Nullable String nonce,
             @NonNull String grantType,
             @Nullable Uri redirectUri,
             @Nullable String scope,
@@ -462,6 +488,7 @@ public class TokenRequest {
             @NonNull Map<String, String> additionalParameters) {
         this.configuration = configuration;
         this.clientId = clientId;
+        this.nonce = nonce;
         this.grantType = grantType;
         this.redirectUri = redirectUri;
         this.scope = scope;
@@ -517,6 +544,7 @@ public class TokenRequest {
         JSONObject json = new JSONObject();
         JsonUtil.put(json, KEY_CONFIGURATION, configuration.toJson());
         JsonUtil.put(json, KEY_CLIENT_ID, clientId);
+        JsonUtil.putIfNotNull(json, KEY_NONCE, nonce);
         JsonUtil.put(json, KEY_GRANT_TYPE, grantType);
         JsonUtil.putIfNotNull(json, KEY_REDIRECT_URI, redirectUri);
         JsonUtil.putIfNotNull(json, KEY_SCOPE, scope);
@@ -553,7 +581,8 @@ public class TokenRequest {
                 .setGrantType(JsonUtil.getString(json, KEY_GRANT_TYPE))
                 .setRefreshToken(JsonUtil.getStringIfDefined(json, KEY_REFRESH_TOKEN))
                 .setAuthorizationCode(JsonUtil.getStringIfDefined(json, KEY_AUTHORIZATION_CODE))
-                .setAdditionalParameters(JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
+                .setAdditionalParameters(JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS))
+                .setNonce(JsonUtil.getStringIfDefined(json, KEY_NONCE));
 
         if (json.has(KEY_SCOPE)) {
             builder.setScopes(AsciiStringListUtil.stringToSet(JsonUtil.getString(json, KEY_SCOPE)));

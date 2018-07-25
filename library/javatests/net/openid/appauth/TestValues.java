@@ -16,7 +16,13 @@ package net.openid.appauth;
 
 import android.net.Uri;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Arrays;
+
+import static net.openid.appauth.AuthorizationServiceDiscoveryTest.TEST_ISSUER;
+import static net.openid.appauth.IDTokenTest.TEST_SUBJECT;
 
 /**
  * Contains common test values which are useful across all tests.
@@ -40,7 +46,12 @@ class TestValues {
     public static final String TEST_AUTH_CODE = "zxcvbnmjk";
     public static final String TEST_ACCESS_TOKEN = "aaabbbccc";
     public static final Long TEST_ACCESS_TOKEN_EXPIRATION_TIME = 120000L; // two minutes
-    public static final String TEST_ID_TOKEN = "abc.def.ghi";
+    public static final String TEST_ID_TOKEN = IDTokenTest.getUnsignedIdToken(
+        TEST_ISSUER,
+        TEST_SUBJECT,
+        TEST_CLIENT_ID,
+        null
+    );
     public static final String TEST_REFRESH_TOKEN = "asdfghjkl";
 
     public static final Long TEST_CLIENT_SECRET_EXPIRES_AT = 78L;
@@ -48,11 +59,17 @@ class TestValues {
 
     public static final String TEST_EMAIL_ADDRESS = "test@example.com";
 
+    public static AuthorizationServiceDiscovery getTestDiscoveryDocument() {
+        try {
+            return new AuthorizationServiceDiscovery(
+                new JSONObject(AuthorizationServiceDiscoveryTest.TEST_JSON));
+        } catch (JSONException | AuthorizationServiceDiscovery.MissingArgumentException ex) {
+            throw new RuntimeException("Unable to create test authorization service discover document", ex);
+        }
+    }
+
     public static AuthorizationServiceConfiguration getTestServiceConfig() {
-        return new AuthorizationServiceConfiguration(
-                TEST_IDP_AUTH_ENDPOINT,
-                TEST_IDP_TOKEN_ENDPOINT,
-                TEST_IDP_REGISTRATION_ENDPOINT);
+        return new AuthorizationServiceConfiguration(getTestDiscoveryDocument());
     }
 
     public static AuthorizationRequest.Builder getMinimalAuthRequestBuilder(String responseType) {
@@ -70,7 +87,9 @@ class TestValues {
     }
 
     public static AuthorizationRequest getTestAuthRequest() {
-        return getTestAuthRequestBuilder().build();
+        return getTestAuthRequestBuilder().
+            setNonce(null).
+            build();
     }
 
     public static AuthorizationResponse.Builder getTestAuthResponseBuilder() {
@@ -129,5 +148,14 @@ class TestValues {
                 .setClientSecret(TEST_CLIENT_SECRET)
                 .setClientSecretExpiresAt(TEST_CLIENT_SECRET_EXPIRES_AT)
                 .build();
+    }
+
+    public static String getTestIdTokenWithNonce(String nonce) {
+        return IDTokenTest.getUnsignedIdToken(
+            TEST_ISSUER,
+            TEST_SUBJECT,
+            TEST_CLIENT_ID,
+            nonce
+        );
     }
 }

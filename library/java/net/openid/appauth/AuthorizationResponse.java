@@ -466,6 +466,7 @@ public class AuthorizationResponse {
                 .setCodeVerifier(request.codeVerifier)
                 .setAuthorizationCode(authorizationCode)
                 .setAdditionalParameters(additionalExchangeParameters)
+                .setNonce(request.nonce)
                 .build();
     }
 

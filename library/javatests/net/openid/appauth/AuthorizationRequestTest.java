@@ -686,6 +686,13 @@ public class AuthorizationRequestTest {
     }
 
     @Test
+    public void testJsonSerialize_nonce() throws Exception {
+        AuthorizationRequest copy = serializeDeserialize(
+            mRequestBuilder.setNonce(TEST_NONCE).build());
+        assertThat(copy.nonce).isEqualTo(TEST_NONCE);
+    }
+
+    @Test
     public void testJsonSerialize_additionalParams() throws Exception {
         AuthorizationRequest copy = serializeDeserialize(
                 mRequestBuilder.setAdditionalParameters(TEST_ADDITIONAL_PARAMS).build());
