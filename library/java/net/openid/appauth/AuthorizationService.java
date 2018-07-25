@@ -556,7 +556,8 @@ public class AuthorizationService {
 
                 // OpenID Connect Core Section 3.1.3.7. rule #9
                 // Validates that the current time is before the expiry time.
-                if (mClock.getCurrentTimeMillis() > idToken.expiration) {
+                Long nowInSeconds = mClock.getCurrentTimeMillis() / 1000;
+                if (nowInSeconds > idToken.expiration) {
                     mCallback.onTokenRequestCompleted(null, AuthorizationException.fromTemplate(
                         GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
                         new IDToken.IDTokenException("ID Token expired")));
@@ -565,8 +566,8 @@ public class AuthorizationService {
 
                 // OpenID Connect Core Section 3.1.3.7. rule #10
                 // Validates that the issued at time is not more than +/- 10 minutes on the current time.
-                Long tenMinutesMillis = (long) (10 * 60 * 1000);
-                if (Math.abs(mClock.getCurrentTimeMillis() - idToken.issuedAt) > tenMinutesMillis) {
+                Long tenMinutesInSeconds = (long) (10 * 60);
+                if (Math.abs(nowInSeconds - idToken.issuedAt) > tenMinutesInSeconds) {
                     mCallback.onTokenRequestCompleted(null, AuthorizationException.fromTemplate(
                         GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
                         new IDToken.IDTokenException(
@@ -579,7 +580,7 @@ public class AuthorizationService {
                     // OpenID Connect Core Section 3.1.3.7. rule #11
                     // Validates the nonce.
                     String expectedNonce = mRequest.nonce;
-                    if(expectedNonce != null && (idToken.nonce != null && idToken.nonce.equals(expectedNonce))) {
+                    if(expectedNonce != null && (idToken.nonce != null && !idToken.nonce.equals(expectedNonce))) {
                         mCallback.onTokenRequestCompleted(null, AuthorizationException.fromTemplate(
                             GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
                             new IDToken.IDTokenException("Nonce mismatch")));

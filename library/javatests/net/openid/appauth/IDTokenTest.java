@@ -55,14 +55,14 @@ public class IDTokenTest {
         @Nullable String subject,
         @Nullable String audience,
         @Nullable String nonce) {
-        Long now = SystemClock.INSTANCE.getCurrentTimeMillis();
-        Long tenMinutesInMillis = (long) (10 * 60 * 1000);
+        Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
+        Long tenMinutesInSeconds = (long) (10 * 60);
         return getUnsignedIdToken(
             issuer,
             subject,
             audience,
-            now + tenMinutesInMillis,
-            now,
+            nowInSeconds + tenMinutesInSeconds,
+            nowInSeconds,
             nonce);
     }
 
