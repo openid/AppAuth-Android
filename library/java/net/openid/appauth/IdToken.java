@@ -1,3 +1,17 @@
+/*
+ * Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.openid.appauth;
 
 import android.support.annotation.NonNull;
@@ -8,10 +22,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-class IDToken {
+class IdToken {
 
     private static final String KEY_ISSUER = "iss";
     private static final String KEY_SUBJECT = "sub";
@@ -20,20 +33,19 @@ class IDToken {
     private static final String KEY_ISSUED_AT = "iat";
     private static final String KEY_NONCE = "nonce";
 
-    final String issuer;
-    final String subject;
-    final List<String> audience;
-    final Long expiration;
-    final Long issuedAt;
-    final String nonce;
+    public final String issuer;
+    public final String subject;
+    public final List<String> audience;
+    public final Long expiration;
+    public final Long issuedAt;
+    public final String nonce;
 
-    IDToken(
-        @NonNull String issuer,
-        @NonNull String subject,
-        @NonNull List<String> audience,
-        @NonNull Long expiration,
-        @NonNull Long issuedAt,
-        @Nullable String nonce) {
+    IdToken(@NonNull String issuer,
+            @NonNull String subject,
+            @NonNull List<String> audience,
+            @NonNull Long expiration,
+            @NonNull Long issuedAt,
+            @Nullable String nonce) {
         this.issuer = issuer;
         this.subject = subject;
         this.audience = audience;
@@ -42,21 +54,21 @@ class IDToken {
         this.nonce = nonce;
     }
 
-    static JSONObject parseJWTSection(String section) throws JSONException {
+    private static JSONObject parseJwtSection(String section) throws JSONException {
         byte[] decodedSection = Base64.decode(section,Base64.URL_SAFE);
         String jsonString = new String(decodedSection);
         return new JSONObject(jsonString);
     }
 
-    static IDToken from(String token) throws JSONException, IDTokenException {
+    static IdToken from(String token) throws JSONException, IdTokenException {
         String[] sections = token.split("\\.");
 
         if (sections.length <= 1) {
-            throw new IDTokenException("ID token must have both header and claims section");
+            throw new IdTokenException("ID token must have both header and claims section");
         }
 
-        parseJWTSection(sections[0]);
-        JSONObject claims = parseJWTSection(sections[1]);
+        parseJwtSection(sections[0]);
+        JSONObject claims = parseJwtSection(sections[1]);
 
         String issuer = JsonUtil.getString(claims, KEY_ISSUER);
         String subject = JsonUtil.getString(claims, KEY_SUBJECT);
@@ -71,7 +83,7 @@ class IDToken {
         Long issuedAt = claims.getLong(KEY_ISSUED_AT);
         String nonce = JsonUtil.getStringIfDefined(claims, KEY_NONCE);
 
-        return new IDToken(
+        return new IdToken(
             issuer,
             subject,
             audience,
@@ -81,8 +93,8 @@ class IDToken {
         );
     }
 
-    static class IDTokenException extends Exception {
-        IDTokenException(String message) {
+    static class IdTokenException extends Exception {
+        IdTokenException(String message) {
             super(message);
         }
     }

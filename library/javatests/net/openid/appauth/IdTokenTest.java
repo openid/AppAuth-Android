@@ -1,9 +1,9 @@
 package net.openid.appauth;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Base64;
 
+import net.openid.appauth.IdToken.IdTokenException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -13,7 +13,7 @@ import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk=16)
-public class IDTokenTest {
+public class IdTokenTest {
 
     static final String TEST_ID_TOKEN = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjFlOWdkazcifQ.ewogIml"
     + "zcyI6ICJodHRwOi8vc2VydmVyLmV4YW1wbGUuY29tIiwKICJzdWIiOiAiMjQ4Mjg5NzYxMDAxIiwKICJhdWQiOiAiczZ"
@@ -27,23 +27,23 @@ public class IDTokenTest {
 
     @Test
     public void testFrom() throws Exception {
-        IDToken idToken = IDToken.from(TEST_ID_TOKEN);
+        IdToken idToken = IdToken.from(TEST_ID_TOKEN);
     }
 
-    @Test(expected = IDToken.IDTokenException.class)
-    public void testFrom_shouldFailOnMissingSection() throws IDToken.IDTokenException, JSONException {
-        IDToken.from("header.");
-    }
-
-    @Test(expected = JSONException.class)
-    public void testFrom_shouldFailOnMalformedInput() throws IDToken.IDTokenException, JSONException {
-        IDToken.from("header.claims");
+    @Test(expected = IdTokenException.class)
+    public void testFrom_shouldFailOnMissingSection() throws IdTokenException, JSONException {
+        IdToken.from("header.");
     }
 
     @Test(expected = JSONException.class)
-    public void testFrom_shouldFailOnMissingIssuer() throws IDToken.IDTokenException, JSONException {
+    public void testFrom_shouldFailOnMalformedInput() throws IdTokenException, JSONException {
+        IdToken.from("header.claims");
+    }
 
-        IDToken.from("header.claims");
+    @Test(expected = JSONException.class)
+    public void testFrom_shouldFailOnMissingIssuer() throws IdTokenException, JSONException {
+
+        IdToken.from("header.claims");
     }
 
     private static String base64UrlNoPaddingEncode(byte[] data) {

@@ -205,13 +205,13 @@ public final class AuthorizationException extends Exception {
          * ID token could not be parsed
          */
         public static final AuthorizationException ID_TOKEN_PARSING_ERROR =
-            generalEx(8, "Unable to parse ID Token");
+                generalEx(8, "Unable to parse ID Token");
 
         /**
          * ID token is invalid
          */
         public static final AuthorizationException ID_TOKEN_VALIDATION_ERROR =
-            generalEx(9, "Invalid ID Token");
+                generalEx(9, "Invalid ID Token");
     }
 
     /**

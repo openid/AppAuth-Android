@@ -14,7 +14,6 @@
 
 package net.openid.appauth;
 
-import static net.openid.appauth.Preconditions.checkNotEmpty;
 import static net.openid.appauth.Preconditions.checkNotNull;
 
 import android.annotation.TargetApi;
@@ -35,6 +34,7 @@ import net.openid.appauth.AuthorizationException.GeneralErrors;
 import net.openid.appauth.AuthorizationException.RegistrationRequestErrors;
 import net.openid.appauth.AuthorizationException.TokenRequestErrors;
 
+import net.openid.appauth.IdToken.IdTokenException;
 import net.openid.appauth.browser.BrowserDescriptor;
 import net.openid.appauth.browser.BrowserSelector;
 import net.openid.appauth.browser.CustomTabManager;
@@ -388,6 +388,10 @@ public class AuthorizationService {
 
     private static class TokenRequestTask
             extends AsyncTask<Void, Void, JSONObject> {
+
+        private static final Long MILLIS_PER_SECOND = 1000L;
+        private static final Long TEN_MINUTES_IN_SECONDS = 600L;
+
         private TokenRequest mRequest;
         private ClientAuthentication mClientAuthentication;
         private final ConnectionBuilder mConnectionBuilder;
@@ -501,12 +505,14 @@ public class AuthorizationService {
             }
 
             if (response.idToken != null) {
-                IDToken idToken;
+                IdToken idToken;
                 try {
-                    idToken = IDToken.from(response.idToken);
-                } catch (IDToken.IDTokenException | JSONException ex) {
+                    idToken = IdToken.from(response.idToken);
+                } catch (IdTokenException | JSONException ex) {
                     mCallback.onTokenRequestCompleted(null,
-                        AuthorizationException.fromTemplate(GeneralErrors.ID_TOKEN_PARSING_ERROR, ex));
+                            AuthorizationException.fromTemplate(
+                                    GeneralErrors.ID_TOKEN_PARSING_ERROR,
+                                    ex));
                     return;
                 }
 
@@ -519,16 +525,16 @@ public class AuthorizationService {
                 AuthorizationServiceDiscovery discoveryDoc = mRequest.configuration.discoveryDoc;
                 if (discoveryDoc == null) {
                     mCallback.onTokenRequestCompleted(null, AuthorizationException.fromTemplate(
-                        GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
-                        new NullPointerException("Missing discovery document")));
+                            GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
+                            new NullPointerException("Missing discovery document")));
                     return;
                 }
 
                 String expectedIssuer = discoveryDoc.getIssuer();
                 if (!idToken.issuer.equals(expectedIssuer)) {
                     mCallback.onTokenRequestCompleted(null, AuthorizationException.fromTemplate(
-                        GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
-                        new IDToken.IDTokenException("Issuer mismatch")));
+                            GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
+                            new IdTokenException("Issuer mismatch")));
                     return;
                 }
 
@@ -537,8 +543,8 @@ public class AuthorizationService {
                 String clientId = mRequest.clientId;
                 if (!idToken.audience.contains(clientId)) {
                     mCallback.onTokenRequestCompleted(null, AuthorizationException.fromTemplate(
-                        GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
-                        new IDToken.IDTokenException("Audience mismatch")));
+                            GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
+                            new IdTokenException("Audience mismatch")));
                     return;
                 }
 
@@ -546,32 +552,32 @@ public class AuthorizationService {
                 // Not supported.
 
                 // OpenID Connect Core Section 3.1.3.7. rule #6
-                // As noted above, AppAuth only supports the code flow which results in direct communication
-                // of the ID Token from the Token Endpoint to the Client, and we are exercising the option to
-                // use TSL server validation instead of checking the token signature. Users may additionally
-                // check the token signature should they wish.
+                // As noted above, AppAuth only supports the code flow which results in direct
+                // communication of the ID Token from the Token Endpoint to the Client, and we are
+                // exercising the option to use TSL server validation instead of checking the token
+                // signature. Users may additionally check the token signature should they wish.
 
                 // OpenID Connect Core Section 3.1.3.7. rules #7 & #8
                 // Not applicable. See rule #6.
 
                 // OpenID Connect Core Section 3.1.3.7. rule #9
                 // Validates that the current time is before the expiry time.
-                Long nowInSeconds = mClock.getCurrentTimeMillis() / 1000;
+                Long nowInSeconds = mClock.getCurrentTimeMillis() / MILLIS_PER_SECOND;
                 if (nowInSeconds > idToken.expiration) {
                     mCallback.onTokenRequestCompleted(null, AuthorizationException.fromTemplate(
-                        GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
-                        new IDToken.IDTokenException("ID Token expired")));
+                            GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
+                            new IdTokenException("ID Token expired")));
                     return;
                 }
 
                 // OpenID Connect Core Section 3.1.3.7. rule #10
-                // Validates that the issued at time is not more than +/- 10 minutes on the current time.
-                Long tenMinutesInSeconds = (long) (10 * 60);
-                if (Math.abs(nowInSeconds - idToken.issuedAt) > tenMinutesInSeconds) {
+                // Validates that the issued at time is not more than +/- 10 minutes on the current
+                // time.
+                if (Math.abs(nowInSeconds - idToken.issuedAt) > TEN_MINUTES_IN_SECONDS) {
                     mCallback.onTokenRequestCompleted(null, AuthorizationException.fromTemplate(
-                        GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
-                        new IDToken.IDTokenException(
-                            "Issued at time is more than 10 minutes before or after the current time")));
+                            GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
+                            new IdTokenException("Issued at time is more than 10 minutes "
+                                    + "before or after the current time")));
                     return;
                 }
 
@@ -580,10 +586,10 @@ public class AuthorizationService {
                     // OpenID Connect Core Section 3.1.3.7. rule #11
                     // Validates the nonce.
                     String expectedNonce = mRequest.nonce;
-                    if(expectedNonce != null && (idToken.nonce != null && !idToken.nonce.equals(expectedNonce))) {
+                    if (verifyNonce(idToken.nonce, expectedNonce)) {
                         mCallback.onTokenRequestCompleted(null, AuthorizationException.fromTemplate(
-                            GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
-                            new IDToken.IDTokenException("Nonce mismatch")));
+                                GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
+                                new IdTokenException("Nonce mismatch")));
                         return;
                     }
                 }
@@ -596,6 +602,11 @@ public class AuthorizationService {
             Logger.debug("Token exchange with %s completed",
                     mRequest.configuration.tokenEndpoint);
             mCallback.onTokenRequestCompleted(response, null);
+        }
+
+        private boolean verifyNonce(String idTokenNonce, String expectedNonce) {
+            return expectedNonce != null
+                    && (idTokenNonce != null && !idTokenNonce.equals(expectedNonce));
         }
 
         /**

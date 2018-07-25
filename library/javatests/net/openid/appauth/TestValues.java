@@ -22,7 +22,7 @@ import org.json.JSONObject;
 import java.util.Arrays;
 
 import static net.openid.appauth.AuthorizationServiceDiscoveryTest.TEST_ISSUER;
-import static net.openid.appauth.IDTokenTest.TEST_SUBJECT;
+import static net.openid.appauth.IdTokenTest.TEST_SUBJECT;
 
 /**
  * Contains common test values which are useful across all tests.
@@ -46,7 +46,7 @@ class TestValues {
     public static final String TEST_AUTH_CODE = "zxcvbnmjk";
     public static final String TEST_ACCESS_TOKEN = "aaabbbccc";
     public static final Long TEST_ACCESS_TOKEN_EXPIRATION_TIME = 120000L; // two minutes
-    public static final String TEST_ID_TOKEN = IDTokenTest.getUnsignedIdToken(
+    public static final String TEST_ID_TOKEN = IdTokenTest.getUnsignedIdToken(
         TEST_ISSUER,
         TEST_SUBJECT,
         TEST_CLIENT_ID,
@@ -151,7 +151,7 @@ class TestValues {
     }
 
     public static String getTestIdTokenWithNonce(String nonce) {
-        return IDTokenTest.getUnsignedIdToken(
+        return IdTokenTest.getUnsignedIdToken(
             TEST_ISSUER,
             TEST_SUBJECT,
             TEST_CLIENT_ID,
