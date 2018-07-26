@@ -1,7 +1,7 @@
 {
-  "client_id": "",
-  "redirect_uri": "net.openid.appauthdemo:/oauth2redirect",
-  "authorization_scope": "openid email profile",
+  "client_id": "mobile",
+  "redirect_uri": "myapp://unikey-ff-oidc-mock/signin-oidc",
+  "authorization_scope": "mockApi, openid, profile",
   "discovery_uri": "",
   "authorization_endpoint_uri": "",
   "token_endpoint_uri": "",
