@@ -27,6 +27,7 @@ import android.support.customtabs.CustomTabsServiceConnection;
 
 import net.openid.appauth.AppAuthConfiguration.Builder;
 import net.openid.appauth.AuthorizationException.GeneralErrors;
+import net.openid.appauth.browser.BrowserDescriptor;
 import net.openid.appauth.browser.Browsers;
 import net.openid.appauth.browser.CustomTabManager;
 import net.openid.appauth.connectivity.ConnectionBuilder;
@@ -218,6 +219,36 @@ public class AuthorizationServiceTest {
         assertThat(actualAuthIntent.getIntExtra(EXTRA_TOOLBAR_COLOR, 0)).isEqualTo(toolbarColor);
         assertThat(actualAuthIntent.getIntExtra(EXTRA_TITLE_VISIBILITY_STATE, 0))
             .isEqualTo(CustomTabsIntent.SHOW_PAGE_TITLE);
+    }
+
+    @Test
+    public void testCreateCustomTabsIntent_Chrome() {
+        BrowserDescriptor browser = Browsers.Chrome.customTab("46");
+        mService = new AuthorizationService(
+                mContext,
+                new Builder()
+                        .setConnectionBuilder(mConnectionBuilder)
+                        .build(),
+                browser,
+                mCustomTabManager);
+        CustomTabsIntent customTabsIntent = mService.createCustomTabsIntent();
+        assertNotNull(customTabsIntent.intent.getPackage());
+        assertTrue(customTabsIntent.intent.getPackage().equals(browser.packageName));
+    }
+
+    @Test
+    public void testCreateCustomTabsIntent_Samsung() {
+        BrowserDescriptor browser = Browsers.SBrowser.customTab("7.2.10.33");
+        mService = new AuthorizationService(
+            mContext,
+            new Builder()
+                .setConnectionBuilder(mConnectionBuilder)
+                .build(),
+            browser,
+            mCustomTabManager);
+        CustomTabsIntent customTabsIntent = mService.createCustomTabsIntent();
+        assertNotNull(customTabsIntent.intent.getPackage());
+        assertTrue(customTabsIntent.intent.getPackage().equals(browser.packageName));
     }
 
     @Test
