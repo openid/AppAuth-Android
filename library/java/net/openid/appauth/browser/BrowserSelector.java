@@ -82,6 +82,10 @@ public final class BrowserSelector {
         if (VERSION.SDK_INT >= VERSION_CODES.M) {
             queryFlag |= PackageManager.MATCH_ALL;
         }
+        // When requesting all matching activities for an intent from the package manager,
+        // the user's preferred browser is not guaranteed to be at the head of this list.
+        // Therefore, the preferred browser must be separately determined and the resultant
+        // list of browsers reordered to restored this desired property.
         ResolveInfo resolvedDefaultActivity =
                 pm.resolveActivity(BROWSER_INTENT, 0);
         if (resolvedDefaultActivity != null) {
