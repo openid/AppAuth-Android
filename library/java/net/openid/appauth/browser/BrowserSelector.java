@@ -110,6 +110,8 @@ public final class BrowserSelector {
                     BrowserDescriptor customTabBrowserDescriptor =
                             new BrowserDescriptor(packageInfo, true);
                     if (info.activityInfo.packageName.equals(defaultBrowserPackage)) {
+                        // If the default browser is having a WarmupService,
+                        // will it be added to the beginning of the list.
                         browsers.add(defaultBrowserIndex, customTabBrowserDescriptor);
                         defaultBrowserIndex++;
                     } else {
@@ -120,6 +122,9 @@ public final class BrowserSelector {
                 BrowserDescriptor fullBrowserDescriptor =
                         new BrowserDescriptor(packageInfo, false);
                 if (info.activityInfo.packageName.equals(defaultBrowserPackage)) {
+                    // The default browser is added to the beginning of the list.
+                    // If there is support for Custom Tabs, will the one disabling Custom Tabs
+                    // be added as the second entry.
                     browsers.add(defaultBrowserIndex, fullBrowserDescriptor);
                 } else {
                     browsers.add(fullBrowserDescriptor);

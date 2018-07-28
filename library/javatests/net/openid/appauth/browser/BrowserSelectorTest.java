@@ -206,6 +206,23 @@ public class BrowserSelectorTest {
     }
 
     @Test
+    public void testSelect_defaultBrowserSetNoneSupporting() throws NameNotFoundException {
+        // Chrome is set as the users default browser, but the version is not supporting Custom Tabs
+        // BrowserSelector.getAllBrowsers will result in a list, where the Dolphin browser is the
+        // first element and the other browser, in this case Firefox, as the second element in the list.
+        setBrowserList(FIREFOX, CHROME);
+        setBrowsersWithWarmupSupport(NO_BROWSERS);
+        when(mContext.getPackageManager().resolveActivity(BROWSER_INTENT, 0))
+            .thenReturn(CHROME.mResolveInfo);
+        List<BrowserDescriptor> allBrowsers = BrowserSelector.getAllBrowsers(mContext);
+
+        assertThat(allBrowsers.get(0).packageName.equals(CHROME.mPackageName));
+        assertFalse(allBrowsers.get(0).useCustomTab);
+        assertThat(allBrowsers.get(1).packageName.equals(FIREFOX.mPackageName));
+        assertFalse(allBrowsers.get(1).useCustomTab);
+    }
+
+    @Test
     public void testSelect_defaultBrowserNoCustomTabs() throws NameNotFoundException {
         // Firefox is set as the users default browser, but the version is not supporting Custom Tabs
         // BrowserSelector.getAllBrowsers will result in a list, where the Firefox browser is the
@@ -240,6 +257,18 @@ public class BrowserSelectorTest {
         assertFalse(allBrowsers.get(1).useCustomTab);
         assertThat(allBrowsers.get(2).packageName.equals(CHROME.mPackageName));
         assertTrue(allBrowsers.get(2).useCustomTab);
+    }
+
+    @Test
+    public void testSelect_selectDefaultBrowserSetNoneSupporting() throws NameNotFoundException {
+        // Chrome is set as the users default browser, none of the browsers support Custom Tabs
+        // BrowserSelector.select will return Chrome as it the default browser.
+        setBrowserList(FIREFOX, CHROME);
+        setBrowsersWithWarmupSupport(NO_BROWSERS);
+        when(mContext.getPackageManager().resolveActivity(BROWSER_INTENT, 0))
+            .thenReturn(CHROME.mResolveInfo);
+
+        checkSelectedBrowser(CHROME, USE_STANDALONE);
     }
 
     @Test
