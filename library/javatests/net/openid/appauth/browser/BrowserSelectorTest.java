@@ -14,6 +14,7 @@
 
 package net.openid.appauth.browser;
 
+import static net.openid.appauth.browser.BrowserSelector.BROWSER_INTENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -67,6 +68,13 @@ public class BrowserSelectorTest {
                     .setVersion("10")
                     .addSignature("FirefoxSignature")
                     .build();
+
+    private static final TestBrowser FIREFOX_CUSTOM_TAB =
+        new TestBrowserBuilder("org.mozilla.firefox")
+            .withBrowserDefaults()
+            .setVersion("57")
+            .addSignature("FirefoxSignature")
+            .build();
 
     private static final TestBrowser DOLPHIN =
             new TestBrowserBuilder("mobi.mgeek.TunnyBrowser")
@@ -195,6 +203,63 @@ public class BrowserSelectorTest {
                         VersionRange.ANY_VERSION));
     }
 
+    @Test
+    public void testSelect_defaultBrowserNoCustomTabs() throws NameNotFoundException {
+        // Firefox is set as the users default browser, but the version is not supporting Custom Tabs
+        // BrowserSelector.getAllBrowsers will result in a list, where the Firefox browser is the
+        // first element and the other browser, in this case Chrome, as the second element in the list.
+        setBrowserList(CHROME, FIREFOX);
+        setBrowsersWithWarmupSupport(CHROME);
+        when(mContext.getPackageManager().resolveActivity(BROWSER_INTENT, 0))
+            .thenReturn(FIREFOX.mResolveInfo);
+        List<BrowserDescriptor> allBrowsers = BrowserSelector.getAllBrowsers(mContext);
+
+        assertThat(allBrowsers.get(0).packageName.equals(FIREFOX.mPackageName));
+        assertThat(allBrowsers.get(1).packageName.equals(CHROME.mPackageName));
+    }
+
+    @Test
+    public void testSelect_selectDefaultBrowserCustomTabs() throws NameNotFoundException {
+        // Firefox is set as the users default browser, supporting Custom Tabs
+        // BrowserSelector.getAllBrowsers will result in a list, where the Firefox browser is the
+        // first element two elements in the list and the other browser, in this case Chrome,
+        // as the third element in the list.
+        setBrowserList(CHROME, FIREFOX_CUSTOM_TAB);
+        setBrowsersWithWarmupSupport(CHROME, FIREFOX_CUSTOM_TAB);
+        when(mContext.getPackageManager().resolveActivity(BROWSER_INTENT, 0))
+            .thenReturn(FIREFOX_CUSTOM_TAB.mResolveInfo);
+        List<BrowserDescriptor> allBrowsers = BrowserSelector.getAllBrowsers(mContext);
+
+        assertThat(allBrowsers.get(0).packageName.equals(FIREFOX_CUSTOM_TAB.mPackageName));
+        assertThat(allBrowsers.get(0).packageName.equals(FIREFOX_CUSTOM_TAB.mPackageName));
+        assertThat(allBrowsers.get(1).packageName.equals(FIREFOX_CUSTOM_TAB.mPackageName));
+        assertThat(allBrowsers.get(2).packageName.equals(CHROME.mPackageName));
+    }
+
+    @Test
+    public void testSelect_selectDefaultBrowserNoCustomTabs() throws NameNotFoundException {
+        // Firefox is set as the users default browser, but the version is not supporting Custom Tabs
+        // BrowserSelector.select will return Chrome as it is supporting Custom Tabs.
+        setBrowserList(CHROME, FIREFOX);
+        setBrowsersWithWarmupSupport(CHROME);
+        when(mContext.getPackageManager().resolveActivity(BROWSER_INTENT, 0))
+            .thenReturn(FIREFOX.mResolveInfo);
+
+        checkSelectedBrowser(CHROME, USE_CUSTOM_TAB);
+    }
+
+    @Test
+    public void testSelect_defaultBrowserCustomTabs() throws NameNotFoundException {
+        // Firefox is set as the users default browser, supporting Custom Tabs
+        // BrowserSelector.select will return Firefox.
+        setBrowserList(CHROME, FIREFOX_CUSTOM_TAB);
+        setBrowsersWithWarmupSupport(CHROME, FIREFOX_CUSTOM_TAB);
+        when(mContext.getPackageManager().resolveActivity(BROWSER_INTENT, 0))
+            .thenReturn(FIREFOX_CUSTOM_TAB.mResolveInfo);
+
+        checkSelectedBrowser(FIREFOX_CUSTOM_TAB, USE_CUSTOM_TAB);
+    }
+
     /**
      * Browsers are expected to be in priority order, such that the default would be first.
      */
@@ -214,7 +279,7 @@ public class BrowserSelectorTest {
         }
 
         when(mPackageManager.queryIntentActivities(
-                BrowserSelector.BROWSER_INTENT,
+                BROWSER_INTENT,
                 PackageManager.GET_RESOLVED_FILTER))
                 .thenReturn(resolveInfos);
     }
