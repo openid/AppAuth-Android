@@ -14,6 +14,8 @@
 
 package net.openid.appauth.browser;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 import static net.openid.appauth.browser.BrowserSelector.BROWSER_INTENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -215,7 +217,9 @@ public class BrowserSelectorTest {
         List<BrowserDescriptor> allBrowsers = BrowserSelector.getAllBrowsers(mContext);
 
         assertThat(allBrowsers.get(0).packageName.equals(FIREFOX.mPackageName));
+        assertFalse(allBrowsers.get(0).useCustomTab);
         assertThat(allBrowsers.get(1).packageName.equals(CHROME.mPackageName));
+        assertTrue(allBrowsers.get(1).useCustomTab);
     }
 
     @Test
@@ -231,9 +235,11 @@ public class BrowserSelectorTest {
         List<BrowserDescriptor> allBrowsers = BrowserSelector.getAllBrowsers(mContext);
 
         assertThat(allBrowsers.get(0).packageName.equals(FIREFOX_CUSTOM_TAB.mPackageName));
-        assertThat(allBrowsers.get(0).packageName.equals(FIREFOX_CUSTOM_TAB.mPackageName));
+        assertTrue(allBrowsers.get(0).useCustomTab);
         assertThat(allBrowsers.get(1).packageName.equals(FIREFOX_CUSTOM_TAB.mPackageName));
+        assertFalse(allBrowsers.get(1).useCustomTab);
         assertThat(allBrowsers.get(2).packageName.equals(CHROME.mPackageName));
+        assertTrue(allBrowsers.get(2).useCustomTab);
     }
 
     @Test
