@@ -30,6 +30,7 @@ import okio.Buffer;
 import okio.BufferedSource;
 import okio.Okio;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -60,7 +61,7 @@ public final class Configuration {
     private String mConfigError;
 
     private String mClientId;
-    private String mScope;
+    private String[] mScopes;
     private Uri mRedirectUri;
     private Uri mDiscoveryUri;
     private Uri mAuthEndpointUri;
@@ -73,7 +74,7 @@ public final class Configuration {
         Configuration config = sInstance.get();
         if (config == null) {
             config = new Configuration(context);
-            sInstance = new WeakReference<Configuration>(config);
+            sInstance = new WeakReference<>(config);
         }
 
         return config;
@@ -128,8 +129,8 @@ public final class Configuration {
     }
 
     @NonNull
-    public String getScope() {
-        return mScope;
+    public String[] getScopes() {
+        return mScopes;
     }
 
     @NonNull
@@ -194,7 +195,7 @@ public final class Configuration {
 
         mConfigHash = configData.sha256().base64();
         mClientId = getConfigString("client_id");
-        mScope = getRequiredConfigString("authorization_scope");
+        mScopes = getConfigScopes();
         mRedirectUri = getRequiredConfigUri("redirect_uri");
 
         if (!isRedirectUriRegistered()) {
@@ -219,6 +220,19 @@ public final class Configuration {
         }
 
         mHttpsRequired = mConfigJson.optBoolean("https_required", true);
+    }
+
+    private String[] getConfigScopes() throws InvalidConfigurationException {
+        try {
+            final JSONArray authorizationScopes = mConfigJson.getJSONArray("authorization_scopes");
+            final String[] scopes = new String[authorizationScopes.length()];
+            for (int i = 0; i < authorizationScopes.length(); i++) {
+                scopes[i] = authorizationScopes.getString(i);
+            }
+            return scopes;
+        } catch (JSONException e) {
+            throw new InvalidConfigurationException("check your authorization_scopes config. something is fishy");
+        }
     }
 
     @Nullable
