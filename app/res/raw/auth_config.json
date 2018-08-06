@@ -1,7 +1,7 @@
 {
   "client_id": "mobile",
   "redirect_uri": "com.unikey.appauthscratchpad://unikey-ff-oidc-mock/signin-oidc",
-  "authorization_scopes": ["mockApi", "openId", "profile"],
+  "authorization_scopes": ["mockApi", "openid", "profile", "offline_access"],
   "discovery_uri": "https://mock-openid-temp-webapp.azurewebsites.net/.well-known/openid-configuration",
   "authorization_endpoint_uri": "https://mock-openid-temp-webapp.azurewebsites.net/connect/authorize",
   "token_endpoint_uri": "https://mock-openid-temp-webapp.azurewebsites.net/connect/token",
