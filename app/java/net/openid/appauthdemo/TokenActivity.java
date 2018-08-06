@@ -36,6 +36,7 @@ import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceDiscovery;
 import net.openid.appauth.ClientAuthentication;
+import net.openid.appauth.ClientSecretPost;
 import net.openid.appauth.TokenRequest;
 import net.openid.appauth.TokenResponse;
 
@@ -292,7 +293,7 @@ public class TokenActivity extends AppCompatActivity {
 
         mAuthService.performTokenRequest(
                 request,
-                clientAuthentication,
+                new ClientSecretPost("un1k3y"),
                 callback);
     }
 

@@ -473,7 +473,7 @@ public final class LoginActivity extends AppCompatActivity {
                 mClientId.get(),
                 ResponseTypeValues.CODE,
                 mConfiguration.getRedirectUri())
-                .setScope(mConfiguration.getScope());
+                .setScopes(mConfiguration.getScopes());
 
         if (!TextUtils.isEmpty(loginHint)) {
             authRequestBuilder.setLoginHint(loginHint);
