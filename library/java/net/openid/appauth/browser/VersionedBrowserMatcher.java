@@ -77,7 +77,7 @@ public class VersionedBrowserMatcher implements BrowserMatcher {
             Browsers.SBrowser.PACKAGE_NAME,
             Browsers.SBrowser.SIGNATURE_SET,
             true,
-            VersionRange.ANY_VERSION);
+            VersionRange.atLeast(Browsers.SBrowser.MINIMUM_VERSION_FOR_CUSTOM_TAB));
 
     private String mPackageName;
     private Set<String> mSignatureHashes;
