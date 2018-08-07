@@ -122,6 +122,14 @@ public class AuthorizationService {
     }
 
     /**
+     * Returns the BrowserDescriptor of the chosen browser.
+     * Can for example be used to set the browsers package name to a CustomTabsIntent.
+     */
+    public BrowserDescriptor getBrowserDescriptor() {
+        return mBrowser;
+    }
+
+    /**
      * Creates a custom tab builder, that will use a tab session from an existing connection to
      * a web browser, if available.
      */

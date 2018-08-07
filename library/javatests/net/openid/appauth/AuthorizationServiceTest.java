@@ -27,6 +27,7 @@ import android.support.customtabs.CustomTabsServiceConnection;
 
 import net.openid.appauth.AppAuthConfiguration.Builder;
 import net.openid.appauth.AuthorizationException.GeneralErrors;
+import net.openid.appauth.browser.BrowserDescriptor;
 import net.openid.appauth.browser.Browsers;
 import net.openid.appauth.browser.CustomTabManager;
 import net.openid.appauth.connectivity.ConnectionBuilder;
@@ -119,6 +120,7 @@ public class AuthorizationServiceTest {
     private RegistrationCallback mRegistrationCallback;
     private AuthorizationService mService;
     private OutputStream mOutputStream;
+    private BrowserDescriptor mBrowserDescriptor;
     @Mock ConnectionBuilder mConnectionBuilder;
     @Mock HttpURLConnection mHttpConnection;
     @Mock PendingIntent mPendingIntent;
@@ -132,12 +134,13 @@ public class AuthorizationServiceTest {
         MockitoAnnotations.initMocks(this);
         mAuthCallback = new AuthorizationCallback();
         mRegistrationCallback = new RegistrationCallback();
+        mBrowserDescriptor = Browsers.Chrome.customTab("46");
         mService = new AuthorizationService(
                 mContext,
                 new Builder()
                         .setConnectionBuilder(mConnectionBuilder)
                         .build(),
-                Browsers.Chrome.customTab("46"),
+                mBrowserDescriptor,
                 mCustomTabManager);
         mOutputStream = new ByteArrayOutputStream();
         when(mConnectionBuilder.openConnection(any(Uri.class))).thenReturn(mHttpConnection);
@@ -395,6 +398,11 @@ public class AuthorizationServiceTest {
     public void testCreateCustomTabsIntentBuilder_afterDispose() throws Exception {
         mService.dispose();
         mService.createCustomTabsIntentBuilder();
+    }
+
+    @Test
+    public void testGetBrowserDescriptor_browserAvailable() {
+        assertEquals(mService.getBrowserDescriptor(), mBrowserDescriptor);
     }
 
     private Intent captureAuthRequestIntent() {
