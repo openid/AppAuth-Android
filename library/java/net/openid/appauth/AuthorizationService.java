@@ -604,11 +604,6 @@ public class AuthorizationService {
             mCallback.onTokenRequestCompleted(response, null);
         }
 
-        private boolean verifyNonce(String idTokenNonce, String expectedNonce) {
-            return expectedNonce != null
-                    && (idTokenNonce != null && !idTokenNonce.equals(expectedNonce));
-        }
-
         /**
          * GitHub will only return a spec-compliant response if JSON is explicitly defined
          * as an acceptable response type. As this is essentially harmless for all other
