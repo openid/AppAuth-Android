@@ -586,7 +586,7 @@ public class AuthorizationService {
                     // OpenID Connect Core Section 3.1.3.7. rule #11
                     // Validates the nonce.
                     String expectedNonce = mRequest.nonce;
-                    if (TextUtils.equals(idToken.nonce, expectedNonce)) {
+                    if (!TextUtils.equals(idToken.nonce, expectedNonce)) {
                         mCallback.onTokenRequestCompleted(null, AuthorizationException.fromTemplate(
                                 GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
                                 new IdTokenException("Nonce mismatch")));

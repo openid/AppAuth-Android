@@ -11,23 +11,32 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import static net.openid.appauth.TestValues.TEST_NONCE;
+import static org.hamcrest.Matchers.contains;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk=16)
 public class IdTokenTest {
 
-    static final String TEST_ID_TOKEN = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjFlOWdkazcifQ.ewogIml"
-    + "zcyI6ICJodHRwOi8vc2VydmVyLmV4YW1wbGUuY29tIiwKICJzdWIiOiAiMjQ4Mjg5NzYxMDAxIiwKICJhdWQiOiAiczZ"
-    + "CaGRSa3F0MyIsCiAibm9uY2UiOiAibi0wUzZfV3pBMk1qIiwKICJleHAiOiAxMzExMjgxOTcwLAogImlhdCI6IDEzMTE"
-    + "yODA5NzAKfQ.ggW8hZ1EuVLuxNuuIJKX_V8a_OMXzR0EHR9R6jgdqrOOF4daGU96Sr_P6qJp6IcmD3HP99Obi1PRs-cw"
-    + "h3LO-p146waJ8IhehcwL7F09JdijmBqkvPeB2T9CJ NqeGpe-gccMg4vfKjkM8FcGvnzZUN4_KSP0aAp1tOJ1zZwgjxq"
-    + "GByKHiOtX7TpdQyHE5lcMiKPXfEIQILVq0pc_E2DzL7emopWoaoZTF_m0_N0YzFC6g6EJbOEoRoSK5hoDalrcvRYLSrQ"
-    + "AZZKflyuVCyixEoV9GfNQC3_osjzw2PAithfubEEBLuVVk4XUVrWOLrLl0nx7RkKU8NXNHq-rvKMzqg";
+    static final String TEST_ISSUER = "https://test.issuer";
     static final String TEST_SUBJECT = "SUBJ3CT";
+    static final String TEST_AUDIENCE = "AUDI3NCE";
 
 
     @Test
     public void testFrom() throws Exception {
-        IdToken idToken = IdToken.from(TEST_ID_TOKEN);
+        String serializedIdToken = getUnsignedIdToken(
+            TEST_ISSUER,
+            TEST_SUBJECT,
+            TEST_AUDIENCE,
+            TEST_NONCE);
+        IdToken idToken = IdToken.from(serializedIdToken);
+        assertEquals(idToken.issuer, TEST_ISSUER);
+        assertEquals(idToken.subject, TEST_SUBJECT);
+        assertThat(idToken.audience, contains(TEST_AUDIENCE));
+        assertEquals(idToken.nonce, TEST_NONCE);
     }
 
     @Test(expected = IdTokenException.class)
