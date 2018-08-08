@@ -784,6 +784,16 @@ public class AuthorizationRequest {
             return this;
         }
 
+        /**
+         * Specifies the String value used to associate a Client session with an ID Token, and to
+         * mitigate replay attacks. The value is passed through unmodified from the Authentication
+         * Request to the ID Token. If this value is not explicitly set, this library will
+         * automatically add nonce and perform appropriate validation of the ID Token. It is
+         * recommended that the default implementation of this parameter be used wherever possible.
+         *
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
+         */
         @NonNull
         public Builder setNonce(@Nullable String nonce) {
             mNonce = checkNullOrNotEmpty(nonce, "state cannot be empty if defined");

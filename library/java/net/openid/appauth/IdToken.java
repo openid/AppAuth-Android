@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
+ * Copyright 2018 The AppAuth for Android Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -24,6 +24,16 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * An OpenID Connect ID Token. Contains claims about the authentication of an End-User by an
+ * Authorization Server. Supports parsing ID Tokens from JWT Compact Serializations and validation
+ * according to the OpenID Connect specification.
+ *
+ * @see "OpenID Connect Core ID Token, Section 2
+ * <http://openid.net/specs/openid-connect-core-1_0.html#IDToken>"
+ * @see "OpenID Connect Core ID Token Validation, Section 3.1.3.7
+ * <http://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation>"
+ */
 class IdToken {
 
     private static final String KEY_ISSUER = "iss";
@@ -67,6 +77,7 @@ class IdToken {
             throw new IdTokenException("ID token must have both header and claims section");
         }
 
+        // We ignore header contents, but parse it to check that it is structurally valid JSON
         parseJwtSection(sections[0]);
         JSONObject claims = parseJwtSection(sections[1]);
 

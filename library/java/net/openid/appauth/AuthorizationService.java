@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
+ * Copyright 2018 The AppAuth for Android Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -517,7 +517,7 @@ public class AuthorizationService {
                 }
 
                 // OpenID Connect Core Section 3.1.3.7. rule #1
-                // Not supported: AppAuth does not support JWT encryption.
+                // Not enforced: AppAuth does not support JWT encryption.
 
                 // OpenID Connect Core Section 3.1.3.7. rule #2
                 // Validates that the issuer in the ID Token matches that of the discovery document.
@@ -549,16 +549,16 @@ public class AuthorizationService {
                 }
 
                 // OpenID Connect Core Section 3.1.3.7. rules #4 & #5
-                // Not supported.
+                // Not enforced.
 
                 // OpenID Connect Core Section 3.1.3.7. rule #6
                 // As noted above, AppAuth only supports the code flow which results in direct
                 // communication of the ID Token from the Token Endpoint to the Client, and we are
-                // exercising the option to use TSL server validation instead of checking the token
+                // exercising the option to use TLS server validation instead of checking the token
                 // signature. Users may additionally check the token signature should they wish.
 
                 // OpenID Connect Core Section 3.1.3.7. rules #7 & #8
-                // Not applicable. See rule #6.
+                // Not enforced. See rule #6.
 
                 // OpenID Connect Core Section 3.1.3.7. rule #9
                 // Validates that the current time is before the expiry time.
@@ -586,7 +586,7 @@ public class AuthorizationService {
                     // OpenID Connect Core Section 3.1.3.7. rule #11
                     // Validates the nonce.
                     String expectedNonce = mRequest.nonce;
-                    if (verifyNonce(idToken.nonce, expectedNonce)) {
+                    if (TextUtils.equals(idToken.nonce, expectedNonce)) {
                         mCallback.onTokenRequestCompleted(null, AuthorizationException.fromTemplate(
                                 GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
                                 new IdTokenException("Nonce mismatch")));

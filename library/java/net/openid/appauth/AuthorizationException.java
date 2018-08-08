@@ -202,13 +202,13 @@ public final class AuthorizationException extends Exception {
                 generalEx(7, "Invalid registration response");
 
         /**
-         * ID token could not be parsed
+         * Indicates that a received ID token could not be parsed
          */
         public static final AuthorizationException ID_TOKEN_PARSING_ERROR =
                 generalEx(8, "Unable to parse ID Token");
 
         /**
-         * ID token is invalid
+         * Indicates that a received ID token is invalid
          */
         public static final AuthorizationException ID_TOKEN_VALIDATION_ERROR =
                 generalEx(9, "Invalid ID Token");
