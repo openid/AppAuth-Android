@@ -14,10 +14,13 @@
 
 package net.openid.appauth;
 
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Base64;
 
+import net.openid.appauth.AuthorizationException.GeneralErrors;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,6 +45,8 @@ class IdToken {
     private static final String KEY_EXPIRATION = "exp";
     private static final String KEY_ISSUED_AT = "iat";
     private static final String KEY_NONCE = "nonce";
+    private static final Long MILLIS_PER_SECOND = 1000L;
+    private static final Long TEN_MINUTES_IN_SECONDS = 600L;
 
     public final String issuer;
     public final String subject;
@@ -102,6 +107,98 @@ class IdToken {
             issuedAt,
             nonce
         );
+    }
+
+    void validate(@NonNull TokenRequest tokenRequest, Clock clock) throws AuthorizationException {
+        // OpenID Connect Core Section 3.1.3.7. rule #1
+        // Not enforced: AppAuth does not support JWT encryption.
+
+        // OpenID Connect Core Section 3.1.3.7. rule #2
+        // Validates that the issuer in the ID Token matches that of the discovery document.
+        AuthorizationServiceDiscovery discoveryDoc = tokenRequest.configuration.discoveryDoc;
+        if (discoveryDoc != null) {
+            String expectedIssuer = discoveryDoc.getIssuer();
+            if (!this.issuer.equals(expectedIssuer)) {
+                throw AuthorizationException.fromTemplate(GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
+                    new IdTokenException("Issuer mismatch"));
+            }
+
+            // OpenID Connect Core Section 2.
+            // The iss value is a case sensitive URL using the https scheme that contains scheme,
+            // host, and optionally, port number and path components and no query or fragment
+            // components.
+            Uri issuerUri = Uri.parse(this.issuer);
+
+            if (!issuerUri.getScheme().equals("https")) {
+                throw AuthorizationException.fromTemplate(GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
+                    new IdTokenException("Issuer must be an https URL"));
+            }
+
+            if (TextUtils.isEmpty(issuerUri.getHost())) {
+                throw AuthorizationException.fromTemplate(GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
+                    new IdTokenException("Issuer host can not be empty"));
+            }
+
+            if (issuerUri.getFragment() != null || issuerUri.getQueryParameterNames().size() > 0) {
+                throw AuthorizationException.fromTemplate(GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
+                    new IdTokenException(
+                        "Issuer URL should not containt query parameters or fragment components"));
+            }
+        }
+
+
+        // OpenID Connect Core Section 3.1.3.7. rule #3
+        // Validates that the audience of the ID Token matches the client ID.
+        String clientId = tokenRequest.clientId;
+        if (!this.audience.contains(clientId)) {
+            throw AuthorizationException.fromTemplate(GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
+                new IdTokenException("Audience mismatch"));
+        }
+
+        // OpenID Connect Core Section 3.1.3.7. rules #4 & #5
+        // Not enforced.
+
+        // OpenID Connect Core Section 3.1.3.7. rule #6
+        // As noted above, AppAuth only supports the code flow which results in direct
+        // communication of the ID Token from the Token Endpoint to the Client, and we are
+        // exercising the option to use TLS server validation instead of checking the token
+        // signature. Users may additionally check the token signature should they wish.
+
+        // OpenID Connect Core Section 3.1.3.7. rules #7 & #8
+        // Not enforced. See rule #6.
+
+        // OpenID Connect Core Section 3.1.3.7. rule #9
+        // Validates that the current time is before the expiry time.
+        Long nowInSeconds = clock.getCurrentTimeMillis() / MILLIS_PER_SECOND;
+        if (nowInSeconds > this.expiration) {
+            throw AuthorizationException.fromTemplate(GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
+                new IdTokenException("ID Token expired"));
+        }
+
+        // OpenID Connect Core Section 3.1.3.7. rule #10
+        // Validates that the issued at time is not more than +/- 10 minutes on the current
+        // time.
+        if (Math.abs(nowInSeconds - this.issuedAt) > TEN_MINUTES_IN_SECONDS) {
+            throw AuthorizationException.fromTemplate(GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
+                new IdTokenException("Issued at time is more than 10 minutes "
+                    + "before or after the current time"));
+        }
+
+        // Only relevant for the authorization_code response type
+        if (GrantTypeValues.AUTHORIZATION_CODE.equals(tokenRequest.grantType)) {
+            // OpenID Connect Core Section 3.1.3.7. rule #11
+            // Validates the nonce.
+            String expectedNonce = tokenRequest.nonce;
+            if (!TextUtils.equals(this.nonce, expectedNonce)) {
+                throw AuthorizationException.fromTemplate(GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
+                    new IdTokenException("Nonce mismatch"));
+            }
+        }
+        // OpenID Connect Core Section 3.1.3.7. rules #12
+        // ACR is not directly supported by AppAuth.
+
+        // OpenID Connect Core Section 3.1.3.7. rules #12
+        // max_age is not directly supported by AppAuth.
     }
 
     static class IdTokenException extends Exception {

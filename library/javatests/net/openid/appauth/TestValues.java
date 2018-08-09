@@ -16,12 +16,13 @@ package net.openid.appauth;
 
 import android.net.Uri;
 
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Arrays;
 
-import static net.openid.appauth.AuthorizationServiceDiscoveryTest.TEST_ISSUER;
 import static net.openid.appauth.IdTokenTest.TEST_SUBJECT;
 
 /**
@@ -46,6 +47,7 @@ class TestValues {
     public static final String TEST_AUTH_CODE = "zxcvbnmjk";
     public static final String TEST_ACCESS_TOKEN = "aaabbbccc";
     public static final Long TEST_ACCESS_TOKEN_EXPIRATION_TIME = 120000L; // two minutes
+    public static final String TEST_ISSUER = "https://test.issuer";
     public static final String TEST_ID_TOKEN = IdTokenTest.getUnsignedIdToken(
         TEST_ISSUER,
         TEST_SUBJECT,
@@ -58,6 +60,42 @@ class TestValues {
     public static final String TEST_CLIENT_SECRET = "test_client_secret";
 
     public static final String TEST_EMAIL_ADDRESS = "test@example.com";
+
+    private static String toJson(List<String> strings) {
+        return new JSONArray(strings).toString();
+    }
+
+    static String getDiscoveryDocumentJson(
+        String issuer,
+        String authorizationEndpoint,
+        String tokenEndpoint,
+        String userInfoEndpoint,
+        String registrationEndpoint,
+        String jwksUri,
+        List<String> responseTypesSupported,
+        List<String> subjectTypesSupported,
+        List<String> idTokenSigningAlgValues,
+        List<String> scopesSupported,
+        List<String> tokenEndpointAuthMethods,
+        List<String> claimsSupported
+        ) {
+        return "{\n"
+            + " \"issuer\": \"" + issuer + "\",\n"
+            + " \"authorization_endpoint\": \"" + authorizationEndpoint + "\",\n"
+            + " \"token_endpoint\": \"" + tokenEndpoint + "\",\n"
+            + " \"userinfo_endpoint\": \"" + userInfoEndpoint + "\",\n"
+            + " \"registration_endpoint\": \"" + registrationEndpoint + "\",\n"
+            + " \"jwks_uri\": \"" + jwksUri + "\",\n"
+            + " \"response_types_supported\": " + toJson(responseTypesSupported) + ",\n"
+            + " \"subject_types_supported\": " + toJson(subjectTypesSupported) + ",\n"
+            + " \"id_token_signing_alg_values_supported\": "
+            + toJson(idTokenSigningAlgValues) + ",\n"
+            + " \"scopes_supported\": " + toJson(scopesSupported) + ",\n"
+            + " \"token_endpoint_auth_methods_supported\": "
+            + toJson(tokenEndpointAuthMethods) + ",\n"
+            + " \"claims_supported\": " + toJson(claimsSupported) + "\n"
+            + "}";
+    }
 
     public static AuthorizationServiceDiscovery getTestDiscoveryDocument() {
         try {

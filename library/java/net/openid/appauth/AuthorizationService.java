@@ -389,9 +389,6 @@ public class AuthorizationService {
     private static class TokenRequestTask
             extends AsyncTask<Void, Void, JSONObject> {
 
-        private static final Long MILLIS_PER_SECOND = 1000L;
-        private static final Long TEN_MINUTES_IN_SECONDS = 600L;
-
         private TokenRequest mRequest;
         private ClientAuthentication mClientAuthentication;
         private final ConnectionBuilder mConnectionBuilder;
@@ -516,88 +513,12 @@ public class AuthorizationService {
                     return;
                 }
 
-                // OpenID Connect Core Section 3.1.3.7. rule #1
-                // Not enforced: AppAuth does not support JWT encryption.
-
-                // OpenID Connect Core Section 3.1.3.7. rule #2
-                // Validates that the issuer in the ID Token matches that of the discovery document.
-
-                AuthorizationServiceDiscovery discoveryDoc = mRequest.configuration.discoveryDoc;
-                if (discoveryDoc == null) {
-                    mCallback.onTokenRequestCompleted(null, AuthorizationException.fromTemplate(
-                            GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
-                            new NullPointerException("Missing discovery document")));
+                try {
+                    idToken.validate(mRequest, mClock);
+                } catch (AuthorizationException ex) {
+                    mCallback.onTokenRequestCompleted(null, ex);
                     return;
                 }
-
-                String expectedIssuer = discoveryDoc.getIssuer();
-                if (!idToken.issuer.equals(expectedIssuer)) {
-                    mCallback.onTokenRequestCompleted(null, AuthorizationException.fromTemplate(
-                            GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
-                            new IdTokenException("Issuer mismatch")));
-                    return;
-                }
-
-                // OpenID Connect Core Section 3.1.3.7. rule #3
-                // Validates that the audience of the ID Token matches the client ID.
-                String clientId = mRequest.clientId;
-                if (!idToken.audience.contains(clientId)) {
-                    mCallback.onTokenRequestCompleted(null, AuthorizationException.fromTemplate(
-                            GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
-                            new IdTokenException("Audience mismatch")));
-                    return;
-                }
-
-                // OpenID Connect Core Section 3.1.3.7. rules #4 & #5
-                // Not enforced.
-
-                // OpenID Connect Core Section 3.1.3.7. rule #6
-                // As noted above, AppAuth only supports the code flow which results in direct
-                // communication of the ID Token from the Token Endpoint to the Client, and we are
-                // exercising the option to use TLS server validation instead of checking the token
-                // signature. Users may additionally check the token signature should they wish.
-
-                // OpenID Connect Core Section 3.1.3.7. rules #7 & #8
-                // Not enforced. See rule #6.
-
-                // OpenID Connect Core Section 3.1.3.7. rule #9
-                // Validates that the current time is before the expiry time.
-                Long nowInSeconds = mClock.getCurrentTimeMillis() / MILLIS_PER_SECOND;
-                if (nowInSeconds > idToken.expiration) {
-                    mCallback.onTokenRequestCompleted(null, AuthorizationException.fromTemplate(
-                            GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
-                            new IdTokenException("ID Token expired")));
-                    return;
-                }
-
-                // OpenID Connect Core Section 3.1.3.7. rule #10
-                // Validates that the issued at time is not more than +/- 10 minutes on the current
-                // time.
-                if (Math.abs(nowInSeconds - idToken.issuedAt) > TEN_MINUTES_IN_SECONDS) {
-                    mCallback.onTokenRequestCompleted(null, AuthorizationException.fromTemplate(
-                            GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
-                            new IdTokenException("Issued at time is more than 10 minutes "
-                                    + "before or after the current time")));
-                    return;
-                }
-
-                // Only relevant for the authorization_code response type
-                if (GrantTypeValues.AUTHORIZATION_CODE.equals(mRequest.grantType)) {
-                    // OpenID Connect Core Section 3.1.3.7. rule #11
-                    // Validates the nonce.
-                    String expectedNonce = mRequest.nonce;
-                    if (!TextUtils.equals(idToken.nonce, expectedNonce)) {
-                        mCallback.onTokenRequestCompleted(null, AuthorizationException.fromTemplate(
-                                GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
-                                new IdTokenException("Nonce mismatch")));
-                        return;
-                    }
-                }
-                // OpenID Connect Core Section 3.1.3.7. rules #12
-                // ACR is not directly supported by AppAuth.
-
-                // OpenID Connect Core Section 3.1.3.7. rules #12
-                // max_age is not directly supported by AppAuth.
             }
             Logger.debug("Token exchange with %s completed",
                     mRequest.configuration.tokenEndpoint);
