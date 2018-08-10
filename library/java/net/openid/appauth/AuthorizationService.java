@@ -34,6 +34,7 @@ import net.openid.appauth.AuthorizationException.GeneralErrors;
 import net.openid.appauth.AuthorizationException.RegistrationRequestErrors;
 import net.openid.appauth.AuthorizationException.TokenRequestErrors;
 
+import net.openid.appauth.IdToken.IdTokenException;
 import net.openid.appauth.browser.BrowserDescriptor;
 import net.openid.appauth.browser.BrowserSelector;
 import net.openid.appauth.browser.CustomTabManager;
@@ -323,6 +324,7 @@ public class AuthorizationService {
                 request,
                 clientAuthentication,
                 mClientConfiguration.getConnectionBuilder(),
+                SystemClock.INSTANCE,
                 callback)
                 .execute();
     }
@@ -394,20 +396,24 @@ public class AuthorizationService {
 
     private static class TokenRequestTask
             extends AsyncTask<Void, Void, JSONObject> {
+
         private TokenRequest mRequest;
         private ClientAuthentication mClientAuthentication;
         private final ConnectionBuilder mConnectionBuilder;
         private TokenResponseCallback mCallback;
+        private Clock mClock;
 
         private AuthorizationException mException;
 
         TokenRequestTask(TokenRequest request,
                          @NonNull ClientAuthentication clientAuthentication,
                          @NonNull ConnectionBuilder connectionBuilder,
+                         Clock clock,
                          TokenResponseCallback callback) {
             mRequest = request;
             mClientAuthentication = clientAuthentication;
             mConnectionBuilder = connectionBuilder;
+            mClock = clock;
             mCallback = callback;
         }
 
@@ -503,6 +509,25 @@ public class AuthorizationService {
                 return;
             }
 
+            if (response.idToken != null) {
+                IdToken idToken;
+                try {
+                    idToken = IdToken.from(response.idToken);
+                } catch (IdTokenException | JSONException ex) {
+                    mCallback.onTokenRequestCompleted(null,
+                            AuthorizationException.fromTemplate(
+                                    GeneralErrors.ID_TOKEN_PARSING_ERROR,
+                                    ex));
+                    return;
+                }
+
+                try {
+                    idToken.validate(mRequest, mClock);
+                } catch (AuthorizationException ex) {
+                    mCallback.onTokenRequestCompleted(null, ex);
+                    return;
+                }
+            }
             Logger.debug("Token exchange with %s completed",
                     mRequest.configuration.tokenEndpoint);
             mCallback.onTokenRequestCompleted(response, null);
