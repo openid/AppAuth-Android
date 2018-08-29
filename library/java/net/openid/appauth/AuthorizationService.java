@@ -218,8 +218,8 @@ public class AuthorizationService {
      *     be created with the help of {@link #createCustomTabsIntentBuilder(Uri[])}, which will
      *     ensure that a warmed-up version of the browser will be used, minimizing latency.
      *
-     * @throws net.openid.appauth.BrowserNotSupportedException if no suitable browser is available to
-     *     perform the authorization flow.
+     * @throws net.openid.appauth.BrowserNotSupportedException if no suitable browser is available
+     *     to perform the authorization flow.
      */
     public void performAuthorizationRequest(
             @NonNull AuthorizationRequest request,
@@ -258,8 +258,8 @@ public class AuthorizationService {
      *     be created with the help of {@link #createCustomTabsIntentBuilder(Uri[])}, which will
      *     ensure that a warmed-up version of the browser will be used, minimizing latency.
      *
-     * @throws net.openid.appauth.BrowserNotSupportedException if no suitable browser is available to
-     *     perform the authorization flow.
+     * @throws net.openid.appauth.BrowserNotSupportedException if no suitable browser is available
+     *     to perform the authorization flow.
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public Intent getAuthorizationRequestIntent(
@@ -289,8 +289,8 @@ public class AuthorizationService {
      * {@link Activity#RESULT_OK} indicates the authorization request completed,
      * not necessarily that it was a successful authorization.
      *
-     * @throws net.openid.appauth.BrowserNotSupportedException if no suitable browser is available to
-     *     perform the authorization flow.
+     * @throws net.openid.appauth.BrowserNotSupportedException if no suitable browser is available
+     *     to perform the authorization flow.
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public Intent getAuthorizationRequestIntent(
