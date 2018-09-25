@@ -376,6 +376,101 @@ public class AuthorizationRequestTest {
                 .build();
     }
 
+    /* ******************************** ui_locales ***********************************************/
+
+    @Test
+    public void testUiLocales_unspecified() {
+        AuthorizationRequest request = mRequestBuilder.build();
+        assertThat(request.uiLocales).isNull();
+        assertThat(request.getUiLocales()).isNull();
+    }
+
+    @Test
+    public void testUiLocales() {
+        AuthorizationRequest req = mRequestBuilder
+            .setUiLocales("en de fr-CA")
+            .build();
+
+        assertThat(req.uiLocales).isEqualTo("en de fr-CA");
+        assertThat(req.getUiLocales())
+            .hasSize(3)
+            .contains("en")
+            .contains("de")
+            .contains("fr-CA");
+    }
+
+    @Test
+    public void testUiLocales_nullValue() {
+        AuthorizationRequest req = mRequestBuilder.setUiLocales(null).build();
+        assertThat(req.uiLocales).isNull();
+        assertThat(req.getUiLocales()).isNull();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUiLocales_empty() {
+        mRequestBuilder.setUiLocales("").build();
+    }
+
+    @Test
+    public void testUiLocales_withVarargs() {
+        AuthorizationRequest req = mRequestBuilder
+            .setUiLocalesValues("en", "de", "fr-CA")
+            .build();
+
+        assertThat(req.uiLocales).isEqualTo("en de fr-CA");
+        assertThat(req.getUiLocales())
+            .hasSize(3)
+            .contains("en")
+            .contains("de")
+            .contains("fr-CA");
+    }
+
+    @Test
+    public void testUiLocales_withNullVarargsArray() {
+        AuthorizationRequest req = mRequestBuilder.setUiLocalesValues((String[])null).build();
+        assertThat(req.uiLocales).isNull();
+        assertThat(req.getUiLocales()).isNull();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUiLocales_withNullStringInVarargs() {
+        mRequestBuilder.setUiLocalesValues("en", null).build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUiLocales_withEmptyStringInVarargs() {
+        mRequestBuilder.setUiLocalesValues("en", "").build();
+    }
+
+    @Test
+    public void testUiLocales_withIterable() {
+        AuthorizationRequest req = mRequestBuilder
+            .setUiLocalesValues(Arrays.asList("en", "de", "fr-CA"))
+            .build();
+
+        assertThat(req.uiLocales).isEqualTo("en de fr-CA");
+
+        assertThat(req.getUiLocales())
+            .hasSize(3)
+            .contains("en")
+            .contains("de")
+            .contains("fr-CA");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUiLocales_withIterableContainingNullValue() {
+        mRequestBuilder
+            .setUiLocalesValues(Arrays.asList("en", null))
+            .build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUiLocales_withIterableContainingEmptyValue() {
+        mRequestBuilder
+            .setUiLocalesValues(Arrays.asList("en", ""))
+            .build();
+    }
+
     /* ******************************** redirectUri ***********************************************/
 
     @Test
@@ -527,6 +622,18 @@ public class AuthorizationRequestTest {
     }
 
     @Test
+    public void testToUri_uiLocalesParam() {
+        Uri uri = mRequestBuilder
+            .setUiLocales("en de fr-CA")
+            .build()
+            .toUri();
+        assertThat(uri.getQueryParameterNames())
+            .contains(AuthorizationRequest.PARAM_UI_LOCALES);
+        assertThat(uri.getQueryParameter(AuthorizationRequest.PARAM_UI_LOCALES))
+            .isEqualTo("en de fr-CA");
+    }
+
+    @Test
     public void testToUri_responseModeParam() {
         Uri uri = mRequestBuilder
                 .setResponseMode(AuthorizationRequest.ResponseMode.QUERY)
@@ -632,6 +739,13 @@ public class AuthorizationRequestTest {
         AuthorizationRequest copy = serializeDeserialize(
                 mRequestBuilder.setPrompt(AuthorizationRequest.Prompt.CONSENT).build());
         assertThat(copy.prompt).isEqualTo(AuthorizationRequest.Prompt.CONSENT);
+    }
+
+    @Test
+    public void testJsonSerialize_uiLocales() throws Exception {
+        AuthorizationRequest copy = serializeDeserialize(
+            mRequestBuilder.setUiLocales("en de fr-CA").build());
+        assertThat(copy.uiLocales).isEqualTo("en de fr-CA");
     }
 
     @Test
