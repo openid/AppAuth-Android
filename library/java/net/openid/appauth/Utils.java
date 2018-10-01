@@ -34,7 +34,7 @@ class Utils {
      */
     public static String readInputStream(InputStream in) throws IOException {
         if (in == null) {
-            throw new  IOException("Input stream must not be null");
+            throw new IOException("Input stream must not be null");
         }
 
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
