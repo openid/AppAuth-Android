@@ -15,10 +15,10 @@
 package net.openid.appauth;
 
 import static net.openid.appauth.Preconditions.checkNotNull;
+import static net.openid.appauth.browser.BrowserSelector.getAllBrowsers;
 
 import android.annotation.TargetApi;
 import android.app.PendingIntent;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -50,6 +50,7 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URLConnection;
+import java.util.List;
 import java.util.Map;
 
 
@@ -217,8 +218,8 @@ public class AuthorizationService {
      *     be created with the help of {@link #createCustomTabsIntentBuilder(Uri[])}, which will
      *     ensure that a warmed-up version of the browser will be used, minimizing latency.
      *
-     * @throws android.content.ActivityNotFoundException if no suitable browser is available to
-     *     perform the authorization flow.
+     * @throws net.openid.appauth.BrowserNotSupportedException if no suitable browser is available
+     *     to perform the authorization flow.
      */
     public void performAuthorizationRequest(
             @NonNull AuthorizationRequest request,
@@ -257,8 +258,8 @@ public class AuthorizationService {
      *     be created with the help of {@link #createCustomTabsIntentBuilder(Uri[])}, which will
      *     ensure that a warmed-up version of the browser will be used, minimizing latency.
      *
-     * @throws android.content.ActivityNotFoundException if no suitable browser is available to
-     *     perform the authorization flow.
+     * @throws net.openid.appauth.BrowserNotSupportedException if no suitable browser is available
+     *     to perform the authorization flow.
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public Intent getAuthorizationRequestIntent(
@@ -288,8 +289,8 @@ public class AuthorizationService {
      * {@link Activity#RESULT_OK} indicates the authorization request completed,
      * not necessarily that it was a successful authorization.
      *
-     * @throws android.content.ActivityNotFoundException if no suitable browser is available to
-     *     perform the authorization flow.
+     * @throws net.openid.appauth.BrowserNotSupportedException if no suitable browser is available
+     *     to perform the authorization flow.
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public Intent getAuthorizationRequestIntent(
@@ -371,7 +372,12 @@ public class AuthorizationService {
         checkNotDisposed();
 
         if (mBrowser == null) {
-            throw new ActivityNotFoundException();
+            List<BrowserDescriptor> browsers = getAllBrowsers(mContext);
+            if (browsers.isEmpty()) {
+                throw new BrowserNotSupportedException();
+            } else {
+                throw new BrowserNotSupportedException(browsers.get(0));
+            }
         }
 
         Uri requestUri = request.toUri();
