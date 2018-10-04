@@ -293,7 +293,7 @@ android.defaultConfig.manifestPlaceholders = [
 
 Alternatively, the redirect URI can be directly configured by adding an
 intent-filter for AppAuth's RedirectUriReceiverActivity to your
-AndroidManfiest.xml:
+AndroidManifest.xml:
 
 ```xml
 <activity

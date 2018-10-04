@@ -27,6 +27,7 @@ import android.os.Build.VERSION_CODES;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.support.customtabs.CustomTabsService;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -52,7 +53,7 @@ public final class BrowserSelector {
      */
     @VisibleForTesting
     static final String ACTION_CUSTOM_TABS_CONNECTION =
-            "android.support.customtabs.action.CustomTabsService";
+            CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION;
 
     /**
      * An arbitrary (but unregistrable, per
