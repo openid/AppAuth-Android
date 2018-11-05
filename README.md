@@ -434,7 +434,7 @@ store private to the app:
   String stateJson = authPrefs.getString("stateJson");
   AuthState state;
   if (stateStr != null) {
-    return AuthState.fromJsonString(stateJson);
+    return AuthState.jsonDeserialize(stateJson);
   } else {
     return new AuthState();
   }
@@ -443,7 +443,7 @@ store private to the app:
 public void writeAuthState(@NonNull AuthState state) {
   SharedPreferences authPrefs = getSharedPreferences("auth", MODE_PRIVATE);
   authPrefs.edit()
-      .putString("stateJson", state.toJsonString())
+      .putString("stateJson", state.jsonSerializeString())
       .apply();
 }
 ```
