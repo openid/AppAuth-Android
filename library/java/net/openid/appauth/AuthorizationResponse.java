@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
  * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.2
  * <https://tools.ietf.org/html/rfc6749#section-4.1.2>"
  */
-public class AuthorizationResponse {
+public class AuthorizationResponse extends AuthorizationManagementResponse {
 
     /**
      * The extra string used to store an {@link AuthorizationResponse} in an intent by
@@ -543,11 +543,18 @@ public class AuthorizationResponse {
         return jsonDeserialize(new JSONObject(jsonStr));
     }
 
+    @Override
+    @Nullable
+    public String getState() {
+        return state;
+    }
+
     /**
      * Produces an intent containing this authorization response. This is used to deliver the
      * authorization response to the registered handler after a call to
      * {@link AuthorizationService#performAuthorizationRequest}.
      */
+    @Override
     @NonNull
     public Intent toIntent() {
         Intent data = new Intent();
@@ -572,5 +579,9 @@ public class AuthorizationResponse {
         } catch (JSONException ex) {
             throw new IllegalArgumentException("Intent contains malformed auth response", ex);
         }
+    }
+
+    static boolean containEndSessionResoponse(@NonNull Intent intent) {
+        return intent.hasExtra(EXTRA_RESPONSE);
     }
 }

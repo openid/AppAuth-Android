@@ -420,6 +420,77 @@ authState.performActionWithFreshTokens(service, new AuthStateAction() {
 });
 ```
 
+### Ending current session (Draft)
+
+Given you have a logged in session and you want to end it. In that case you need to get:
+- `AuthorizationServiceConfiguration`
+- valid Open Id Token that you should get after authentication
+- End of session URI that should be provided within you OpeId service config
+
+First you have to build EndSessionRequest 
+
+```java
+EndSessionRequest endSessionRequest = new EndSessionRequest(
+        authorizationServiceConfiguration,
+        idToken,
+        endSessionRedirectUri
+    );
+```
+This request can then be dispatched using one of two approaches.
+
+a `startActivityForResult` call using an Intent returned from the `AuthorizationService`,
+or by calling `performEndSessionRequest` and providing pending intent for completion 
+and cancelation handling activities.
+
+The startActivityForResult approach is simpler to use but may require more processing of the result:
+
+```java
+private void endSession() {
+  AuthorizationService authService = new AuthorizationService(this);
+  Intent endSessionItent = authService.getAuthorizationRequestIntent(endSessionRequest);
+  startActivityForResult(endSessionItent, RC_END_SESSION);
+}
+
+@Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+  if (requestCode == RC_END_SESSION) {
+    EndSessionResonse resp = EndSessionResonse.fromIntent(data);
+    AuthorizationException ex = AuthorizationException.fromIntent(data);
+    // ... process the response or exception ...
+  } else {
+    // ...
+  }
+}
+```
+If instead you wish to directly transition to another activity on completion or cancelation, 
+you can use `performEndSessionRequest`:
+
+```java
+AuthorizationService authService = new AuthorizationService(this);
+
+authService.performEndSessionRequest(
+    endSessionRequest,
+    PendingIntent.getActivity(this, 0, new Intent(this, MyAuthCompleteActivity.class), 0),
+    PendingIntent.getActivity(this, 0, new Intent(this, MyAuthCanceledActivity.class), 0));
+```
+
+End session flow will also work involving browser mechanism that is described in authorization
+mechanism session. 
+Handling response mechanism with transition to another activity should be as follows:
+ 
+ ```java
+public void onCreate(Bundle b) {
+  EndSessionResponse resp = EndSessionResponse.fromIntent(getIntent());
+  AuthorizationException ex = AuthorizationException.fromIntent(getIntent());
+  if (resp != null) {
+    // authorization completed
+  } else {
+    // authorization failed, check ex for more details
+  }
+  // ...
+}
+```
+
 ### AuthState persistence
 
 Instances of `AuthState` keep track of the authorization and token

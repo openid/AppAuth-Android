@@ -604,7 +604,7 @@ public class AuthorizationRequestTest {
                 .isEqualTo("5678");
     }
 
-    /* ************************** jsonSerialize() / jsonDeserialize() *****************************/
+    /* ************************** jsonSerialize() / jsonDeserializeString() *****************************/
 
     @Test
     public void testJsonSerialize_clientId() throws Exception {

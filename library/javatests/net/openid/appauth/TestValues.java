@@ -71,6 +71,7 @@ class TestValues {
         String tokenEndpoint,
         String userInfoEndpoint,
         String registrationEndpoint,
+        String endSessionEndpont,
         String jwksUri,
         List<String> responseTypesSupported,
         List<String> subjectTypesSupported,
@@ -84,6 +85,7 @@ class TestValues {
             + " \"authorization_endpoint\": \"" + authorizationEndpoint + "\",\n"
             + " \"token_endpoint\": \"" + tokenEndpoint + "\",\n"
             + " \"userinfo_endpoint\": \"" + userInfoEndpoint + "\",\n"
+            + " \"end_session_endpoint\": \"" + endSessionEndpont + "\",\n"
             + " \"registration_endpoint\": \"" + registrationEndpoint + "\",\n"
             + " \"jwks_uri\": \"" + jwksUri + "\",\n"
             + " \"response_types_supported\": " + toJson(responseTypesSupported) + ",\n"
@@ -128,6 +130,10 @@ class TestValues {
         return getTestAuthRequestBuilder().
             setNonce(null).
             build();
+    }
+
+    public static EndSessionRequest getTestEndSessionRequest() {
+        return new EndSessionRequest(getTestServiceConfig(),TEST_ID_TOKEN, TEST_APP_REDIRECT_URI);
     }
 
     public static AuthorizationResponse.Builder getTestAuthResponseBuilder() {

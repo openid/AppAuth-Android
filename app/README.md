@@ -16,6 +16,15 @@ The configuration file MUST contain a JSON object. The following properties can 
     The value specified here should match the value specified for `appAuthRedirectScheme` in the
     `build.gradle` (Module: app), so that the demo app can capture the response.
 
+  - `end_sesion_uri` (required): The redirect URI to use for receiving the end session response.
+    This should be a custom scheme URI (com.example.app:/oauth2redirect/example-provider). 
+    Consult the documentation for your authorization server. 
+
+    The value specified here should match the value specified for `appAuthRedirectScheme` in the
+    `build.gradle` (Module: app), so that the demo app can capture the response.
+    
+    NOTE: Scheme of the URI should be the same as `redirect_uri` but callback should be different.
+
   - `authorization_scope` (required): The scope string to use for the authorization request.
     For the purposes of the demo, we recommend the value "openid profile email", though any value
     understood by your authorization server can be used.
