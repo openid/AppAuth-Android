@@ -60,6 +60,7 @@ import static net.openid.appauth.AuthorizationManagementActivity.KEY_AUTH_REQUES
 import static net.openid.appauth.AuthorizationManagementActivity.KEY_CANCEL_INTENT;
 import static net.openid.appauth.AuthorizationManagementActivity.KEY_COMPLETE_INTENT;
 import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
+import static net.openid.appauth.TestValues.TEST_APP_REDIRECT_URI;
 import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
 import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
 import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET_EXPIRES_AT;
@@ -70,8 +71,10 @@ import static net.openid.appauth.TestValues.TEST_STATE;
 import static net.openid.appauth.TestValues.getTestAuthCodeExchangeRequest;
 import static net.openid.appauth.TestValues.getTestAuthCodeExchangeRequestBuilder;
 import static net.openid.appauth.TestValues.getTestAuthRequestBuilder;
+import static net.openid.appauth.TestValues.getTestEndSessionRequest;
 import static net.openid.appauth.TestValues.getTestIdTokenWithNonce;
 import static net.openid.appauth.TestValues.getTestRegistrationRequest;
+import static net.openid.appauth.TestValues.getTestServiceConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -158,6 +161,15 @@ public class AuthorizationServiceTest {
     }
 
     @Test
+    public void testEndSessionRequest_withSpecifiedState() throws Exception {
+        EndSessionRequest request = new EndSessionRequest(getTestServiceConfig(), TEST_ID_TOKEN, TEST_APP_REDIRECT_URI, TEST_STATE);
+        mService.performEndOfSessionRequest(request, mPendingIntent);
+        Intent intent = captureAuthRequestIntent();
+        assertRequestIntent(intent, null);
+        assertEquals(request.toUri().toString(), intent.getData().toString());
+    }
+
+    @Test
     public void testAuthorizationRequest_withSpecifiedNonce() throws Exception {
         AuthorizationRequest request = getTestAuthRequestBuilder()
             .setNonce(TEST_NONCE)
@@ -189,10 +201,29 @@ public class AuthorizationServiceTest {
         assertColorMatch(intent, Color.GREEN);
     }
 
+    @Test
+    public void testEndSessionRequest_customization() throws Exception {
+        CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
+            .setToolbarColor(Color.GREEN)
+            .build();
+        mService.performEndOfSessionRequest(
+            getTestEndSessionRequest(),
+            mPendingIntent,
+            customTabsIntent);
+        Intent intent = captureAuthRequestIntent();
+        assertColorMatch(intent, Color.GREEN);
+    }
+
     @Test(expected = IllegalStateException.class)
     public void testAuthorizationRequest_afterDispose() throws Exception {
         mService.dispose();
         mService.performAuthorizationRequest(getTestAuthRequestBuilder().build(), mPendingIntent);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testEndSessionRequest_afterDispose() throws Exception {
+        mService.dispose();
+        mService.performEndOfSessionRequest(getTestEndSessionRequest(), mPendingIntent);
     }
 
     @Test

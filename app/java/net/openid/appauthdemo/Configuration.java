@@ -62,9 +62,11 @@ public final class Configuration {
     private String mClientId;
     private String mScope;
     private Uri mRedirectUri;
+    private Uri mEndSessionUri;
     private Uri mDiscoveryUri;
     private Uri mAuthEndpointUri;
     private Uri mTokenEndpointUri;
+    private Uri mEndSessionEndpoint;
     private Uri mRegistrationEndpointUri;
     private Uri mUserInfoEndpointUri;
     private boolean mHttpsRequired;
@@ -143,6 +145,11 @@ public final class Configuration {
     }
 
     @Nullable
+    public Uri getmEndSessionUri() {
+        return mEndSessionUri;
+    }
+
+    @Nullable
     public Uri getAuthEndpointUri() {
         return mAuthEndpointUri;
     }
@@ -150,6 +157,11 @@ public final class Configuration {
     @Nullable
     public Uri getTokenEndpointUri() {
         return mTokenEndpointUri;
+    }
+
+    @Nullable
+    public Uri getEndSessionEndpoint() {
+        return mEndSessionEndpoint;
     }
 
     @Nullable
@@ -196,6 +208,7 @@ public final class Configuration {
         mClientId = getConfigString("client_id");
         mScope = getRequiredConfigString("authorization_scope");
         mRedirectUri = getRequiredConfigUri("redirect_uri");
+        mEndSessionUri = getRequiredConfigUri("end_session_uri");
 
         if (!isRedirectUriRegistered()) {
             throw new InvalidConfigurationException(
@@ -210,6 +223,7 @@ public final class Configuration {
 
             mTokenEndpointUri = getRequiredConfigWebUri("token_endpoint_uri");
             mUserInfoEndpointUri = getRequiredConfigWebUri("user_info_endpoint_uri");
+            mEndSessionEndpoint = getRequiredConfigUri("end_session_endpoint");
 
             if (mClientId == null) {
                 mRegistrationEndpointUri = getRequiredConfigWebUri("registration_endpoint_uri");

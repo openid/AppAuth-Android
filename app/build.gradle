@@ -12,7 +12,7 @@ android {
         // Make sure this is consistent with the redirect URI used in res/raw/auth_config.json,
         // or specify additional redirect URIs in AndroidManifest.xml
         manifestPlaceholders = [
-                'appAuthRedirectScheme': 'net.openid.appauthdemo'
+                'appAuthRedirectScheme': 'com.lohika.android.test'
         ]
     }
 

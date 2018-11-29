@@ -29,10 +29,10 @@ import net.openid.appauth.internal.Logger;
 import org.json.JSONException;
 
 /**
- * Stores state and handles events related to the authorization flow. The activity is
- * started by {@link AuthorizationService#performAuthorizationRequest
- * AuthorizationService.performAuthorizationRequest}, and records all state pertinent to
- * the authorization request before invoking the authorization intent. It also functions
+ * Stores state and handles events related to the authorization management flow. The activity is
+ * started by {@link AuthorizationService#performAuthorizationRequest} or
+ * {@link AuthorizationService#performEndOfSessionRequest}, and records all state pertinent to
+ * the authorization management request before invoking the authorization intent. It also functions
  * to control the back stack, ensuring that the authorization activity will not be reachable
  * via the back button after the flow completes.
  *
@@ -71,7 +71,8 @@ import org.json.JSONException;
  * ```
  *
  * The process begins with an activity requesting that an authorization flow be started,
- * using {@link AuthorizationService#performAuthorizationRequest}.
+ * using {@link AuthorizationService#performAuthorizationRequest} or
+ * {@link AuthorizationService#performEndOfSessionRequest}.
  *
  * - Step 1: Using an intent derived from {@link #createStartIntent}, this activity is
  *   started. The state delivered in this intent is recorded for future use.
@@ -85,12 +86,14 @@ import org.json.JSONException;
  *       activity to finish, the AuthorizationManagementActivity will be recreated or restarted.
  *
  *     - Step C2a: If a cancellation PendingIntent was provided in the call to
- *       {@link AuthorizationService#performAuthorizationRequest}, then this is
+ *       {@link AuthorizationService#performAuthorizationRequest} or
+ *       {@link AuthorizationService#performEndOfSessionRequest}, then this is
  *       used to invoke a cancelation activity.
  *
  *     - Step C2b: If no cancellation PendingIntent was provided (legacy behavior, or
  *       AuthorizationManagementActivity was started with an intent from
- *       {@link AuthorizationService#getAuthorizationRequestIntent}), then the
+ *       {@link AuthorizationService#getAuthorizationRequestIntent} or
+ *       @link AuthorizationService#performEndOfSessionRequest}), then the
  *       AuthorizationManagementActivity simply finishes after calling {@link Activity#setResult},
  *       with {@link Activity#RESULT_CANCELED}, returning control to the activity above
  *       it in the back stack (typically, the initiating activity).
@@ -107,9 +110,10 @@ import org.json.JSONException;
  *       top of the back stack.
  *
  *     - Step S3a: If this activity was invoked via
- *       {@link AuthorizationService#performAuthorizationRequest}, then the pending intent provided
+ *       {@link AuthorizationService#performAuthorizationRequest} or
+ *       {@link AuthorizationService#performEndOfSessionRequest}, then the pending intent provided
  *       for completion of the authorization flow is invoked, providing the decoded
- *       {@link AuthorizationResponse} or {@link AuthorizationException} as appropriate.
+ *       {@link AuthorizationManagementResponse} or {@link AuthorizationException} as appropriate.
  *       The AuthorizationManagementActivity finishes, removing itself from the back stack.
  *
  *     - Step S3b: If this activity was invoked via an intent returned by
@@ -138,7 +142,7 @@ public class AuthorizationManagementActivity extends Activity {
 
     private boolean mAuthorizationStarted = false;
     private Intent mAuthIntent;
-    private AuthorizationRequest mAuthRequest;
+    private AuthorizationManagementRequest mAuthRequest;
     private PendingIntent mCompleteIntent;
     private PendingIntent mCancelIntent;
 
@@ -152,7 +156,7 @@ public class AuthorizationManagementActivity extends Activity {
      */
     public static Intent createStartIntent(
             Context context,
-            AuthorizationRequest request,
+            AuthorizationManagementRequest request,
             Intent authIntent,
             PendingIntent completeIntent,
             PendingIntent cancelIntent) {
@@ -167,12 +171,12 @@ public class AuthorizationManagementActivity extends Activity {
     /**
      * Creates an intent to start an authorization flow.
      * @param context the package context for the app.
-     * @param request the authorization request which is to be sent.
+     * @param request the authorization management request which is to be sent.
      * @param authIntent the intent to be used to get authorization from the user.
      */
     public static Intent createStartForResultIntent(
             Context context,
-            AuthorizationRequest request,
+            AuthorizationManagementRequest request,
             Intent authIntent) {
         return createStartIntent(context, request, authIntent, null, null);
     }
@@ -263,16 +267,7 @@ public class AuthorizationManagementActivity extends Activity {
         }
         responseData.setData(responseUri);
 
-        if (mCompleteIntent != null) {
-            Logger.debug("Authorization complete - invoking completion intent");
-            try {
-                mCompleteIntent.send(this, 0, responseData);
-            } catch (CanceledException ex) {
-                Logger.error("Failed to send completion intent", ex);
-            }
-        } else {
-            setResult(RESULT_OK, responseData);
-        }
+        sendResult(mCompleteIntent, responseData, RESULT_OK);
     }
 
     private void handleAuthorizationCanceled() {
@@ -281,16 +276,8 @@ public class AuthorizationManagementActivity extends Activity {
                 AuthorizationException.GeneralErrors.USER_CANCELED_AUTH_FLOW,
                 null)
                 .toIntent();
-        if (mCancelIntent != null) {
-            try {
-                mCancelIntent.send(this, 0, cancelData);
-            } catch (CanceledException ex) {
-                Logger.error("Failed to send cancel intent", ex);
-            }
-        } else {
-            setResult(RESULT_CANCELED, cancelData);
-            Logger.debug("No cancel intent set - will return to previous activity");
-        }
+
+        sendResult(mCancelIntent, cancelData, RESULT_CANCELED);
     }
 
     private void extractState(Bundle state) {
@@ -302,33 +289,46 @@ public class AuthorizationManagementActivity extends Activity {
 
         mAuthIntent = state.getParcelable(KEY_AUTH_INTENT);
         mAuthorizationStarted = state.getBoolean(KEY_AUTHORIZATION_STARTED, false);
+        mCompleteIntent = state.getParcelable(KEY_COMPLETE_INTENT);
+        mCancelIntent = state.getParcelable(KEY_CANCEL_INTENT);
         try {
             String authRequestJson = state.getString(KEY_AUTH_REQUEST, null);
             mAuthRequest = authRequestJson != null
-                    ? AuthorizationRequest.jsonDeserialize(authRequestJson)
+                    ? AuthorizationManagementRequest.jsonDeserialize(authRequestJson)
                     : null;
         } catch (JSONException ex) {
-            throw new IllegalStateException("Unable to deserialize authorization request", ex);
+            sendResult(mCancelIntent,AuthorizationRequestErrors.INVALID_REQUEST.toIntent(),
+                    RESULT_CANCELED);
         }
-        mCompleteIntent = state.getParcelable(KEY_COMPLETE_INTENT);
-        mCancelIntent = state.getParcelable(KEY_CANCEL_INTENT);
+    }
+
+    private void sendResult(PendingIntent callback, Intent cancelData, int resultCode) {
+        if (callback != null) {
+            try {
+                callback.send(this, 0, cancelData);
+            } catch (CanceledException e) {
+                Logger.error("Failed to send cancel intent", e);
+            }
+        } else {
+            setResult(resultCode, cancelData);
+        }
     }
 
     private Intent extractResponseData(Uri responseUri) {
         if (responseUri.getQueryParameterNames().contains(AuthorizationException.PARAM_ERROR)) {
             return AuthorizationException.fromOAuthRedirect(responseUri).toIntent();
         } else {
-            AuthorizationResponse response = new AuthorizationResponse.Builder(mAuthRequest)
-                    .fromUri(responseUri)
-                    .build();
+            AuthorizationManagementResponse response = AuthorizationManagementResponse
+                    .buildFromRequest(mAuthRequest, responseUri);
 
-            if (mAuthRequest.state == null && response.state != null
-                    || (mAuthRequest.state != null && !mAuthRequest.state.equals(response.state))) {
+            if (mAuthRequest.getState() == null && response.getState() != null
+                    || (mAuthRequest.getState() != null && !mAuthRequest.getState()
+                    .equals(response.getState()))) {
 
                 Logger.warn("State returned in authorization response (%s) does not match state "
                         + "from request (%s) - discarding response",
-                        response.state,
-                        mAuthRequest.state);
+                        response.getState(),
+                        mAuthRequest.getState());
 
                 return AuthorizationRequestErrors.STATE_MISMATCH.toIntent();
             }
