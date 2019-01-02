@@ -51,9 +51,10 @@ public final class BrowserSelector {
     /**
      * The service we expect to find on a web browser that indicates it supports custom tabs.
      */
+    @SuppressWarnings("StringBufferReplaceableByString")
     @VisibleForTesting
     static final String ACTION_CUSTOM_TABS_CONNECTION =
-            CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION;
+        new StringBuilder().append("android.sup").append("port.customtabs.action.CustomTabsService").toString();
 
     /**
      * An arbitrary (but unregistrable, per
