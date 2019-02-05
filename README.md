@@ -18,7 +18,7 @@ tasks like performing an action with fresh tokens.
 The library follows the best practices set out in
 [RFC 8252 - OAuth 2.0 for Native Apps](https://tools.ietf.org/html/rfc8252),
 including using
-[Custom Tabs](http://developer.android.com/tools/support-library/features.html#custom-tabs)
+[Custom Tabs](https://developer.chrome.com/multidevice/android/customtabs)
 for authorization requests. For this reason,
 `WebView` is explicitly *not* supported due to usability and security reasons.
 
