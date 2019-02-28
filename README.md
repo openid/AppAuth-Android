@@ -525,7 +525,7 @@ AuthorizationService authService =
         new AuthorizationService(context, appAuthConfig);
 ```
 
-### Customing the connection builder for HTTP requests
+### Customizing the connection builder for HTTP requests
 
 It can be desirable to customize how HTTP connections are made when performing
 token requests, for instance to use
