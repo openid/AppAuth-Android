@@ -15,6 +15,7 @@
 package net.openid.appauth;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -48,9 +49,9 @@ class Utils {
     }
 
     /**
-     * Close an input stream quietly, i.e. without throwing an exception.
+     * Close a stream quietly, i.e. without throwing an exception.
      */
-    public static void closeQuietly(InputStream in) {
+    public static void closeQuietly(Closeable in) {
         try {
             if (in != null) {
                 in.close();

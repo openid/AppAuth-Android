@@ -322,9 +322,10 @@ public class AuthorizationServiceConfiguration {
 
         @Override
         protected AuthorizationServiceConfiguration doInBackground(Void... voids) {
+            HttpURLConnection conn = null;
             InputStream is = null;
             try {
-                HttpURLConnection conn = mConnectionBuilder.openConnection(mUri);
+                conn = mConnectionBuilder.openConnection(mUri);
                 conn.setRequestMethod("GET");
                 conn.setDoInput(true);
                 conn.connect();
@@ -352,6 +353,9 @@ public class AuthorizationServiceConfiguration {
                         ex);
             } finally {
                 Utils.closeQuietly(is);
+                if (conn != null) {
+                    conn.disconnect();
+                }
             }
             return null;
         }

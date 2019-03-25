@@ -45,11 +45,13 @@ import net.openid.appauth.internal.UriUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URLConnection;
+import java.util.LinkedList;
 import java.util.Map;
 
 
@@ -419,9 +421,10 @@ public class AuthorizationService {
 
         @Override
         protected JSONObject doInBackground(Void... voids) {
-            InputStream is = null;
+            HttpURLConnection conn = null;
+            LinkedList<Closeable> closeables = new LinkedList<>();
             try {
-                HttpURLConnection conn = mConnectionBuilder.openConnection(
+                conn = mConnectionBuilder.openConnection(
                         mRequest.configuration.tokenEndpoint);
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -446,16 +449,19 @@ public class AuthorizationService {
                 String queryData = UriUtil.formUrlEncode(parameters);
                 conn.setRequestProperty("Content-Length", String.valueOf(queryData.length()));
                 OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+                closeables.add(wr);
 
                 wr.write(queryData);
                 wr.flush();
 
+                InputStream is;
                 if (conn.getResponseCode() >= HttpURLConnection.HTTP_OK
                         && conn.getResponseCode() < HttpURLConnection.HTTP_MULT_CHOICE) {
                     is = conn.getInputStream();
                 } else {
                     is = conn.getErrorStream();
                 }
+                closeables.add(is);
                 String response = Utils.readInputStream(is);
                 return new JSONObject(response);
             } catch (IOException ex) {
@@ -467,7 +473,12 @@ public class AuthorizationService {
                 mException = AuthorizationException.fromTemplate(
                         GeneralErrors.JSON_DESERIALIZATION_ERROR, ex);
             } finally {
-                Utils.closeQuietly(is);
+                for (Closeable closeable : closeables) {
+                    Utils.closeQuietly(closeable);
+                }
+                if (conn != null) {
+                    conn.disconnect();
+                }
             }
             return null;
         }
