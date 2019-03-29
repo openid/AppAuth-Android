@@ -1,11 +1,13 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.jfrog.bintray'
-apply plugin: 'com.github.dcendents.android-maven'
 
 apply from: '../config/android-common.gradle'
 
 group = "net.openid"
-version = rootProject.versionName
+version = "1.0"
+
+android {
+    publishNonDefault true
+}
 
 android.defaultConfig.project.archivesBaseName = 'appauth'
 
@@ -15,7 +17,7 @@ android.buildTypes {
     forTests {
         initWith debug
         manifestPlaceholders = [
-            'appAuthRedirectScheme': 'net.openid.appauth.test'
+                'appAuthRedirectScheme': 'net.openid.appauth.test'
         ]
     }
 }
@@ -24,7 +26,7 @@ android.testBuildType "forTests"
 
 dependencies {
     api "com.android.support:customtabs:${rootProject.supportLibVersion}"
-    apply from: '../config/testdeps.gradle', to:it
+    apply from: '../config/testdeps.gradle', to: it
 }
 
 apply from: '../config/style.gradle'
@@ -34,62 +36,4 @@ apply from: '../config/javadoc.gradle'
 artifacts {
     archives sourcesJar
     archives javadocJar
-}
-
-bintray {
-    user = System.getenv("BINTRAY_USER")
-    key = System.getenv("BINTRAY_KEY")
-    pkg {
-        repo = "net.openid"
-        name = "appauth"
-        desc = "AppAuth for Android"
-        userOrg = "openid"
-        licenses = ["Apache-2.0"]
-        websiteUrl = "https://openid.github.io/AppAuth-Android/"
-        issueTrackerUrl = "https://github.com/openid/AppAuth-Android/issues"
-        vcsUrl = "https://github.com/openid/AppAuth-Android.git"
-        githubRepo = 'bintray/gradle-bintray-plugin'
-
-        version {
-            name = rootProject.versionName
-            desc = "AppAuth for Android"
-            released = rootProject.versionDate
-            vcsTag = rootProject.versionName
-        }
-    }
-    configurations = ["archives"]
-}
-
-install {
-    repositories.mavenInstaller {
-        pom {
-            project {
-                packaging 'aar'
-                name 'AppAuth for Android'
-                description = 'OAuth2 / OpenID Connect client for Android apps'
-                url 'https://github.com/openid/AppAuth-Android'
-                licenses {
-                    license {
-                        name "The Apache Software License, Version 2.0"
-                        url "http://www.apache.org/licenses/LICENSE-2.0.txt"
-                        distribution "repo"
-                    }
-                }
-
-                developers {
-                    developer {
-                        id "iainmcgin"
-                        name "Iain McGinniss"
-                        email "iain.mcginniss@wework.com"
-                    }
-                }
-
-                scm {
-                    connection "https://github.com/openid/AppAuth-Android.git"
-                    developerConnection "https://github.com/openid/AppAuth-Android.git"
-                    url 'https://github.com/openid/AppAuth-Android'
-                }
-            }
-        }
-    }
 }

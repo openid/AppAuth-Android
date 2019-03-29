@@ -1,11 +1,11 @@
 android {
-    compileSdkVersion rootProject.compileSdkVersion
-    buildToolsVersion rootProject.buildToolsVersion
+    compileSdkVersion 28
+    buildToolsVersion "28.0.3"
     defaultConfig {
-        minSdkVersion rootProject.minSdkVersion
-        targetSdkVersion rootProject.compileSdkVersion
-        versionCode rootProject.versionNum
-        versionName rootProject.versionName
+        minSdkVersion 21
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
     }
     sourceSets {
         main.manifest.srcFile 'AndroidManifest.xml'
@@ -29,14 +29,6 @@ android {
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
     }
-}
-
-// produces just the classes JAR
-task jar(type: Copy, dependsOn:'bundleRelease') {
-    from("${project.buildDir}/intermediates/bundles/release/")
-    into("${project.buildDir}/libs/")
-    include('classes.jar')
-    rename('classes.jar', "appauth-${rootProject.versionName}.jar")
 }
 
 // produces a JAR containing sources
