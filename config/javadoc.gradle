@@ -28,6 +28,6 @@ task javadocJar(type: Jar, dependsOn:androidJavadoc) {
 afterEvaluate {
     // fixes issue where javadoc can't find android symbols ref: http://stackoverflow.com/a/34572606
     androidJavadoc.classpath += files(android.libraryVariants.collect { variant ->
-        variant.javaCompile.classpath.files
+        variant.javaCompileProvider.get().classpath.files
     })
 }
