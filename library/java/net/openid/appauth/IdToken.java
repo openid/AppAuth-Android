@@ -206,7 +206,7 @@ class IdToken {
         // OpenID Connect Core Section 3.1.3.7. rules #12
         // ACR is not directly supported by AppAuth.
 
-        // OpenID Connect Core Section 3.1.3.7. rules #12
+        // OpenID Connect Core Section 3.1.3.7. rules #13
         // max_age is not directly supported by AppAuth.
     }
 
