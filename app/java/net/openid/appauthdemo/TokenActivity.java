@@ -47,8 +47,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -347,23 +345,15 @@ public class TokenActivity extends AppCompatActivity {
                         .getAuthorizationServiceConfiguration()
                         .discoveryDoc;
 
-        URL userInfoEndpoint;
-        try {
-            userInfoEndpoint =
+        Uri userInfoEndpoint =
                     mConfiguration.getUserInfoEndpointUri() != null
-                        ? new URL(mConfiguration.getUserInfoEndpointUri().toString())
-                        : new URL(discovery.getUserinfoEndpoint().toString());
-        } catch (MalformedURLException urlEx) {
-            Log.e(TAG, "Failed to construct user info endpoint URL", urlEx);
-            mUserInfoJson.set(null);
-            runOnUiThread(this::displayAuthorized);
-            return;
-        }
+                        ? Uri.parse(mConfiguration.getUserInfoEndpointUri().toString())
+                        : Uri.parse(discovery.getUserinfoEndpoint().toString());
 
         mExecutor.submit(() -> {
             try {
-                HttpURLConnection conn =
-                        (HttpURLConnection) userInfoEndpoint.openConnection();
+                HttpURLConnection conn = mConfiguration.getConnectionBuilder().openConnection(
+                        userInfoEndpoint);
                 conn.setRequestProperty("Authorization", "Bearer " + accessToken);
                 conn.setInstanceFollowRedirects(false);
                 String response = Okio.buffer(Okio.source(conn.getInputStream()))
