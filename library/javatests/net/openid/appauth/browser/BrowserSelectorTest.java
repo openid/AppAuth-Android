@@ -85,6 +85,15 @@ public class BrowserSelectorTest {
                     .addSignature("DolphinSignature")
                     .build();
 
+    private static final TestBrowser OPERA =
+            new TestBrowserBuilder("com.opera.browser")
+                    .addAction(Intent.ACTION_VIEW)
+                    .addScheme(SCHEME_HTTP)
+                    .addScheme(SCHEME_HTTPS)
+                    .setVersion("50")
+                    .addSignature("OperaSignature")
+                    .build();
+
     private static final TestBrowser[] NO_BROWSERS = new TestBrowser[0];
 
     @Mock Context mContext;
@@ -147,18 +156,12 @@ public class BrowserSelectorTest {
     }
 
     @Test
-    public void testSelect_ignoreBrowsersWithoutBrowseableCategory()
+    public void testSelect_acceptBrowsersWithoutBrowseableCategory()
             throws NameNotFoundException {
-        TestBrowser misconfiguredBrowser =
-                new TestBrowserBuilder("com.broken.browser")
-                        .addAction(Intent.ACTION_VIEW)
-                        .addCategory(Intent.CATEGORY_DEFAULT)
-                        .addScheme(SCHEME_HTTP)
-                        .addScheme(SCHEME_HTTPS)
-                        .build();
-        setBrowserList(misconfiguredBrowser, CHROME);
-        setBrowsersWithWarmupSupport(misconfiguredBrowser, CHROME);
-        checkSelectedBrowser(CHROME, USE_CUSTOM_TAB);
+        // Opera browser does not expose Intent.CATEGORY_BROWSABLE
+        setBrowserList(OPERA);
+        setBrowsersWithWarmupSupport(OPERA);
+        checkSelectedBrowser(OPERA, USE_CUSTOM_TAB);
     }
 
     @Test
