@@ -161,6 +161,8 @@ public class AuthorizationManagementActivity extends Activity {
         intent.putExtra(KEY_AUTH_REQUEST, request.jsonSerializeString());
         intent.putExtra(KEY_COMPLETE_INTENT, completeIntent);
         intent.putExtra(KEY_CANCEL_INTENT, cancelIntent);
+
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         return intent;
     }
 
