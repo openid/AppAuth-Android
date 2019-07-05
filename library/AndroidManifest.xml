@@ -18,10 +18,12 @@
   <uses-permission android:name="android.permission.INTERNET" />
 
   <application>
-    <activity android:name=".AuthorizationManagementActivity"
-      android:exported="false"
-      android:theme="@android:style/Theme.Translucent.NoTitleBar"
-      android:launchMode="singleTask" />
+    <activity
+        android:name=".AuthorizationManagementActivity"
+        android:exported="false"
+        android:theme="@android:style/Theme.Translucent.NoTitleBar"
+        android:screenOrientation="portrait"
+        android:launchMode="singleTask" />
 
     <activity android:name=".RedirectUriReceiverActivity" android:exported="true">
       <intent-filter>
