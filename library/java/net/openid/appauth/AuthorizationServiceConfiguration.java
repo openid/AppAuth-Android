@@ -329,7 +329,18 @@ public class AuthorizationServiceConfiguration {
                 conn.setDoInput(true);
                 conn.connect();
 
-                is = conn.getInputStream();
+                if (conn.getResponseCode() < HttpURLConnection.HTTP_BAD_REQUEST) {
+                    is = conn.getInputStream();
+                } else {
+                    is = conn.getErrorStream();
+                    String errorString = Utils.readInputStream(is);
+                    mException = AuthorizationException.fromHttpError(
+                        conn.getResponseCode(),
+                        conn.getResponseMessage(),
+                        errorString);
+                    return null;
+                }
+
                 JSONObject json = new JSONObject(Utils.readInputStream(is));
 
                 AuthorizationServiceDiscovery discovery =

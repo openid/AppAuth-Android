@@ -218,6 +218,25 @@ public class AuthorizationServiceConfigurationTest {
     }
 
     @Test
+    public void testServiceConfigurationRequest_withBadRequest() throws Exception {
+        InputStream is = new ByteArrayInputStream(AuthorizationServiceTest.BAD_REQUEST_RESPONSE.getBytes());
+        when(mHttpConnection.getErrorStream()).thenReturn(is);
+        when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_BAD_REQUEST);
+        when(mHttpConnection.getResponseMessage()).thenReturn(AuthorizationServiceTest.BAD_REQUEST_ERROR_MESSAGE);
+        doFetch();
+        mCallback.waitForCallback();
+        assertBadRequest(mCallback.error);
+    }
+
+    private void assertBadRequest(AuthorizationException error) {
+        assertNotNull(error);
+        assertEquals(AuthorizationException.TYPE_HTTP_ERROR, error.type);
+        assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, error.code);
+        assertEquals(AuthorizationServiceTest.BAD_REQUEST_ERROR_MESSAGE, error.error);
+        assertEquals(AuthorizationServiceTest.BAD_REQUEST_RESPONSE, error.errorDescription);
+    }
+
+    @Test
     public void testFetchFromUrl_missingArgument() throws Exception {
         InputStream is = new ByteArrayInputStream(TEST_JSON_MISSING_ARGUMENT.getBytes());
         when(mHttpConnection.getInputStream()).thenReturn(is);

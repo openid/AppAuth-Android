@@ -450,11 +450,16 @@ public class AuthorizationService {
                 wr.write(queryData);
                 wr.flush();
 
-                if (conn.getResponseCode() >= HttpURLConnection.HTTP_OK
-                        && conn.getResponseCode() < HttpURLConnection.HTTP_MULT_CHOICE) {
+                if (conn.getResponseCode() < HttpURLConnection.HTTP_BAD_REQUEST) {
                     is = conn.getInputStream();
                 } else {
                     is = conn.getErrorStream();
+                    String errorString = Utils.readInputStream(is);
+                    mException = AuthorizationException.fromHttpError(
+                        conn.getResponseCode(),
+                        conn.getResponseMessage(),
+                        errorString);
+                    return null;
                 }
                 String response = Utils.readInputStream(is);
                 return new JSONObject(response);
@@ -599,7 +604,17 @@ public class AuthorizationService {
                 wr.write(postData);
                 wr.flush();
 
-                is = conn.getInputStream();
+                if (conn.getResponseCode() < HttpURLConnection.HTTP_BAD_REQUEST) {
+                    is = conn.getInputStream();
+                } else {
+                    is = conn.getErrorStream();
+                    String errorString = Utils.readInputStream(is);
+                    mException = AuthorizationException.fromHttpError(
+                        conn.getResponseCode(),
+                        conn.getResponseMessage(),
+                        errorString);
+                    return null;
+                }
                 String response = Utils.readInputStream(is);
                 return new JSONObject(response);
             } catch (IOException ex) {
