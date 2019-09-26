@@ -314,7 +314,8 @@ public class AuthorizationManagementActivity extends Activity {
         mCancelIntent = state.getParcelable(KEY_CANCEL_INTENT);
     }
 
-    private Intent extractResponseData(Uri responseUri) {
+    private Intent extractResponseData(Uri uri) {
+        UriParser responseUri = new UriParser(uri);
         if (responseUri.getQueryParameterNames().contains(AuthorizationException.PARAM_ERROR)) {
             return AuthorizationException.fromOAuthRedirect(responseUri).toIntent();
         } else {

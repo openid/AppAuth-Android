@@ -217,13 +217,13 @@ public class AuthorizationResponse {
          * Extracts authorization response parameters from the query portion of a redirect URI.
          */
         @NonNull
-        public Builder fromUri(@NonNull Uri uri) {
+        public Builder fromUri(@NonNull UriParser uri) {
             return fromUri(uri, SystemClock.INSTANCE);
         }
 
         @NonNull
         @VisibleForTesting
-        Builder fromUri(@NonNull Uri uri, @NonNull Clock clock) {
+        Builder fromUri(@NonNull UriParser uri, @NonNull Clock clock) {
             setState(uri.getQueryParameter(KEY_STATE));
             setTokenType(uri.getQueryParameter(KEY_TOKEN_TYPE));
             setAuthorizationCode(uri.getQueryParameter(KEY_AUTHORIZATION_CODE));

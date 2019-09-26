@@ -90,7 +90,7 @@ public class AuthorizationResponseTest {
                 .setState(TEST_STATE)
                 .build();
         AuthorizationResponse authResponse = new AuthorizationResponse.Builder(authRequest)
-                .fromUri(TEST_URI, mClock)
+                .fromUri(new UriParser(TEST_URI), mClock)
                 .build();
         checkExpectedFields(authResponse);
     }

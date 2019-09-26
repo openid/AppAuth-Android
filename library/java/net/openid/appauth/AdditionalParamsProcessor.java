@@ -85,7 +85,7 @@ class AdditionalParamsProcessor {
     }
 
     static Map<String, String> extractAdditionalParams(
-            Uri uri,
+            UriParser uri,
             Set<String> builtInParams) {
         Map<String, String> additionalParams = new LinkedHashMap<>();
         for (String param : uri.getQueryParameterNames()) {

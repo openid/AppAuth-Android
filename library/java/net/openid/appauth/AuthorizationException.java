@@ -522,7 +522,7 @@ public final class AuthorizationException extends Exception {
      * Creates an exception from an OAuth redirect URI that describes an authorization failure.
      */
     public static AuthorizationException fromOAuthRedirect(
-            @NonNull Uri redirectUri) {
+            @NonNull UriParser redirectUri) {
         String error = redirectUri.getQueryParameter(PARAM_ERROR);
         String errorDescription = redirectUri.getQueryParameter(PARAM_ERROR_DESCRIPTION);
         String errorUri = redirectUri.getQueryParameter(PARAM_ERROR_URI);

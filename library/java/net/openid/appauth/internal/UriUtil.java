@@ -23,6 +23,7 @@ import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
 import net.openid.appauth.Preconditions;
+import net.openid.appauth.UriParser;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -66,7 +67,7 @@ public final class UriUtil {
         uriBuilder.appendQueryParameter(paramName, value.toString());
     }
 
-    public static Long getLongQueryParameter(@NonNull Uri uri, @NonNull String param) {
+    public static Long getLongQueryParameter(@NonNull UriParser uri, @NonNull String param) {
         String valueStr = uri.getQueryParameter(param);
         if (valueStr != null) {
             return Long.parseLong(valueStr);
@@ -106,6 +107,10 @@ public final class UriUtil {
             queryParts.add(param.getKey() + "=" + formUrlEncodeValue(param.getValue()));
         }
         return TextUtils.join("&", queryParts);
+    }
+
+    public static boolean containsFragment(@NonNull Uri uri) {
+        return uri.getFragment() != null;
     }
 
     @NonNull
