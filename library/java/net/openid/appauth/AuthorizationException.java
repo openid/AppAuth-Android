@@ -24,6 +24,8 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.util.ArrayMap;
 
+import net.openid.appauth.internal.UriParser;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -522,7 +524,7 @@ public final class AuthorizationException extends Exception {
      * Creates an exception from an OAuth redirect URI that describes an authorization failure.
      */
     public static AuthorizationException fromOAuthRedirect(
-            @NonNull Uri redirectUri) {
+            @NonNull UriParser redirectUri) {
         String error = redirectUri.getQueryParameter(PARAM_ERROR);
         String errorDescription = redirectUri.getQueryParameter(PARAM_ERROR_DESCRIPTION);
         String errorUri = redirectUri.getQueryParameter(PARAM_ERROR_URI);

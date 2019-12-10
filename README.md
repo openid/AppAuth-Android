@@ -1,4 +1,18 @@
+THIS IS A FORK
+
+This Fork implements the Hybrid model allowing fragments to be parsed off the Uri.
+
+See: https://github.com/openid/AppAuth-Android/issues/75
+
+Released on JCenter()
+
+[Bintray page](https://bintray.com/blundell/).
+
+______
+
 ![AppAuth for Android](https://rawgit.com/openid/AppAuth-Android/master/appauth_lockup.svg)
+
+
 
 [![Download](https://api.bintray.com/packages/openid/net.openid/appauth/images/download.svg) ](https://bintray.com/openid/net.openid/appauth/_latestVersion)
 [![Javadocs](http://javadoc.io/badge/net.openid/appauth.svg)](http://javadoc.io/doc/net.openid/appauth)

@@ -25,6 +25,7 @@ import android.support.annotation.VisibleForTesting;
 
 import net.openid.appauth.AuthorizationException.AuthorizationRequestErrors;
 import net.openid.appauth.internal.Logger;
+import net.openid.appauth.internal.UriParser;
 
 import org.json.JSONException;
 
@@ -255,13 +256,14 @@ public class AuthorizationManagementActivity extends Activity {
     }
 
     private void handleAuthorizationComplete() {
-        Uri responseUri = getIntent().getData();
+        Uri data = getIntent().getData();
+        UriParser responseUri = new UriParser(data);
         Intent responseData = extractResponseData(responseUri);
         if (responseData == null) {
             Logger.error("Failed to extract OAuth2 response from redirect");
             return;
         }
-        responseData.setData(responseUri);
+        responseData.setData(data);
 
         if (mCompleteIntent != null) {
             Logger.debug("Authorization complete - invoking completion intent");
@@ -314,7 +316,7 @@ public class AuthorizationManagementActivity extends Activity {
         mCancelIntent = state.getParcelable(KEY_CANCEL_INTENT);
     }
 
-    private Intent extractResponseData(Uri responseUri) {
+    private Intent extractResponseData(UriParser responseUri) {
         if (responseUri.getQueryParameterNames().contains(AuthorizationException.PARAM_ERROR)) {
             return AuthorizationException.fromOAuthRedirect(responseUri).toIntent();
         } else {

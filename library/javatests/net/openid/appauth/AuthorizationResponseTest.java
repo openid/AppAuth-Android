@@ -29,6 +29,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.net.Uri;
+
+import net.openid.appauth.internal.UriParser;
+
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
@@ -90,7 +93,7 @@ public class AuthorizationResponseTest {
                 .setState(TEST_STATE)
                 .build();
         AuthorizationResponse authResponse = new AuthorizationResponse.Builder(authRequest)
-                .fromUri(TEST_URI, mClock)
+                .fromUri(new UriParser(TEST_URI), mClock)
                 .build();
         checkExpectedFields(authResponse);
     }

@@ -17,9 +17,10 @@ package net.openid.appauth;
 import static net.openid.appauth.Preconditions.checkArgument;
 import static net.openid.appauth.Preconditions.checkNotNull;
 
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
+import net.openid.appauth.internal.UriParser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -85,7 +86,7 @@ class AdditionalParamsProcessor {
     }
 
     static Map<String, String> extractAdditionalParams(
-            Uri uri,
+            UriParser uri,
             Set<String> builtInParams) {
         Map<String, String> additionalParams = new LinkedHashMap<>();
         for (String param : uri.getQueryParameterNames()) {

@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.novoda.bintray-release'
 
 apply from: '../config/android-common.gradle'
 
@@ -21,6 +22,15 @@ android.buildTypes {
 }
 
 android.testBuildType "forTests"
+
+publish {
+    userOrg = 'blundell'
+    groupId = 'com.blundell'
+    artifactId = 'app-auth-android'
+    publishVersion = '0.7.1-HYBRID-FORK-0.0.1'
+    desc = 'A fork of App Auth Android allowing Hybrid sign in, fragment urls to work.'
+    website = 'https://github.com/blundell/AppAuth-Android'
+}
 
 dependencies {
     api "com.android.support:customtabs:${rootProject.supportLibVersion}"
