@@ -6,7 +6,11 @@ See: https://github.com/openid/AppAuth-Android/issues/75
 
 Released on JCenter()
 
-[Bintray page](https://bintray.com/blundell/).
+```groovy
+    implementation "com.blundell:app-auth-android:0.6.1-HYBRID-FORK-0.0.1"
+```
+
+[Bintray page](https://bintray.com/blundell/maven/app-auth-android).
 
 ______
 
