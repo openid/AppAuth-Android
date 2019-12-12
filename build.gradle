@@ -41,7 +41,7 @@ try {
 }
 
 project.ext.minSdkVersion = 16
-project.ext.compileSdkVersion = 27
+project.ext.compileSdkVersion = 28
 project.ext.buildToolsVersion = '28.0.3'
 project.ext.supportLibVersion = '27.1.1'
 

@@ -18,14 +18,15 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.WorkerThread;
-import android.support.customtabs.CustomTabsCallback;
-import android.support.customtabs.CustomTabsClient;
-import android.support.customtabs.CustomTabsIntent;
-import android.support.customtabs.CustomTabsServiceConnection;
-import android.support.customtabs.CustomTabsSession;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
+
+import androidx.browser.customtabs.CustomTabsCallback;
+import androidx.browser.customtabs.CustomTabsClient;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.customtabs.CustomTabsServiceConnection;
+import androidx.browser.customtabs.CustomTabsSession;
 
 import net.openid.appauth.internal.Logger;
 import net.openid.appauth.internal.UriUtil;
@@ -93,9 +94,9 @@ public class CustomTabManager {
 
         Context context = mContextRef.get();
         if (context == null || !CustomTabsClient.bindCustomTabsService(
-                context,
-                browserPackage,
-                mConnection)) {
+            context,
+            browserPackage,
+            mConnection)) {
             // this is expected if the browser does not support custom tabs
             Logger.info("Unable to bind custom tabs service");
             mClientLatch.countDown();
@@ -103,7 +104,7 @@ public class CustomTabManager {
     }
 
     /**
-     * Creates a {@link android.support.customtabs.CustomTabsIntent.Builder custom tab builder},
+     * Creates a {@link CustomTabsIntent.Builder custom tab builder},
      * with an optional list of optional URIs that may be requested. The URI list
      * should be ordered such that the most likely URI to be requested is first. If the selected
      * browser does not support custom tabs, then the URI list has no effect.
@@ -129,7 +130,7 @@ public class CustomTabManager {
     }
 
     /**
-     * Creates a {@link android.support.customtabs.CustomTabsSession custom tab session} for
+     * Creates a {@link CustomTabsSession custom tab session} for
      * use with a custom tab intent, with optional callbacks and optional list of URIs that may
      * be requested. The URI list should be ordered such that the most likely URI to be requested
      * is first. If no custom tab supporting browser is available, this will return {@code null}.
@@ -137,8 +138,8 @@ public class CustomTabManager {
     @WorkerThread
     @Nullable
     public CustomTabsSession createSession(
-            @Nullable CustomTabsCallback callbacks,
-            @Nullable Uri... possibleUris) {
+        @Nullable CustomTabsCallback callbacks,
+        @Nullable Uri... possibleUris) {
         CustomTabsClient client = getClient();
         if (client == null) {
             return null;

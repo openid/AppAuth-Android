@@ -16,11 +16,12 @@ package net.openid.appauth.internal;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.customtabs.CustomTabsService;
-import android.support.v4.util.Pair;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.Pair;
+
+import androidx.browser.customtabs.CustomTabsService;
 
 import net.openid.appauth.Preconditions;
 
@@ -51,9 +52,9 @@ public final class UriUtil {
     }
 
     public static void appendQueryParameterIfNotNull(
-            @NonNull Uri.Builder uriBuilder,
-            @NonNull String paramName,
-            @Nullable Object value) {
+        @NonNull Uri.Builder uriBuilder,
+        @NonNull String paramName,
+        @Nullable Object value) {
         if (value == null) {
             return;
         }

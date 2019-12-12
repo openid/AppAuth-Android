@@ -15,7 +15,7 @@
 package net.openid.appauth.connectivity;
 
 import android.net.Uri;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;

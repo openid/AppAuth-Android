@@ -24,10 +24,11 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
-import android.support.customtabs.CustomTabsService;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
+import androidx.browser.customtabs.CustomTabsService;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -36,7 +37,7 @@ import java.util.List;
 /**
  * Utility class to obtain the browser package name to be used for
  * {@link net.openid.appauth.AuthorizationService#performAuthorizationRequest(
- * net.openid.appauth.AuthorizationRequest,
+ *net.openid.appauth.AuthorizationRequest,
  * android.app.PendingIntent)} calls. It prioritizes browsers which support
  * [custom tabs](https://developer.chrome.com/multidevice/android/customtabs). To mitigate
  * man-in-the-middle attacks by malicious apps pretending to be browsers for the specific URI we
@@ -53,7 +54,7 @@ public final class BrowserSelector {
      */
     @VisibleForTesting
     static final String ACTION_CUSTOM_TABS_CONNECTION =
-            CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION;
+        CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION;
 
     /**
      * An arbitrary (but unregistrable, per
@@ -62,8 +63,8 @@ public final class BrowserSelector {
      */
     @VisibleForTesting
     static final Intent BROWSER_INTENT = new Intent(
-            Intent.ACTION_VIEW,
-            Uri.parse("http://www.example.com"));
+        Intent.ACTION_VIEW,
+        Uri.parse("http://www.example.com"));
 
     /**
      * Retrieves the full list of browsers installed on the device. Two entries will exist
@@ -88,12 +89,12 @@ public final class BrowserSelector {
         // Therefore, the preferred browser must be separately determined and the resultant
         // list of browsers reordered to restored this desired property.
         ResolveInfo resolvedDefaultActivity =
-                pm.resolveActivity(BROWSER_INTENT, 0);
+            pm.resolveActivity(BROWSER_INTENT, 0);
         if (resolvedDefaultActivity != null) {
             defaultBrowserPackage = resolvedDefaultActivity.activityInfo.packageName;
         }
         List<ResolveInfo> resolvedActivityList =
-                pm.queryIntentActivities(BROWSER_INTENT, queryFlag);
+            pm.queryIntentActivities(BROWSER_INTENT, queryFlag);
 
         for (ResolveInfo info : resolvedActivityList) {
             // ignore handlers which are not browsers
@@ -104,12 +105,12 @@ public final class BrowserSelector {
             try {
                 int defaultBrowserIndex = 0;
                 PackageInfo packageInfo = pm.getPackageInfo(
-                        info.activityInfo.packageName,
-                        PackageManager.GET_SIGNATURES);
+                    info.activityInfo.packageName,
+                    PackageManager.GET_SIGNATURES);
 
                 if (hasWarmupService(pm, info.activityInfo.packageName)) {
                     BrowserDescriptor customTabBrowserDescriptor =
-                            new BrowserDescriptor(packageInfo, true);
+                        new BrowserDescriptor(packageInfo, true);
                     if (info.activityInfo.packageName.equals(defaultBrowserPackage)) {
                         // If the default browser is having a WarmupService,
                         // will it be added to the beginning of the list.
@@ -121,7 +122,7 @@ public final class BrowserSelector {
                 }
 
                 BrowserDescriptor fullBrowserDescriptor =
-                        new BrowserDescriptor(packageInfo, false);
+                    new BrowserDescriptor(packageInfo, false);
                 if (info.activityInfo.packageName.equals(defaultBrowserPackage)) {
                     // The default browser is added to the beginning of the list.
                     // If there is support for Custom Tabs, will the one disabling Custom Tabs
@@ -182,8 +183,8 @@ public final class BrowserSelector {
     private static boolean isFullBrowser(ResolveInfo resolveInfo) {
         // The filter must match ACTION_VIEW, CATEGORY_BROWSEABLE, and at least one scheme,
         if (!resolveInfo.filter.hasAction(Intent.ACTION_VIEW)
-                || !resolveInfo.filter.hasCategory(Intent.CATEGORY_BROWSABLE)
-                || resolveInfo.filter.schemesIterator() == null) {
+            || !resolveInfo.filter.hasCategory(Intent.CATEGORY_BROWSABLE)
+            || resolveInfo.filter.schemesIterator() == null) {
             return false;
         }
 

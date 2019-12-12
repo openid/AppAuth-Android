@@ -14,15 +14,11 @@
 
 package net.openid.appauth;
 
-import static net.openid.appauth.Preconditions.checkNotEmpty;
-import static net.openid.appauth.Preconditions.checkNotNull;
-
 import android.content.Intent;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
-import android.support.v4.util.ArrayMap;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import net.openid.appauth.internal.UriParser;
 
@@ -30,15 +26,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+
+import static net.openid.appauth.Preconditions.checkNotEmpty;
+import static net.openid.appauth.Preconditions.checkNotNull;
 
 /**
  * Returned as a response to OAuth2 requests if they fail. Specifically:
- *
+ * <p>
  * - The {@link net.openid.appauth.AuthorizationService.TokenResponseCallback response} to
  * {@link AuthorizationService#performTokenRequest(net.openid.appauth.TokenRequest,
  * AuthorizationService.TokenResponseCallback) token requests},
- *
+ * <p>
  * - The {@link net.openid.appauth.AuthorizationServiceConfiguration.RetrieveConfigurationCallback
  * response}
  * to
@@ -158,62 +158,62 @@ public final class AuthorizationException extends Exception {
          * Indicates a problem parsing an OpenID Connect Service Discovery document.
          */
         public static final AuthorizationException INVALID_DISCOVERY_DOCUMENT =
-                generalEx(0, "Invalid discovery document");
+            generalEx(0, "Invalid discovery document");
 
         /**
          * Indicates the user manually canceled the OAuth authorization code flow.
          */
         public static final AuthorizationException USER_CANCELED_AUTH_FLOW =
-                generalEx(1, "User cancelled flow");
+            generalEx(1, "User cancelled flow");
 
         /**
          * Indicates an OAuth authorization flow was programmatically cancelled.
          */
         public static final AuthorizationException PROGRAM_CANCELED_AUTH_FLOW =
-                generalEx(2, "Flow cancelled programmatically");
+            generalEx(2, "Flow cancelled programmatically");
 
         /**
          * Indicates a network error occurred.
          */
         public static final AuthorizationException NETWORK_ERROR =
-                generalEx(3, "Network error");
+            generalEx(3, "Network error");
 
         /**
          * Indicates a server error occurred.
          */
         public static final AuthorizationException SERVER_ERROR =
-                generalEx(4, "Server error");
+            generalEx(4, "Server error");
 
         /**
          * Indicates a problem occurred deserializing JSON.
          */
         public static final AuthorizationException JSON_DESERIALIZATION_ERROR =
-                generalEx(5, "JSON deserialization error");
+            generalEx(5, "JSON deserialization error");
 
         /**
          * Indicates a problem occurred constructing a {@link TokenResponse token response} object
          * from the JSON provided by the server.
          */
         public static final AuthorizationException TOKEN_RESPONSE_CONSTRUCTION_ERROR =
-                generalEx(6, "Token response construction error");
+            generalEx(6, "Token response construction error");
 
         /**
          * Indicates a problem parsing an OpenID Connect Registration Response.
          */
         public static final AuthorizationException INVALID_REGISTRATION_RESPONSE =
-                generalEx(7, "Invalid registration response");
+            generalEx(7, "Invalid registration response");
 
         /**
          * Indicates that a received ID token could not be parsed
          */
         public static final AuthorizationException ID_TOKEN_PARSING_ERROR =
-                generalEx(8, "Unable to parse ID Token");
+            generalEx(8, "Unable to parse ID Token");
 
         /**
          * Indicates that a received ID token is invalid
          */
         public static final AuthorizationException ID_TOKEN_VALIDATION_ERROR =
-                generalEx(9, "Invalid ID Token");
+            generalEx(9, "Invalid ID Token");
     }
 
     /**
@@ -229,52 +229,52 @@ public final class AuthorizationException extends Exception {
          * An `invalid_request` OAuth2 error response.
          */
         public static final AuthorizationException INVALID_REQUEST =
-                authEx(1000, "invalid_request");
+            authEx(1000, "invalid_request");
 
         /**
          * An `unauthorized_client` OAuth2 error response.
          */
         public static final AuthorizationException UNAUTHORIZED_CLIENT =
-                authEx(1001, "unauthorized_client");
+            authEx(1001, "unauthorized_client");
 
         /**
          * An `access_denied` OAuth2 error response.
          */
         public static final AuthorizationException ACCESS_DENIED =
-                authEx(1002, "access_denied");
+            authEx(1002, "access_denied");
 
         /**
          * An `unsupported_response_type` OAuth2 error response.
          */
         public static final AuthorizationException UNSUPPORTED_RESPONSE_TYPE =
-                authEx(1003, "unsupported_response_type");
+            authEx(1003, "unsupported_response_type");
 
         /**
          * An `invalid_scope` OAuth2 error response.
          */
         public static final AuthorizationException INVALID_SCOPE =
-                authEx(1004, "invalid_scope");
+            authEx(1004, "invalid_scope");
 
         /**
          * An `server_error` OAuth2 error response, equivalent to an HTTP 500 error code, but
          * sent via redirect.
          */
         public static final AuthorizationException SERVER_ERROR =
-                authEx(1005, "server_error");
+            authEx(1005, "server_error");
 
         /**
          * A `temporarily_unavailable` OAuth2 error response, equivalent to an HTTP 503 error
          * code, but sent via redirect.
          */
         public static final AuthorizationException TEMPORARILY_UNAVAILABLE =
-                authEx(1006, "temporarily_unavailable");
+            authEx(1006, "temporarily_unavailable");
 
         /**
          * An authorization error occurring on the client rather than the server. For example,
          * due to client misconfiguration. This error should be treated as unrecoverable.
          */
         public static final AuthorizationException CLIENT_ERROR =
-                authEx(1007, null);
+            authEx(1007, null);
 
         /**
          * Indicates an OAuth error as per RFC 6749, but the error code is not known to the
@@ -283,26 +283,26 @@ public final class AuthorizationException extends Exception {
          * the server.
          */
         public static final AuthorizationException OTHER =
-                authEx(1008, null);
+            authEx(1008, null);
 
         /**
          * Indicates that the response state param did not match the request state param,
          * resulting in the response being discarded.
          */
         public static final AuthorizationException STATE_MISMATCH =
-                generalEx(9, "Response state param did not match request state");
+            generalEx(9, "Response state param did not match request state");
 
         private static final Map<String, AuthorizationException> STRING_TO_EXCEPTION =
-                exceptionMapByString(
-                        INVALID_REQUEST,
-                        UNAUTHORIZED_CLIENT,
-                        ACCESS_DENIED,
-                        UNSUPPORTED_RESPONSE_TYPE,
-                        INVALID_SCOPE,
-                        SERVER_ERROR,
-                        TEMPORARILY_UNAVAILABLE,
-                        CLIENT_ERROR,
-                        OTHER);
+            exceptionMapByString(
+                INVALID_REQUEST,
+                UNAUTHORIZED_CLIENT,
+                ACCESS_DENIED,
+                UNSUPPORTED_RESPONSE_TYPE,
+                INVALID_SCOPE,
+                SERVER_ERROR,
+                TEMPORARILY_UNAVAILABLE,
+                CLIENT_ERROR,
+                OTHER);
 
         /**
          * Returns the matching exception type for the provided OAuth2 error string, or
@@ -331,44 +331,44 @@ public final class AuthorizationException extends Exception {
          * An `invalid_request` OAuth2 error response.
          */
         public static final AuthorizationException INVALID_REQUEST =
-                tokenEx(2000, "invalid_request");
+            tokenEx(2000, "invalid_request");
 
         /**
          * An `invalid_client` OAuth2 error response.
          */
         public static final AuthorizationException INVALID_CLIENT =
-                tokenEx(2001, "invalid_client");
+            tokenEx(2001, "invalid_client");
 
         /**
          * An `invalid_grant` OAuth2 error response.
          */
         public static final AuthorizationException INVALID_GRANT =
-                tokenEx(2002, "invalid_grant");
+            tokenEx(2002, "invalid_grant");
 
         /**
          * An `unauthorized_client` OAuth2 error response.
          */
         public static final AuthorizationException UNAUTHORIZED_CLIENT =
-                tokenEx(2003, "unauthorized_client");
+            tokenEx(2003, "unauthorized_client");
 
         /**
          * An `unsupported_grant_type` OAuth2 error response.
          */
         public static final AuthorizationException UNSUPPORTED_GRANT_TYPE =
-                tokenEx(2004, "unsupported_grant_type");
+            tokenEx(2004, "unsupported_grant_type");
 
         /**
          * An `invalid_scope` OAuth2 error response.
          */
         public static final AuthorizationException INVALID_SCOPE =
-                tokenEx(2005, "invalid_scope");
+            tokenEx(2005, "invalid_scope");
 
         /**
          * An authorization error occurring on the client rather than the server. For example,
          * due to client misconfiguration. This error should be treated as unrecoverable.
          */
         public static final AuthorizationException CLIENT_ERROR =
-                tokenEx(2006, null);
+            tokenEx(2006, null);
 
         /**
          * Indicates an OAuth error as per RFC 6749, but the error code is not known to the
@@ -377,18 +377,18 @@ public final class AuthorizationException extends Exception {
          * the server.
          */
         public static final AuthorizationException OTHER =
-                tokenEx(2007, null);
+            tokenEx(2007, null);
 
         private static final Map<String, AuthorizationException> STRING_TO_EXCEPTION =
-                exceptionMapByString(
-                        INVALID_REQUEST,
-                        INVALID_CLIENT,
-                        INVALID_GRANT,
-                        UNAUTHORIZED_CLIENT,
-                        UNSUPPORTED_GRANT_TYPE,
-                        INVALID_SCOPE,
-                        CLIENT_ERROR,
-                        OTHER);
+            exceptionMapByString(
+                INVALID_REQUEST,
+                INVALID_CLIENT,
+                INVALID_GRANT,
+                UNAUTHORIZED_CLIENT,
+                UNSUPPORTED_GRANT_TYPE,
+                INVALID_SCOPE,
+                CLIENT_ERROR,
+                OTHER);
 
         /**
          * Returns the matching exception type for the provided OAuth2 error string, or
@@ -413,26 +413,26 @@ public final class AuthorizationException extends Exception {
          * An `invalid_request` OAuth2 error response.
          */
         public static final AuthorizationException INVALID_REQUEST =
-                registrationEx(4000, "invalid_request");
+            registrationEx(4000, "invalid_request");
 
         /**
          * An `invalid_client` OAuth2 error response.
          */
         public static final AuthorizationException INVALID_REDIRECT_URI =
-                registrationEx(4001, "invalid_redirect_uri");
+            registrationEx(4001, "invalid_redirect_uri");
 
         /**
          * An `invalid_grant` OAuth2 error response.
          */
         public static final AuthorizationException INVALID_CLIENT_METADATA =
-                registrationEx(4002, "invalid_client_metadata");
+            registrationEx(4002, "invalid_client_metadata");
 
         /**
          * An authorization error occurring on the client rather than the server. For example,
          * due to client misconfiguration. This error should be treated as unrecoverable.
          */
         public static final AuthorizationException CLIENT_ERROR =
-                registrationEx(4003, null);
+            registrationEx(4003, null);
 
         /**
          * Indicates an OAuth error as per RFC 6749, but the error code is not known to the
@@ -441,15 +441,15 @@ public final class AuthorizationException extends Exception {
          * the server.
          */
         public static final AuthorizationException OTHER =
-                registrationEx(4004, null);
+            registrationEx(4004, null);
 
         private static final Map<String, AuthorizationException> STRING_TO_EXCEPTION =
-                exceptionMapByString(
-                        INVALID_REQUEST,
-                        INVALID_REDIRECT_URI,
-                        INVALID_CLIENT_METADATA,
-                        CLIENT_ERROR,
-                        OTHER);
+            exceptionMapByString(
+                INVALID_REQUEST,
+                INVALID_REDIRECT_URI,
+                INVALID_CLIENT_METADATA,
+                CLIENT_ERROR,
+                OTHER);
 
         /**
          * Returns the matching exception type for the provided OAuth2 error string, or
@@ -466,22 +466,22 @@ public final class AuthorizationException extends Exception {
 
     private static AuthorizationException generalEx(int code, @Nullable String errorDescription) {
         return new AuthorizationException(
-                TYPE_GENERAL_ERROR, code, null, errorDescription, null, null);
+            TYPE_GENERAL_ERROR, code, null, errorDescription, null, null);
     }
 
     private static AuthorizationException authEx(int code, @Nullable String error) {
         return new AuthorizationException(
-                TYPE_OAUTH_AUTHORIZATION_ERROR, code, error, null, null, null);
+            TYPE_OAUTH_AUTHORIZATION_ERROR, code, error, null, null, null);
     }
 
     private static AuthorizationException tokenEx(int code, @Nullable String error) {
         return new AuthorizationException(
-                TYPE_OAUTH_TOKEN_ERROR, code, error, null, null, null);
+            TYPE_OAUTH_TOKEN_ERROR, code, error, null, null, null);
     }
 
     private static AuthorizationException registrationEx(int code, @Nullable String error) {
         return new AuthorizationException(
-                TYPE_OAUTH_REGISTRATION_ERROR, code, error, null, null, null);
+            TYPE_OAUTH_REGISTRATION_ERROR, code, error, null, null, null);
     }
 
     /**
@@ -490,15 +490,15 @@ public final class AuthorizationException extends Exception {
      * providing a root cause.
      */
     public static AuthorizationException fromTemplate(
-            @NonNull AuthorizationException ex,
-            @Nullable Throwable rootCause) {
+        @NonNull AuthorizationException ex,
+        @Nullable Throwable rootCause) {
         return new AuthorizationException(
-                ex.type,
-                ex.code,
-                ex.error,
-                ex.errorDescription,
-                ex.errorUri,
-                rootCause);
+            ex.type,
+            ex.code,
+            ex.error,
+            ex.errorDescription,
+            ex.errorUri,
+            rootCause);
     }
 
     /**
@@ -507,40 +507,41 @@ public final class AuthorizationException extends Exception {
      * retrieved from OAuth error response.
      */
     public static AuthorizationException fromOAuthTemplate(
-            @NonNull AuthorizationException ex,
-            @Nullable String errorOverride,
-            @Nullable String errorDescriptionOverride,
-            @Nullable Uri errorUriOverride) {
+        @NonNull AuthorizationException ex,
+        @Nullable String errorOverride,
+        @Nullable String errorDescriptionOverride,
+        @Nullable Uri errorUriOverride) {
         return new AuthorizationException(
-                ex.type,
-                ex.code,
-                (errorOverride != null) ? errorOverride : ex.error,
-                (errorDescriptionOverride != null) ? errorDescriptionOverride : ex.errorDescription,
-                (errorUriOverride != null) ? errorUriOverride : ex.errorUri,
-                null);
+            ex.type,
+            ex.code,
+            (errorOverride != null) ? errorOverride : ex.error,
+            (errorDescriptionOverride != null) ? errorDescriptionOverride : ex.errorDescription,
+            (errorUriOverride != null) ? errorUriOverride : ex.errorUri,
+            null);
     }
 
     /**
      * Creates an exception from an OAuth redirect URI that describes an authorization failure.
      */
     public static AuthorizationException fromOAuthRedirect(
-            @NonNull UriParser redirectUri) {
+        @NonNull UriParser redirectUri) {
         String error = redirectUri.getQueryParameter(PARAM_ERROR);
         String errorDescription = redirectUri.getQueryParameter(PARAM_ERROR_DESCRIPTION);
         String errorUri = redirectUri.getQueryParameter(PARAM_ERROR_URI);
         AuthorizationException base = AuthorizationRequestErrors.byString(error);
         return new AuthorizationException(
-                base.type,
-                base.code,
-                error,
-                errorDescription != null ? errorDescription : base.errorDescription,
-                errorUri != null ? Uri.parse(errorUri) : base.errorUri,
-                null);
+            base.type,
+            base.code,
+            error,
+            errorDescription != null ? errorDescription : base.errorDescription,
+            errorUri != null ? Uri.parse(errorUri) : base.errorUri,
+            null);
     }
 
     /**
      * Reconstructs an {@link AuthorizationException} from the JSON produced by
      * {@link #toJsonString()}.
+     *
      * @throws JSONException if the JSON is malformed or missing required properties
      */
     public static AuthorizationException fromJson(@NonNull String jsonStr) throws JSONException {
@@ -551,17 +552,18 @@ public final class AuthorizationException extends Exception {
     /**
      * Reconstructs an {@link AuthorizationException} from the JSON produced by
      * {@link #toJson()}.
+     *
      * @throws JSONException if the JSON is malformed or missing required properties
      */
     public static AuthorizationException fromJson(@NonNull JSONObject json) throws JSONException {
         checkNotNull(json, "json cannot be null");
         return new AuthorizationException(
-                json.getInt(KEY_TYPE),
-                json.getInt(KEY_CODE),
-                JsonUtil.getStringIfDefined(json, KEY_ERROR),
-                JsonUtil.getStringIfDefined(json, KEY_ERROR_DESCRIPTION),
-                JsonUtil.getUriIfDefined(json, KEY_ERROR_URI),
-                null);
+            json.getInt(KEY_TYPE),
+            json.getInt(KEY_CODE),
+            JsonUtil.getStringIfDefined(json, KEY_ERROR),
+            JsonUtil.getStringIfDefined(json, KEY_ERROR_DESCRIPTION),
+            JsonUtil.getUriIfDefined(json, KEY_ERROR_URI),
+            null);
     }
 
     /**
@@ -585,9 +587,9 @@ public final class AuthorizationException extends Exception {
     }
 
     private static Map<String, AuthorizationException> exceptionMapByString(
-            AuthorizationException... exceptions) {
-        ArrayMap<String, AuthorizationException> map =
-                new ArrayMap<>(exceptions != null ? exceptions.length : 0);
+        AuthorizationException... exceptions) {
+        Map<String, AuthorizationException> map =
+            new HashMap<>(exceptions != null ? exceptions.length : 0);
 
         if (exceptions != null) {
             for (AuthorizationException ex : exceptions) {
@@ -602,6 +604,7 @@ public final class AuthorizationException extends Exception {
 
     /**
      * The type of the error.
+     *
      * @see #TYPE_GENERAL_ERROR
      * @see #TYPE_OAUTH_AUTHORIZATION_ERROR
      * @see #TYPE_OAUTH_TOKEN_ERROR
@@ -637,12 +640,12 @@ public final class AuthorizationException extends Exception {
      * Instantiates an authorization request with optional root cause information.
      */
     public AuthorizationException(
-            int type,
-            int code,
-            @Nullable String error,
-            @Nullable String errorDescription,
-            @Nullable Uri errorUri,
-            @Nullable Throwable rootCause) {
+        int type,
+        int code,
+        @Nullable String error,
+        @Nullable String errorDescription,
+        @Nullable Uri errorUri,
+        @Nullable Throwable rootCause) {
         super(errorDescription, rootCause);
         this.type = type;
         this.code = code;

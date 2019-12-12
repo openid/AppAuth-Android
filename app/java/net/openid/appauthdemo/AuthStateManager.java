@@ -16,9 +16,9 @@ package net.openid.appauthdemo;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.annotation.AnyThread;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.AnyThread;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 import net.openid.appauth.AuthState;

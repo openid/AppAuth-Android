@@ -16,7 +16,7 @@ package net.openid.appauth;
 
 import static net.openid.appauth.Preconditions.checkNotNull;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Base64;
 
 import net.openid.appauth.internal.UriUtil;

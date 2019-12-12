@@ -27,24 +27,25 @@ publish {
     userOrg = 'blundell'
     groupId = 'com.blundell'
     artifactId = 'app-auth-android'
-    publishVersion = '0.7.1-HYBRID-FORK-0.0.1'
+    publishVersion = '0.7.1-HYBRID-FORK-0.0.2'
     desc = 'A fork of App Auth Android allowing Hybrid sign in, fragment urls to work.'
     website = 'https://github.com/blundell/AppAuth-Android'
 }
 
 dependencies {
-    api "com.android.support:customtabs:${rootProject.supportLibVersion}"
-    apply from: '../config/testdeps.gradle', to:it
+    implementation 'androidx.annotation:annotation:1.1.0'
+    api "androidx.browser:browser:1.0.0"
+    apply from: '../config/testdeps.gradle', to: it
 }
 
-apply from: '../config/style.gradle'
 apply from: '../config/coverage.gradle'
-apply from: '../config/javadoc.gradle'
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
-}
+//apply from: '../config/style.gradle'
+//apply from: '../config/javadoc.gradle'
+//
+//artifacts {
+//    archives sourcesJar
+//    archives javadocJar
+//}
 
 bintray {
     user = System.getenv("BINTRAY_USER")

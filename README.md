@@ -10,6 +10,10 @@ Released on JCenter()
     implementation "com.blundell:app-auth-android:0.6.1-HYBRID-FORK-0.0.1"
 ```
 
+I've updated it to AndroidX & latest compile version, this meant 
+- I had to comment out checkstyle & javadocs for now (sorry not sorry)
+
+
 [Bintray page](https://bintray.com/blundell/maven/app-auth-android).
 
 ______
