@@ -5,7 +5,7 @@ language: android
 android:
   components:
     - build-tools-29.0.2
-    - android-27
+    - android-29
 script:
   - ./gradlew check jacoco assemble
   - bash <(curl -s https://codecov.io/bash)
