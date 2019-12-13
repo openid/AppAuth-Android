@@ -16,9 +16,10 @@ package net.openid.appauthdemo;
 
 import android.annotation.SuppressLint;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import net.openid.appauth.Preconditions;
 import net.openid.appauth.connectivity.ConnectionBuilder;

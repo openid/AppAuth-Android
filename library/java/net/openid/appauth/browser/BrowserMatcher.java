@@ -14,7 +14,7 @@
 
 package net.openid.appauth.browser;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Determines whether a {@link BrowserDescriptor} matches some set of criteria.

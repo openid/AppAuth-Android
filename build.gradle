@@ -42,7 +42,6 @@ try {
 project.ext.minSdkVersion = 16
 project.ext.compileSdkVersion = 29
 project.ext.buildToolsVersion = '29.0.2'
-project.ext.supportLibVersion = '27.1.1'
 
 task showVersion {
     doLast {
