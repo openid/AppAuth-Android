@@ -404,7 +404,7 @@ server. This can be done directly, by extracting the access token from a
 token response. However, in most cases, it is simpler to use the
 `performActionWithFreshTokens` utility method provided by AuthState:
 
-```
+```java
 authState.performActionWithFreshTokens(service, new AuthStateAction() {
   @Override public void execute(
       String accessToken,
