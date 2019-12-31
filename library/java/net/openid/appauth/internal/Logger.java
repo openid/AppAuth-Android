@@ -16,10 +16,11 @@ package net.openid.appauth.internal;
 
 import static net.openid.appauth.Preconditions.checkNotNull;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import android.util.Log;
 
 /**
  * Convenience wrapper around {@link android.util.Log}, which evaluates the current log level of

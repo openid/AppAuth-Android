@@ -8,7 +8,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.3'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
         classpath 'org.ajoberstar:gradle-git:1.7.2'
         classpath 'com.novoda:bintray-release:0.9.2'
     }
@@ -41,9 +41,8 @@ try {
 }
 
 project.ext.minSdkVersion = 16
-project.ext.compileSdkVersion = 28
-project.ext.buildToolsVersion = '28.0.3'
-project.ext.supportLibVersion = '27.1.1'
+project.ext.compileSdkVersion = 29
+project.ext.buildToolsVersion = '29.0.2'
 
 task showVersion {
     doLast {

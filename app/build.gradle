@@ -40,8 +40,6 @@ android {
     }
 }
 
-project.ext.glideVersion = '4.7.1'
-
 dependencies {
     implementation project(':library')
     implementation "androidx.appcompat:appcompat:1.1.0"
@@ -54,4 +52,4 @@ dependencies {
     annotationProcessor "com.github.bumptech.glide:compiler:4.10.0"
 }
 
-//apply from: '../config/style.gradle'
+apply from: '../config/style.gradle'

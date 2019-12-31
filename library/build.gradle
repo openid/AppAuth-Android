@@ -33,19 +33,19 @@ publish {
 }
 
 dependencies {
+    api "androidx.browser:browser:1.2.0"
     implementation 'androidx.annotation:annotation:1.1.0'
-    api "androidx.browser:browser:1.0.0"
-    apply from: '../config/testdeps.gradle', to: it
+    apply from: '../config/testdeps.gradle', to:it
 }
 
 apply from: '../config/coverage.gradle'
-//apply from: '../config/style.gradle'
-//apply from: '../config/javadoc.gradle'
-//
-//artifacts {
-//    archives sourcesJar
-//    archives javadocJar
-//}
+apply from: '../config/coverage.gradle'
+apply from: '../config/javadoc.gradle'
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
 
 bintray {
     user = System.getenv("BINTRAY_USER")

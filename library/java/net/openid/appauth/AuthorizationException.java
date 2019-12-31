@@ -15,10 +15,10 @@
 package net.openid.appauth;
 
 import android.content.Intent;
-import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.collection.ArrayMap;
 
 import net.openid.appauth.internal.UriParser;
 

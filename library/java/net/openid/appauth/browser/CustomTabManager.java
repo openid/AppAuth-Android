@@ -21,7 +21,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
-
 import androidx.browser.customtabs.CustomTabsCallback;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
@@ -104,7 +103,7 @@ public class CustomTabManager {
     }
 
     /**
-     * Creates a {@link CustomTabsIntent.Builder custom tab builder},
+     * Creates a {@link androidx.browser.customtabs.CustomTabsIntent.Builder custom tab builder},
      * with an optional list of optional URIs that may be requested. The URI list
      * should be ordered such that the most likely URI to be requested is first. If the selected
      * browser does not support custom tabs, then the URI list has no effect.
@@ -130,7 +129,7 @@ public class CustomTabManager {
     }
 
     /**
-     * Creates a {@link CustomTabsSession custom tab session} for
+     * Creates a {@link androidx.browser.customtabs.CustomTabsSession custom tab session} for
      * use with a custom tab intent, with optional callbacks and optional list of URIs that may
      * be requested. The URI list should be ordered such that the most likely URI to be requested
      * is first. If no custom tab supporting browser is available, this will return {@code null}.

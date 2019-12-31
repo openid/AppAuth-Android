@@ -27,7 +27,6 @@ import android.os.Build.VERSION_CODES;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-
 import androidx.browser.customtabs.CustomTabsService;
 
 import java.util.ArrayList;
