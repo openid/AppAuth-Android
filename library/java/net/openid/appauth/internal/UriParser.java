@@ -15,9 +15,9 @@
 package net.openid.appauth.internal;
 
 import android.net.Uri;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
-import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -19,12 +19,9 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Pair;
 
-import androidx.browser.customtabs.CustomTabsService;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsService;
-import androidx.core.util.Pair;
 
 import net.openid.appauth.Preconditions;
 
@@ -55,9 +52,9 @@ public final class UriUtil {
     }
 
     public static void appendQueryParameterIfNotNull(
-        @NonNull Uri.Builder uriBuilder,
-        @NonNull String paramName,
-        @Nullable Object value) {
+            @NonNull Uri.Builder uriBuilder,
+            @NonNull String paramName,
+            @Nullable Object value) {
         if (value == null) {
             return;
         }

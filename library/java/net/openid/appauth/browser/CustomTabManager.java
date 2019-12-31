@@ -93,9 +93,9 @@ public class CustomTabManager {
 
         Context context = mContextRef.get();
         if (context == null || !CustomTabsClient.bindCustomTabsService(
-            context,
-            browserPackage,
-            mConnection)) {
+                context,
+                browserPackage,
+                mConnection)) {
             // this is expected if the browser does not support custom tabs
             Logger.info("Unable to bind custom tabs service");
             mClientLatch.countDown();
@@ -137,8 +137,8 @@ public class CustomTabManager {
     @WorkerThread
     @Nullable
     public CustomTabsSession createSession(
-        @Nullable CustomTabsCallback callbacks,
-        @Nullable Uri... possibleUris) {
+            @Nullable CustomTabsCallback callbacks,
+            @Nullable Uri... possibleUris) {
         CustomTabsClient client = getClient();
         if (client == null) {
             return null;
