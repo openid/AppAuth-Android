@@ -1,18 +1,20 @@
-THIS IS A FORK
+### THIS IS A FORK
 
-This Fork implements the Hybrid model allowing fragments to be parsed off the Uri.
+This Fork implements:
+  - The Hybrid model allowing url fragments to be parsed off the Uri
+  - The libraries activities now support `inheritShowWhenLocked` manifest attribute
+  - Update to Android X
+  - Targeting Q
 
 See: https://github.com/openid/AppAuth-Android/issues/75
 
 Released on JCenter()
 
 ```groovy
-    implementation "com.blundell:app-auth-android:0.6.1-HYBRID-FORK-0.0.1"
+    implementation "com.blundell:app-auth-android:0.6.1-HYBRID-FORK-0.0.3"
 ```
 
-I've updated it to AndroidX & latest compile version, this meant 
-- I had to comment out checkstyle & javadocs for now (sorry not sorry)
-
+Latest version can be found here:
 
 [Bintray page](https://bintray.com/blundell/maven/app-auth-android).
 

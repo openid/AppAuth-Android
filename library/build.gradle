@@ -27,7 +27,7 @@ publish {
     userOrg = 'blundell'
     groupId = 'com.blundell'
     artifactId = 'app-auth-android'
-    publishVersion = '0.7.1-HYBRID-FORK-0.0.2'
+    publishVersion = '0.7.1-HYBRID-FORK-0.0.3'
     desc = 'A fork of App Auth Android allowing Hybrid sign in, fragment urls to work.'
     website = 'https://github.com/blundell/AppAuth-Android'
 }
