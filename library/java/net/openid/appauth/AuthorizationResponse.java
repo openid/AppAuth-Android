@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
  * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.2
  * <https://tools.ietf.org/html/rfc6749#section-4.1.2>"
  */
-public class AuthorizationResponse {
+public class AuthorizationResponse extends AuthorizationManagementResponse {
 
     /**
      * The extra string used to store an {@link AuthorizationResponse} in an intent by
@@ -469,10 +469,17 @@ public class AuthorizationResponse {
                 .build();
     }
 
+    @Override
+    @Nullable
+    public String getState() {
+        return state;
+    }
+
     /**
      * Produces a JSON representation of the authorization response for persistent storage or local
      * transmission (e.g. between activities).
      */
+    @Override
     @NonNull
     public JSONObject jsonSerialize() {
         JSONObject json = new JSONObject();
@@ -487,16 +494,6 @@ public class AuthorizationResponse {
         JsonUtil.put(json, KEY_ADDITIONAL_PARAMETERS,
                 JsonUtil.mapToJsonObject(additionalParameters));
         return json;
-    }
-
-    /**
-     * Produces a JSON representation of the authorization response for persistent storage or local
-     * transmission (e.g. between activities). This method is just a convenience wrapper
-     * for {@link #jsonSerialize()}, converting the JSON object to its string form.
-     */
-    @NonNull
-    public String jsonSerializeString() {
-        return jsonSerialize().toString();
     }
 
     /**
@@ -547,6 +544,7 @@ public class AuthorizationResponse {
      * authorization response to the registered handler after a call to
      * {@link AuthorizationService#performAuthorizationRequest}.
      */
+    @Override
     @NonNull
     public Intent toIntent() {
         Intent data = new Intent();
@@ -571,5 +569,9 @@ public class AuthorizationResponse {
         } catch (JSONException ex) {
             throw new IllegalArgumentException("Intent contains malformed auth response", ex);
         }
+    }
+
+    static boolean containsAuthorizationResponse(@NonNull Intent intent) {
+        return intent.hasExtra(EXTRA_RESPONSE);
     }
 }

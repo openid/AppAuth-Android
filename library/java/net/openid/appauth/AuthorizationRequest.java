@@ -23,7 +23,6 @@ import static net.openid.appauth.Preconditions.checkNullOrNotEmpty;
 
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Base64;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -32,7 +31,6 @@ import net.openid.appauth.internal.UriUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,7 +46,7 @@ import java.util.Set;
  * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.1
  * <https://tools.ietf.org/html/rfc6749#section-4.1.1>"
  */
-public class AuthorizationRequest {
+public class AuthorizationRequest extends AuthorizationManagementRequest {
 
     /**
      * SHA-256 based code verifier challenge method.
@@ -332,13 +330,13 @@ public class AuthorizationRequest {
     private static final String KEY_CODE_VERIFIER_CHALLENGE_METHOD = "codeVerifierChallengeMethod";
     private static final String KEY_RESPONSE_MODE = "responseMode";
     private static final String KEY_ADDITIONAL_PARAMETERS = "additionalParameters";
-    private static final int STATE_LENGTH = 16;
 
     /**
      * The service's {@link AuthorizationServiceConfiguration configuration}.
      * This configuration specifies how to connect to a particular OAuth provider.
      * Configurations may be
-     * {@link AuthorizationServiceConfiguration#AuthorizationServiceConfiguration(Uri, Uri, Uri)}
+     * {@link
+     * AuthorizationServiceConfiguration#AuthorizationServiceConfiguration(Uri, Uri, Uri, Uri)}
      * created manually}, or {@link AuthorizationServiceConfiguration#fetchFromUrl(Uri,
      * AuthorizationServiceConfiguration.RetrieveConfigurationCallback)} via an OpenID Connect
      * Discovery Document}.
@@ -588,8 +586,8 @@ public class AuthorizationRequest {
             setClientId(clientId);
             setResponseType(responseType);
             setRedirectUri(redirectUri);
-            setState(AuthorizationRequest.generateRandomState());
-            setNonce(AuthorizationRequest.generateRandomState());
+            setState(AuthorizationManagementRequest.generateRandomState());
+            setNonce(AuthorizationManagementRequest.generateRandomState());
             setCodeVerifier(CodeVerifierUtil.generateRandomCodeVerifier());
         }
 
@@ -977,9 +975,16 @@ public class AuthorizationRequest {
         return AsciiStringListUtil.stringToSet(prompt);
     }
 
+    @Override
+    @Nullable
+    public String getState() {
+        return state;
+    }
+
     /**
-     * Produces a request URI, that can be used to dispath the authorization request.
+     * Produces a request URI, that can be used to dispatch the authorization request.
      */
+    @Override
     @NonNull
     public Uri toUri() {
         Uri.Builder uriBuilder = configuration.authorizationEndpoint.buildUpon()
@@ -1011,6 +1016,7 @@ public class AuthorizationRequest {
      * Produces a JSON representation of the authorization request for persistent storage or local
      * transmission (e.g. between activities).
      */
+    @Override
     @NonNull
     public JSONObject jsonSerialize() {
         JSONObject json = new JSONObject();
@@ -1032,15 +1038,6 @@ public class AuthorizationRequest {
         JsonUtil.put(json, KEY_ADDITIONAL_PARAMETERS,
                 JsonUtil.mapToJsonObject(additionalParameters));
         return json;
-    }
-
-    /**
-     * Produces a JSON string representation of the authorization request for persistent storage or
-     * local transmission (e.g. between activities). This method is just a convenience wrapper
-     * for {@link #jsonSerialize()}, converting the JSON object to its string form.
-     */
-    public String jsonSerializeString() {
-        return jsonSerialize().toString();
     }
 
     /**
@@ -1088,10 +1085,8 @@ public class AuthorizationRequest {
         return jsonDeserialize(new JSONObject(jsonStr));
     }
 
-    private static String generateRandomState() {
-        SecureRandom sr = new SecureRandom();
-        byte[] random = new byte[STATE_LENGTH];
-        sr.nextBytes(random);
-        return Base64.encodeToString(random, Base64.NO_WRAP | Base64.NO_PADDING | Base64.URL_SAFE);
+    static boolean isAuthorizationRequest(JSONObject json) {
+        return json.has(KEY_REDIRECT_URI);
     }
+
 }
