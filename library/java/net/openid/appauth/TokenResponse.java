@@ -50,7 +50,7 @@ public class TokenResponse {
      * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 7.1
      * <https://tools.ietf.org/html/rfc6749#section-7.1>"
      */
-    public static final String TOKEN_TYPE_BEARER = "bearer";
+    public static final String TOKEN_TYPE_BEARER = "Bearer";
 
     @VisibleForTesting
     static final String KEY_REQUEST = "request";
