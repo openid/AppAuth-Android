@@ -16,7 +16,7 @@ package net.openid.appauth.browser;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.Signature;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Base64;
 
 import java.security.MessageDigest;

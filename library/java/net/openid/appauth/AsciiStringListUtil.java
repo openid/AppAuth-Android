@@ -16,7 +16,7 @@ package net.openid.appauth;
 
 import static net.openid.appauth.Preconditions.checkArgument;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.text.TextUtils;
 
 import java.util.Arrays;

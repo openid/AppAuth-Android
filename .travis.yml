@@ -4,8 +4,8 @@
 language: android
 android:
   components:
-    - build-tools-27.0.3
-    - android-27
+    - build-tools-30.0.0
+    - android-230
 script:
   - ./gradlew check jacoco assemble
   - bash <(curl -s https://codecov.io/bash)

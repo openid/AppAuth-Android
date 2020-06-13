@@ -24,7 +24,6 @@ import org.robolectric.annotation.Config;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Set;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -43,9 +42,6 @@ import static net.openid.appauth.TokenResponse.KEY_REFRESH_TOKEN;
 import static net.openid.appauth.TokenResponse.KEY_SCOPE;
 import static net.openid.appauth.TokenResponse.KEY_TOKEN_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk=16)

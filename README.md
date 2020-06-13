@@ -51,6 +51,12 @@ either through custom URI scheme redirects, or App Links.
 AS's that assume all clients are web-based or require clients to maintain
 confidentiality of the client secrets may not work well.
 
+From Android API 30 (R) and above, set [QUERY_ALL_PACKAGES](https://developer.android.com/reference/kotlin/android/Manifest.permission#query_all_packages) in the manifest,
+to enable AppAuth searching for usable installed browsers.
+```xml
+<uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+```
+
 ## Demo app
 
 A demo app is contained within this repository. For instructions on how to
