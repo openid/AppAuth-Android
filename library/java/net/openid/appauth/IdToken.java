@@ -15,10 +15,11 @@
 package net.openid.appauth;
 
 import android.net.Uri;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Base64;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import net.openid.appauth.AuthorizationException.GeneralErrors;
 import org.json.JSONException;

@@ -22,11 +22,12 @@ import static net.openid.appauth.Preconditions.checkNotNull;
 import static net.openid.appauth.Preconditions.checkNullOrNotEmpty;
 
 import android.net.Uri;
+import android.text.TextUtils;
+import android.util.Base64;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import android.text.TextUtils;
-import android.util.Base64;
 
 import net.openid.appauth.internal.UriUtil;
 

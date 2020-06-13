@@ -19,9 +19,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.text.TextUtils;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.text.TextUtils;
 
 import net.openid.appauth.connectivity.ConnectionBuilder;
 import net.openid.appauth.connectivity.DefaultConnectionBuilder;
@@ -36,7 +37,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Reads and validates the demo app configuration from `res/raw/auth_config.json`. Configuration
@@ -184,7 +184,7 @@ public final class Configuration {
         Buffer configData = new Buffer();
         try {
             configSource.readAll(configData);
-            mConfigJson = new JSONObject(configData.readString(StandardCharsets.UTF_8));
+            mConfigJson = new JSONObject(configData.readString(Charset.forName("UTF-8")));
         } catch (IOException ex) {
             throw new InvalidConfigurationException(
                     "Failed to read configuration: " + ex.getMessage());

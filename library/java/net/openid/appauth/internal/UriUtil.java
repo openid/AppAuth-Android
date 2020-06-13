@@ -16,11 +16,12 @@ package net.openid.appauth.internal;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsService;
 import androidx.core.util.Pair;
-import android.text.TextUtils;
 
 import net.openid.appauth.Preconditions;
 

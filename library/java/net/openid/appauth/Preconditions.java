@@ -14,9 +14,10 @@
 
 package net.openid.appauth;
 
+import android.text.TextUtils;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.text.TextUtils;
 
 import java.util.Collection;
 
