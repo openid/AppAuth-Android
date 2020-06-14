@@ -61,6 +61,11 @@ to enable AppAuth searching for usable installed browsers.
             <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="https" />
         </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.APP_BROWSER" />
+            <data android:scheme="https" />
+        </intent>
     </queries>
     ...
 </manifest>
