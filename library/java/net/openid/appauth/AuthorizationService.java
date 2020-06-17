@@ -17,6 +17,7 @@ package net.openid.appauth;
 import static net.openid.appauth.Preconditions.checkNotNull;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
