@@ -178,7 +178,7 @@ public class BrowserSelectorTest {
     @Test
     public void testSelect_matcherPrefersStandaloneChrome() throws NameNotFoundException {
         // in this scenario, the user has firefox as their default but the app insists on using
-        // chrome via a browser whitelist.
+        // chrome via a browser allowList.
         setBrowserList(FIREFOX, CHROME, DOLPHIN);
         setBrowsersWithWarmupSupport(FIREFOX, CHROME);
         checkSelectedBrowser(CHROME,
