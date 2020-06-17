@@ -19,5 +19,22 @@ package net.openid.appauth.browser;
  * and will be removed completely in the next major version
  */
 @Deprecated
-class BrowserBlacklist extends BrowserDenyList {
+public class BrowserBlacklist extends BrowserDenyList {
+    /**
+     * This class is deprecated in favor of BrowserDenyList,
+     * and will be removed completely in the next major version
+     */
+    @Deprecated
+    public BrowserBlacklist(BrowserMatcher... matchers) {
+        super(matchers);
+    }
+
+    /**
+     * This class is deprecated in favor of BrowserDenyList,
+     * and will be removed completely in the next major version
+     */
+    @Deprecated
+    public BrowserBlacklist() {
+    }
+
 }
