@@ -14,8 +14,8 @@ android {
         main.res.srcDir 'res'
         main.assets.srcDir 'assets'
         main.resources.srcDir 'java'
-        test.setRoot('javatests');
-        test.java.srcDir('javatests');
+        test.setRoot('javatests')
+        test.java.srcDir('javatests')
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
