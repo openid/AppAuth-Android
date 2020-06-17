@@ -3,7 +3,7 @@ apply plugin: 'checkstyle'
 checkstyle {
     configFile file('../config/checkstyle/checkstyle.xml')
     configProperties = ['checkstyle.java.header': file('../config/checkstyle/java.header').getAbsolutePath()]
-    toolVersion = "8.11"
+    toolVersion = "8.33"
 }
 
 task checkAllSource(type: Checkstyle) {

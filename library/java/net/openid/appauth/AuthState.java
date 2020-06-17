@@ -24,7 +24,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import net.openid.appauth.internal.Logger;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
