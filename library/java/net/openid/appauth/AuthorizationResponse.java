@@ -21,10 +21,11 @@ import static net.openid.appauth.Preconditions.checkNullOrNotEmpty;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import net.openid.appauth.internal.UriUtil;
 

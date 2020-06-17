@@ -23,7 +23,8 @@ android.buildTypes {
 android.testBuildType "forTests"
 
 dependencies {
-    api "com.android.support:customtabs:${rootProject.supportLibVersion}"
+    api "androidx.browser:browser:1.0.0"
+    implementation 'androidx.annotation:annotation:1.1.0'
     apply from: '../config/testdeps.gradle', to:it
 }
 

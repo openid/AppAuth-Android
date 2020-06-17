@@ -7,9 +7,11 @@ checkstyle {
 }
 
 task checkAllSource(type: Checkstyle) {
-    source 'java'
-    include '**/*.java'
-    classpath = files project.configurations.compile.files
+    afterEvaluate {
+        source 'java'
+        include '**/*.java'
+        classpath = files project.configurations.compile.files
+    }
 }
 
 task failOnCheckstyleWarning {
