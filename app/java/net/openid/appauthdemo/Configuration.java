@@ -20,17 +20,14 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.text.TextUtils;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import net.openid.appauth.connectivity.ConnectionBuilder;
 import net.openid.appauth.connectivity.DefaultConnectionBuilder;
-
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.Okio;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 

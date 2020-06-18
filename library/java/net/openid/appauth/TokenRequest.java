@@ -21,7 +21,6 @@ import static net.openid.appauth.Preconditions.checkNullOrNotEmpty;
 
 import android.net.Uri;
 import android.text.TextUtils;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;

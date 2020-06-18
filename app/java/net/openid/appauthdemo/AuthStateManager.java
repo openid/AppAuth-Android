@@ -17,7 +17,6 @@ package net.openid.appauthdemo;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
-
 import androidx.annotation.AnyThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,7 +26,6 @@ import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.RegistrationResponse;
 import net.openid.appauth.TokenResponse;
-
 import org.json.JSONException;
 
 import java.lang.ref.WeakReference;

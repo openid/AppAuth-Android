@@ -17,6 +17,7 @@ package net.openid.appauth;
 import static net.openid.appauth.Preconditions.checkNotNull;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -25,7 +26,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.text.TextUtils;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -41,7 +41,6 @@ import net.openid.appauth.browser.CustomTabManager;
 import net.openid.appauth.connectivity.ConnectionBuilder;
 import net.openid.appauth.internal.Logger;
 import net.openid.appauth.internal.UriUtil;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 

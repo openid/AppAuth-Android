@@ -26,7 +26,6 @@ import net.openid.appauth.JsonUtil.Field;
 import net.openid.appauth.JsonUtil.StringField;
 import net.openid.appauth.JsonUtil.StringListField;
 import net.openid.appauth.JsonUtil.UriField;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
