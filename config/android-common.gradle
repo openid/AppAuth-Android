@@ -4,7 +4,7 @@ android {
     defaultConfig {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.compileSdkVersion
-        versionCode rootProject.versionNum
+        versionCode getVersionCode()
         versionName rootProject.versionName
     }
     sourceSets {
@@ -43,4 +43,10 @@ task sourcesJar(type: Jar, dependsOn:'generateReleaseSources') {
 
 tasks.withType(JavaCompile) {
     options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
+}
+
+static def getVersionCode() {
+    def date = new Date()
+    def formattedDate = date.format('yyyyMMddHHmmss')
+    return formattedDate
 }

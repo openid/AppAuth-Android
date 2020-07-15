@@ -1,0 +1,76 @@
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'maven-publish'
+
+def artifactoryURL = "https://artifactory.skyscannertools.net/artifactory/infrastructure-maven"
+
+task sourceJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier "source"
+}
+
+afterEvaluate { project ->
+
+    project.ext.getJFrogPassword = {
+        if (project.hasProperty("SKYSCANNER_ARTIFACTORY_MAVEN_PASSWORD")) {
+            return project.property("SKYSCANNER_ARTIFACTORY_MAVEN_PASSWORD")
+        }
+        return ""
+    }
+
+    project.ext.getJFrogUsername = {
+        if (project.hasProperty("SKYSCANNER_ARTIFACTORY_MAVEN_USER")) {
+            return project.property("SKYSCANNER_ARTIFACTORY_MAVEN_USER")
+        }
+        return ""
+    }
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId 'net.openid'
+                artifactId 'appauth'
+                version versionName
+                description description
+
+                artifact bundleRelease
+                artifact sourceJar
+
+                pom.withXml {
+
+                    def dependenciesNode = asNode().appendNode('dependencies')
+                    //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
+                    project.configurations.implementation.allDependencies.each {
+                        if (it.group != null && (it.name != null || "unspecified" == it.name) && it.version != null) {
+                            def dependencyNode = dependenciesNode.appendNode('dependency')
+                            dependencyNode.appendNode('groupId', it.group)
+                            dependencyNode.appendNode('artifactId', it.name)
+                            dependencyNode.appendNode('version', it.version)
+                        }
+                    }
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                url "$artifactoryURL"
+                credentials {
+                    username "${project.getJFrogUsername()}"
+                    password "${project.getJFrogPassword()}"
+                }
+            }
+        }
+    }
+
+    task checkMavenCredentials(type: Exec) {
+        outputs.upToDateWhen { false }
+        workingDir './'
+        commandLine(['curl',
+                     '--silent',
+                     '--fail',
+                     '-I',
+                     '-u',
+                     "${project.getJFrogUsername()}:${project.getJFrogPassword()}",
+                     "$artifactoryURL"])
+    }
+}

@@ -3,6 +3,7 @@ apply plugin: 'com.jfrog.bintray'
 apply plugin: 'com.github.dcendents.android-maven'
 
 apply from: '../config/android-common.gradle'
+apply from: 'gradle-maven-push.gradle'
 
 group = "net.openid"
 version = rootProject.versionName
@@ -53,7 +54,6 @@ bintray {
         version {
             name = rootProject.versionName
             desc = "AppAuth for Android"
-            released = rootProject.versionDate
             vcsTag = rootProject.versionName
         }
     }
