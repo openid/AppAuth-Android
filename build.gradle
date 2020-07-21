@@ -23,31 +23,16 @@ subprojects {
 
 ext.verifyKeystore()
 
-try {
-    def grgit = org.ajoberstar.grgit.Grgit.open(dir: '.')
-    def lastCommit = grgit.head()
-
-    project.ext.versionNum = grgit.log(includes:['HEAD']).size()
-    project.ext.versionName = grgit.describe()
-    project.ext.versionDate = lastCommit.getDate()
-    if (project.ext.versionName == null) {
-        project.ext.versionName = 'DEV'
-    }
-} catch (Exception ex) {
-    project.ext.versionNum = 0
-    project.ext.versionName = 'DEV'
-    project.ext.versionDate = new Date()
-}
-
 project.ext.minSdkVersion = 16
 project.ext.compileSdkVersion = 27
 project.ext.buildToolsVersion = '27.0.3'
 project.ext.supportLibVersion = '27.1.1'
+project.ext.versionID = "0.7.0"
+project.ext.versionName = """$versionID-skyscanner"""
 
 task showVersion {
     doLast {
-        logger.lifecycle("Version ID: " + project.versionNum)
+        logger.lifecycle("Version ID: " + project.versionID)
         logger.lifecycle("Version Name: " + project.versionName)
-        logger.lifecycle("Version Date: " + project.versionDate)
     }
 }
