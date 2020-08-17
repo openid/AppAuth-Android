@@ -19,14 +19,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
-import android.support.annotation.ColorInt;
-import android.support.annotation.Nullable;
-import android.support.customtabs.CustomTabsClient;
-import android.support.customtabs.CustomTabsIntent;
-import android.support.customtabs.CustomTabsServiceConnection;
+import androidx.annotation.ColorInt;
+import androidx.annotation.Nullable;
+import androidx.browser.customtabs.CustomTabsClient;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.customtabs.CustomTabsServiceConnection;
 
 import net.openid.appauth.AppAuthConfiguration.Builder;
 import net.openid.appauth.AuthorizationException.GeneralErrors;
+import net.openid.appauth.browser.BrowserDescriptor;
 import net.openid.appauth.browser.Browsers;
 import net.openid.appauth.browser.CustomTabManager;
 import net.openid.appauth.connectivity.ConnectionBuilder;
@@ -52,7 +53,8 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import static android.support.customtabs.CustomTabsIntent.EXTRA_TOOLBAR_COLOR;
+import static androidx.browser.customtabs.CustomTabsIntent.EXTRA_TITLE_VISIBILITY_STATE;
+import static androidx.browser.customtabs.CustomTabsIntent.EXTRA_TOOLBAR_COLOR;
 import static net.openid.appauth.AuthorizationManagementActivity.KEY_AUTH_INTENT;
 import static net.openid.appauth.AuthorizationManagementActivity.KEY_AUTH_REQUEST;
 import static net.openid.appauth.AuthorizationManagementActivity.KEY_CANCEL_INTENT;
@@ -62,10 +64,13 @@ import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
 import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
 import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET_EXPIRES_AT;
 import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
+import static net.openid.appauth.TestValues.TEST_NONCE;
 import static net.openid.appauth.TestValues.TEST_REFRESH_TOKEN;
 import static net.openid.appauth.TestValues.TEST_STATE;
 import static net.openid.appauth.TestValues.getTestAuthCodeExchangeRequest;
+import static net.openid.appauth.TestValues.getTestAuthCodeExchangeRequestBuilder;
 import static net.openid.appauth.TestValues.getTestAuthRequestBuilder;
+import static net.openid.appauth.TestValues.getTestIdTokenWithNonce;
 import static net.openid.appauth.TestValues.getTestRegistrationRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -87,14 +92,6 @@ public class AuthorizationServiceTest {
 
     private static final int TEST_EXPIRES_IN = 3600;
     private static final String TEST_BROWSER_PACKAGE = "com.browser.test";
-
-    private static final String AUTH_CODE_EXCHANGE_RESPONSE_JSON = "{\n"
-            + "  \"refresh_token\": \"" + TEST_REFRESH_TOKEN + "\",\n"
-            + "  \"access_token\": \"" + TEST_ACCESS_TOKEN + "\",\n"
-            + "  \"expires_in\": \"" + TEST_EXPIRES_IN + "\",\n"
-            + "  \"id_token\": \"" + TEST_ID_TOKEN + "\",\n"
-            + "  \"token_type\": \"" + AuthorizationResponse.TOKEN_TYPE_BEARER + "\"\n"
-            + "}";
 
     private static final String REGISTRATION_RESPONSE_JSON = "{\n"
             + " \"client_id\": \"" + TEST_CLIENT_ID + "\",\n"
@@ -118,6 +115,7 @@ public class AuthorizationServiceTest {
     private RegistrationCallback mRegistrationCallback;
     private AuthorizationService mService;
     private OutputStream mOutputStream;
+    private BrowserDescriptor mBrowserDescriptor;
     @Mock ConnectionBuilder mConnectionBuilder;
     @Mock HttpURLConnection mHttpConnection;
     @Mock PendingIntent mPendingIntent;
@@ -131,12 +129,13 @@ public class AuthorizationServiceTest {
         MockitoAnnotations.initMocks(this);
         mAuthCallback = new AuthorizationCallback();
         mRegistrationCallback = new RegistrationCallback();
+        mBrowserDescriptor = Browsers.Chrome.customTab("46");
         mService = new AuthorizationService(
                 mContext,
                 new Builder()
                         .setConnectionBuilder(mConnectionBuilder)
                         .build(),
-                Browsers.Chrome.customTab("46"),
+                mBrowserDescriptor,
                 mCustomTabManager);
         mOutputStream = new ByteArrayOutputStream();
         when(mConnectionBuilder.openConnection(any(Uri.class))).thenReturn(mHttpConnection);
@@ -159,7 +158,18 @@ public class AuthorizationServiceTest {
     }
 
     @Test
-    public void testAuthorizationRequest_withDefaultRandomState() throws Exception {
+    public void testAuthorizationRequest_withSpecifiedNonce() throws Exception {
+        AuthorizationRequest request = getTestAuthRequestBuilder()
+            .setNonce(TEST_NONCE)
+            .build();
+        mService.performAuthorizationRequest(request, mPendingIntent);
+        Intent intent = captureAuthRequestIntent();
+        assertRequestIntent(intent, null);
+        assertEquals(request.toUri().toString(), intent.getData().toString());
+    }
+
+    @Test
+    public void testAuthorizationRequest_withDefaultRandomStateAndNonce() throws Exception {
         AuthorizationRequest request = getTestAuthRequestBuilder().build();
         mService.performAuthorizationRequest(request, mPendingIntent);
         Intent intent = captureAuthRequestIntent();
@@ -199,8 +209,8 @@ public class AuthorizationServiceTest {
         AuthorizationRequest request = getTestAuthRequestBuilder().build();
         Intent intent = mService.getAuthorizationRequestIntent(request);
         Intent actualAuthIntent = intent.getParcelableExtra(KEY_AUTH_INTENT);
-        assertThat(actualAuthIntent.getParcelableExtra(KEY_COMPLETE_INTENT)).isNull();
-        assertThat(actualAuthIntent.getParcelableExtra(KEY_CANCEL_INTENT)).isNull();
+        assertThat(actualAuthIntent.<Intent>getParcelableExtra(KEY_COMPLETE_INTENT)).isNull();
+        assertThat(actualAuthIntent.<Intent>getParcelableExtra(KEY_CANCEL_INTENT)).isNull();
     }
 
     @Test
@@ -209,16 +219,19 @@ public class AuthorizationServiceTest {
         @ColorInt int toolbarColor = Color.GREEN;
         CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
                 .setToolbarColor(toolbarColor)
+                .setShowTitle(true)
                 .build();
 
         Intent intent = mService.getAuthorizationRequestIntent(request, customTabsIntent);
         Intent actualAuthIntent = intent.getParcelableExtra(KEY_AUTH_INTENT);
         assertThat(actualAuthIntent.getIntExtra(EXTRA_TOOLBAR_COLOR, 0)).isEqualTo(toolbarColor);
+        assertThat(actualAuthIntent.getIntExtra(EXTRA_TITLE_VISIBILITY_STATE, 0))
+            .isEqualTo(CustomTabsIntent.SHOW_PAGE_TITLE);
     }
 
     @Test
     public void testTokenRequest() throws Exception {
-        InputStream is = new ByteArrayInputStream(AUTH_CODE_EXCHANGE_RESPONSE_JSON.getBytes());
+        InputStream is = new ByteArrayInputStream(getAuthCodeExchangeResponseJson().getBytes());
         when(mHttpConnection.getInputStream()).thenReturn(is);
         when(mHttpConnection.getRequestProperty("Accept")).thenReturn(null);
         when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
@@ -242,8 +255,24 @@ public class AuthorizationServiceTest {
     }
 
     @Test
+    public void testTokenRequest_withNonceValidation() throws Exception {
+        String idToken = getTestIdTokenWithNonce(TEST_NONCE);
+        InputStream is = new ByteArrayInputStream(
+            getAuthCodeExchangeResponseJson(idToken).getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(is);
+        when(mHttpConnection.getRequestProperty("Accept")).thenReturn(null);
+        when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        TokenRequest request = getTestAuthCodeExchangeRequestBuilder()
+                .setNonce(TEST_NONCE)
+                .build();
+        mService.performTokenRequest(request, mAuthCallback);
+        mAuthCallback.waitForCallback();
+        assertTokenResponse(mAuthCallback.response, request, idToken);
+    }
+
+    @Test
     public void testTokenRequest_clientSecretBasicAuth() throws Exception {
-        InputStream is = new ByteArrayInputStream(AUTH_CODE_EXCHANGE_RESPONSE_JSON.getBytes());
+        InputStream is = new ByteArrayInputStream(getAuthCodeExchangeResponseJson().getBytes());
         when(mHttpConnection.getInputStream()).thenReturn(is);
         when(mHttpConnection.getRequestProperty("Accept")).thenReturn(null);
         when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
@@ -264,7 +293,7 @@ public class AuthorizationServiceTest {
 
     @Test
     public void testTokenRequest_leaveExistingAcceptUntouched() throws Exception {
-        InputStream is = new ByteArrayInputStream(AUTH_CODE_EXCHANGE_RESPONSE_JSON.getBytes());
+        InputStream is = new ByteArrayInputStream(getAuthCodeExchangeResponseJson().getBytes());
 
         // emulate some content types having already been set as an Accept value
         when(mHttpConnection.getRequestProperty("Accept"))
@@ -282,7 +311,7 @@ public class AuthorizationServiceTest {
     @Test
     public void testTokenRequest_withBasicAuth() throws Exception {
         ClientSecretBasic csb = new ClientSecretBasic(TEST_CLIENT_SECRET);
-        InputStream is = new ByteArrayInputStream(AUTH_CODE_EXCHANGE_RESPONSE_JSON.getBytes());
+        InputStream is = new ByteArrayInputStream(getAuthCodeExchangeResponseJson().getBytes());
         when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
         when(mHttpConnection.getInputStream()).thenReturn(is);
         TokenRequest request = getTestAuthCodeExchangeRequest();
@@ -298,7 +327,7 @@ public class AuthorizationServiceTest {
     @Test
     public void testTokenRequest_withPostAuth() throws Exception {
         ClientSecretPost csp = new ClientSecretPost(TEST_CLIENT_SECRET);
-        InputStream is = new ByteArrayInputStream(AUTH_CODE_EXCHANGE_RESPONSE_JSON.getBytes());
+        InputStream is = new ByteArrayInputStream(getAuthCodeExchangeResponseJson().getBytes());
         when(mHttpConnection.getInputStream()).thenReturn(is);
         when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
         TokenRequest request = getTestAuthCodeExchangeRequest();
@@ -393,6 +422,11 @@ public class AuthorizationServiceTest {
         mService.createCustomTabsIntentBuilder();
     }
 
+    @Test
+    public void testGetBrowserDescriptor_browserAvailable() {
+        assertEquals(mService.getBrowserDescriptor(), mBrowserDescriptor);
+    }
+
     private Intent captureAuthRequestIntent() {
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         verify(mContext).startActivity(intentCaptor.capture());
@@ -404,12 +438,19 @@ public class AuthorizationServiceTest {
     }
 
     private void assertTokenResponse(TokenResponse response, TokenRequest expectedRequest) {
+        assertTokenResponse(response, expectedRequest, TEST_ID_TOKEN);
+    }
+
+    private void assertTokenResponse(
+            TokenResponse response,
+            TokenRequest expectedRequest,
+            String idToken) {
         assertNotNull(response);
         assertEquals(expectedRequest, response.request);
         assertEquals(TEST_ACCESS_TOKEN, response.accessToken);
         assertEquals(TEST_REFRESH_TOKEN, response.refreshToken);
         assertEquals(AuthorizationResponse.TOKEN_TYPE_BEARER, response.tokenType);
-        assertEquals(TEST_ID_TOKEN, response.idToken);
+        assertEquals(idToken, response.idToken);
     }
 
     private void assertInvalidGrant(AuthorizationException error) {
@@ -515,5 +556,22 @@ public class AuthorizationServiceTest {
 
     static Intent serviceIntentEq() {
         return argThat(new CustomTabsServiceMatcher());
+    }
+
+    String getAuthCodeExchangeResponseJson() {
+        return getAuthCodeExchangeResponseJson(null);
+    }
+
+    String getAuthCodeExchangeResponseJson(@Nullable String idToken) {
+        if (idToken == null) {
+            idToken = TEST_ID_TOKEN;
+        }
+        return "{\n"
+                + "  \"refresh_token\": \"" + TEST_REFRESH_TOKEN + "\",\n"
+                + "  \"access_token\": \"" + TEST_ACCESS_TOKEN + "\",\n"
+                + "  \"expires_in\": \"" + TEST_EXPIRES_IN + "\",\n"
+                + "  \"id_token\": \"" + idToken + "\",\n"
+                + "  \"token_type\": \"" + AuthorizationResponse.TOKEN_TYPE_BEARER + "\"\n"
+                + "}";
     }
 }

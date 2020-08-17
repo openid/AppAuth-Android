@@ -14,51 +14,26 @@
 
 package net.openid.appauth.browser;
 
-import android.support.annotation.NonNull;
-
-import java.util.Arrays;
-import java.util.List;
-
 /**
- * A whitelist of browsers which can be used as part of an authorization flows. Examples:
- *
- * ```java
- * // only allow Chrome, and only as a standalone browser
- * new BrowserWhitelist(VersionedBrowserMatcher.CHROME_BROWSER);
- *
- * // allow Chrome custom tabs only, but exclude a version range
- * new BrowserWhitelist(
- *     new VersionedBrowserMatcher(
- *         Browsers.Chrome.PACKAGE_NAME,
- *         Browsers.Chrome.SIGNATURE_SET,
- *         true,
- *         VersionRange.atMost("45.1")),
- *     new VersionedBrowserMatcher(
- *         Browsers.Chrome.PACKAGE_NAME,
- *         Browsers.Chrome.SIGNATURE_SET,
- *         true,
- *         VersionRange.atLeast("45.3"));
- * ```
+ * This class is deprecated in favor of BrowserAllowList,
+ * and will be removed completely in the next major version
  */
-public class BrowserWhitelist implements BrowserMatcher {
-
-    private List<BrowserMatcher> mBrowserMatchers;
-
+@Deprecated
+public class BrowserWhitelist extends BrowserAllowList {
     /**
-     * Creates a browser whitelist, which will match if any of the provided matchers do.
+     * This class is deprecated in favor of BrowserAllowList,
+     * and will be removed completely in the next major version
      */
+    @Deprecated
     public BrowserWhitelist(BrowserMatcher... matchers) {
-        mBrowserMatchers = Arrays.asList(matchers);
+        super(matchers);
     }
 
-    @Override
-    public boolean matches(@NonNull BrowserDescriptor descriptor) {
-        for (BrowserMatcher matcher : mBrowserMatchers) {
-            if (matcher.matches(descriptor)) {
-                return true;
-            }
-        }
-
-        return false;
+    /**
+     * This class is deprecated in favor of BrowserAllowList,
+     * and will be removed completely in the next major version
+     */
+    @Deprecated
+    public BrowserWhitelist() {
     }
 }

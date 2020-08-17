@@ -14,14 +14,14 @@
 
 package net.openid.appauth.browser;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.util.Collections;
 import java.util.Set;
 
 /**
  * Matches a browser based on its package name, set of signatures, version and whether it is
- * being used as a custom tab. This can be used as part of a browser whitelist or blacklist.
+ * being used as a custom tab. This can be used as part of a browser allowList or denyList.
  */
 public class VersionedBrowserMatcher implements BrowserMatcher {
 
@@ -42,6 +42,15 @@ public class VersionedBrowserMatcher implements BrowserMatcher {
             Browsers.Chrome.SIGNATURE_SET,
             false,
             VersionRange.ANY_VERSION);
+
+    /**
+     * Matches any version of Firefox for use as a custom tab.
+     */
+    public static final VersionedBrowserMatcher FIREFOX_CUSTOM_TAB = new VersionedBrowserMatcher(
+            Browsers.Firefox.PACKAGE_NAME,
+            Browsers.Firefox.SIGNATURE_SET,
+            true,
+            VersionRange.atLeast(Browsers.Firefox.MINIMUM_VERSION_FOR_CUSTOM_TAB));
 
     /**
      * Matches any version of Mozilla Firefox.
@@ -68,7 +77,7 @@ public class VersionedBrowserMatcher implements BrowserMatcher {
             Browsers.SBrowser.PACKAGE_NAME,
             Browsers.SBrowser.SIGNATURE_SET,
             true,
-            VersionRange.ANY_VERSION);
+            VersionRange.atLeast(Browsers.SBrowser.MINIMUM_VERSION_FOR_CUSTOM_TAB));
 
     private String mPackageName;
     private Set<String> mSignatureHashes;

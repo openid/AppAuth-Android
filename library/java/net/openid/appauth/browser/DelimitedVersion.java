@@ -14,7 +14,7 @@
 
 package net.openid.appauth.browser;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Represents a delimited version number for an application. This can parse common version number

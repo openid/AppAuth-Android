@@ -8,7 +8,7 @@ apply from: 'gradle-maven-push.gradle'
 group = "net.openid"
 version = rootProject.versionName
 
-android.defaultConfig.project.archivesBaseName = 'appauth'
+project.archivesBaseName = 'appauth'
 
 // use a separate build type for unit tests, so that we can configure the manifest placeholder
 // without interfering with other builds.
@@ -24,7 +24,8 @@ android.buildTypes {
 android.testBuildType "forTests"
 
 dependencies {
-    api "com.android.support:customtabs:${rootProject.supportLibVersion}"
+    api "androidx.browser:browser:${project.androidXVersions.browser}"
+    implementation "androidx.annotation:annotation:${project.androidXVersions.annotation}"
     apply from: '../config/testdeps.gradle', to:it
 }
 
@@ -80,7 +81,7 @@ install {
                     developer {
                         id "iainmcgin"
                         name "Iain McGinniss"
-                        email "iainmcgin@google.com"
+                        email "iain.mcginniss@wework.com"
                     }
                 }
 

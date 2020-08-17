@@ -32,7 +32,7 @@ afterEvaluate { project ->
                 version versionName
                 description description
 
-                artifact bundleRelease
+                artifact bundleReleaseAar
                 artifact sourceJar
 
                 pom.withXml {

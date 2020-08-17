@@ -17,16 +17,15 @@ package net.openid.appauth;
 import static net.openid.appauth.Preconditions.checkNotNull;
 
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import net.openid.appauth.JsonUtil.BooleanField;
 import net.openid.appauth.JsonUtil.Field;
 import net.openid.appauth.JsonUtil.StringField;
 import net.openid.appauth.JsonUtil.StringListField;
 import net.openid.appauth.JsonUtil.UriField;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 

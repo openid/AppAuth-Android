@@ -66,4 +66,9 @@ public class UtilsTest {
         InputStream in = new ByteArrayInputStream(TEST_STRING.getBytes());
         assertEquals(TEST_STRING, Utils.readInputStream(in));
     }
+
+    @Test(expected = IOException.class)
+    public void testReadInputStream_throw() throws Exception{
+        Utils.readInputStream(null);
+    }
 }

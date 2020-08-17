@@ -14,6 +14,8 @@
 
 package net.openid.appauth;
 
+import static net.openid.appauth.TestValues.TEST_ISSUER;
+import static net.openid.appauth.TestValues.getDiscoveryDocumentJson;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -21,7 +23,6 @@ import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,34 +34,33 @@ import org.robolectric.annotation.Config;
 @Config(constants = BuildConfig.class, sdk=16)
 public class AuthorizationServiceDiscoveryTest {
     // ToDo: add more tests for remaining getters
-    private static final String TEST_ISSUER = "test_issuer";
-    private static final String TEST_AUTHORIZATION_ENDPOINT = "http://test.openid.com/o/oauth/auth";
-    private static final String TEST_TOKEN_ENDPOINT = "http://test.openid.com/o/oauth/token";
-    private static final String TEST_USERINFO_ENDPOINT = "http://test.openid.com/o/oauth/userinfo";
-    private static final String TEST_JWKS_URI = "http://test.openid.com/o/oauth/jwks";
-    private static final List<String> TEST_RESPONSE_TYPE_SUPPORTED = Arrays.asList("code", "token");
-    private static final List<String> TEST_SUBJECT_TYPES_SUPPORTED = Arrays.asList("public");
-    private static final List<String> TEST_ID_TOKEN_SIGNING_ALG_VALUES = Arrays.asList("RS256");
-    private static final List<String> TEST_SCOPES_SUPPORTED = Arrays.asList("openid", "profile");
-    private static final List<String> TEST_TOKEN_ENDPOINT_AUTH_METHODS
-            = Arrays.asList("client_secret_post", "client_secret_basic");
-    private static final List<String> TEST_CLAIMS_SUPPORTED = Arrays.asList("aud", "exp");
+    static final String TEST_AUTHORIZATION_ENDPOINT = "http://test.openid.com/o/oauth/auth";
+    static final String TEST_TOKEN_ENDPOINT = "http://test.openid.com/o/oauth/token";
+    static final String TEST_USERINFO_ENDPOINT = "http://test.openid.com/o/oauth/userinfo";
+    static final String TEST_REGISTRATION_ENDPOINT = "http://test.openid.com/o/oauth/register";
+    static final String TEST_JWKS_URI = "http://test.openid.com/o/oauth/jwks";
+    static final List<String> TEST_RESPONSE_TYPES_SUPPORTED = Arrays.asList("code", "token");
+    static final List<String> TEST_SUBJECT_TYPES_SUPPORTED = Arrays.asList("public");
+    static final List<String> TEST_ID_TOKEN_SIGNING_ALG_VALUES = Arrays.asList("RS256");
+    static final List<String> TEST_SCOPES_SUPPORTED = Arrays.asList("openid", "profile");
+    static final List<String> TEST_TOKEN_ENDPOINT_AUTH_METHODS
+    = Arrays.asList("client_secret_post", "client_secret_basic");
+    static final List<String> TEST_CLAIMS_SUPPORTED = Arrays.asList("aud", "exp");
 
-    private static final String TEST_JSON = "{\n"
-            + " \"issuer\": \"" + TEST_ISSUER + "\",\n"
-            + " \"authorization_endpoint\": \"" + TEST_AUTHORIZATION_ENDPOINT + "\",\n"
-            + " \"token_endpoint\": \"" + TEST_TOKEN_ENDPOINT + "\",\n"
-            + " \"userinfo_endpoint\": \"" + TEST_USERINFO_ENDPOINT + "\",\n"
-            + " \"jwks_uri\": \"" + TEST_JWKS_URI + "\",\n"
-            + " \"response_types_supported\": " + toJson(TEST_RESPONSE_TYPE_SUPPORTED) + ",\n"
-            + " \"subject_types_supported\": " + toJson(TEST_SUBJECT_TYPES_SUPPORTED) + ",\n"
-            + " \"id_token_signing_alg_values_supported\": "
-            + toJson(TEST_ID_TOKEN_SIGNING_ALG_VALUES) + ",\n"
-            + " \"scopes_supported\": " + toJson(TEST_SCOPES_SUPPORTED) + ",\n"
-            + " \"token_endpoint_auth_methods_supported\": "
-            + toJson(TEST_TOKEN_ENDPOINT_AUTH_METHODS) + ",\n"
-            + " \"claims_supported\": " + toJson(TEST_CLAIMS_SUPPORTED) + "\n"
-            + "}";
+    static final String TEST_JSON = getDiscoveryDocumentJson(
+        TEST_ISSUER,
+        TEST_AUTHORIZATION_ENDPOINT,
+        TEST_TOKEN_ENDPOINT,
+        TEST_USERINFO_ENDPOINT,
+        TEST_REGISTRATION_ENDPOINT,
+        TEST_JWKS_URI,
+        TEST_RESPONSE_TYPES_SUPPORTED,
+        TEST_SUBJECT_TYPES_SUPPORTED,
+        TEST_ID_TOKEN_SIGNING_ALG_VALUES,
+        TEST_SCOPES_SUPPORTED,
+        TEST_TOKEN_ENDPOINT_AUTH_METHODS,
+        TEST_CLAIMS_SUPPORTED
+    );
 
     JSONObject mJson;
     AuthorizationServiceDiscovery mDiscovery;
@@ -194,7 +194,7 @@ public class AuthorizationServiceDiscoveryTest {
 
     @Test
     public void testGetResponseTypeSupported() {
-        assertEquals(TEST_RESPONSE_TYPE_SUPPORTED, mDiscovery.getResponseTypesSupported());
+        assertEquals(TEST_RESPONSE_TYPES_SUPPORTED, mDiscovery.getResponseTypesSupported());
     }
 
     @Test
@@ -224,7 +224,4 @@ public class AuthorizationServiceDiscoveryTest {
         assertEquals(TEST_CLAIMS_SUPPORTED, mDiscovery.getClaimsSupported());
     }
 
-    private static String toJson(List<String> strings) {
-        return new JSONArray(strings).toString();
-    }
 }

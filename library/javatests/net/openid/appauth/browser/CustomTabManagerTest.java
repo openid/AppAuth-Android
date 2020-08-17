@@ -8,11 +8,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.customtabs.CustomTabsCallback;
-import android.support.customtabs.CustomTabsClient;
-import android.support.customtabs.CustomTabsService;
-import android.support.customtabs.CustomTabsServiceConnection;
-import android.support.customtabs.CustomTabsSession;
+import androidx.browser.customtabs.CustomTabsCallback;
+import androidx.browser.customtabs.CustomTabsClient;
+import androidx.browser.customtabs.CustomTabsService;
+import androidx.browser.customtabs.CustomTabsServiceConnection;
+import androidx.browser.customtabs.CustomTabsSession;
 import java.util.List;
 import net.openid.appauth.BuildConfig;
 import org.junit.Before;
@@ -114,6 +114,19 @@ public class CustomTabManagerTest {
     public void testCreateSession_browserDoesNotSupportCustomTabs() {
         startBind(false);
         assertThat(mManager.createSession(null)).isNull();
+    }
+
+    @Test
+    public void testCreateSession_creationFails() {
+        startBind(true);
+        provideClient();
+
+        // Emulate session creation failure - annoyingly the contract for this is just to return
+        // null, rather than an exception with some useful context.
+        CustomTabsCallback mockCallbacks = Mockito.mock(CustomTabsCallback.class);
+        Mockito.doReturn(null).when(mClient).newSession(mockCallbacks);
+
+        assertThat(mManager.createSession(mockCallbacks)).isNull();
     }
 
     @Test

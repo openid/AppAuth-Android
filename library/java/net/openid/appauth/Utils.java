@@ -33,6 +33,10 @@ class Utils {
      * Read a string from an input stream.
      */
     public static String readInputStream(InputStream in) throws IOException {
+        if (in == null) {
+            throw new IOException("Input stream must not be null");
+        }
+
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         char[] buffer = new char[INITIAL_READ_BUFFER_SIZE];
         StringBuilder sb = new StringBuilder();

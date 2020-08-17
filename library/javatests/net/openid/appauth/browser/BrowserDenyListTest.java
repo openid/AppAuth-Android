@@ -24,33 +24,33 @@ import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk=16)
-public class BrowserBlacklistTest {
+public class BrowserDenyListTest {
 
     @Test
-    public void testMatches_emptyBlacklist() {
-        BrowserBlacklist blacklist = new BrowserBlacklist();
-        assertThat(blacklist.matches(Browsers.Chrome.customTab("46"))).isTrue();
-        assertThat(blacklist.matches(Browsers.Firefox.standaloneBrowser("10"))).isTrue();
-        assertThat(blacklist.matches(Browsers.SBrowser.standaloneBrowser("11"))).isTrue();
+    public void testMatches_emptyDenyList() {
+        BrowserDenyList denyList = new BrowserDenyList();
+        assertThat(denyList.matches(Browsers.Chrome.customTab("46"))).isTrue();
+        assertThat(denyList.matches(Browsers.Firefox.standaloneBrowser("10"))).isTrue();
+        assertThat(denyList.matches(Browsers.SBrowser.standaloneBrowser("11"))).isTrue();
     }
 
     @Test
     public void testMatches_singleBrowser() {
-        BrowserBlacklist blacklist = new BrowserBlacklist(VersionedBrowserMatcher.FIREFOX_BROWSER);
-        assertThat(blacklist.matches(Browsers.Chrome.customTab("46"))).isTrue();
-        assertThat(blacklist.matches(Browsers.Firefox.standaloneBrowser("10"))).isFalse();
-        assertThat(blacklist.matches(Browsers.SBrowser.standaloneBrowser("11"))).isTrue();
+        BrowserDenyList denyList = new BrowserDenyList(VersionedBrowserMatcher.FIREFOX_BROWSER);
+        assertThat(denyList.matches(Browsers.Chrome.customTab("46"))).isTrue();
+        assertThat(denyList.matches(Browsers.Firefox.standaloneBrowser("10"))).isFalse();
+        assertThat(denyList.matches(Browsers.SBrowser.standaloneBrowser("11"))).isTrue();
     }
 
     @Test
     public void testMatches_customTabs() {
-        BrowserBlacklist blacklist = new BrowserBlacklist(
+        BrowserDenyList denyList = new BrowserDenyList(
                 VersionedBrowserMatcher.CHROME_CUSTOM_TAB,
                 VersionedBrowserMatcher.SAMSUNG_CUSTOM_TAB);
 
-        assertThat(blacklist.matches(Browsers.Chrome.standaloneBrowser("46"))).isTrue();
-        assertThat(blacklist.matches(Browsers.Chrome.customTab("46"))).isFalse();
-        assertThat(blacklist.matches(Browsers.SBrowser.standaloneBrowser("11"))).isTrue();
-        assertThat(blacklist.matches(Browsers.SBrowser.customTab("11"))).isFalse();
+        assertThat(denyList.matches(Browsers.Chrome.standaloneBrowser("46"))).isTrue();
+        assertThat(denyList.matches(Browsers.Chrome.customTab("46"))).isFalse();
+        assertThat(denyList.matches(Browsers.SBrowser.standaloneBrowser("11"))).isTrue();
+        assertThat(denyList.matches(Browsers.SBrowser.customTab("11"))).isFalse();
     }
 }

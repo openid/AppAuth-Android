@@ -19,10 +19,10 @@ import static net.openid.appauth.Preconditions.checkNotNull;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
-import android.support.v4.util.ArrayMap;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import androidx.collection.ArrayMap;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -200,6 +200,18 @@ public final class AuthorizationException extends Exception {
          */
         public static final AuthorizationException INVALID_REGISTRATION_RESPONSE =
                 generalEx(7, "Invalid registration response");
+
+        /**
+         * Indicates that a received ID token could not be parsed
+         */
+        public static final AuthorizationException ID_TOKEN_PARSING_ERROR =
+                generalEx(8, "Unable to parse ID Token");
+
+        /**
+         * Indicates that a received ID token is invalid
+         */
+        public static final AuthorizationException ID_TOKEN_VALIDATION_ERROR =
+                generalEx(9, "Invalid ID Token");
     }
 
     /**

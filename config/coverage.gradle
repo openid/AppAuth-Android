@@ -1,8 +1,4 @@
 apply plugin: 'jacoco'
-jacoco {
-    toolVersion = "0.8.1"
-}
-
 android {
     testOptions {
         unitTests.all {
@@ -21,10 +17,18 @@ task jacocoTestReport(type: JacocoReport, dependsOn: "testDebugUnitTest") {
         html.enabled = true
     }
     // Class R is used, but usage will not be covered, so ignore this class from report
-    classDirectories = fileTree(
-            dir: 'build/intermediates/classes/debug',
-            excludes: ['**/BuildConfig.class']
-    )
-    sourceDirectories = files('java')
-    executionData = files('build/jacoco/testDebugUnitTest.exec')
+    afterEvaluate {
+        getClassDirectories().setFrom(
+            fileTree(
+                dir: 'build/intermediates/classes/debug',
+                excludes: ['**/BuildConfig.class']
+            )
+        )
+        getSourceDirectories().setFrom(
+            files('java')
+        )
+        getExecutionData().setFrom(
+            files('build/jacoco/testDebugUnitTest.exec')
+        )
+    }
 }

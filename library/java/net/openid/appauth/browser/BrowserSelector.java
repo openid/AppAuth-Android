@@ -24,9 +24,10 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import androidx.browser.customtabs.CustomTabsService;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -52,7 +53,7 @@ public final class BrowserSelector {
      */
     @VisibleForTesting
     static final String ACTION_CUSTOM_TABS_CONNECTION =
-            "android.support.customtabs.action.CustomTabsService";
+            CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION;
 
     /**
      * An arbitrary (but unregistrable, per
@@ -76,10 +77,20 @@ public final class BrowserSelector {
     public static List<BrowserDescriptor> getAllBrowsers(Context context) {
         PackageManager pm = context.getPackageManager();
         List<BrowserDescriptor> browsers = new ArrayList<>();
+        String defaultBrowserPackage = null;
 
         int queryFlag = PackageManager.GET_RESOLVED_FILTER;
         if (VERSION.SDK_INT >= VERSION_CODES.M) {
             queryFlag |= PackageManager.MATCH_ALL;
+        }
+        // When requesting all matching activities for an intent from the package manager,
+        // the user's preferred browser is not guaranteed to be at the head of this list.
+        // Therefore, the preferred browser must be separately determined and the resultant
+        // list of browsers reordered to restored this desired property.
+        ResolveInfo resolvedDefaultActivity =
+                pm.resolveActivity(BROWSER_INTENT, 0);
+        if (resolvedDefaultActivity != null) {
+            defaultBrowserPackage = resolvedDefaultActivity.activityInfo.packageName;
         }
         List<ResolveInfo> resolvedActivityList =
                 pm.queryIntentActivities(BROWSER_INTENT, queryFlag);
@@ -91,15 +102,34 @@ public final class BrowserSelector {
             }
 
             try {
+                int defaultBrowserIndex = 0;
                 PackageInfo packageInfo = pm.getPackageInfo(
                         info.activityInfo.packageName,
                         PackageManager.GET_SIGNATURES);
 
                 if (hasWarmupService(pm, info.activityInfo.packageName)) {
-                    browsers.add(new BrowserDescriptor(packageInfo, true));
+                    BrowserDescriptor customTabBrowserDescriptor =
+                            new BrowserDescriptor(packageInfo, true);
+                    if (info.activityInfo.packageName.equals(defaultBrowserPackage)) {
+                        // If the default browser is having a WarmupService,
+                        // will it be added to the beginning of the list.
+                        browsers.add(defaultBrowserIndex, customTabBrowserDescriptor);
+                        defaultBrowserIndex++;
+                    } else {
+                        browsers.add(customTabBrowserDescriptor);
+                    }
                 }
 
-                browsers.add(new BrowserDescriptor(packageInfo, false));
+                BrowserDescriptor fullBrowserDescriptor =
+                        new BrowserDescriptor(packageInfo, false);
+                if (info.activityInfo.packageName.equals(defaultBrowserPackage)) {
+                    // The default browser is added to the beginning of the list.
+                    // If there is support for Custom Tabs, will the one disabling Custom Tabs
+                    // be added as the second entry.
+                    browsers.add(defaultBrowserIndex, fullBrowserDescriptor);
+                } else {
+                    browsers.add(fullBrowserDescriptor);
+                }
             } catch (NameNotFoundException e) {
                 // a descriptor cannot be generated without the package info
             }
@@ -152,7 +182,8 @@ public final class BrowserSelector {
     private static boolean isFullBrowser(ResolveInfo resolveInfo) {
         // The filter must match ACTION_VIEW, CATEGORY_BROWSEABLE, and at least one scheme,
         if (!resolveInfo.filter.hasAction(Intent.ACTION_VIEW)
-                || !resolveInfo.filter.hasCategory(Intent.CATEGORY_BROWSABLE)
+                || !(resolveInfo.filter.hasCategory(Intent.CATEGORY_BROWSABLE)
+                    || (resolveInfo.filter.hasCategory(Intent.CATEGORY_APP_BROWSER)))
                 || resolveInfo.filter.schemesIterator() == null) {
             return false;
         }

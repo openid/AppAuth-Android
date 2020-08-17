@@ -14,7 +14,7 @@
 
 package net.openid.appauthdemo;
 
-import android.support.v7.app.AppCompatDelegate;
+import androidx.appcompat.app.AppCompatDelegate;
 
 /**
  * Application object; ensures that the support library is correctly configured for use of
