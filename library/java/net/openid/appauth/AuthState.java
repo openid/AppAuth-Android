@@ -619,7 +619,7 @@ public class AuthState {
                 mLastAuthorizationResponse.request.configuration,
                 mLastAuthorizationResponse.request.clientId)
                 .setGrantType(GrantTypeValues.REFRESH_TOKEN)
-                .setScope(mLastAuthorizationResponse.request.scope)
+                .setScope(null)
                 .setRefreshToken(mRefreshToken)
                 .setAdditionalParameters(additionalParameters)
                 .build();
