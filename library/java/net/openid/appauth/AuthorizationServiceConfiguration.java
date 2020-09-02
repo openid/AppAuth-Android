@@ -224,6 +224,28 @@ public class AuthorizationServiceConfiguration {
         fetchFromUrl(buildConfigurationUriFromIssuer(openIdConnectIssuerUri), callback);
     }
 
+    /**
+     * Fetch an AuthorizationServiceConfiguration from an OpenID Connect issuer URI, using
+     * the {@link DefaultConnectionBuilder default connection builder}.
+     * This method is equivalent to {@link #fetchFromUrl(Uri, RetrieveConfigurationCallback,
+     * ConnectionBuilder)}, but automatically appends the OpenID connect well-known
+     * configuration path to the URI.
+     *
+     * @param openIdConnectIssuerUri The issuer URI, e.g. "https://accounts.google.com"
+     * @param connectionBuilder      The connection builder that is used to establish a connection
+     *                               to the resource server.
+     * @param callback               The callback to invoke upon completion.
+     * @see "OpenID Connect discovery 1.0
+     * <https://openid.net/specs/openid-connect-discovery-1_0.html>"
+     */
+    public static void fetchFromIssuer(@NonNull Uri openIdConnectIssuerUri,
+                                       @NonNull RetrieveConfigurationCallback callback,
+                                       @NonNull ConnectionBuilder connectionBuilder) {
+        fetchFromUrl(buildConfigurationUriFromIssuer(openIdConnectIssuerUri),
+                callback,
+                connectionBuilder);
+    }
+
     static Uri buildConfigurationUriFromIssuer(Uri openIdConnectIssuerUri) {
         return openIdConnectIssuerUri.buildUpon()
                 .appendPath(WELL_KNOWN_PATH)
