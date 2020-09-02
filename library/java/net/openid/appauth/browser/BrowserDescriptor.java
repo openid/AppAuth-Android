@@ -32,7 +32,8 @@ public class BrowserDescriptor {
     // See: http://stackoverflow.com/a/2816747
     private static final int PRIME_HASH_FACTOR = 92821;
 
-    private static final String DIGEST_SHA_512 = "SHA-512";
+    public static final String DIGEST_SHA_256 = "SHA-256";
+    public static final String DIGEST_SHA_512 = "SHA-512";
 
     /**
      * The package name of the browser app.
@@ -142,17 +143,17 @@ public class BrowserDescriptor {
     }
 
     /**
-     * Generates a SHA-512 hash, Base64 url-safe encoded, from a {@link Signature}.
+     * Generates a SHA-* hash, Base64 url-safe encoded, from a {@link Signature}.
      */
     @NonNull
-    public static String generateSignatureHash(@NonNull Signature signature) {
+    public static String generateSignatureHash(@NonNull Signature signature, @NonNull String digestSHA) {
         try {
-            MessageDigest digest = MessageDigest.getInstance(DIGEST_SHA_512);
+            MessageDigest digest = MessageDigest.getInstance(digestSHA);
             byte[] hashBytes = digest.digest(signature.toByteArray());
             return Base64.encodeToString(hashBytes, Base64.URL_SAFE | Base64.NO_WRAP);
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException(
-                    "Platform does not support" + DIGEST_SHA_512 + " hashing");
+                    "Platform does not support" + digestSHA + " hashing");
         }
     }
 
@@ -162,9 +163,18 @@ public class BrowserDescriptor {
      */
     @NonNull
     public static Set<String> generateSignatureHashes(@NonNull Signature[] signatures) {
+        return generateSignatureHashes(signatures, DIGEST_SHA_512);
+    }
+
+    /**
+     * Generates a set of SHA-*, Base64 url-safe encoded signature hashes from the provided
+     * array of signatures.
+     */
+    @NonNull
+    public static Set<String> generateSignatureHashes(@NonNull Signature[] signatures, @NonNull String digestSHA) {
         Set<String> signatureHashes = new HashSet<>();
         for (Signature signature : signatures) {
-            signatureHashes.add(generateSignatureHash(signature));
+            signatureHashes.add(generateSignatureHash(signature, digestSHA));
         }
 
         return signatureHashes;
