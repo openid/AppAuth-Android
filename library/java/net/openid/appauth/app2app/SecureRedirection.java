@@ -8,25 +8,26 @@ import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.util.Pair;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.browser.customtabs.CustomTabsIntent;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.Volley;
+import java.io.IOException;
+import java.io.InputStream;
 
+import java.net.HttpURLConnection;
+
+import net.openid.appauth.Utils;
 import net.openid.appauth.browser.BrowserAllowList;
 import net.openid.appauth.browser.BrowserDescriptor;
 import net.openid.appauth.browser.BrowserSelector;
 import net.openid.appauth.browser.VersionedBrowserMatcher;
+import net.openid.appauth.connectivity.DefaultConnectionBuilder;
 
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,53 +48,70 @@ public final class SecureRedirection {
      * work it is required that the "/.well-known/assetlinks.json" file is correctly set up for this
      * domain and that the target app has an intent-filter for this URL.
      */
-    public static void secureRedirection(@NotNull Context context, @NotNull Uri uri) {
+    public static void secureRedirection(@NonNull Context context, @NonNull Uri uri) {
         getAssetLinksFile(new RedirectSession(context, uri));
     }
 
     /**
      * This function retrieves the '/.well-known/assetlinks.json' file from the given domain.
      */
-    private static void getAssetLinksFile(@NotNull final RedirectSession redirectSession) {
-        RequestQueue volleyQueue = Volley.newRequestQueue(redirectSession.getContext());
+    private static void getAssetLinksFile(@NonNull final RedirectSession redirectSession) {
+        new DownloadAssetLinksFile().execute(redirectSession);
+    }
 
-        String url =
-            redirectSession.getUri().getScheme()
+    private static class DownloadAssetLinksFile extends
+        AsyncTask<RedirectSession, Void, RedirectSession> {
+
+        @Override
+        protected RedirectSession doInBackground(RedirectSession... redirectSessions) {
+            RedirectSession redirectSession = redirectSessions[0];
+            Uri uri = Uri.parse(redirectSession.getUri().getScheme()
                 + "://"
                 + redirectSession.getUri().getHost()
                 + ":"
                 + redirectSession.getUri().getPort()
-                + "/.well-known/assetlinks.json";
+                + "/.well-known/assetlinks.json");
 
-        JsonArrayRequest request =
-            new JsonArrayRequest(
-                Request.Method.GET,
-                url,
-                null,
-                new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        JSONArray baseCertFingerprints =
-                            findInstalledApp(redirectSession, response);
+            InputStream is = null;
+            try {
+                HttpURLConnection conn = DefaultConnectionBuilder.INSTANCE.openConnection(uri);
+                conn.setRequestMethod("GET");
+                conn.setDoInput(true);
+                conn.connect();
 
-                        redirectSession.setBaseCertFingerprints(
-                            CertificateFingerprintEncoding
-                                .certFingerprintsToDecodedString(
-                                    baseCertFingerprints));
+                is = conn.getInputStream();
+                JSONArray response = new JSONArray(Utils.readInputStream(is));
+                redirectSession.setAssetLinksFile(response);
 
-                        doRedirection(redirectSession);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        System.err.println(
-                            "Failed to fetch '/.well-known/assetlinks.json' from domain "
-                                + "'${redirectSession.uri.host}'\nError: ${error}");
-                    }
-                });
+            } catch (IOException e) {
+                redirectSession.setAssetLinksFile(null);
+            } catch (JSONException e) {
+                redirectSession.setAssetLinksFile(null);
+            } finally {
+                Utils.closeQuietly(is);
+            }
+            return redirectSession;
+        }
 
-        volleyQueue.add(request);
+        @Override
+        protected void onPostExecute(RedirectSession redirectSession) {
+            if (redirectSession.getAssetLinksFile() != null) {
+                JSONArray baseCertFingerprints =
+                    findInstalledApp(redirectSession, redirectSession.getAssetLinksFile());
+
+                redirectSession.setBaseCertFingerprints(
+                    CertificateFingerprintEncoding
+                        .certFingerprintsToDecodedString(
+                            baseCertFingerprints));
+
+                doRedirection(redirectSession);
+            } else {
+                System.err.println(
+                    "Failed to fetch '/.well-known/assetlinks.json' from domain "
+                        + "'${redirectSession.uri.host}'\nError: ${error}");
+                redirectToWeb(redirectSession.getContext(), redirectSession.getUri());
+            }
+        }
     }
 
     /**
@@ -105,9 +123,9 @@ public final class SecureRedirection {
      * @param assetLinks
      * @return
      */
-    @NotNull
+    @NonNull
     private static JSONArray findInstalledApp(
-        @NotNull RedirectSession redirectSession, @NotNull JSONArray assetLinks) {
+        @NonNull RedirectSession redirectSession, @NonNull JSONArray assetLinks) {
         Pair<Set<String>, Map<String, JSONArray>> basePair =
             getBaseValuesFromAssetLinksFile(assetLinks);
         Set<String> foundPackageNames = getPackageNamesForIntent(redirectSession);
@@ -136,9 +154,9 @@ public final class SecureRedirection {
      * @param assetLinks
      * @return
      */
-    @NotNull
+    @NonNull
     private static Pair<Set<String>, Map<String, JSONArray>> getBaseValuesFromAssetLinksFile(
-        @NotNull JSONArray assetLinks) {
+        @NonNull JSONArray assetLinks) {
         Set<String> basePackageNames = new HashSet<>();
         Map<String, JSONArray> baseCertFingerprints = new HashMap<>();
         try {
@@ -165,8 +183,8 @@ public final class SecureRedirection {
      * @param redirectSession
      * @return
      */
-    @NotNull
-    private static Set<String> getPackageNamesForIntent(@NotNull RedirectSession redirectSession) {
+    @NonNull
+    private static Set<String> getPackageNamesForIntent(@NonNull RedirectSession redirectSession) {
         /*
            Source: https://stackoverflow.com/questions/11904158/can-i-disable-an-option-when-i-call-intent-action-view
         */
@@ -191,7 +209,7 @@ public final class SecureRedirection {
      * This method checks whether the legit app is installed and either redirect the user to this
      * app or to the default browser.
      */
-    private static void doRedirection(@NotNull RedirectSession redirectSession) {
+    private static void doRedirection(@NonNull RedirectSession redirectSession) {
         if (!redirectSession.getBasePackageName().isEmpty() && isAppLegit(redirectSession)) {
             Intent redirectIntent = new Intent(Intent.ACTION_VIEW, redirectSession.getUri());
             redirectIntent.setPackage(redirectSession.getBasePackageName());
@@ -205,7 +223,7 @@ public final class SecureRedirection {
      * This method take a packageName and the signing certificate hash of this package to validate
      * whether the correct app is installed on the device.
      */
-    private static boolean isAppLegit(@NotNull RedirectSession redirectSession) {
+    private static boolean isAppLegit(@NonNull RedirectSession redirectSession) {
         Set<String> foundCertFingerprints = getSigningCertificates(redirectSession);
         if (foundCertFingerprints != null) {
             return matchHashes(redirectSession.getBaseCertFingerprints(), foundCertFingerprints);
@@ -217,7 +235,7 @@ public final class SecureRedirection {
      * This method retrieves the signing certificate of an app from the Android Package Manager. If
      * the app is not installed this method returns null.
      */
-    private static Set<String> getSigningCertificates(@NotNull RedirectSession redirectSession) {
+    private static Set<String> getSigningCertificates(@NonNull RedirectSession redirectSession) {
         try {
             Signature[] signatures;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
@@ -253,7 +271,7 @@ public final class SecureRedirection {
      */
     @VisibleForTesting
     public static boolean matchHashes(
-        @NotNull Set<String> certHashes0, @NotNull Set<String> certHashes1) {
+        @NonNull Set<String> certHashes0, @NonNull Set<String> certHashes1) {
         return certHashes0.containsAll(certHashes1) && certHashes0.size() == certHashes1.size();
     }
 
@@ -261,7 +279,7 @@ public final class SecureRedirection {
      * This method uses the BrowserSelector class to find the user's default browser and validated
      * the integrity of this browser. It then opens the given uri in an Android Custom Tab.
      */
-    public static void redirectToWeb(@NotNull Context context, @NotNull Uri uri) {
+    public static void redirectToWeb(@NonNull Context context, @NonNull Uri uri) {
         redirectToWeb(context, uri, 0, Color.WHITE);
     }
 
@@ -270,7 +288,7 @@ public final class SecureRedirection {
      * the integrity of this browser. It then opens the given uri in an Android Custom Tab.
      */
     public static void redirectToWeb(
-        @NotNull Context context, @NotNull Uri uri, int additionalFlags, int toolbarColor) {
+        @NonNull Context context, @NonNull Uri uri, int additionalFlags, int toolbarColor) {
         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
         builder.setToolbarColor(toolbarColor);
         CustomTabsIntent customTabsIntent = builder.build();

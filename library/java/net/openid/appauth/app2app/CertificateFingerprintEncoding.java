@@ -2,7 +2,8 @@ package net.openid.appauth.app2app;
 
 import android.util.Base64;
 
-import org.jetbrains.annotations.NotNull;
+import androidx.annotation.NonNull;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -18,9 +19,9 @@ final class CertificateFingerprintEncoding {
      * This method takes the certificate fingerprints from the '/.well-known/assetlinks.json' file
      * and decodes it in the correct way to compare the hashes with the ones found on the device.
      */
-    @NotNull
+    @NonNull
     protected static Set<String> certFingerprintsToDecodedString(
-        @NotNull JSONArray certFingerprints) {
+        @NonNull JSONArray certFingerprints) {
         Set<String> hashes = new HashSet<>();
 
         for (int i = 0; i < certFingerprints.length(); i++) {
@@ -41,8 +42,8 @@ final class CertificateFingerprintEncoding {
      * <p>
      * Example hexString: 4F:69:88:01:...
      */
-    @NotNull
-    private static byte[] hexStringToByteArray(@NotNull String hexString) {
+    @NonNull
+    private static byte[] hexStringToByteArray(@NonNull String hexString) {
         String[] hexValues = hexString.split(":");
         byte[] byteArray = new byte[hexValues.length];
         String str;

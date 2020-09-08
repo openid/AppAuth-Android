@@ -25,9 +25,7 @@ android.testBuildType "forTests"
 dependencies {
     api "androidx.browser:browser:${project.androidXVersions.browser}"
     implementation "androidx.annotation:annotation:${project.androidXVersions.annotation}"
-    implementation 'org.jetbrains:annotations:15.0'
     apply from: '../config/testdeps.gradle', to:it
-    implementation 'com.android.volley:volley:1.1.1'
 }
 
 apply from: '../config/style.gradle'

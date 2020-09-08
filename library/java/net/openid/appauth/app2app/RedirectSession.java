@@ -3,9 +3,10 @@ package net.openid.appauth.app2app;
 import android.content.Context;
 import android.net.Uri;
 
-import org.jetbrains.annotations.NotNull;
+import androidx.annotation.NonNull;
 
 import java.util.Set;
+import org.json.JSONArray;
 
 /**
  * Class to hold all important information to perform a secure redirection.
@@ -16,36 +17,37 @@ class RedirectSession {
     private Uri mUri;
     private String mBasePackageName = "";
     private Set<String> mBaseCertFingerprints;
+    private JSONArray mAssetLinksFile = null;
 
-    protected RedirectSession(@NotNull Context mContext, @NotNull Uri mUri) {
+    protected RedirectSession(@NonNull Context mContext, @NonNull Uri mUri) {
         this.mContext = mContext;
         this.mUri = mUri;
     }
 
-    @NotNull
+    @NonNull
     protected Context getContext() {
         return mContext;
     }
 
-    protected void setContext(@NotNull Context context) {
+    protected void setContext(@NonNull Context context) {
         this.mContext = context;
     }
 
-    @NotNull
+    @NonNull
     protected Uri getUri() {
         return mUri;
     }
 
-    protected void setUri(@NotNull Uri uri) {
+    protected void setUri(@NonNull Uri uri) {
         this.mUri = uri;
     }
 
-    @NotNull
+    @NonNull
     protected String getBasePackageName() {
         return mBasePackageName;
     }
 
-    protected void setBasePackageName(@NotNull String basePackageName) {
+    protected void setBasePackageName(@NonNull String basePackageName) {
         this.mBasePackageName = basePackageName;
     }
 
@@ -55,5 +57,13 @@ class RedirectSession {
 
     protected void setBaseCertFingerprints(Set<String> mBaseCertFingerprints) {
         this.mBaseCertFingerprints = mBaseCertFingerprints;
+    }
+
+    public JSONArray getAssetLinksFile() {
+        return mAssetLinksFile;
+    }
+
+    public void setAssetLinksFile(JSONArray mAssetLinksFile) {
+        this.mAssetLinksFile = mAssetLinksFile;
     }
 }
