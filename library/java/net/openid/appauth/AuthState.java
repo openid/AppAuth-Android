@@ -19,6 +19,7 @@ import static net.openid.appauth.Preconditions.checkArgument;
 import static net.openid.appauth.Preconditions.checkNotEmpty;
 import static net.openid.appauth.Preconditions.checkNotNull;
 
+import android.os.AsyncTask;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -32,6 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 /**
  * Collects authorization state from authorization requests and responses. This facilitates
@@ -78,6 +80,7 @@ public class AuthState {
     private AuthorizationException mAuthorizationException;
 
     private final Object mPendingActionsSyncObject = new Object();
+    private Executor mTokenRefreshExecutor = AsyncTask.THREAD_POOL_EXECUTOR;
     private List<AuthStateAction> mPendingActions;
     private boolean mNeedsTokenRefreshOverride;
 
@@ -366,6 +369,14 @@ public class AuthState {
     }
 
     /**
+     * Sets the Executor to use when refreshing the token.
+     * @see {@link AsyncTask#executeOnExecutor}
+     */
+    public void setTokenRefreshExecutor(Executor exec) {
+        mTokenRefreshExecutor = exec;
+    }
+
+    /**
      * Updates the authorization state based on a new authorization response.
      */
     public void update(
@@ -532,15 +543,28 @@ public class AuthState {
         checkNotNull(action, "action cannot be null");
 
         if (!getNeedsTokenRefresh(clock)) {
-            action.execute(getAccessToken(), getIdToken(), null);
+            mTokenRefreshExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    action.execute(getAccessToken(), getIdToken(), null);
+                }
+            });
             return;
         }
 
         if (mRefreshToken == null) {
-            AuthorizationException ex = AuthorizationException.fromTemplate(
-                    AuthorizationRequestErrors.CLIENT_ERROR,
-                    new IllegalStateException("No refresh token available and token have expired"));
-            action.execute(null, null, ex);
+            mTokenRefreshExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    AuthorizationException ex = AuthorizationException.fromTemplate(
+                            AuthorizationRequestErrors.CLIENT_ERROR,
+                            new IllegalStateException(
+                                    "No refresh token available and token have expired")
+                    );
+
+                    action.execute(null, null, ex);
+                }
+            });
             return;
         }
 
@@ -560,6 +584,7 @@ public class AuthState {
         service.performTokenRequest(
                 createTokenRefreshRequest(refreshTokenAdditionalParams),
                 clientAuth,
+                mTokenRefreshExecutor,
                 new AuthorizationService.TokenResponseCallback() {
                     @Override
                     public void onTokenRequestCompleted(

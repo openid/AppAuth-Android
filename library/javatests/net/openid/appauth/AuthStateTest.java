@@ -36,6 +36,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.util.Collections;
+import java.util.concurrent.Executor;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,6 +54,15 @@ public class AuthStateTest {
     private static final Long TWO_MINUTES = 120000L;
 
     private TestClock mClock;
+    /**
+     *
+     */
+    private Executor mExecutor = new Executor() {
+        @Override
+        public void execute(Runnable runnable) {
+            runnable.run();
+        }
+    };
 
     @Before
     public void setUp() {
@@ -61,6 +72,7 @@ public class AuthStateTest {
     @Test
     public void testInitialState() {
         AuthState state = new AuthState();
+
         assertThat(state.isAuthorized()).isFalse();
 
         assertThat(state.getAccessToken()).isNull();
@@ -412,6 +424,7 @@ public class AuthStateTest {
                 .build();
         TokenResponse tokenResp = getTestAuthCodeExchangeResponse();
         AuthState state = new AuthState(authResp, tokenResp, null);
+        state.setTokenRefreshExecutor(mExecutor);
 
         AuthorizationService service = mock(AuthorizationService.class);
         AuthState.AuthStateAction action = mock(AuthState.AuthStateAction.class);
@@ -470,6 +483,7 @@ public class AuthStateTest {
         verify(service, times(1)).performTokenRequest(
                 requestCaptor.capture(),
                 any(ClientAuthentication.class),
+                any(Executor.class),
                 callbackCaptor.capture());
 
         assertThat(requestCaptor.getValue().refreshToken).isEqualTo(tokenResp.refreshToken);
@@ -545,6 +559,7 @@ public class AuthStateTest {
         verify(service, times(1)).performTokenRequest(
             requestCaptor.capture(),
             any(ClientAuthentication.class),
+            any(Executor.class),
             callbackCaptor.capture());
 
         assertThat(requestCaptor.getValue().refreshToken).isEqualTo(tokenResp.refreshToken);

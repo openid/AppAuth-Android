@@ -50,6 +50,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URLConnection;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 
 /**
@@ -304,7 +305,19 @@ public class AuthorizationService {
     public void performTokenRequest(
             @NonNull TokenRequest request,
             @NonNull TokenResponseCallback callback) {
-        performTokenRequest(request, NoClientAuthentication.INSTANCE, callback);
+        performTokenRequest(request, AsyncTask.THREAD_POOL_EXECUTOR, callback);
+    }
+
+    /**
+     * Sends a request to the authorization service to exchange a code granted as part of an
+     * authorization request for a token. The result of this request will be sent to the provided
+     * callback handler.
+     */
+    public void performTokenRequest(
+            @NonNull TokenRequest request,
+            @NonNull Executor executor,
+            @NonNull TokenResponseCallback callback) {
+        performTokenRequest(request, NoClientAuthentication.INSTANCE, executor, callback);
     }
 
     /**
@@ -316,16 +329,32 @@ public class AuthorizationService {
             @NonNull TokenRequest request,
             @NonNull ClientAuthentication clientAuthentication,
             @NonNull TokenResponseCallback callback) {
+        performTokenRequest(request,
+                clientAuthentication,
+                AsyncTask.THREAD_POOL_EXECUTOR,
+                callback);
+    }
+
+    /**
+     * Sends a request to the authorization service to exchange a code granted as part of an
+     * authorization request for a token. The result of this request will be sent to the provided
+     * callback handler.
+     */
+    public void performTokenRequest(
+            @NonNull TokenRequest request,
+            @NonNull ClientAuthentication clientAuthentication,
+            @NonNull Executor executor,
+            @NonNull TokenResponseCallback callback) {
         checkNotDisposed();
         Logger.debug("Initiating code exchange request to %s",
                 request.configuration.tokenEndpoint);
         new TokenRequestTask(
-                request,
-                clientAuthentication,
-                mClientConfiguration.getConnectionBuilder(),
-                SystemClock.INSTANCE,
-                callback)
-                .execute();
+            request,
+            clientAuthentication,
+            mClientConfiguration.getConnectionBuilder(),
+            SystemClock.INSTANCE,
+            callback)
+            .executeOnExecutor(executor);
     }
 
     /**
@@ -339,10 +368,10 @@ public class AuthorizationService {
         Logger.debug("Initiating dynamic client registration %s",
                 request.configuration.registrationEndpoint.toString());
         new RegistrationRequestTask(
-                request,
-                mClientConfiguration.getConnectionBuilder(),
-                callback)
-                .execute();
+            request,
+            mClientConfiguration.getConnectionBuilder(),
+            callback)
+            .execute();
     }
 
     /**
