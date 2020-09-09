@@ -174,21 +174,20 @@ AuthorizationServiceConfiguration serviceConfig =
 Where available, using an OpenID Connect discovery document is preferable:
 
 ```java
-AuthorizationServiceConfiguration serviceConfig =
-    AuthorizationServiceConfiguration.fetchFromIssuer(
-        Uri.parse("https://idp.example.com"),
-        new RetrieveConfigurationCallback() {
-          void onFetchConfigurationCompleted(
-              @Nullable AuthorizationServiceConfiguration serviceConfiguration,
-              @Nullable AuthorizationException ex) {
-            if (ex != null) {
-              Log.e(TAG, "failed to fetch configuration");
-              return;
-            }
+AuthorizationServiceConfiguration.fetchFromIssuer(
+    Uri.parse("https://idp.example.com"),
+    new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
+      public void onFetchConfigurationCompleted(
+          @Nullable AuthorizationServiceConfiguration serviceConfiguration,
+          @Nullable AuthorizationException ex) {
+        if (ex != null) {
+          Log.e(TAG, "failed to fetch configuration");
+          return;
+        }
 
-            // use serviceConfiguration as needed
-          }
-        });
+        // use serviceConfiguration as needed
+      }
+    });
 ```
 
 This will attempt to download a discovery document from the standard location
