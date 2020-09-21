@@ -24,10 +24,10 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
-import android.support.customtabs.CustomTabsService;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import androidx.browser.customtabs.CustomTabsService;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -182,7 +182,8 @@ public final class BrowserSelector {
     private static boolean isFullBrowser(ResolveInfo resolveInfo) {
         // The filter must match ACTION_VIEW, CATEGORY_BROWSEABLE, and at least one scheme,
         if (!resolveInfo.filter.hasAction(Intent.ACTION_VIEW)
-                || !resolveInfo.filter.hasCategory(Intent.CATEGORY_BROWSABLE)
+                || !(resolveInfo.filter.hasCategory(Intent.CATEGORY_BROWSABLE)
+                    || (resolveInfo.filter.hasCategory(Intent.CATEGORY_APP_BROWSER)))
                 || resolveInfo.filter.schemesIterator() == null) {
             return false;
         }

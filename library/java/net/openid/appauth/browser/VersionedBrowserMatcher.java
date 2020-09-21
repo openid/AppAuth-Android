@@ -14,14 +14,14 @@
 
 package net.openid.appauth.browser;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.util.Collections;
 import java.util.Set;
 
 /**
  * Matches a browser based on its package name, set of signatures, version and whether it is
- * being used as a custom tab. This can be used as part of a browser whitelist or blacklist.
+ * being used as a custom tab. This can be used as part of a browser allowList or denyList.
  */
 public class VersionedBrowserMatcher implements BrowserMatcher {
 

@@ -51,6 +51,26 @@ either through custom URI scheme redirects, or App Links.
 AS's that assume all clients are web-based or require clients to maintain
 confidentiality of the client secrets may not work well.
 
+From Android API 30 (R) and above, set [queries](https://developer.android.com/preview/privacy/package-visibility) in the manifest,
+to enable AppAuth searching for usable installed browsers.
+```xml
+<manifest package="com.example.game">
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.APP_BROWSER" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+    ...
+</manifest>
+```
+
 ## Demo app
 
 A demo app is contained within this repository. For instructions on how to
@@ -559,11 +579,11 @@ provided, such as:
   a version number within a defined
   [VersionRange](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/browser/VersionRange.java). This class also provides some static instances for matching
   Chrome, Firefox and Samsung SBrowser.
-- [BrowserWhitelist](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/browser/BrowserWhitelist.java):
+- [BrowserAllowList](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/browser/BrowserAllowList.java):
   takes a list of BrowserMatcher instances, and will match a browser if any
   of these child BrowserMatcher instances signals a match.
-- [BrowserBlacklist](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/browser/BrowserBlacklist.java):
-  the inverse of BrowserWhitelist - takes a list of browser matcher instances,
+- [BrowserDenyList](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/browser/BrowserDenyList.java):
+  the inverse of BrowserAllowList - takes a list of browser matcher instances,
   and will match a browser if it _does not_ match any of these child
   BrowserMatcher instances.
 
@@ -572,7 +592,7 @@ or SBrowser as a custom tab:
 
 ```java
 AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
-    .setBrowserMatcher(new BrowserWhitelist(
+    .setBrowserMatcher(new BrowserAllowList(
         VersionedBrowserMatcher.CHROME_CUSTOM_TAB,
         VersionedBrowserMatcher.SAMSUNG_CUSTOM_TAB))
     .build();
@@ -585,7 +605,7 @@ Samsung SBrowser:
 
 ```java
 AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
-    .setBrowserMatcher(new BrowserBlacklist(
+    .setBrowserMatcher(new BrowserDenyList(
         new VersionedBrowserMatcher(
             Browsers.SBrowser.PACKAGE_NAME,
             Browsers.SBrowser.SIGNATURE_SET,

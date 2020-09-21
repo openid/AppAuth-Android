@@ -4,11 +4,13 @@
 language: android
 android:
   components:
-    - build-tools-27.0.3
-    - android-27
+    - build-tools-30.0.0
+    - android-230
 script:
   - ./gradlew check jacoco assemble
   - bash <(curl -s https://codecov.io/bash)
+before_install:
+  - yes | sdkmanager "platforms;android-30"
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/

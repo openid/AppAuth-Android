@@ -16,8 +16,8 @@ package net.openid.appauth;
 
 import static net.openid.appauth.Preconditions.checkArgument;
 
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import androidx.annotation.Nullable;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;

@@ -33,6 +33,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.text.TextUtils;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -178,7 +179,7 @@ public class BrowserSelectorTest {
     @Test
     public void testSelect_matcherPrefersStandaloneChrome() throws NameNotFoundException {
         // in this scenario, the user has firefox as their default but the app insists on using
-        // chrome via a browser whitelist.
+        // chrome via a browser allowList.
         setBrowserList(FIREFOX, CHROME, DOLPHIN);
         setBrowsersWithWarmupSupport(FIREFOX, CHROME);
         checkSelectedBrowser(CHROME,
@@ -408,7 +409,7 @@ public class BrowserSelectorTest {
         }
 
         public TestBrowserBuilder addSignature(String signature) {
-            mSignatures.add(signature.getBytes(Charset.forName("UTF-8")));
+            mSignatures.add(signature.getBytes(StandardCharsets.UTF_8));
             return this;
         }
 

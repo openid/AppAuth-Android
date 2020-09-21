@@ -14,55 +14,27 @@
 
 package net.openid.appauth.browser;
 
-import android.support.annotation.NonNull;
-
-import java.util.Arrays;
-import java.util.List;
-
 /**
- * A blacklist of browsers. This will reject a match for any browser on the list, and permit
- * all others. Examples:
- *
- * ```java
- * // blacklist Chrome, whether using a custom tab or not
- * new BrowserBlacklist(
- *     VersionedBrowserMatcher.CHROME_BROWSER,
- *     VersionedBrowserMatcher.CHROME_CUSTOM_TAB);
- *
- * // blacklist Firefox
- * new BrowserBlacklist(
- *     VersionedBrowserMatcher.FIREFOX_BROWSER,
- *     VersionedBrowserMatcher.FIREFOX_CUSTOM_TAB);
- *
- * // blacklist Dolphin Browser
- * new BrowserBlacklist(
- *     new VersionedBrowserMatcher(
- *         "mobi.mgeek.TunnyBrowser",
- *         "<DOLPHIN_SIGNATURE>",
- *         false,
- *         VersionRange.ANY_VERSION));
- * }
- * ```
+ * This class is deprecated in favor of BrowserDenyList,
+ * and will be removed completely in the next major version
  */
-public class BrowserBlacklist implements BrowserMatcher {
-
-    private List<BrowserMatcher> mBrowserMatchers;
+@Deprecated
+public class BrowserBlacklist extends BrowserDenyList {
+    /**
+     * This class is deprecated in favor of BrowserDenyList,
+     * and will be removed completely in the next major version
+     */
+    @Deprecated
+    public BrowserBlacklist(BrowserMatcher... matchers) {
+        super(matchers);
+    }
 
     /**
-     * Creates a blacklist from the provided set of matchers.
+     * This class is deprecated in favor of BrowserDenyList,
+     * and will be removed completely in the next major version
      */
-    public BrowserBlacklist(BrowserMatcher... matchers) {
-        mBrowserMatchers = Arrays.asList(matchers);
+    @Deprecated
+    public BrowserBlacklist() {
     }
 
-    @Override
-    public boolean matches(@NonNull BrowserDescriptor descriptor) {
-        for (BrowserMatcher matcher : mBrowserMatchers) {
-            if (matcher.matches(descriptor)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
 }

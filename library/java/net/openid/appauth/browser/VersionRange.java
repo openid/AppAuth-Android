@@ -14,8 +14,8 @@
 
 package net.openid.appauth.browser;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * A browser filter which matches when a browser falls into a version range. Versions are

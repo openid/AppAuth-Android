@@ -19,11 +19,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
-import android.support.annotation.ColorInt;
-import android.support.annotation.Nullable;
-import android.support.customtabs.CustomTabsClient;
-import android.support.customtabs.CustomTabsIntent;
-import android.support.customtabs.CustomTabsServiceConnection;
+import androidx.annotation.ColorInt;
+import androidx.annotation.Nullable;
+import androidx.browser.customtabs.CustomTabsClient;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.customtabs.CustomTabsServiceConnection;
 
 import net.openid.appauth.AppAuthConfiguration.Builder;
 import net.openid.appauth.AuthorizationException.GeneralErrors;
@@ -53,8 +53,8 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import static android.support.customtabs.CustomTabsIntent.EXTRA_TITLE_VISIBILITY_STATE;
-import static android.support.customtabs.CustomTabsIntent.EXTRA_TOOLBAR_COLOR;
+import static androidx.browser.customtabs.CustomTabsIntent.EXTRA_TITLE_VISIBILITY_STATE;
+import static androidx.browser.customtabs.CustomTabsIntent.EXTRA_TOOLBAR_COLOR;
 import static net.openid.appauth.AuthorizationManagementActivity.KEY_AUTH_INTENT;
 import static net.openid.appauth.AuthorizationManagementActivity.KEY_AUTH_REQUEST;
 import static net.openid.appauth.AuthorizationManagementActivity.KEY_CANCEL_INTENT;

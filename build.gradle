@@ -1,3 +1,5 @@
+import org.ajoberstar.grgit.Grgit
+
 apply from: 'config/keystore.gradle'
 
 buildscript {
@@ -6,10 +8,11 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.4'
+        classpath 'com.android.tools.build:gradle:4.0.0'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
         classpath 'org.ajoberstar:gradle-git:1.7.2'
+        classpath "org.jacoco:org.jacoco.core:0.8.5"
     }
 }
 
@@ -24,7 +27,7 @@ subprojects {
 ext.verifyKeystore()
 
 try {
-    def grgit = org.ajoberstar.grgit.Grgit.open(dir: '.')
+    def grgit = Grgit.open(dir: '.')
     def lastCommit = grgit.head()
 
     project.ext.versionNum = grgit.log(includes:['HEAD']).size()
@@ -33,16 +36,31 @@ try {
     if (project.ext.versionName == null) {
         project.ext.versionName = 'DEV'
     }
-} catch (Exception ex) {
+} catch (Exception ignored) {
     project.ext.versionNum = 0
     project.ext.versionName = 'DEV'
     project.ext.versionDate = new Date()
 }
 
-project.ext.minSdkVersion = 16
-project.ext.compileSdkVersion = 27
-project.ext.buildToolsVersion = '27.0.3'
-project.ext.supportLibVersion = '27.1.1'
+project.ext {
+    minSdkVersion = 16
+    compileSdkVersion = 30
+    buildToolsVersion = '30.0.0'
+
+    googleVersions = [
+        glide                 : '4.11.0',
+        material              : '1.1.0',
+    ]
+
+    androidXVersions = [
+        annotation            : '1.1.0',
+        appCompat             : '1.1.0',
+        browser               : '1.2.0',
+    ]
+
+    okioVersion = '1.17.5'
+    jodaVersion = '2.10.6'
+}
 
 task showVersion {
     doLast {

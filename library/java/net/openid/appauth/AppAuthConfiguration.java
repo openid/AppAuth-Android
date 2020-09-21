@@ -14,7 +14,7 @@
 
 package net.openid.appauth;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import net.openid.appauth.browser.AnyBrowserMatcher;
 import net.openid.appauth.browser.BrowserMatcher;
