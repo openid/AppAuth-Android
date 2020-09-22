@@ -71,6 +71,7 @@ class TestValues {
         String tokenEndpoint,
         String userInfoEndpoint,
         String registrationEndpoint,
+        String endSessionEndpoint,
         String jwksUri,
         List<String> responseTypesSupported,
         List<String> subjectTypesSupported,
@@ -84,6 +85,7 @@ class TestValues {
             + " \"authorization_endpoint\": \"" + authorizationEndpoint + "\",\n"
             + " \"token_endpoint\": \"" + tokenEndpoint + "\",\n"
             + " \"userinfo_endpoint\": \"" + userInfoEndpoint + "\",\n"
+            + " \"end_session_endpoint\": \"" + endSessionEndpoint + "\",\n"
             + " \"registration_endpoint\": \"" + registrationEndpoint + "\",\n"
             + " \"jwks_uri\": \"" + jwksUri + "\",\n"
             + " \"response_types_supported\": " + toJson(responseTypesSupported) + ",\n"
@@ -124,10 +126,22 @@ class TestValues {
                 .setCodeVerifier(TEST_CODE_VERIFIER);
     }
 
+    public static EndSessionRequest.Builder getTestEndSessionRequestBuilder() {
+        return new EndSessionRequest.Builder(
+            getTestServiceConfig(),
+            TEST_ID_TOKEN,
+            TEST_APP_REDIRECT_URI);
+    }
+
     public static AuthorizationRequest getTestAuthRequest() {
-        return getTestAuthRequestBuilder().
-            setNonce(null).
-            build();
+        return getTestAuthRequestBuilder()
+            .setNonce(null)
+            .build();
+    }
+
+    public static EndSessionRequest getTestEndSessionRequest() {
+        return getTestEndSessionRequestBuilder()
+            .build();
     }
 
     public static AuthorizationResponse.Builder getTestAuthResponseBuilder() {
