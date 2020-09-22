@@ -18,8 +18,9 @@ import static net.openid.appauth.Preconditions.checkNotNull;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,7 +68,7 @@ class AuthorizationManagementUtil {
     }
 
     /**
-     * Extracts response from an intent produced by {@link #toIntent()}. This is
+     * Extracts response from an intent produced by . This is
      * used to extract the response from the intent data passed to an activity registered as the
      * handler for {@link AuthorizationService#performEndSessionRequest}
      * or {@link AuthorizationService#performAuthorizationRequest}.
