@@ -1,10 +1,10 @@
 ![AppAuth for Android](https://rawgit.com/openid/AppAuth-Android/master/appauth_lockup.svg)
-
-[![Download](https://api.bintray.com/packages/openid/net.openid/appauth/images/download.svg) ](https://bintray.com/openid/net.openid/appauth/_latestVersion)
-[![Javadocs](http://javadoc.io/badge/net.openid/appauth.svg)](http://javadoc.io/doc/net.openid/appauth)
-[![Build Status](https://travis-ci.org/openid/AppAuth-Android.svg?branch=master)](https://travis-ci.org/openid/AppAuth-Android)
+[![](https://jitpack.io/v/trufla-technology/AppAuth-Android.svg)](https://jitpack.io/#trufla-technology/AppAuth-Android)
+[![Download](https://api.bintray.com/packages/trufla-technology/net.openid/appauth/images/download.svg) ](https://bintray.com/openid/net.openid/appauth/_latestVersion)
+[![Javadocs](http://javadoc.io/badge/net.trufla-technology/appauth.svg)](http://javadoc.io/doc/net.trufla-technology/appauth)
+[![Build Status](https://travis-ci.org/trufla-technology/AppAuth-Android.svg?branch=master)](https://travis-ci.org/openid/AppAuth-Android)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/321412eec811478085ec6c4c923ad8a1)](https://www.codacy.com/app/iainmcgin/AppAuth-Android)
-[![codecov.io](https://codecov.io/github/openid/AppAuth-Android/coverage.svg?branch=master)](https://codecov.io/github/openid/AppAuth-Android?branch=master)
+[![codecov.io](https://codecov.io/github/trufla-technology/AppAuth-Android/coverage.svg?branch=master)](https://codecov.io/github/openid/AppAuth-Android?branch=master)
 
 AppAuth for Android is a client SDK for communicating with
 [OAuth 2.0](https://tools.ietf.org/html/rfc6749) and
