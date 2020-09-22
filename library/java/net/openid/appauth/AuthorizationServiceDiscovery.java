@@ -617,4 +617,6 @@ public class AuthorizationServiceDiscovery {
     private static BooleanField bool(String key, boolean defaultValue) {
         return new BooleanField(key, defaultValue);
     }
+
+
 }

@@ -1,12 +1,13 @@
 {
-  "client_id": "",
-  "redirect_uri": "net.openid.appauthdemo:/oauth2redirect",
-  "end_session_uri":"",
+  "client_id": "truMobile_Android",
+  "prompt": "login",
+  "redirect_uri": "net.openid.appauthdemo:/oauthredirect",
+  "end_session_uri":"https://secure.trufla.dev/auth/realms/sharp/protocol/openid-connect/logout",
   "authorization_scope": "openid email profile",
   "discovery_uri": "",
-  "authorization_endpoint_uri": "",
-  "token_endpoint_uri": "",
-  "registration_endpoint_uri": "",
-  "user_info_endpoint_uri": "",
+  "authorization_endpoint_uri": "https://secure.trufla.dev/auth/realms/Sharp/protocol/openid-connect/auth",
+  "token_endpoint_uri": "https://secure.trufla.dev/auth/realms/Sharp/protocol/openid-connect/token",
+  "registration_endpoint_uri": "https://secure.trufla.dev/auth/realms/Sharp/clients-registrations/openid-connect",
+  "user_info_endpoint_uri": "https://secure.trufla.dev/auth/realms/Sharp/protocol/openid-connect/userinfo",
   "https_required": true
 }
