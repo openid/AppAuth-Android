@@ -28,7 +28,21 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="${appAuthRedirectScheme}"/>
+          <data android:scheme="@string/keycloak_auth_redirect_scheme"/>
+      </intent-filter>
+    </activity>
+
+      <!-- Callback from logout screen -->
+      <activity android:name="net.openid.appauth.LogoutUriReceiverActivity">
+          <!--
+              Filter which captures custom scheme based redirects for Google authorization
+              requests.
+          -->
+          <intent-filter>
+              <action android:name="android.intent.action.VIEW"/>
+              <category android:name="android.intent.category.DEFAULT"/>
+              <category android:name="android.intent.category.BROWSABLE"/>
+              <data android:scheme="@string/keycloak_auth_logout_scheme"/>
       </intent-filter>
     </activity>
   </application>

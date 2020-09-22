@@ -15,6 +15,7 @@
 package net.openid.appauthdemo;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -38,6 +39,8 @@ import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceDiscovery;
 import net.openid.appauth.ClientAuthentication;
 import net.openid.appauth.EndSessionRequest;
+import net.openid.appauth.LogoutRequest;
+import net.openid.appauth.LogoutService;
 import net.openid.appauth.TokenRequest;
 import net.openid.appauth.TokenResponse;
 import okio.Okio;
@@ -68,6 +71,7 @@ public class TokenActivity extends AppCompatActivity {
     private static final String KEY_USER_INFO = "userInfo";
 
     private static final int END_SESSION_REQUEST_CODE = 911;
+    private static final String EXTRA_AUTH_SERVICE_DISCOVERY = "authServiceDiscovery";
 
     private AuthorizationService mAuthService;
     private AuthStateManager mStateManager;
@@ -325,11 +329,7 @@ public class TokenActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Demonstrates the use of {@link AuthState#performActionWithFreshTokens} to retrieve
-     * user info from the IDP's user info endpoint. This callback will negotiate a new access
-     * token / id token for use in a follow-up action, or provide an error if this fails.
-     */
+
     @MainThread
     private void fetchUserInfo() {
         displayLoading("Fetching user info");
@@ -420,21 +420,69 @@ public class TokenActivity extends AppCompatActivity {
         startActivityForResult(endSessionEnten, END_SESSION_REQUEST_CODE);
     }
 
+
+    static AuthorizationServiceDiscovery getDiscoveryDocFromIntent(Intent intent) {
+        if (!intent.hasExtra(EXTRA_AUTH_SERVICE_DISCOVERY)) {
+            return null;
+        }
+        String discoveryJson = intent.getStringExtra(EXTRA_AUTH_SERVICE_DISCOVERY);
+        try {
+            return new AuthorizationServiceDiscovery(new JSONObject(discoveryJson));
+        } catch (JSONException | AuthorizationServiceDiscovery.MissingArgumentException  ex) {
+            throw new IllegalStateException("Malformed JSON in discovery doc");
+        }
+    }
+
     @MainThread
     private void signOut() {
-        // discard the authorization and token state, but retain the configuration and
-        // dynamic client registration (if applicable), to save from retrieving them again.
-        AuthState currentState = mStateManager.getCurrent();
-        AuthState clearedState =
-                new AuthState(currentState.getAuthorizationServiceConfiguration());
-        if (currentState.getLastRegistrationResponse() != null) {
-            clearedState.update(currentState.getLastRegistrationResponse());
-        }
-        mStateManager.replace(clearedState);
+//        // discard the authorization and token state, but retain the configuration and
+//        // dynamic client registration (if applicable), to save from retrieving them again.
+//        AuthState currentState = mStateManager.getCurrent();
+//        AuthState clearedState =
+//                new AuthState(currentState.getAuthorizationServiceConfiguration());
+//        if (currentState.getLastRegistrationResponse() != null) {
+//            clearedState.update(currentState.getLastRegistrationResponse());
+//        }
+//        mStateManager.replace(clearedState);
+//
+//        Intent mainIntent = new Intent(this, LoginActivity.class);
+//        mainIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//        startActivity(mainIntent);
+//        finish();
 
-        Intent mainIntent = new Intent(this, LoginActivity.class);
-        mainIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(mainIntent);
-        finish();
+        AuthState mAuthState = mStateManager.getCurrent();
+
+        if (mAuthState.getAuthorizationServiceConfiguration() == null) {
+            Log.e(TAG, "Cannot make userInfo request without service configuration");
+        }
+
+        mAuthState.performActionWithFreshTokens(mAuthService, new AuthState.AuthStateAction() {
+            @Override
+            public void execute(String accessToken, String idToken, AuthorizationException ex) {
+                if (ex != null) {
+                    Log.e(TAG, "Token refresh failed when fetching user info");
+                    return;
+                }
+
+                AuthorizationServiceDiscovery discoveryDoc = getDiscoveryDocFromIntent(getIntent());
+                if (discoveryDoc == null) {
+                    throw new IllegalStateException("no available discovery doc");
+                }
+
+                Uri endSessionEndpoint = Uri.parse(discoveryDoc.getEndSessionEndpoint().toString());
+
+                String logoutUri = getResources().getString(R.string.keycloak_auth_logout_uri);
+                LogoutRequest logoutRequest = new LogoutRequest(endSessionEndpoint,
+                    Uri.parse(logoutUri));
+
+                LogoutService logoutService = new LogoutService(TokenActivity.this);
+                logoutService.performLogoutRequest(
+                    logoutRequest,
+                    PendingIntent.getActivity(
+                        TokenActivity.this, logoutRequest.hashCode(),
+                        new Intent(TokenActivity.this, LoginActivity.class), 0)
+                );
+            }
+        });
     }
 }
