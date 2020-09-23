@@ -325,23 +325,6 @@ public class IdTokenTest {
     }
 
     @Test(expected = AuthorizationException.class)
-    public void testValidate_shouldFailOnIssuedAtOverTenMinutesAgo() throws AuthorizationException {
-        Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
-        Long tenMinutesInSeconds = (long) (10 * 60);
-        IdToken idToken = new IdToken(
-            TEST_ISSUER,
-            TEST_SUBJECT,
-            Collections.singletonList(TEST_CLIENT_ID),
-            nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds - (tenMinutesInSeconds * 2),
-            TEST_NONCE
-        );
-        TokenRequest tokenRequest = getAuthCodeExchangeRequestWithNonce();
-        Clock clock = SystemClock.INSTANCE;
-        idToken.validate(tokenRequest, clock);
-    }
-
-    @Test(expected = AuthorizationException.class)
     public void testValidate_shouldFailOnNonceMismatch() throws AuthorizationException {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
         Long tenMinutesInSeconds = (long) (10 * 60);

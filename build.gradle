@@ -37,7 +37,7 @@ project.ext {
     minSdkVersion = 16
     compileSdkVersion = 30
     buildToolsVersion = '30.0.0'
-    versionID = "0.8.0"
+    versionID = "0.8.1"
     versionName = """$versionID-skyscanner"""
 
     googleVersions = [
