@@ -61,7 +61,7 @@ public final class Configuration {
     private String mClientId;
     private String mScope;
     private Uri mRedirectUri;
-    private Uri mDiscoveryUri;
+    private Uri mIssuerUri;
     private Uri mAuthEndpointUri;
     private Uri mTokenEndpointUri;
     private Uri mRegistrationEndpointUri;
@@ -137,8 +137,8 @@ public final class Configuration {
     }
 
     @Nullable
-    public Uri getDiscoveryUri() {
-        return mDiscoveryUri;
+    public Uri getmIssuerUri() {
+        return mIssuerUri;
     }
 
     @Nullable
@@ -204,7 +204,7 @@ public final class Configuration {
                             + "exists in your app manifest.");
         }
 
-        if (getConfigString("discovery_uri") == null) {
+        if (getConfigString("issuer_uri") == null) {
             mAuthEndpointUri = getRequiredConfigWebUri("authorization_endpoint_uri");
 
             mTokenEndpointUri = getRequiredConfigWebUri("token_endpoint_uri");
@@ -214,7 +214,7 @@ public final class Configuration {
                 mRegistrationEndpointUri = getRequiredConfigWebUri("registration_endpoint_uri");
             }
         } else {
-            mDiscoveryUri = getRequiredConfigWebUri("discovery_uri");
+            mIssuerUri = getRequiredConfigWebUri("issuer_uri");
         }
 
         mHttpsRequired = mConfigJson.optBoolean("https_required", true);
