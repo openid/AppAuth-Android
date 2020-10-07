@@ -361,8 +361,9 @@ public class TokenActivity extends AppCompatActivity {
 
         mExecutor.submit(() -> {
             try {
-                HttpURLConnection conn =
-                        (HttpURLConnection) userInfoEndpoint.openConnection();
+                Configuration config = Configuration.getInstance(this);
+                Uri uri = Uri.parse(userInfoEndpoint.toString());
+                HttpURLConnection conn = config.getConnectionBuilder().openConnection(uri);
                 conn.setRequestProperty("Authorization", "Bearer " + accessToken);
                 conn.setInstanceFollowRedirects(false);
                 String response = Okio.buffer(Okio.source(conn.getInputStream()))
