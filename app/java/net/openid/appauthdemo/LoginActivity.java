@@ -75,7 +75,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * - Initiate the authorization request using the built-in heuristics or a user-selected browser.
  *
  * _NOTE_: From a clean checkout of this project, the authorization service is not configured.
- * Edit `res/values/auth_config.xml` to provide the required configuration properties. See the
+ * Edit `res/raw/auth_config.json` to provide the required configuration properties. See the
  * README.md in the app/ directory for configuration instructions, and the adjacent IDP-specific
  * instructions.
  */
