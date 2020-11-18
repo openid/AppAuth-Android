@@ -1,3 +1,17 @@
+/*
+ * Copyright 2016 The AppAuth for Android Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.openid.appauth.app2app;
 
 import android.content.Context;
@@ -11,15 +25,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Pair;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.browser.customtabs.CustomTabsIntent;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import java.net.HttpURLConnection;
 
 import net.openid.appauth.Utils;
 import net.openid.appauth.browser.BrowserAllowList;
@@ -27,11 +35,13 @@ import net.openid.appauth.browser.BrowserDescriptor;
 import net.openid.appauth.browser.BrowserSelector;
 import net.openid.appauth.browser.VersionedBrowserMatcher;
 import net.openid.appauth.connectivity.DefaultConnectionBuilder;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,8 +50,7 @@ import java.util.Set;
 
 public final class SecureRedirection {
 
-    private SecureRedirection() {
-    }
+    private SecureRedirection() {}
 
     /**
      * This method redirects an user securely from one app to another with a given URL. For this to
@@ -52,25 +61,25 @@ public final class SecureRedirection {
         getAssetLinksFile(new RedirectSession(context, uri));
     }
 
-    /**
-     * This function retrieves the '/.well-known/assetlinks.json' file from the given domain.
-     */
+    /** This function retrieves the '/.well-known/assetlinks.json' file from the given domain. */
     private static void getAssetLinksFile(@NonNull final RedirectSession redirectSession) {
         new DownloadAssetLinksFile().execute(redirectSession);
     }
 
-    private static class DownloadAssetLinksFile extends
-        AsyncTask<RedirectSession, Void, RedirectSession> {
+    private static class DownloadAssetLinksFile
+            extends AsyncTask<RedirectSession, Void, RedirectSession> {
 
         @Override
         protected RedirectSession doInBackground(RedirectSession... redirectSessions) {
             RedirectSession redirectSession = redirectSessions[0];
-            Uri uri = Uri.parse(redirectSession.getUri().getScheme()
-                + "://"
-                + redirectSession.getUri().getHost()
-                + ":"
-                + redirectSession.getUri().getPort()
-                + "/.well-known/assetlinks.json");
+            Uri uri =
+                    Uri.parse(
+                            redirectSession.getUri().getScheme()
+                                    + "://"
+                                    + redirectSession.getUri().getHost()
+                                    + ":"
+                                    + redirectSession.getUri().getPort()
+                                    + "/.well-known/assetlinks.json");
 
             InputStream is = null;
             try {
@@ -97,18 +106,17 @@ public final class SecureRedirection {
         protected void onPostExecute(RedirectSession redirectSession) {
             if (redirectSession.getAssetLinksFile() != null) {
                 JSONArray baseCertFingerprints =
-                    findInstalledApp(redirectSession, redirectSession.getAssetLinksFile());
+                        findInstalledApp(redirectSession, redirectSession.getAssetLinksFile());
 
                 redirectSession.setBaseCertFingerprints(
-                    CertificateFingerprintEncoding
-                        .certFingerprintsToDecodedString(
-                            baseCertFingerprints));
+                        CertificateFingerprintEncoding.certFingerprintsToDecodedString(
+                                baseCertFingerprints));
 
                 doRedirection(redirectSession);
             } else {
                 System.err.println(
-                    "Failed to fetch '/.well-known/assetlinks.json' from domain "
-                        + "'${redirectSession.uri.host}'\nError: ${error}");
+                        "Failed to fetch '/.well-known/assetlinks.json' from domain "
+                                + "'${redirectSession.uri.host}'\nError: ${error}");
                 redirectToWeb(redirectSession.getContext(), redirectSession.getUri());
             }
         }
@@ -125,9 +133,9 @@ public final class SecureRedirection {
      */
     @NonNull
     private static JSONArray findInstalledApp(
-        @NonNull RedirectSession redirectSession, @NonNull JSONArray assetLinks) {
+            @NonNull RedirectSession redirectSession, @NonNull JSONArray assetLinks) {
         Pair<Set<String>, Map<String, JSONArray>> basePair =
-            getBaseValuesFromAssetLinksFile(assetLinks);
+                getBaseValuesFromAssetLinksFile(assetLinks);
         Set<String> foundPackageNames = getPackageNamesForIntent(redirectSession);
 
         // Intersect the set of installed apps with the set of apps
@@ -156,7 +164,7 @@ public final class SecureRedirection {
      */
     @NonNull
     private static Pair<Set<String>, Map<String, JSONArray>> getBaseValuesFromAssetLinksFile(
-        @NonNull JSONArray assetLinks) {
+            @NonNull JSONArray assetLinks) {
         Set<String> basePackageNames = new HashSet<>();
         Map<String, JSONArray> baseCertFingerprints = new HashMap<>();
         try {
@@ -193,10 +201,10 @@ public final class SecureRedirection {
         intent.addCategory(Intent.CATEGORY_BROWSABLE);
 
         List<ResolveInfo> infos =
-            redirectSession
-                .getContext()
-                .getPackageManager()
-                .queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER);
+                redirectSession
+                        .getContext()
+                        .getPackageManager()
+                        .queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER);
 
         Set<String> packageNames = new HashSet<>();
         for (ResolveInfo info : infos) {
@@ -240,26 +248,26 @@ public final class SecureRedirection {
             Signature[] signatures;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
                 SigningInfo signingInfo =
-                    redirectSession
-                        .getContext()
-                        .getPackageManager()
-                        .getPackageInfo(
-                            redirectSession.getBasePackageName(),
-                            PackageManager.GET_SIGNING_CERTIFICATES)
-                        .signingInfo;
+                        redirectSession
+                                .getContext()
+                                .getPackageManager()
+                                .getPackageInfo(
+                                        redirectSession.getBasePackageName(),
+                                        PackageManager.GET_SIGNING_CERTIFICATES)
+                                .signingInfo;
                 signatures = signingInfo.getSigningCertificateHistory();
             } else {
                 signatures =
-                    redirectSession
-                        .getContext()
-                        .getPackageManager()
-                        .getPackageInfo(
-                            redirectSession.getBasePackageName(),
-                            PackageManager.GET_SIGNATURES)
-                        .signatures;
+                        redirectSession
+                                .getContext()
+                                .getPackageManager()
+                                .getPackageInfo(
+                                        redirectSession.getBasePackageName(),
+                                        PackageManager.GET_SIGNATURES)
+                                .signatures;
             }
             return BrowserDescriptor.generateSignatureHashes(
-                signatures, BrowserDescriptor.DIGEST_SHA_256);
+                    signatures, BrowserDescriptor.DIGEST_SHA_256);
         } catch (PackageManager.NameNotFoundException excepetion) {
             return null;
         }
@@ -271,7 +279,7 @@ public final class SecureRedirection {
      */
     @VisibleForTesting
     public static boolean matchHashes(
-        @NonNull Set<String> certHashes0, @NonNull Set<String> certHashes1) {
+            @NonNull Set<String> certHashes0, @NonNull Set<String> certHashes1) {
         return certHashes0.containsAll(certHashes1) && certHashes0.size() == certHashes1.size();
     }
 
@@ -288,27 +296,27 @@ public final class SecureRedirection {
      * the integrity of this browser. It then opens the given uri in an Android Custom Tab.
      */
     public static void redirectToWeb(
-        @NonNull Context context, @NonNull Uri uri, int additionalFlags, int toolbarColor) {
+            @NonNull Context context, @NonNull Uri uri, int additionalFlags, int toolbarColor) {
         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
         builder.setToolbarColor(toolbarColor);
         CustomTabsIntent customTabsIntent = builder.build();
 
         BrowserDescriptor browserDescriptor =
-            BrowserSelector.select(
-                context,
-                new BrowserAllowList(
-                    VersionedBrowserMatcher.CHROME_CUSTOM_TAB,
-                    VersionedBrowserMatcher.CHROME_BROWSER,
-                    VersionedBrowserMatcher.FIREFOX_CUSTOM_TAB,
-                    VersionedBrowserMatcher.FIREFOX_BROWSER,
-                    VersionedBrowserMatcher.SAMSUNG_CUSTOM_TAB,
-                    VersionedBrowserMatcher.SAMSUNG_BROWSER));
+                BrowserSelector.select(
+                        context,
+                        new BrowserAllowList(
+                                VersionedBrowserMatcher.CHROME_CUSTOM_TAB,
+                                VersionedBrowserMatcher.CHROME_BROWSER,
+                                VersionedBrowserMatcher.FIREFOX_CUSTOM_TAB,
+                                VersionedBrowserMatcher.FIREFOX_BROWSER,
+                                VersionedBrowserMatcher.SAMSUNG_CUSTOM_TAB,
+                                VersionedBrowserMatcher.SAMSUNG_BROWSER));
 
         if (browserDescriptor != null) {
             customTabsIntent
-                .intent
-                .setPackage(browserDescriptor.packageName)
-                .setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | additionalFlags);
+                    .intent
+                    .setPackage(browserDescriptor.packageName)
+                    .setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | additionalFlags);
             customTabsIntent.launchUrl(context, uri);
         } else {
             Toast.makeText(context, "Could not find a browser", Toast.LENGTH_SHORT).show();

@@ -1,16 +1,28 @@
+/*
+ * Copyright 2016 The AppAuth for Android Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.openid.appauth.app2app;
 
 import android.content.Context;
 import android.net.Uri;
-
 import androidx.annotation.NonNull;
 
-import java.util.Set;
 import org.json.JSONArray;
 
-/**
- * Class to hold all important information to perform a secure redirection.
- */
+import java.util.Set;
+
+/** Class to hold all important information to perform a secure redirection. */
 class RedirectSession {
 
     private Context mContext;
@@ -19,9 +31,9 @@ class RedirectSession {
     private Set<String> mBaseCertFingerprints;
     private JSONArray mAssetLinksFile = null;
 
-    protected RedirectSession(@NonNull Context mContext, @NonNull Uri mUri) {
-        this.mContext = mContext;
-        this.mUri = mUri;
+    protected RedirectSession(@NonNull Context context, @NonNull Uri uri) {
+        this.mContext = context;
+        this.mUri = uri;
     }
 
     @NonNull
@@ -55,15 +67,15 @@ class RedirectSession {
         return mBaseCertFingerprints;
     }
 
-    protected void setBaseCertFingerprints(Set<String> mBaseCertFingerprints) {
-        this.mBaseCertFingerprints = mBaseCertFingerprints;
+    protected void setBaseCertFingerprints(Set<String> baseCertFingerprints) {
+        this.mBaseCertFingerprints = baseCertFingerprints;
     }
 
     public JSONArray getAssetLinksFile() {
         return mAssetLinksFile;
     }
 
-    public void setAssetLinksFile(JSONArray mAssetLinksFile) {
-        this.mAssetLinksFile = mAssetLinksFile;
+    public void setAssetLinksFile(JSONArray assetLinksFile) {
+        this.mAssetLinksFile = assetLinksFile;
     }
 }
