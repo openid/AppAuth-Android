@@ -25,6 +25,7 @@ import androidx.annotation.Nullable;
 import net.openid.appauth.AuthorizationException.GeneralErrors;
 import net.openid.appauth.connectivity.ConnectionBuilder;
 import net.openid.appauth.connectivity.DefaultConnectionBuilder;
+import net.openid.appauth.connectivity.HttpConnection;
 import net.openid.appauth.internal.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -322,7 +323,7 @@ public class AuthorizationServiceConfiguration {
         protected AuthorizationServiceConfiguration doInBackground(Void... voids) {
             InputStream is = null;
             try {
-                HttpURLConnection conn = mConnectionBuilder.openConnection(mUri);
+                HttpConnection conn = mConnectionBuilder.openConnection(mUri);
                 conn.setRequestMethod("GET");
                 conn.setDoInput(true);
                 conn.connect();
