@@ -4,11 +4,12 @@ import java.io.IOError;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 
 public class DefaultHttpConnectionImpl implements HttpConnection {
-    final HttpURLConnection connection;
+    private final HttpURLConnection connection;
 
     public DefaultHttpConnectionImpl(HttpURLConnection con) {
         connection = con;
@@ -50,13 +51,16 @@ public class DefaultHttpConnectionImpl implements HttpConnection {
     }
 
     @Override
-    public InputStream getInputStream() throws IOException {
-        return connection.getInputStream();
+    public void setRequestData(String mimeType, String data) throws IOException {
+        OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream());
+        wr.write(data);
+        wr.flush();
     }
 
+
     @Override
-    public OutputStream getOutputStream() throws IOException {
-        return connection.getOutputStream();
+    public InputStream getInputStream() throws IOException {
+        return connection.getInputStream();
     }
 
     @Override

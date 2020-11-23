@@ -445,10 +445,7 @@ public class AuthorizationService {
 
                 String queryData = UriUtil.formUrlEncode(parameters);
                 conn.setRequestProperty("Content-Length", String.valueOf(queryData.length()));
-                OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
-
-                wr.write(queryData);
-                wr.flush();
+                conn.setRequestData("application/json", queryData);
 
                 if (conn.getResponseCode() >= HttpURLConnection.HTTP_OK
                         && conn.getResponseCode() < HttpURLConnection.HTTP_MULT_CHOICE) {
@@ -595,9 +592,7 @@ public class AuthorizationService {
                 conn.setRequestProperty("Content-Type", "application/json");
                 conn.setDoOutput(true);
                 conn.setRequestProperty("Content-Length", String.valueOf(postData.length()));
-                OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
-                wr.write(postData);
-                wr.flush();
+                conn.setRequestData("application/json", postData);
 
                 is = conn.getInputStream();
                 String response = Utils.readInputStream(is);

@@ -67,7 +67,6 @@ public interface HttpConnection {
     void setReadTimeout(int readTimeoutMilliSeconds);
 
     /**
-     * public void setInstanceFollowRedirects(boolean followRedirects)
      *
      * Sets whether HTTP redirects (requests with response code 3xx) should be automatically followed by this HttpURLConnection instance.
      *
@@ -77,17 +76,17 @@ public interface HttpConnection {
     void setInstanceFollowRedirects(boolean followRedirects);
 
     /**
+     * Set the request data the body should send.
+     * @param mimeType Mime type of the body data.
+     * @param data the body represented as string.
+     */
+    void setRequestData(String mimeType, String data) throws IOException;
+
+    /**
      * Returns an input stream that reads from this open connection. A SocketTimeoutException can be thrown when reading from the returned input stream if the read timeout expires before data is available for read.
      * @return an input stream that reads from this open connection.
      */
     InputStream getInputStream() throws IOException;
-
-    /**
-     * Returns an output stream that writes to this connection.
-     * @return an output stream that writes to this connection.
-     * @throws IOException - if an I/O error occurs while creating the output stream.
-     */
-    OutputStream getOutputStream() throws IOException;
 
     /**
      * Returns the value of the named general request property for this connection.
@@ -116,7 +115,7 @@ public interface HttpConnection {
      * This method will not cause a connection to be initiated. If the connection was not connected, or if the server did not have an error while connecting or if the server had an error but no error data was sent, this method will return null. This is the default.
      * @return an error stream if any, null if there have been no errors, the connection is not connected or the server sent no useful data.
      */
-    InputStream getErrorStream();
+    InputStream getErrorStream() throws IOException;
 
     /**
      * Opens a communications link to the resource referenced by this URL, if such a connection has not already been established.
