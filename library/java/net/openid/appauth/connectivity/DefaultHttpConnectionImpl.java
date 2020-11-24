@@ -57,7 +57,6 @@ public class DefaultHttpConnectionImpl implements HttpConnection {
         wr.flush();
     }
 
-
     @Override
     public InputStream getInputStream() throws IOException {
         return connection.getInputStream();

@@ -34,6 +34,8 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import net.openid.appauth.AuthorizationException.GeneralErrors;
 import net.openid.appauth.connectivity.ConnectionBuilder;
+import net.openid.appauth.connectivity.HttpConnection;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -106,7 +108,7 @@ public class AuthorizationServiceConfigurationTest {
 
     private AuthorizationServiceConfiguration mConfig;
     private RetrievalCallback mCallback;
-    @Mock HttpURLConnection mHttpConnection;
+    @Mock HttpConnection mHttpConnection;
     @Mock ConnectionBuilder mConnectionBuilder;
 
     @Before

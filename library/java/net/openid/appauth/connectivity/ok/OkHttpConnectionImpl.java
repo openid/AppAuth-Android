@@ -22,7 +22,7 @@ public class OkHttpConnectionImpl implements HttpConnection {
     private final OkHttpClient.Builder httpClientBuilder;
     private final Headers.Builder headersBuilder = new Headers.Builder();
     private String method = "GET";
-    private RequestBody requstBody;
+    private RequestBody requestBody;
     private Response response = null;
 
     public OkHttpConnectionImpl(OkHttpClient client, Uri uri) {
@@ -67,7 +67,7 @@ public class OkHttpConnectionImpl implements HttpConnection {
 
     @Override
     public void setRequestData(String mimeType, String data) {
-        requstBody = RequestBody.create(data, MediaType.get(mimeType));
+        requestBody = RequestBody.create(data, MediaType.get(mimeType));
     }
 
     @Override
@@ -102,7 +102,7 @@ public class OkHttpConnectionImpl implements HttpConnection {
     @Override
     public void connect() throws IOException, IOError {
         if(!method.equals("GET")) {
-            requestBuilder.method(method, requstBody);
+            requestBuilder.method(method, requestBody);
         }
         response = httpClientBuilder.build()
             .newCall(requestBuilder
