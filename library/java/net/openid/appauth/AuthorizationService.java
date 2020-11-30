@@ -445,7 +445,7 @@ public class AuthorizationService {
 
                 String queryData = UriUtil.formUrlEncode(parameters);
                 conn.setRequestProperty("Content-Length", String.valueOf(queryData.length()));
-                conn.setRequestData("application/json", queryData);
+                conn.setRequestData("application/x-www-form-urlencoded", queryData);
 
                 if (conn.getResponseCode() >= HttpURLConnection.HTTP_OK
                         && conn.getResponseCode() < HttpURLConnection.HTTP_MULT_CHOICE) {
