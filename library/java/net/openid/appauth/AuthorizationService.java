@@ -447,6 +447,8 @@ public class AuthorizationService {
                 conn.setRequestProperty("Content-Length", String.valueOf(queryData.length()));
                 conn.setRequestData("application/x-www-form-urlencoded", queryData);
 
+                conn.connect();
+
                 if (conn.getResponseCode() >= HttpURLConnection.HTTP_OK
                         && conn.getResponseCode() < HttpURLConnection.HTTP_MULT_CHOICE) {
                     is = conn.getInputStream();
