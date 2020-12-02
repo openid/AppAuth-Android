@@ -25,7 +25,7 @@ android.testBuildType "forTests"
 dependencies {
     api "androidx.browser:browser:${project.androidXVersions.browser}"
     implementation "androidx.annotation:annotation:${project.androidXVersions.annotation}"
-    implementation("com.squareup.okhttp3:okhttp:4.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.6.0")
     apply from: '../config/testdeps.gradle', to:it
 }
 
