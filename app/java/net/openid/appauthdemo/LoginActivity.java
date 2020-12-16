@@ -17,6 +17,7 @@ package net.openid.appauthdemo;
 import android.annotation.TargetApi;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -211,7 +212,7 @@ public final class LoginActivity extends AppCompatActivity {
 
         // if we are not using discovery, build the authorization service configuration directly
         // from the static configuration values.
-        if (mConfiguration.getDiscoveryUri() == null) {
+        if (mConfiguration.getmIssuerUri() == null) {
             Log.i(TAG, "Creating auth config from res/raw/auth_config.json");
             AuthorizationServiceConfiguration config = new AuthorizationServiceConfiguration(
                     mConfiguration.getAuthEndpointUri(),
@@ -227,10 +228,8 @@ public final class LoginActivity extends AppCompatActivity {
         // noinspection WrongThread
         runOnUiThread(() -> displayLoading("Retrieving discovery document"));
         Log.i(TAG, "Retrieving OpenID discovery doc");
-        AuthorizationServiceConfiguration.fetchFromUrl(
-                mConfiguration.getDiscoveryUri(),
-                this::handleConfigurationRetrievalResult,
-                mConfiguration.getConnectionBuilder());
+        AuthorizationServiceConfiguration.fetchFromIssuer(
+            mConfiguration.getmIssuerUri(), this::handleConfigurationRetrievalResult);
     }
 
     @MainThread
