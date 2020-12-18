@@ -31,5 +31,5 @@ public interface ConnectionBuilder {
      * @throws IOException if an error occurs while attempting to establish the connection.
      */
     @NonNull
-    HttpURLConnection openConnection(@NonNull Uri uri) throws IOException;
+    HttpConnection openConnection(@NonNull Uri uri) throws IOException;
 }

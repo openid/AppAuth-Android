@@ -22,6 +22,8 @@ import androidx.annotation.Nullable;
 
 import net.openid.appauth.Preconditions;
 import net.openid.appauth.connectivity.ConnectionBuilder;
+import net.openid.appauth.connectivity.DefaultHttpConnectionImpl;
+import net.openid.appauth.connectivity.HttpConnection;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -106,14 +108,15 @@ public final class ConnectionBuilderForTesting implements ConnectionBuilder {
 
     @NonNull
     @Override
-    public HttpURLConnection openConnection(@NonNull Uri uri) throws IOException {
+    public HttpConnection openConnection(@NonNull Uri uri) throws IOException {
         Preconditions.checkNotNull(uri, "url must not be null");
         Preconditions.checkArgument(HTTP.equals(uri.getScheme()) || HTTPS.equals(uri.getScheme()),
                 "scheme or uri must be http or https");
         HttpURLConnection conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
-        conn.setConnectTimeout(CONNECTION_TIMEOUT_MS);
-        conn.setReadTimeout(READ_TIMEOUT_MS);
-        conn.setInstanceFollowRedirects(false);
+        HttpConnection conWrapper = new DefaultHttpConnectionImpl(conn);
+        conWrapper.setConnectTimeout(CONNECTION_TIMEOUT_MS);
+        conWrapper.setReadTimeout(READ_TIMEOUT_MS);
+        conWrapper.setInstanceFollowRedirects(false);
 
         if (conn instanceof HttpsURLConnection && TRUSTING_CONTEXT != null) {
             HttpsURLConnection httpsConn = (HttpsURLConnection) conn;
@@ -121,6 +124,6 @@ public final class ConnectionBuilderForTesting implements ConnectionBuilder {
             httpsConn.setHostnameVerifier(ANY_HOSTNAME_VERIFIER);
         }
 
-        return conn;
+        return conWrapper;
     }
 }

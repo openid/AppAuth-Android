@@ -46,14 +46,15 @@ public final class DefaultConnectionBuilder implements ConnectionBuilder {
 
     @NonNull
     @Override
-    public HttpURLConnection openConnection(@NonNull Uri uri) throws IOException {
+    public HttpConnection openConnection(@NonNull Uri uri) throws IOException {
         Preconditions.checkNotNull(uri, "url must not be null");
-        Preconditions.checkArgument(HTTPS_SCHEME.equals(uri.getScheme()),
-                "only https connections are permitted");
+//        Preconditions.checkArgument(HTTPS_SCHEME.equals(uri.getScheme()),
+//                "only https connections are permitted");
         HttpURLConnection conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
-        conn.setConnectTimeout(CONNECTION_TIMEOUT_MS);
-        conn.setReadTimeout(READ_TIMEOUT_MS);
-        conn.setInstanceFollowRedirects(false);
-        return conn;
+        HttpConnection conWrapper = new DefaultHttpConnectionImpl(conn);
+        conWrapper.setConnectTimeout(CONNECTION_TIMEOUT_MS);
+        conWrapper.setReadTimeout(READ_TIMEOUT_MS);
+        conWrapper.setInstanceFollowRedirects(false);
+        return conWrapper;
     }
 }

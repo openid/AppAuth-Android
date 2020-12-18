@@ -39,6 +39,7 @@ import net.openid.appauth.browser.BrowserDescriptor;
 import net.openid.appauth.browser.BrowserSelector;
 import net.openid.appauth.browser.CustomTabManager;
 import net.openid.appauth.connectivity.ConnectionBuilder;
+import net.openid.appauth.connectivity.HttpConnection;
 import net.openid.appauth.internal.Logger;
 import net.openid.appauth.internal.UriUtil;
 import org.json.JSONException;
@@ -420,7 +421,7 @@ public class AuthorizationService {
         protected JSONObject doInBackground(Void... voids) {
             InputStream is = null;
             try {
-                HttpURLConnection conn = mConnectionBuilder.openConnection(
+                HttpConnection conn = mConnectionBuilder.openConnection(
                         mRequest.configuration.tokenEndpoint);
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -444,10 +445,9 @@ public class AuthorizationService {
 
                 String queryData = UriUtil.formUrlEncode(parameters);
                 conn.setRequestProperty("Content-Length", String.valueOf(queryData.length()));
-                OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+                conn.setRequestData("application/x-www-form-urlencoded", queryData);
 
-                wr.write(queryData);
-                wr.flush();
+                conn.connect();
 
                 if (conn.getResponseCode() >= HttpURLConnection.HTTP_OK
                         && conn.getResponseCode() < HttpURLConnection.HTTP_MULT_CHOICE) {
@@ -538,7 +538,7 @@ public class AuthorizationService {
          * spec-compliant IDPs, we add this header if no existing Accept header has been set
          * by the connection builder.
          */
-        private void addJsonToAcceptHeader(URLConnection conn) {
+        private void addJsonToAcceptHeader(HttpConnection conn) {
             if (TextUtils.isEmpty(conn.getRequestProperty("Accept"))) {
                 conn.setRequestProperty("Accept", "application/json");
             }
@@ -588,15 +588,13 @@ public class AuthorizationService {
             InputStream is = null;
             String postData = mRequest.toJsonString();
             try {
-                HttpURLConnection conn = mConnectionBuilder.openConnection(
+                HttpConnection conn = mConnectionBuilder.openConnection(
                         mRequest.configuration.registrationEndpoint);
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json");
                 conn.setDoOutput(true);
                 conn.setRequestProperty("Content-Length", String.valueOf(postData.length()));
-                OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
-                wr.write(postData);
-                wr.flush();
+                conn.setRequestData("application/json", postData);
 
                 is = conn.getInputStream();
                 String response = Utils.readInputStream(is);
