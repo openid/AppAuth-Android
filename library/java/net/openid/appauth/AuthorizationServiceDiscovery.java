@@ -51,7 +51,7 @@ public class AuthorizationServiceDiscovery {
     static final UriField TOKEN_ENDPOINT = uri("token_endpoint");
 
     @VisibleForTesting
-    static final UriField END_SESSION_ENPDINT = uri("end_session_endpoint");
+    static final UriField END_SESSION_ENDPOINT = uri("end_session_endpoint");
 
     @VisibleForTesting
     static final UriField USERINFO_ENDPOINT = uri("userinfo_endpoint");
@@ -265,7 +265,7 @@ public class AuthorizationServiceDiscovery {
      * The OAuth 2 emd session endpoint URI. Not specified test OAuth implementation
      */
     public Uri getEndSessionEndpoint() {
-        return get(END_SESSION_ENPDINT);
+        return get(END_SESSION_ENDPOINT);
     }
 
     /**
