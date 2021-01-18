@@ -70,6 +70,7 @@ public class AuthorizationServiceConfigurationTest {
             + " \"authorization_endpoint\": \"" + TEST_AUTH_ENDPOINT + "\",\n"
             + " \"token_endpoint\": \"" + TEST_TOKEN_ENDPOINT + "\",\n"
             + " \"registration_endpoint\": \"" + TEST_REGISTRATION_ENDPOINT + "\",\n"
+            + " \"end_session_endpoint\": \"" + TEST_END_SESSION_ENDPOINT + "\",\n"
             + " \"userinfo_endpoint\": \"" + TEST_USERINFO_ENDPOINT + "\",\n"
             + " \"jwks_uri\": \"" + TEST_JWKS_URI + "\",\n"
             + " \"response_types_supported\": " + toJson(TEST_RESPONSE_TYPE_SUPPORTED) + ",\n"
@@ -117,8 +118,8 @@ public class AuthorizationServiceConfigurationTest {
         mConfig = new AuthorizationServiceConfiguration(
                 Uri.parse(TEST_AUTH_ENDPOINT),
                 Uri.parse(TEST_TOKEN_ENDPOINT),
-                Uri.parse(TEST_END_SESSION_ENDPOINT),
-                Uri.parse(TEST_REGISTRATION_ENDPOINT));
+                Uri.parse(TEST_REGISTRATION_ENDPOINT),
+                Uri.parse(TEST_END_SESSION_ENDPOINT));
         when(mConnectionBuilder.openConnection(any(Uri.class))).thenReturn(mHttpConnection);
     }
 
@@ -139,13 +140,14 @@ public class AuthorizationServiceConfigurationTest {
         AuthorizationServiceConfiguration config = new AuthorizationServiceConfiguration(
                 Uri.parse(TEST_AUTH_ENDPOINT),
                 Uri.parse(TEST_TOKEN_ENDPOINT),
-                Uri.parse(TEST_END_SESSION_ENDPOINT), null);
+                null,
+                Uri.parse(TEST_END_SESSION_ENDPOINT));
         AuthorizationServiceConfiguration deserialized = AuthorizationServiceConfiguration
                 .fromJson(config.toJson());
         assertThat(deserialized.authorizationEndpoint).isEqualTo(config.authorizationEndpoint);
         assertThat(deserialized.tokenEndpoint).isEqualTo(config.tokenEndpoint);
-        assertThat(deserialized.endSessionEndpoint).isEqualTo(config.endSessionEndpoint);
         assertThat(deserialized.registrationEndpoint).isNull();
+        assertThat(deserialized.endSessionEndpoint).isEqualTo(config.endSessionEndpoint);
     }
 
     @Test
@@ -183,6 +185,7 @@ public class AuthorizationServiceConfigurationTest {
         assertEquals(TEST_AUTH_ENDPOINT, config.authorizationEndpoint.toString());
         assertEquals(TEST_TOKEN_ENDPOINT, config.tokenEndpoint.toString());
         assertEquals(TEST_REGISTRATION_ENDPOINT, config.registrationEndpoint.toString());
+        assertEquals(TEST_END_SESSION_ENDPOINT, config.endSessionEndpoint.toString());
     }
 
     @Test
