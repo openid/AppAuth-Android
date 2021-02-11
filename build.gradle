@@ -9,8 +9,6 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.0.0'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
         classpath 'org.ajoberstar:gradle-git:1.7.2'
         classpath "org.jacoco:org.jacoco.core:0.8.5"
     }

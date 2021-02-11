@@ -1,10 +1,10 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.jfrog.bintray'
-apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
 apply from: '../config/android-common.gradle'
 
-group = "net.openid"
+group = GROUP
 version = rootProject.versionName
 
 project.archivesBaseName = 'appauth'
@@ -37,60 +37,67 @@ artifacts {
     archives javadocJar
 }
 
-bintray {
-    user = System.getenv("BINTRAY_USER")
-    key = System.getenv("BINTRAY_KEY")
-    pkg {
-        repo = "net.openid"
-        name = "appauth"
-        desc = "AppAuth for Android"
-        userOrg = "openid"
-        licenses = ["Apache-2.0"]
-        websiteUrl = "https://openid.github.io/AppAuth-Android/"
-        issueTrackerUrl = "https://github.com/openid/AppAuth-Android/issues"
-        vcsUrl = "https://github.com/openid/AppAuth-Android.git"
-        githubRepo = 'bintray/gradle-bintray-plugin'
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId GROUP
+            artifactId POM_ARTIFACT_ID
+            version rootProject.versionName
 
-        version {
-            name = rootProject.versionName
-            desc = "AppAuth for Android"
-            released = rootProject.versionDate
-            vcsTag = rootProject.versionName
-        }
-    }
-    configurations = ["archives"]
-}
+            artifact("$buildDir/outputs/aar/${project.archivesBaseName}-release.aar")
+            artifact sourcesJar
+            artifact javadocJar
 
-install {
-    repositories.mavenInstaller {
-        pom {
-            project {
-                packaging 'aar'
-                name 'AppAuth for Android'
-                description = 'OAuth2 / OpenID Connect client for Android apps'
-                url 'https://github.com/openid/AppAuth-Android'
+            pom {
+                name = POM_NAME
+                description = POM_DESCRIPTION
+                packaging = POM_PACKAGING
+                url = POM_URL
                 licenses {
                     license {
-                        name "The Apache Software License, Version 2.0"
-                        url "http://www.apache.org/licenses/LICENSE-2.0.txt"
-                        distribution "repo"
+                        name = POM_LICENCE_NAME
+                        url = POM_LICENCE_URL
+                        distribution = POM_LICENCE_DIST
                     }
                 }
-
                 developers {
                     developer {
-                        id "iainmcgin"
-                        name "Iain McGinniss"
-                        email "iain.mcginniss@wework.com"
+                        id = POM_DEVELOPER_ID
+                        name = POM_DEVELOPER_NAME
+                        url = POM_DEVELOPER_URL
                     }
                 }
-
                 scm {
-                    connection "https://github.com/openid/AppAuth-Android.git"
-                    developerConnection "https://github.com/openid/AppAuth-Android.git"
-                    url 'https://github.com/openid/AppAuth-Android'
+                    url = POM_SCM_URL
+                    connection = POM_SCM_CONNECTION
+                    developerConnection = POM_SCM_DEV_CONNECTION
+                }
+                // A slightly hacky fix so that the POM will include transitive dependencies
+                withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    project.configurations.implementation.allDependencies.each {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
                 }
             }
         }
     }
+    repositories {
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+                username ossrhUsername
+                password ossrhPassword
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications
 }
