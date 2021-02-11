@@ -1,6 +1,6 @@
 ![AppAuth for Android](https://rawgit.com/openid/AppAuth-Android/master/appauth_lockup.svg)
 
-[![Download](https://api.bintray.com/packages/openid/net.openid/appauth/images/download.svg) ](https://bintray.com/openid/net.openid/appauth/_latestVersion)
+[![Download](https://img.shields.io/maven-central/v/net.openid/appauth)](https://search.maven.org/search?q=g:net.openid%20appauth)
 [![Javadocs](http://javadoc.io/badge/net.openid/appauth.svg)](http://javadoc.io/doc/net.openid/appauth)
 [![Build Status](https://travis-ci.org/openid/AppAuth-Android.svg?branch=master)](https://travis-ci.org/openid/AppAuth-Android)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/321412eec811478085ec6c4c923ad8a1)](https://www.codacy.com/app/iainmcgin/AppAuth-Android)
@@ -34,9 +34,11 @@ Google) can be found here:
 
 ## Download
 
-Instructions for downloading the binary releases of AppAuth, or to add a
-dependency using Maven, Gradle or Ivy, can be found on our
-[Bintray page](https://bintray.com/openid/net.openid/appauth).
+AppAuth for Android is available on [MavenCentral](https://search.maven.org/search?q=g:net.openid%20appauth)
+
+```groovy
+implementation 'net.openid:appauth:0.8.0'
+```
 
 ## Requirements
 
