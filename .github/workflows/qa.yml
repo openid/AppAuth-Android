@@ -24,9 +24,7 @@ jobs:
     - name: Setup Android tools
       run: yes | sdkmanager "build-tools;30.0.3" "platforms;android-30"
     - name: Build with Gradle
-      run: |
-        ./gradlew check jacoco assemble
-        - bash <(curl -s https://codecov.io/bash)
+      run: ./gradlew check jacoco assemble
     - name: Cleanup Gradle Cache
       # Remove some files from the Gradle cache, so they aren't cached by GitHub Actions.
       # Restoring these files from a GitHub Actions cache might cause problems for future builds.
