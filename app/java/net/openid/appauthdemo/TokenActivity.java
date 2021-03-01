@@ -416,7 +416,7 @@ public class TokenActivity extends AppCompatActivity {
                 new EndSessionRequest.Builder(
                 mStateManager.getCurrent().getAuthorizationServiceConfiguration(),
                 mStateManager.getCurrent().getIdToken(),
-                mConfiguration.getEndSessionUri()).build());
+                mConfiguration.getEndSessionRedirectUri()).build());
         startActivityForResult(endSessionEnten, END_SESSION_REQUEST_CODE);
     }
 

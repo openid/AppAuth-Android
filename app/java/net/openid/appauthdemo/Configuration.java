@@ -61,7 +61,7 @@ public final class Configuration {
     private String mClientId;
     private String mScope;
     private Uri mRedirectUri;
-    private Uri mEndSessionUri;
+    private Uri mEndSessionRedirectUri;
     private Uri mDiscoveryUri;
     private Uri mAuthEndpointUri;
     private Uri mTokenEndpointUri;
@@ -144,9 +144,7 @@ public final class Configuration {
     }
 
     @Nullable
-    public Uri getEndSessionUri() {
-        return mEndSessionUri;
-    }
+    public Uri getEndSessionRedirectUri() { return mEndSessionRedirectUri; }
 
     @Nullable
     public Uri getAuthEndpointUri() {
@@ -207,7 +205,7 @@ public final class Configuration {
         mClientId = getConfigString("client_id");
         mScope = getRequiredConfigString("authorization_scope");
         mRedirectUri = getRequiredConfigUri("redirect_uri");
-        mEndSessionUri = getRequiredConfigUri("end_session_uri");
+        mEndSessionRedirectUri = getRequiredConfigUri("end_session_redirect_uri");
 
         if (!isRedirectUriRegistered()) {
             throw new InvalidConfigurationException(
