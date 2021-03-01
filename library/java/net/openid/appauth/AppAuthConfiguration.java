@@ -40,11 +40,19 @@ public class AppAuthConfiguration {
     @NonNull
     private final ConnectionBuilder mConnectionBuilder;
 
+    private final boolean mSkipIssuerHttpsCheck;
+
+    private final boolean mSkipNonceVerification;
+
     private AppAuthConfiguration(
             @NonNull BrowserMatcher browserMatcher,
-            @NonNull ConnectionBuilder connectionBuilder) {
+            @NonNull ConnectionBuilder connectionBuilder,
+            Boolean skipIssuerHttpsCheck,
+            Boolean skipNonceVerification) {
         mBrowserMatcher = browserMatcher;
         mConnectionBuilder = connectionBuilder;
+        mSkipIssuerHttpsCheck = skipIssuerHttpsCheck;
+        mSkipNonceVerification = skipNonceVerification;
     }
 
     /**
@@ -65,12 +73,24 @@ public class AppAuthConfiguration {
     }
 
     /**
+     * Disables https validation for the issuer identifier.
+     */
+    public boolean getSkipIssuerHttpsCheck() { return mSkipIssuerHttpsCheck; }
+
+    /**
+     * Disables nonce verification for value sent in the Authentication Request.
+     */
+    public boolean getSkipNonceVerification() { return mSkipNonceVerification; }
+
+    /**
      * Creates {@link AppAuthConfiguration} instances.
      */
     public static class Builder {
 
         private BrowserMatcher mBrowserMatcher = AnyBrowserMatcher.INSTANCE;
         private ConnectionBuilder mConnectionBuilder = DefaultConnectionBuilder.INSTANCE;
+        private boolean mSkipIssuerHttpsCheck;
+        private boolean mSkipNonceVerification;
 
         /**
          * Specify the browser matcher to use, which controls the browsers that can be used
@@ -95,11 +115,32 @@ public class AppAuthConfiguration {
         }
 
         /**
+         * Disables https validation for the issuer identifier.
+         */
+        public Builder setSkipIssuerHttpsCheck(Boolean skipIssuerHttpsCheck) {
+            mSkipIssuerHttpsCheck = skipIssuerHttpsCheck;
+            return this;
+        }
+
+        /**
+         * Disables nonce verification for value sent in the Authentication Request.
+         */
+        public Builder setSkipNonceVerification(Boolean skipNonceVerification) {
+            mSkipNonceVerification = skipNonceVerification;
+            return this;
+        }
+
+        /**
          * Creates the instance from the configured properties.
          */
         @NonNull
         public AppAuthConfiguration build() {
-            return new AppAuthConfiguration(mBrowserMatcher, mConnectionBuilder);
+            return new AppAuthConfiguration(
+                mBrowserMatcher,
+                mConnectionBuilder,
+                mSkipIssuerHttpsCheck,
+                mSkipNonceVerification
+            );
         }
 
 

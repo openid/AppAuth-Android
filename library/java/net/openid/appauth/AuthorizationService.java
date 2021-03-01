@@ -489,7 +489,9 @@ public class AuthorizationService {
                 clientAuthentication,
                 mClientConfiguration.getConnectionBuilder(),
                 SystemClock.INSTANCE,
-                callback)
+                callback,
+                mClientConfiguration.getSkipIssuerHttpsCheck(),
+                mClientConfiguration.getSkipNonceVerification())
                 .execute();
     }
 
@@ -567,6 +569,8 @@ public class AuthorizationService {
         private final ConnectionBuilder mConnectionBuilder;
         private TokenResponseCallback mCallback;
         private Clock mClock;
+        private boolean mSkipIssuerHttpsCheck;
+        private boolean mSkipNonceVerification;
 
         private AuthorizationException mException;
 
@@ -574,12 +578,16 @@ public class AuthorizationService {
                          @NonNull ClientAuthentication clientAuthentication,
                          @NonNull ConnectionBuilder connectionBuilder,
                          Clock clock,
-                         TokenResponseCallback callback) {
+                         TokenResponseCallback callback,
+                         Boolean skipIssuerHttpsCheck,
+                         Boolean skipNonceVerification) {
             mRequest = request;
             mClientAuthentication = clientAuthentication;
             mConnectionBuilder = connectionBuilder;
             mClock = clock;
             mCallback = callback;
+            mSkipIssuerHttpsCheck = skipIssuerHttpsCheck;
+            mSkipNonceVerification = skipNonceVerification;
         }
 
         @Override
@@ -687,7 +695,12 @@ public class AuthorizationService {
                 }
 
                 try {
-                    idToken.validate(mRequest, mClock);
+                    idToken.validate(
+                            mRequest,
+                            mClock,
+                            mSkipIssuerHttpsCheck,
+                            mSkipNonceVerification
+                    );
                 } catch (AuthorizationException ex) {
                     mCallback.onTokenRequestCompleted(null, ex);
                     return;
