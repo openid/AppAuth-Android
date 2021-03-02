@@ -99,5 +99,6 @@ publishing {
 }
 
 signing {
+    required { hasProperty('signing.keyId') }
     sign publishing.publications
 }
