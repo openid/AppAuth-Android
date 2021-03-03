@@ -73,12 +73,18 @@ public class AppAuthConfiguration {
     }
 
     /**
-     * Disables https validation for the issuer identifier.
+     * Returns <code>true</code> if issuer https validation is disabled, otherwise
+     * <code>false</code>.
+     *
+     * @see Builder#setSkipIssuerHttpsCheck(Boolean)
      */
     public boolean getSkipIssuerHttpsCheck() { return mSkipIssuerHttpsCheck; }
 
     /**
-     * Disables nonce verification for value sent in the Authentication Request.
+     * Returns <code>true</code> if nonce verification on response is disabled, otherwise
+     * <code>false</code>.
+     *
+     * @see Builder#setSkipNonceVerification(Boolean)
      */
     public boolean getSkipNonceVerification() { return mSkipNonceVerification; }
 
@@ -116,6 +122,9 @@ public class AppAuthConfiguration {
 
         /**
          * Disables https validation for the issuer identifier.
+         *
+         * <p>NOTE: Disabling issuer https validation implies the app is running against an
+         * insecure environment. Enabling this option is only recommended for testing purposes.
          */
         public Builder setSkipIssuerHttpsCheck(Boolean skipIssuerHttpsCheck) {
             mSkipIssuerHttpsCheck = skipIssuerHttpsCheck;
@@ -124,6 +133,13 @@ public class AppAuthConfiguration {
 
         /**
          * Disables nonce verification for value sent in the Authentication Request.
+         *
+         * <p>NOTE: Some Authorization Servers do not return the requested nonce value thus failing
+         * ID token validation. Please consider raising an issue with your Identity Provider and
+         * disabling this option once it is fixed.
+         *
+         * <p>Alternatively, you may avoid sending a nonce by passing <code>null</code> to
+         * {@link AuthorizationRequest.Builder#setNonce}
          */
         public Builder setSkipNonceVerification(Boolean skipNonceVerification) {
             mSkipNonceVerification = skipNonceVerification;
