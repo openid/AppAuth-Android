@@ -19,6 +19,7 @@ import android.text.TextUtils;
 import android.util.Base64;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import net.openid.appauth.AuthorizationException.GeneralErrors;
 import org.json.JSONException;
@@ -109,7 +110,15 @@ class IdToken {
         );
     }
 
+    @VisibleForTesting
     void validate(@NonNull TokenRequest tokenRequest, Clock clock) throws AuthorizationException {
+        validate(tokenRequest, clock, false, false);
+    }
+
+    void validate(@NonNull TokenRequest tokenRequest,
+                  Clock clock,
+                  boolean skipIssuerHttpsCheck,
+                  boolean skipNonceVerification) throws AuthorizationException {
         // OpenID Connect Core Section 3.1.3.7. rule #1
         // Not enforced: AppAuth does not support JWT encryption.
 
@@ -129,7 +138,7 @@ class IdToken {
             // components.
             Uri issuerUri = Uri.parse(this.issuer);
 
-            if (!issuerUri.getScheme().equals("https")) {
+            if (!skipIssuerHttpsCheck && !issuerUri.getScheme().equals("https")) {
                 throw AuthorizationException.fromTemplate(GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
                     new IdTokenException("Issuer must be an https URL"));
             }
@@ -189,7 +198,7 @@ class IdToken {
             // OpenID Connect Core Section 3.1.3.7. rule #11
             // Validates the nonce.
             String expectedNonce = tokenRequest.nonce;
-            if (!TextUtils.equals(this.nonce, expectedNonce)) {
+            if (!skipNonceVerification && !TextUtils.equals(this.nonce, expectedNonce)) {
                 throw AuthorizationException.fromTemplate(GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
                     new IdTokenException("Nonce mismatch"));
             }
