@@ -125,6 +125,11 @@ public final class AuthorizationException extends Exception {
      */
     public static final int TYPE_OAUTH_REGISTRATION_ERROR = 4;
 
+    /**
+     * Error type when returning http error code >= 400
+     */
+    public static final int TYPE_HTTP_ERROR = 5;
+
     @VisibleForTesting
     static final String KEY_TYPE = "type";
 
@@ -497,6 +502,24 @@ public final class AuthorizationException extends Exception {
                 ex.errorDescription,
                 ex.errorUri,
                 rootCause);
+    }
+
+    /**
+     * Creates an exception based on HTTP error codes returned from HttpUrlConnection
+     * Exception includes actual error code from HttpURLConnection.getResponseStream()
+     * Errors are considered anything >= 400
+     */
+    public static AuthorizationException fromHttpError(
+            int responseCode,
+            @NonNull String responseMessage,
+            @NonNull String errorString) {
+        return new AuthorizationException(
+            TYPE_HTTP_ERROR,
+            responseCode,
+            responseMessage,
+            errorString,
+            null,
+            null);
     }
 
     /**
