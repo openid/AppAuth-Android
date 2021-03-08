@@ -14,6 +14,8 @@
 
 package net.openid.appauth;
 
+import static android.os.Looper.getMainLooper;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -21,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.robolectric.Shadows.shadowOf;
 
 import android.net.Uri;
 import androidx.annotation.Nullable;
@@ -30,8 +33,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 import net.openid.appauth.AuthorizationException.GeneralErrors;
 import net.openid.appauth.connectivity.ConnectionBuilder;
 import org.json.JSONArray;
@@ -42,10 +43,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.android.util.concurrent.PausedExecutorService;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.LooperMode;
+import org.robolectric.shadows.ShadowPausedAsyncTask;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk=16)
+@Config(sdk = 16)
+@LooperMode(LooperMode.Mode.PAUSED)
 public class AuthorizationServiceConfigurationTest {
     private static final int CALLBACK_TIMEOUT_MILLIS = 1000;
     private static final String TEST_NAME = "test_name";
@@ -110,6 +115,7 @@ public class AuthorizationServiceConfigurationTest {
     private RetrievalCallback mCallback;
     @Mock HttpURLConnection mHttpConnection;
     @Mock ConnectionBuilder mConnectionBuilder;
+    private PausedExecutorService mPausedExecutorService;
 
     @Before
     public void setUp() throws Exception {
@@ -121,6 +127,9 @@ public class AuthorizationServiceConfigurationTest {
                 Uri.parse(TEST_REGISTRATION_ENDPOINT),
                 Uri.parse(TEST_END_SESSION_ENDPOINT));
         when(mConnectionBuilder.openConnection(any(Uri.class))).thenReturn(mHttpConnection);
+
+        mPausedExecutorService = new PausedExecutorService();
+        ShadowPausedAsyncTask.overrideExecutor(mPausedExecutorService);
     }
 
     @Test
@@ -215,7 +224,8 @@ public class AuthorizationServiceConfigurationTest {
         InputStream is = new ByteArrayInputStream(TEST_JSON.getBytes());
         when(mHttpConnection.getInputStream()).thenReturn(is);
         doFetch();
-        mCallback.waitForCallback();
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
         AuthorizationServiceConfiguration result = mCallback.config;
         assertNotNull(result);
         assertEquals(TEST_AUTH_ENDPOINT, result.authorizationEndpoint.toString());
@@ -228,7 +238,9 @@ public class AuthorizationServiceConfigurationTest {
         InputStream is = new ByteArrayInputStream(TEST_JSON.getBytes());
         when(mHttpConnection.getInputStream()).thenReturn(is);
         doFetch();
-        mCallback.waitForCallback();
+        shadowOf(getMainLooper()).idle();
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
         AuthorizationServiceConfiguration result = mCallback.config;
         assertNotNull(result);
         assertEquals(TEST_AUTH_ENDPOINT, result.authorizationEndpoint.toString());
@@ -241,7 +253,8 @@ public class AuthorizationServiceConfigurationTest {
         InputStream is = new ByteArrayInputStream(TEST_JSON_MISSING_ARGUMENT.getBytes());
         when(mHttpConnection.getInputStream()).thenReturn(is);
         doFetch();
-        mCallback.waitForCallback();
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
         assertNotNull(mCallback.error);
         assertEquals(GeneralErrors.INVALID_DISCOVERY_DOCUMENT, mCallback.error);
     }
@@ -251,7 +264,8 @@ public class AuthorizationServiceConfigurationTest {
         InputStream is = new ByteArrayInputStream(TEST_JSON_MALFORMED.getBytes());
         when(mHttpConnection.getInputStream()).thenReturn(is);
         doFetch();
-        mCallback.waitForCallback();
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
         assertNotNull(mCallback.error);
         assertEquals(GeneralErrors.JSON_DESERIALIZATION_ERROR, mCallback.error);
     }
@@ -261,7 +275,8 @@ public class AuthorizationServiceConfigurationTest {
         IOException ex = new IOException();
         when(mHttpConnection.getInputStream()).thenThrow(ex);
         doFetch();
-        mCallback.waitForCallback();
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
         assertNotNull(mCallback.error);
         assertEquals(GeneralErrors.NETWORK_ERROR, mCallback.error);
     }
@@ -275,14 +290,8 @@ public class AuthorizationServiceConfigurationTest {
 
     private static class RetrievalCallback implements
             AuthorizationServiceConfiguration.RetrieveConfigurationCallback {
-        private Semaphore mSemaphore = new Semaphore(0);
         public AuthorizationServiceConfiguration config;
         public AuthorizationException error;
-
-        public void waitForCallback() throws Exception {
-            assertTrue(mSemaphore.tryAcquire(CALLBACK_TIMEOUT_MILLIS,
-                    TimeUnit.MILLISECONDS));
-        }
 
         @Override
         public void onFetchConfigurationCompleted(
@@ -291,7 +300,6 @@ public class AuthorizationServiceConfigurationTest {
             assertTrue((serviceConfiguration == null) ^ (ex == null));
             this.config = serviceConfiguration;
             this.error = ex;
-            mSemaphore.release();
         }
     }
 

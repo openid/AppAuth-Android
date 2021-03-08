@@ -44,7 +44,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk=16)
+@Config(sdk = 16)
 public class TokenResponseTest {
     private static final String TEST_KEY_TOKEN_TYPE = "Bearer";
     private static final String TEST_KEY_ACCESS_TOKEN = "pAstudrU6axaw#Da355eseTu6ugufrev";

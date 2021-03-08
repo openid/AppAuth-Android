@@ -36,12 +36,13 @@ import static net.openid.appauth.TestValues.TEST_ISSUER;
 import static net.openid.appauth.TestValues.TEST_NONCE;
 import static net.openid.appauth.TestValues.getDiscoveryDocumentJson;
 import static net.openid.appauth.TestValues.getTestAuthCodeExchangeRequestBuilder;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk=16)
+@Config(sdk=16)
 public class IdTokenTest {
 
     static final String TEST_SUBJECT = "SUBJ3CT";

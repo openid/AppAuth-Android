@@ -39,7 +39,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk=16)
+@Config(sdk = 16)
 public class JsonUtilTest {
     private static final String TEST_KEY = "key";
     private static final String TEST_STRING = "value";
