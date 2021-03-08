@@ -8,9 +8,9 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.0'
+        classpath 'com.android.tools.build:gradle:4.1.2'
         classpath 'org.ajoberstar:gradle-git:1.7.2'
-        classpath "org.jacoco:org.jacoco.core:0.8.5"
+        classpath 'org.jacoco:org.jacoco.core:0.8.6'
     }
 }
 
@@ -46,18 +46,18 @@ project.ext {
     buildToolsVersion = '30.0.0'
 
     googleVersions = [
-        glide                 : '4.11.0',
-        material              : '1.1.0',
+        glide                 : '4.12.0',
+        material              : '1.3.0',
     ]
 
     androidXVersions = [
         annotation            : '1.1.0',
-        appCompat             : '1.1.0',
-        browser               : '1.2.0',
+        appCompat             : '1.2.0',
+        browser               : '1.3.0',
     ]
 
-    okioVersion = '1.17.5'
-    jodaVersion = '2.10.6'
+    okioVersion = '2.10.0'
+    jodaVersion = '2.10.10'
 }
 
 task showVersion {
