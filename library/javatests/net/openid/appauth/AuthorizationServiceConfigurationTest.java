@@ -37,6 +37,7 @@ import net.openid.appauth.AuthorizationException.GeneralErrors;
 import net.openid.appauth.connectivity.ConnectionBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -111,6 +112,7 @@ public class AuthorizationServiceConfigurationTest {
             + " \"userinfo_endpoint\": \"" + TEST_USERINFO_ENDPOINT + "\"\n"
             + "}";
 
+    private AutoCloseable mMockitoCloseable;
     private AuthorizationServiceConfiguration mConfig;
     private RetrievalCallback mCallback;
     @Mock HttpURLConnection mHttpConnection;
@@ -119,7 +121,7 @@ public class AuthorizationServiceConfigurationTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        mMockitoCloseable = MockitoAnnotations.openMocks(this);
         mCallback = new RetrievalCallback();
         mConfig = new AuthorizationServiceConfiguration(
                 Uri.parse(TEST_AUTH_ENDPOINT),
@@ -130,6 +132,11 @@ public class AuthorizationServiceConfigurationTest {
 
         mPausedExecutorService = new PausedExecutorService();
         ShadowPausedAsyncTask.overrideExecutor(mPausedExecutorService);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mMockitoCloseable.close();
     }
 
     @Test

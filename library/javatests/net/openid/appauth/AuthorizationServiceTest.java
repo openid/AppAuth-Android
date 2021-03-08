@@ -35,6 +35,7 @@ import net.openid.appauth.browser.CustomTabManager;
 import net.openid.appauth.connectivity.ConnectionBuilder;
 import net.openid.appauth.internal.UriUtil;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -118,6 +119,7 @@ public class AuthorizationServiceTest {
 
     private static final int TEST_INVALID_GRANT_CODE = 2002;
 
+    private AutoCloseable mMockitoCloseable;
     private AuthorizationCallback mAuthCallback;
     private RegistrationCallback mRegistrationCallback;
     private AuthorizationService mService;
@@ -134,7 +136,7 @@ public class AuthorizationServiceTest {
     @Before
     @SuppressWarnings("ResourceType")
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        mMockitoCloseable = MockitoAnnotations.openMocks(this);
         mAuthCallback = new AuthorizationCallback();
         mRegistrationCallback = new RegistrationCallback();
         mBrowserDescriptor = Browsers.Chrome.customTab("46");
@@ -155,6 +157,11 @@ public class AuthorizationServiceTest {
 
         mPausedExecutorService = new PausedExecutorService();
         ShadowPausedAsyncTask.overrideExecutor(mPausedExecutorService);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mMockitoCloseable.close();
     }
 
     @Test

@@ -38,6 +38,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import net.openid.appauth.BuildConfig;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -88,13 +90,20 @@ public class BrowserSelectorTest {
 
     private static final TestBrowser[] NO_BROWSERS = new TestBrowser[0];
 
+    private AutoCloseable mMockitoCloseable;
+
     @Mock Context mContext;
     @Mock PackageManager mPackageManager;
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        mMockitoCloseable = MockitoAnnotations.openMocks(this);
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mMockitoCloseable.close();
     }
 
     @Test

@@ -30,6 +30,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,6 +58,8 @@ public class JsonUtilTest {
         }
     }
 
+    private AutoCloseable mMockitoCloseable;
+
     @Mock
     private JSONObject mJson;
 
@@ -64,8 +67,13 @@ public class JsonUtilTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        mMockitoCloseable = MockitoAnnotations.openMocks(this);
         mRealJson = new JSONObject();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mMockitoCloseable.close();
     }
 
     @Test

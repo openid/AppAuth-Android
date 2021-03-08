@@ -33,7 +33,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.Collections;
 import org.junit.Before;
@@ -426,7 +426,7 @@ public class AuthStateTest {
                 action);
 
         // as the token has not expired, the service will not be used to refresh it
-        verifyZeroInteractions(service);
+        verifyNoInteractions(service);
 
         // the action should have been directly invoked
         verify(action, times(1)).execute(
@@ -475,7 +475,7 @@ public class AuthStateTest {
         assertThat(requestCaptor.getValue().refreshToken).isEqualTo(tokenResp.refreshToken);
 
         // the action should not be executed until after the token refresh completes
-        verifyZeroInteractions(action);
+        verifyNoInteractions(action);
 
         String freshAccessToken = "fresh_access_token";
         Long freshExpirationTime = mClock.currentTime.get() + TWO_MINUTES;
@@ -550,7 +550,7 @@ public class AuthStateTest {
         assertThat(requestCaptor.getValue().refreshToken).isEqualTo(tokenResp.refreshToken);
 
         // the action should not be executed until after the token refresh completes
-        verifyZeroInteractions(action);
+        verifyNoInteractions(action);
 
         String freshRefreshToken = "fresh_refresh_token";
         String freshAccessToken = "fresh_access_token";
