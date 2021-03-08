@@ -37,7 +37,7 @@ Google) can be found here:
 AppAuth for Android is available on [MavenCentral](https://search.maven.org/search?q=g:net.openid%20appauth)
 
 ```groovy
-implementation 'net.openid:appauth:0.8.0'
+implementation 'net.openid:appauth:0.8.1'
 ```
 
 ## Requirements
@@ -623,6 +623,38 @@ AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
       }
     })
     .build();
+```
+
+### Issues with [ID Token](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/IdToken.java#L118) validation
+
+ID Token validation was introduced in `0.8.0` but not all authorization servers or configurations support it correctly.
+
+- For testing environments [setSkipIssuerHttpsCheck](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AppAuthConfiguration.java#L129) can be used to bypass the fact the issuer needs to be HTTPS.
+
+```java
+AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
+    .setSkipIssuerHttpsCheck(true)
+    .build()
+```
+
+- For services that don't correctly return the requested nonce there is [setSkipNonceVerification](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AppAuthConfiguration.java#L144). Please consider **raising an issue** with your Identity Provider and disabling this option once it is fixed.
+
+```java
+AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
+    .setSkipNonceVerification(true)
+    .build()
+```
+
+Alternatively this can be bypassed by setting the nonce in `AuthorizationRequest` to null:
+
+```java
+val builder = AuthorizationRequest.Builder(
+    serviceConfiguration,
+    mClientId,
+    RESPONSE_TYPE,
+    redirectUri
+)
+builder.setNonce(null)
 ```
 
 ## Dynamic client registration
