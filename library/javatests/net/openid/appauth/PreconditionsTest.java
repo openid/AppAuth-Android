@@ -32,7 +32,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk=16)
+@Config(sdk = 16)
 public class PreconditionsTest {
     private static final String TEST_MSG = "test";
 

@@ -16,14 +16,17 @@ package net.openid.appauth;
 
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
-import static org.assertj.android.api.Assertions.assertThat;
+import static androidx.test.ext.truth.content.IntentSubject.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+
+import androidx.test.core.app.ApplicationProvider;
 
 import net.openid.appauth.AuthorizationException.AuthorizationRequestErrors;
 import org.junit.Before;
@@ -31,15 +34,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowActivity;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk=16)
+@Config(sdk = 16)
 public class AuthorizationManagementActivityTest {
 
+    private Context mContext;
     private AuthorizationRequest mAuthRequest;
     private EndSessionRequest mEndSessionRequest;
     private Intent mAuthIntent;
@@ -63,16 +66,18 @@ public class AuthorizationManagementActivityTest {
 
     @Before
     public void setUp() {
+        mContext = ApplicationProvider.getApplicationContext();
+
         mAuthRequest = TestValues.getTestAuthRequest();
         mEndSessionRequest = TestValues.getTestEndSessionRequest();
 
         mAuthIntent = new Intent("AUTH");
         mCompleteIntent = new Intent("COMPLETE");
         mCompletePendingIntent =
-                PendingIntent.getActivity(RuntimeEnvironment.application, 0, mCompleteIntent, 0);
+                PendingIntent.getActivity(mContext, 0, mCompleteIntent, 0);
         mCancelIntent = new Intent("CANCEL");
         mCancelPendingIntent =
-                PendingIntent.getActivity(RuntimeEnvironment.application, 0, mCancelIntent, 0);
+                PendingIntent.getActivity(mContext, 0, mCancelIntent, 0);
 
         mStartAuthIntentWithPendings =
                 createStartIntentWithPendingIntents(mAuthRequest, mCancelPendingIntent);
@@ -120,7 +125,7 @@ public class AuthorizationManagementActivityTest {
             AuthorizationManagementRequest authRequest,
             PendingIntent cancelIntent) {
         return AuthorizationManagementActivity.createStartIntent(
-                RuntimeEnvironment.application,
+                mContext,
                 authRequest,
                 mAuthIntent,
                 mCompletePendingIntent,
@@ -130,7 +135,7 @@ public class AuthorizationManagementActivityTest {
     private Intent createStartForResultIntent(
         AuthorizationManagementRequest authRequest) {
         return AuthorizationManagementActivity.createStartForResultIntent(
-                RuntimeEnvironment.application,
+                mContext,
                 authRequest,
                 mAuthIntent);
     }
@@ -160,18 +165,18 @@ public class AuthorizationManagementActivityTest {
         // on completion of the authorization activity, the result will be forwarded to the
         // management activity via newIntent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-                RuntimeEnvironment.application,
+                mContext,
                 mSuccessAuthRedirect));
 
         // the management activity is then resumed
         mController.resume();
 
         // after which the completion intent should be fired
-        assertThat(mActivityShadow.getNextStartedActivity())
-                .hasAction("COMPLETE")
-                .hasData(mSuccessAuthRedirect)
-                .hasExtra(AuthorizationResponse.EXTRA_RESPONSE);
-        assertThat(mActivity).isFinishing();
+        Intent nextStartedActivity = mActivityShadow.getNextStartedActivity();
+        assertThat(nextStartedActivity).hasAction("COMPLETE");
+        assertThat(nextStartedActivity).hasData(mSuccessAuthRedirect);
+        assertThat(nextStartedActivity).extras().containsKey(AuthorizationResponse.EXTRA_RESPONSE);
+        assertThat(mActivity.isFinishing()).isTrue();
     }
 
     @Test
@@ -190,17 +195,17 @@ public class AuthorizationManagementActivityTest {
         // on completion of the authorization activity, the result will be forwarded to the
         // management activity via newIntent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-            RuntimeEnvironment.application,
+            mContext,
             mSuccessEndSessionRedirect));
 
         // the management activity is then resumed
         mController.resume();
 
         // after which the completion intent should be fired
-        assertThat(mActivityShadow.getNextStartedActivity())
-            .hasAction("COMPLETE")
-            .hasData(mSuccessEndSessionRedirect);
-        assertThat(mActivity).isFinishing();
+        Intent nextStartedActivity = mActivityShadow.getNextStartedActivity();
+        assertThat(nextStartedActivity).hasAction("COMPLETE");
+        assertThat(nextStartedActivity).hasData(mSuccessEndSessionRedirect);
+        assertThat(mActivity.isFinishing()).isTrue();
     }
 
     @Test
@@ -219,7 +224,7 @@ public class AuthorizationManagementActivityTest {
         // on completion of the authorization activity, the result will be forwarded to the
         // management activity via newIntent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-                RuntimeEnvironment.application,
+                mContext,
                 mSuccessAuthRedirect));
 
         // the management activity is then resumed
@@ -227,7 +232,7 @@ public class AuthorizationManagementActivityTest {
 
         // and then sets a result before finishing as there is no completion intent
         assertThat(mActivityShadow.getResultCode()).isEqualTo(RESULT_OK);
-        assertThat(mActivity).isFinishing();
+        assertThat(mActivity.isFinishing()).isTrue();
     }
 
     @Test
@@ -246,7 +251,7 @@ public class AuthorizationManagementActivityTest {
         // on completion of the authorization activity, the result will be forwarded to the
         // management activity via newIntent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-            RuntimeEnvironment.application,
+            mContext,
             mSuccessEndSessionRedirect));
 
         // the management activity is then resumed
@@ -254,7 +259,7 @@ public class AuthorizationManagementActivityTest {
 
         // and then sets a result before finishing as there is no completion intent
         assertThat(mActivityShadow.getResultCode()).isEqualTo(RESULT_OK);
-        assertThat(mActivity).isFinishing();
+        assertThat(mActivity.isFinishing()).isTrue();
     }
 
     @Test
@@ -277,18 +282,18 @@ public class AuthorizationManagementActivityTest {
 
         // the authorization redirect will be forwarded via a new intent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-                RuntimeEnvironment.application,
+                mContext,
                 mSuccessAuthRedirect));
 
         // the management activity is then resumed
         mController.resume();
 
         // after which the completion intent should be fired
-        assertThat(mActivityShadow.getNextStartedActivity())
-                .hasAction("COMPLETE")
-                .hasData(mSuccessAuthRedirect)
-                .hasExtra(AuthorizationResponse.EXTRA_RESPONSE);
-        assertThat(mActivity).isFinishing();
+        Intent nextStartedActivity = mActivityShadow.getNextStartedActivity();
+        assertThat(nextStartedActivity).hasAction("COMPLETE");
+        assertThat(nextStartedActivity).hasData(mSuccessAuthRedirect);
+        assertThat(nextStartedActivity).extras().containsKey(AuthorizationResponse.EXTRA_RESPONSE);
+        assertThat(mActivity.isFinishing()).isTrue();
     }
 
     @Test
@@ -311,17 +316,17 @@ public class AuthorizationManagementActivityTest {
 
         // the authorization redirect will be forwarded via a new intent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-            RuntimeEnvironment.application,
+            mContext,
             mSuccessAuthRedirect));
 
         // the management activity is then resumed
         mController.resume();
 
         // after which the completion intent should be fired
-        assertThat(mActivityShadow.getNextStartedActivity())
-            .hasAction("COMPLETE")
-            .hasData(mSuccessAuthRedirect);
-        assertThat(mActivity).isFinishing();
+        Intent nextStartedActivity = mActivityShadow.getNextStartedActivity();
+        assertThat(nextStartedActivity).hasAction("COMPLETE");
+        assertThat(nextStartedActivity).hasData(mSuccessAuthRedirect);
+        assertThat(mActivity.isFinishing()).isTrue();
     }
 
     @Test
@@ -344,7 +349,7 @@ public class AuthorizationManagementActivityTest {
 
         // the authorization redirect will be forwarded via a new intent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-                RuntimeEnvironment.application,
+                mContext,
                 mSuccessAuthRedirect));
 
         // the management activity is then resumed
@@ -352,7 +357,7 @@ public class AuthorizationManagementActivityTest {
 
         // and then sets a result before finishing as there is no completion intent
         assertThat(mActivityShadow.getResultCode()).isEqualTo(RESULT_OK);
-        assertThat(mActivity).isFinishing();
+        assertThat(mActivity.isFinishing()).isTrue();
     }
 
     @Test
@@ -375,7 +380,7 @@ public class AuthorizationManagementActivityTest {
 
         // the authorization redirect will be forwarded via a new intent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-            RuntimeEnvironment.application,
+            mContext,
             mSuccessEndSessionRedirect));
 
         // the management activity is then resumed
@@ -383,7 +388,7 @@ public class AuthorizationManagementActivityTest {
 
         // and then sets a result before finishing as there is no completion intent
         assertThat(mActivityShadow.getResultCode()).isEqualTo(RESULT_OK);
-        assertThat(mActivity).isFinishing();
+        assertThat(mActivity.isFinishing()).isTrue();
     }
 
     @Test
@@ -401,18 +406,18 @@ public class AuthorizationManagementActivityTest {
 
         // the authorization redirect will be forwarded via a new intent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-                RuntimeEnvironment.application,
+                mContext,
                 mErrorAuthRedirect));
 
         // the management activity is then resumed
         mController.resume();
 
         // after which the completion intent should be fired
-        assertThat(mActivityShadow.getNextStartedActivity())
-                .hasAction("COMPLETE")
-                .hasData(mErrorAuthRedirect)
-                .hasExtra(AuthorizationException.EXTRA_EXCEPTION);
-        assertThat(mActivity).isFinishing();
+        Intent nextStartedActivity = mActivityShadow.getNextStartedActivity();
+        assertThat(nextStartedActivity).hasAction("COMPLETE");
+        assertThat(nextStartedActivity).hasData(mErrorAuthRedirect);
+        assertThat(nextStartedActivity).extras().containsKey(AuthorizationException.EXTRA_EXCEPTION);
+        assertThat(mActivity.isFinishing()).isTrue();
     }
 
     @Test
@@ -430,18 +435,18 @@ public class AuthorizationManagementActivityTest {
 
         // the authorization redirect will be forwarded via a new intent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-            RuntimeEnvironment.application,
+            mContext,
             mErrorEndSessionRedirect));
 
         // the management activity is then resumed
         mController.resume();
 
         // after which the completion intent should be fired
-        assertThat(mActivityShadow.getNextStartedActivity())
-            .hasAction("COMPLETE")
-            .hasData(mErrorEndSessionRedirect)
-            .hasExtra(AuthorizationException.EXTRA_EXCEPTION);
-        assertThat(mActivity).isFinishing();
+        Intent nextStartedActivity = mActivityShadow.getNextStartedActivity();
+        assertThat(nextStartedActivity).hasAction("COMPLETE");
+        assertThat(nextStartedActivity).hasData(mErrorEndSessionRedirect);
+        assertThat(nextStartedActivity).extras().containsKey(AuthorizationException.EXTRA_EXCEPTION);
+        assertThat(mActivity.isFinishing()).isTrue();
     }
 
     @Test
@@ -459,7 +464,7 @@ public class AuthorizationManagementActivityTest {
 
         // the authorization redirect will be forwarded via a new intent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-                RuntimeEnvironment.application,
+                mContext,
                 mErrorAuthRedirect));
 
         // the management activity is then resumed
@@ -469,7 +474,7 @@ public class AuthorizationManagementActivityTest {
         assertThat(mActivityShadow.getResultCode()).isEqualTo(RESULT_OK);
         Intent resultIntent = mActivityShadow.getResultIntent();
         assertThat(resultIntent.getData()).isEqualTo(mErrorAuthRedirect);
-        assertThat(mActivity).isFinishing();
+        assertThat(mActivity.isFinishing()).isTrue();
     }
 
     @Test
@@ -487,7 +492,7 @@ public class AuthorizationManagementActivityTest {
 
         // the authorization redirect will be forwarded via a new intent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-            RuntimeEnvironment.application,
+            mContext,
             mErrorAuthRedirect));
 
         // the management activity is then resumed
@@ -497,7 +502,7 @@ public class AuthorizationManagementActivityTest {
         assertThat(mActivityShadow.getResultCode()).isEqualTo(RESULT_OK);
         Intent resultIntent = mActivityShadow.getResultIntent();
         assertThat(resultIntent.getData()).isEqualTo(mErrorEndSessionRedirect);
-        assertThat(mActivity).isFinishing();
+        assertThat(mActivity.isFinishing()).isTrue();
     }
 
     @Test
@@ -511,14 +516,13 @@ public class AuthorizationManagementActivityTest {
 
         Intent nextStartedActivity = emulateAuthorizationResponseReceived(
                 AuthorizationManagementActivity.createResponseHandlingIntent(
-                        RuntimeEnvironment.application,
+                        mContext,
                         authResponseUri));
 
         // the next activity should be from the completion intent, carrying an error
-        assertThat(nextStartedActivity)
-                .hasAction("COMPLETE")
-                .hasData(authResponseUri)
-                .hasExtra(AuthorizationException.EXTRA_EXCEPTION);
+        assertThat(nextStartedActivity).hasAction("COMPLETE");
+        assertThat(nextStartedActivity).hasData(authResponseUri);
+        assertThat(nextStartedActivity).extras().containsKey(AuthorizationException.EXTRA_EXCEPTION);
 
         assertThat(AuthorizationException.fromIntent(nextStartedActivity))
                 .isEqualTo(AuthorizationRequestErrors.STATE_MISMATCH);
@@ -534,14 +538,13 @@ public class AuthorizationManagementActivityTest {
 
         Intent nextStartedActivity = emulateAuthorizationResponseReceived(
             AuthorizationManagementActivity.createResponseHandlingIntent(
-                RuntimeEnvironment.application,
+                mContext,
                 authResponseUri));
 
         // the next activity should be from the completion intent, carrying an error
-        assertThat(nextStartedActivity)
-            .hasAction("COMPLETE")
-            .hasData(authResponseUri)
-            .hasExtra(AuthorizationException.EXTRA_EXCEPTION);
+        assertThat(nextStartedActivity).hasAction("COMPLETE");
+        assertThat(nextStartedActivity).hasData(authResponseUri);
+        assertThat(nextStartedActivity).extras().containsKey(AuthorizationException.EXTRA_EXCEPTION);
 
         assertThat(AuthorizationException.fromIntent(nextStartedActivity))
             .isEqualTo(AuthorizationRequestErrors.STATE_MISMATCH);
@@ -558,7 +561,7 @@ public class AuthorizationManagementActivityTest {
 
         // the authorization redirect will be forwarded via a new intent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-                RuntimeEnvironment.application,
+                mContext,
                 authResponseUri));
 
         // the management activity is then resumed
@@ -568,9 +571,8 @@ public class AuthorizationManagementActivityTest {
         // via the result intent supplied to setResult
         Intent resultIntent = mActivityShadow.getResultIntent();
 
-        assertThat(resultIntent)
-                .hasData(authResponseUri)
-                .hasExtra(AuthorizationException.EXTRA_EXCEPTION);
+        assertThat(resultIntent).hasData(authResponseUri);
+        assertThat(resultIntent).extras().containsKey(AuthorizationException.EXTRA_EXCEPTION);
 
         assertThat(AuthorizationException.fromIntent(resultIntent))
                 .isEqualTo(AuthorizationRequestErrors.STATE_MISMATCH);
@@ -586,7 +588,7 @@ public class AuthorizationManagementActivityTest {
 
         // the authorization redirect will be forwarded via a new intent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-            RuntimeEnvironment.application,
+            mContext,
             authResponseUri));
 
         // the management activity is then resumed
@@ -596,9 +598,8 @@ public class AuthorizationManagementActivityTest {
         // via the result intent supplied to setResult
         Intent resultIntent = mActivityShadow.getResultIntent();
 
-        assertThat(resultIntent)
-            .hasData(authResponseUri)
-            .hasExtra(AuthorizationException.EXTRA_EXCEPTION);
+        assertThat(resultIntent).hasData(authResponseUri);
+        assertThat(resultIntent).extras().containsKey(AuthorizationException.EXTRA_EXCEPTION);
 
         assertThat(AuthorizationException.fromIntent(resultIntent))
             .isEqualTo(AuthorizationRequestErrors.STATE_MISMATCH);
@@ -625,7 +626,7 @@ public class AuthorizationManagementActivityTest {
         // the next activity should be from the completion intent, carrying an error
         Intent nextStartedActivity = emulateAuthorizationResponseReceived(
                 AuthorizationManagementActivity.createResponseHandlingIntent(
-                        RuntimeEnvironment.application,
+                        mContext,
                         authResponseUri));
 
         assertThat(AuthorizationException.fromIntent(nextStartedActivity))
@@ -651,7 +652,7 @@ public class AuthorizationManagementActivityTest {
         // the next activity should be from the completion intent, carrying an error
         Intent nextStartedActivity = emulateAuthorizationResponseReceived(
             AuthorizationManagementActivity.createResponseHandlingIntent(
-                RuntimeEnvironment.application,
+                mContext,
                 authResponseUri));
 
         assertThat(AuthorizationException.fromIntent(nextStartedActivity))
@@ -678,7 +679,7 @@ public class AuthorizationManagementActivityTest {
 
         // the authorization redirect will be forwarded via a new intent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-                RuntimeEnvironment.application,
+                mContext,
                 authResponseUri));
 
         // the management activity is then resumed
@@ -707,7 +708,7 @@ public class AuthorizationManagementActivityTest {
 
         // the authorization redirect will be forwarded via a new intent
         mController.newIntent(AuthorizationManagementActivity.createResponseHandlingIntent(
-            RuntimeEnvironment.application,
+            mContext,
             authResponseUri));
 
         // the management activity is then resumed
@@ -735,7 +736,7 @@ public class AuthorizationManagementActivityTest {
 
         // at which point the cancel intent should be fired
         assertThat(mActivityShadow.getNextStartedActivity()).hasAction("CANCEL");
-        assertThat(mActivity).isFinishing();
+        assertThat(mActivity.isFinishing()).isTrue();
     }
 
     @Test
@@ -755,7 +756,7 @@ public class AuthorizationManagementActivityTest {
 
         // at which point the cancel intent should be fired
         assertThat(mActivityShadow.getNextStartedActivity()).hasAction("CANCEL");
-        assertThat(mActivity).isFinishing();
+        assertThat(mActivity.isFinishing()).isTrue();
     }
 
     @Test
@@ -777,12 +778,12 @@ public class AuthorizationManagementActivityTest {
         assertThat(mActivityShadow.getResultCode()).isEqualTo(RESULT_CANCELED);
 
         Intent resultIntent = mActivityShadow.getResultIntent();
-        assertThat(resultIntent).hasExtra(AuthorizationException.EXTRA_EXCEPTION);
+        assertThat(resultIntent).extras().containsKey(AuthorizationException.EXTRA_EXCEPTION);
 
         assertThat(AuthorizationException.fromIntent(resultIntent))
             .isEqualTo(AuthorizationException.GeneralErrors.USER_CANCELED_AUTH_FLOW);
 
-        assertThat(mActivity).isFinishing();
+        assertThat(mActivity.isFinishing()).isTrue();
     }
 
     @Test
@@ -804,12 +805,12 @@ public class AuthorizationManagementActivityTest {
         assertThat(mActivityShadow.getResultCode()).isEqualTo(RESULT_CANCELED);
 
         Intent resultIntent = mActivityShadow.getResultIntent();
-        assertThat(resultIntent).hasExtra(AuthorizationException.EXTRA_EXCEPTION);
+        assertThat(resultIntent).extras().containsKey(AuthorizationException.EXTRA_EXCEPTION);
 
         assertThat(AuthorizationException.fromIntent(resultIntent))
             .isEqualTo(AuthorizationException.GeneralErrors.USER_CANCELED_AUTH_FLOW);
 
-        assertThat(mActivity).isFinishing();
+        assertThat(mActivity.isFinishing()).isTrue();
     }
 
     @Test
@@ -829,7 +830,7 @@ public class AuthorizationManagementActivityTest {
 
         // as there is no cancel intent, the activity simply finishes
         assertThat(mActivityShadow.getNextStartedActivity()).isNull();
-        assertThat(mActivity).isFinishing();
+        assertThat(mActivity.isFinishing()).isTrue();
     }
 
     @Test
@@ -849,7 +850,7 @@ public class AuthorizationManagementActivityTest {
 
         // as there is no cancel intent, the activity simply finishes
         assertThat(mActivityShadow.getNextStartedActivity()).isNull();
-        assertThat(mActivity).isFinishing();
+        assertThat(mActivity.isFinishing()).isTrue();
     }
 
     private void emulateFlowToAuthorizationActivityLaunch(Intent startIntent) {

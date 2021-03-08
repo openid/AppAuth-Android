@@ -31,7 +31,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk=16)
+@Config(sdk = 16)
 public class AuthorizationServiceDiscoveryTest {
     // ToDo: add more tests for remaining getters
     static final String TEST_AUTHORIZATION_ENDPOINT = "http://test.openid.com/o/oauth/auth";

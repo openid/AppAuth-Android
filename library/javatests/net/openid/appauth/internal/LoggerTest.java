@@ -35,7 +35,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk=16)
+@Config(sdk = 16)
 public final class LoggerTest {
 
     private static final int INT = 100;

@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk=16)
+@Config(sdk = 16)
 public class EndSessionRequestTest {
 
     /* ********************************** Builder() ***********************************************/

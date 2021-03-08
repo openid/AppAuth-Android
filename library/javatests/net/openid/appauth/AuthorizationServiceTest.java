@@ -14,6 +14,8 @@
 
 package net.openid.appauth;
 
+import static android.os.Looper.getMainLooper;
+
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -41,7 +43,10 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.android.util.concurrent.PausedExecutorService;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.LooperMode;
+import org.robolectric.shadows.ShadowPausedAsyncTask;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -50,8 +55,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.util.Map;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
 import static androidx.browser.customtabs.CustomTabsIntent.EXTRA_TITLE_VISIBILITY_STATE;
 import static androidx.browser.customtabs.CustomTabsIntent.EXTRA_TOOLBAR_COLOR;
@@ -86,9 +89,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk=16)
+@Config(sdk = 16)
+@LooperMode(LooperMode.Mode.PAUSED)
 public class AuthorizationServiceTest {
     private static final int CALLBACK_TIMEOUT_MILLIS = 1000;
 
@@ -124,6 +129,7 @@ public class AuthorizationServiceTest {
     @Mock Context mContext;
     @Mock CustomTabsClient mClient;
     @Mock CustomTabManager mCustomTabManager;
+    private PausedExecutorService mPausedExecutorService;
 
     @Before
     @SuppressWarnings("ResourceType")
@@ -146,6 +152,9 @@ public class AuthorizationServiceTest {
                 anyInt())).thenReturn(true);
         when(mCustomTabManager.createTabBuilder())
                 .thenReturn(new CustomTabsIntent.Builder());
+
+        mPausedExecutorService = new PausedExecutorService();
+        ShadowPausedAsyncTask.overrideExecutor(mPausedExecutorService);
     }
 
     @Test
@@ -269,7 +278,8 @@ public class AuthorizationServiceTest {
         when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
         TokenRequest request = getTestAuthCodeExchangeRequest();
         mService.performTokenRequest(request, mAuthCallback);
-        mAuthCallback.waitForCallback();
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
         assertTokenResponse(mAuthCallback.response, request);
         String postBody = mOutputStream.toString();
 
@@ -298,7 +308,8 @@ public class AuthorizationServiceTest {
                 .setNonce(TEST_NONCE)
                 .build();
         mService.performTokenRequest(request, mAuthCallback);
-        mAuthCallback.waitForCallback();
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
         assertTokenResponse(mAuthCallback.response, request, idToken);
     }
 
@@ -312,7 +323,8 @@ public class AuthorizationServiceTest {
 
         ClientSecretBasic clientAuth = new ClientSecretBasic("SUPER_SECRET");
         mService.performTokenRequest(request, clientAuth, mAuthCallback);
-        mAuthCallback.waitForCallback();
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
         assertTokenResponse(mAuthCallback.response, request);
         String postBody = mOutputStream.toString();
 
@@ -348,7 +360,8 @@ public class AuthorizationServiceTest {
         when(mHttpConnection.getInputStream()).thenReturn(is);
         TokenRequest request = getTestAuthCodeExchangeRequest();
         mService.performTokenRequest(request, csb, mAuthCallback);
-        mAuthCallback.waitForCallback();
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
         assertTokenResponse(mAuthCallback.response, request);
         String postBody = mOutputStream.toString();
         assertTokenRequestBody(postBody, request.getRequestParameters());
@@ -364,7 +377,8 @@ public class AuthorizationServiceTest {
         when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
         TokenRequest request = getTestAuthCodeExchangeRequest();
         mService.performTokenRequest(request, csp, mAuthCallback);
-        mAuthCallback.waitForCallback();
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
         assertTokenResponse(mAuthCallback.response, request);
 
         String postBody = mOutputStream.toString();
@@ -381,7 +395,8 @@ public class AuthorizationServiceTest {
         when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_BAD_REQUEST);
         TokenRequest request = getTestAuthCodeExchangeRequest();
         mService.performTokenRequest(request, csp, mAuthCallback);
-        mAuthCallback.waitForCallback();
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
         assertInvalidGrant(mAuthCallback.error);
     }
 
@@ -393,7 +408,8 @@ public class AuthorizationServiceTest {
         when(mHttpConnection.getResponseCode()).thenReturn(199);
         TokenRequest request = getTestAuthCodeExchangeRequest();
         mService.performTokenRequest(request, csp, mAuthCallback);
-        mAuthCallback.waitForCallback();
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
         assertInvalidGrant(mAuthCallback.error);
     }
 
@@ -405,7 +421,8 @@ public class AuthorizationServiceTest {
         when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_BAD_REQUEST);
         TokenRequest request = getTestAuthCodeExchangeRequest();
         mService.performTokenRequest(request, csp, mAuthCallback);
-        mAuthCallback.waitForCallback();
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
         assertInvalidGrantWithNoDescription(mAuthCallback.error);
     }
 
@@ -415,7 +432,8 @@ public class AuthorizationServiceTest {
         when(mHttpConnection.getInputStream()).thenThrow(ex);
         when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
         mService.performTokenRequest(getTestAuthCodeExchangeRequest(), mAuthCallback);
-        mAuthCallback.waitForCallback();
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
         assertNotNull(mAuthCallback.error);
         assertEquals(GeneralErrors.NETWORK_ERROR, mAuthCallback.error);
     }
@@ -426,7 +444,8 @@ public class AuthorizationServiceTest {
         when(mHttpConnection.getInputStream()).thenReturn(is);
         RegistrationRequest request = getTestRegistrationRequest();
         mService.performRegistrationRequest(request, mRegistrationCallback);
-        mRegistrationCallback.waitForCallback();
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
         assertRegistrationResponse(mRegistrationCallback.response, request);
         String postBody = mOutputStream.toString();
         assertThat(postBody).isEqualTo(request.toJsonString());
@@ -437,7 +456,8 @@ public class AuthorizationServiceTest {
         Exception ex = new IOException();
         when(mHttpConnection.getInputStream()).thenThrow(ex);
         mService.performRegistrationRequest(getTestRegistrationRequest(), mRegistrationCallback);
-        mRegistrationCallback.waitForCallback();
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
         assertNotNull(mRegistrationCallback.error);
         assertEquals(GeneralErrors.NETWORK_ERROR, mRegistrationCallback.error);
     }
@@ -520,7 +540,6 @@ public class AuthorizationServiceTest {
 
     private static class AuthorizationCallback implements
             AuthorizationService.TokenResponseCallback {
-        private Semaphore mSemaphore = new Semaphore(0);
         public TokenResponse response;
         public AuthorizationException error;
 
@@ -531,18 +550,11 @@ public class AuthorizationServiceTest {
             assertTrue((tokenResponse == null) ^ (ex == null));
             this.response = tokenResponse;
             this.error = ex;
-            mSemaphore.release();
-        }
-
-        public void waitForCallback() throws Exception {
-            assertTrue(mSemaphore.tryAcquire(CALLBACK_TIMEOUT_MILLIS,
-                    TimeUnit.MILLISECONDS));
         }
     }
 
     private static class RegistrationCallback implements
             AuthorizationService.RegistrationResponseCallback {
-        private Semaphore mSemaphore = new Semaphore(0);
         public RegistrationResponse response;
         public AuthorizationException error;
 
@@ -553,12 +565,6 @@ public class AuthorizationServiceTest {
             assertTrue((registrationResponse == null) ^ (ex == null));
             this.response = registrationResponse;
             this.error = ex;
-            mSemaphore.release();
-        }
-
-        public void waitForCallback() throws Exception {
-            assertTrue(mSemaphore.tryAcquire(CALLBACK_TIMEOUT_MILLIS,
-                    TimeUnit.MILLISECONDS));
         }
     }
 
