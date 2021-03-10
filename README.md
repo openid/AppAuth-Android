@@ -62,7 +62,7 @@ build and configure this app, see the
 ## Codelabs, videos and other resources
 
 - A codelab featuring AppAuth was provided for Google I/O 2016:
-  [Achieving Single Sign-on with AppAuth](https://codelabs.developers.google.com/codelabs/appauth-android-codelab/index.html).
+  [Achieving Single Sign-on with AppAuth](https://kiosk-dot-codelabs-site.appspot.com/codelabs/appauth-android-codelab/index.html).
 
 - A talk providing an overview of using the library for enterprise single
   sign-on (produced by Google) can be found here:
