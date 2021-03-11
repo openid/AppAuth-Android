@@ -4,12 +4,13 @@ apply from: 'config/keystore.gradle'
 
 buildscript {
     repositories {
+        maven { url "https://plugins.gradle.org/m2/" }
         jcenter()
         google()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.2'
-        classpath 'org.ajoberstar:gradle-git:1.7.2'
+        classpath 'org.ajoberstar.grgit:grgit-gradle:4.1.0'
         classpath 'org.jacoco:org.jacoco.core:0.8.6'
     }
 }
@@ -25,7 +26,7 @@ subprojects {
 ext.verifyKeystore()
 
 try {
-    def grgit = Grgit.open(dir: '.')
+    def grgit = Grgit.open(currentDir: project.rootDir)
     def lastCommit = grgit.head()
 
     project.ext.versionNum = grgit.log(includes:['HEAD']).size()
@@ -35,7 +36,7 @@ try {
         project.ext.versionName = 'DEV'
     }
 } catch (Exception ignored) {
-    project.ext.versionNum = 0
+    project.ext.versionNum = 1
     project.ext.versionName = 'DEV'
     project.ext.versionDate = new Date()
 }
