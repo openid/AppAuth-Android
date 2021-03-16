@@ -56,6 +56,19 @@ public class RegistrationRequestTest {
             + " \"grant_types\": [\"" + GrantTypeValues.IMPLICIT + "\"]\n"
             + "}";
 
+    public static final Uri TEST_JWKS_URI = Uri.parse("https://mydomain/path/keys");
+    private static final String TEST_JWKS = "{\n"
+        + " \"keys\": [\n"
+        + "  {\n"
+        + "   \"kty\": \"RSA\",\n"
+        + "   \"kid\": \"key1\",\n"
+        + "   \"n\": \"AJnc...L0HU=\",\n"
+        + "   \"e\": \"AQAB\"\n"
+        + "  }\n"
+        + " ]\n"
+        + "}";
+
+
     private RegistrationRequest.Builder mMinimalRequestBuilder;
     private RegistrationRequest.Builder mMaximalRequestBuilder;
     private JSONObject mJson;
@@ -132,6 +145,34 @@ public class RegistrationRequestTest {
         RegistrationRequest request = mMaximalRequestBuilder.build();
         String jsonStr = request.toJsonString();
         assertMaximalValuesInJson(request, new JSONObject(jsonStr));
+    }
+
+    @Test
+    public void testToJsonString_withJwksUri() throws JSONException {
+        RegistrationRequest request = mMinimalRequestBuilder
+            .setJwksUri(TEST_JWKS_URI)
+            .build();
+
+        String jsonStr = request.toJsonString();
+        JSONObject json = new JSONObject(jsonStr);
+
+        assertThat(Uri.parse(json.getString(RegistrationRequest.PARAM_JWKS_URI)))
+            .isEqualTo(TEST_JWKS_URI);
+    }
+
+
+    @Test
+    public void testToJsonString_withJwks() throws JSONException {
+        RegistrationRequest request = mMinimalRequestBuilder
+            .setJwks(new JSONObject(TEST_JWKS))
+            .build();
+        assertThat(request.jwks).isNotNull();
+
+        String jsonStr = request.toJsonString();
+        JSONObject json = new JSONObject(jsonStr);
+
+        assertThat(json.getJSONObject(RegistrationRequest.PARAM_JWKS).toString())
+            .isEqualTo(request.jwks.toString());
     }
 
     @Test

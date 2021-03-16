@@ -309,6 +309,21 @@ final class JsonUtil {
         return stringMap;
     }
 
+    public static JSONObject getJsonObjectIfDefined(@NonNull JSONObject json,
+            @NonNull String field) throws JSONException {
+        checkNotNull(json, "json must not be null");
+        checkNotNull(field, "field must not be null");
+        if (!json.has(field)) {
+            return null;
+        }
+
+        JSONObject value = json.optJSONObject(field);
+        if (value == null) {
+            throw new JSONException("field \"" + field + "\" is mapped to a null value");
+        }
+        return value;
+    }
+
     @NonNull
     public static List<String> toStringList(@Nullable JSONArray jsonArray)
             throws JSONException {

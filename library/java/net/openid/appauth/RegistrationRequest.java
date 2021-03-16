@@ -45,6 +45,8 @@ public class RegistrationRequest {
     static final String PARAM_GRANT_TYPES = "grant_types";
     static final String PARAM_APPLICATION_TYPE = "application_type";
     static final String PARAM_SUBJECT_TYPE = "subject_type";
+    static final String PARAM_JWKS_URI = "jwks_uri";
+    static final String PARAM_JWKS = "jwks";
     static final String PARAM_TOKEN_ENDPOINT_AUTHENTICATION_METHOD = "token_endpoint_auth_method";
 
     private static final Set<String> BUILT_IN_PARAMS = builtInParams(
@@ -53,6 +55,8 @@ public class RegistrationRequest {
             PARAM_GRANT_TYPES,
             PARAM_APPLICATION_TYPE,
             PARAM_SUBJECT_TYPE,
+            PARAM_JWKS_URI,
+            PARAM_JWKS,
             PARAM_TOKEN_ENDPOINT_AUTHENTICATION_METHOD
     );
 
@@ -131,6 +135,24 @@ public class RegistrationRequest {
     public final String subjectType;
 
     /**
+     * URL for the Client's JSON Web Key Set [JWK] document.
+     *
+     * @see "OpenID Connect Dynamic Client Registration 1.0, Client Metadata
+     * <https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata>"
+     */
+    @Nullable
+    public final Uri jwksUri;
+
+    /**
+     * Client's JSON Web Key Set [JWK] document.
+     *
+     * @see "OpenID Connect Dynamic Client Registration 1.0, Client Metadata
+     * <https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata>"
+     */
+    @Nullable
+    public final JSONObject jwks;
+
+    /**
      * The client authentication method to use at the token endpoint.
      *
      * @see "OpenID Connect Core 1.0, Section 9 <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.9>"
@@ -162,6 +184,12 @@ public class RegistrationRequest {
 
         @Nullable
         private String mSubjectType;
+
+        @Nullable
+        private Uri mJwksUri;
+
+        @Nullable
+        private JSONObject mJwks;
 
         @Nullable
         private String mTokenEndpointAuthenticationMethod;
@@ -273,6 +301,30 @@ public class RegistrationRequest {
         }
 
         /**
+         * Specifies the URL for the Client's JSON Web Key Set.
+         *
+         * @see "OpenID Connect Dynamic Client Registration 1.0, Client Metadata
+         * <https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata>"
+         */
+        @NonNull
+        public Builder setJwksUri(@Nullable Uri jwksUri) {
+            mJwksUri = jwksUri;
+            return this;
+        }
+
+        /**
+         * Specifies the client's JSON Web Key Set.
+         *
+         * @see "OpenID Connect Dynamic Client Registration 1.0, Client Metadata
+         * <https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata>"
+         */
+        @NonNull
+        public Builder setJwks(@Nullable JSONObject jwks) {
+            mJwks = jwks;
+            return this;
+        }
+
+        /**
          * Specifies the client authentication method to use at the token endpoint.
          *
          * @see "OpenID Connect Core 1.0, Section 9
@@ -308,6 +360,8 @@ public class RegistrationRequest {
                             ? mResponseTypes : Collections.unmodifiableList(mResponseTypes),
                     mGrantTypes == null ? mGrantTypes : Collections.unmodifiableList(mGrantTypes),
                     mSubjectType,
+                    mJwksUri,
+                    mJwks,
                     mTokenEndpointAuthenticationMethod,
                     Collections.unmodifiableMap(mAdditionalParameters));
         }
@@ -319,6 +373,8 @@ public class RegistrationRequest {
             @Nullable List<String> responseTypes,
             @Nullable List<String> grantTypes,
             @Nullable String subjectType,
+            @Nullable Uri jwksUri,
+            @Nullable JSONObject jwks,
             @Nullable String tokenEndpointAuthenticationMethod,
             @NonNull Map<String, String> additionalParameters) {
         this.configuration = configuration;
@@ -326,6 +382,8 @@ public class RegistrationRequest {
         this.responseTypes = responseTypes;
         this.grantTypes = grantTypes;
         this.subjectType = subjectType;
+        this.jwksUri = jwksUri;
+        this.jwks = jwks;
         this.tokenEndpointAuthenticationMethod = tokenEndpointAuthenticationMethod;
         this.additionalParameters = additionalParameters;
         this.applicationType = APPLICATION_TYPE_NATIVE;
@@ -379,6 +437,10 @@ public class RegistrationRequest {
             JsonUtil.put(json, PARAM_GRANT_TYPES, JsonUtil.toJsonArray(grantTypes));
         }
         JsonUtil.putIfNotNull(json, PARAM_SUBJECT_TYPE, subjectType);
+
+        JsonUtil.putIfNotNull(json, PARAM_JWKS_URI, jwksUri);
+        JsonUtil.putIfNotNull(json, PARAM_JWKS, jwks);
+
         JsonUtil.putIfNotNull(json, PARAM_TOKEN_ENDPOINT_AUTHENTICATION_METHOD,
                 tokenEndpointAuthenticationMethod);
         return json;
@@ -394,12 +456,16 @@ public class RegistrationRequest {
         checkNotNull(json, "json must not be null");
         List<Uri> redirectUris = JsonUtil.getUriList(json, PARAM_REDIRECT_URIS);
 
-        Builder builder = new RegistrationRequest.Builder(
+        Builder builder = new Builder(
                 AuthorizationServiceConfiguration.fromJson(json.getJSONObject(KEY_CONFIGURATION)),
                 redirectUris)
-                .setSubjectType(JsonUtil.getStringIfDefined(json, PARAM_SUBJECT_TYPE))
                 .setResponseTypeValues(JsonUtil.getStringListIfDefined(json, PARAM_RESPONSE_TYPES))
                 .setGrantTypeValues(JsonUtil.getStringListIfDefined(json, PARAM_GRANT_TYPES))
+                .setSubjectType(JsonUtil.getStringIfDefined(json, PARAM_SUBJECT_TYPE))
+                .setJwksUri(JsonUtil.getUriIfDefined(json, PARAM_JWKS_URI))
+                .setJwks(JsonUtil.getJsonObjectIfDefined(json, PARAM_JWKS))
+                .setTokenEndpointAuthenticationMethod(JsonUtil.getStringIfDefined(json,
+                        PARAM_TOKEN_ENDPOINT_AUTHENTICATION_METHOD))
                 .setAdditionalParameters(JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
 
         return builder.build();
