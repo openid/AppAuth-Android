@@ -15,7 +15,6 @@
 package net.openid.appauth;
 
 import android.os.Bundle;
-
 import androidx.appcompat.app.AppCompatActivity;
 
 /**
