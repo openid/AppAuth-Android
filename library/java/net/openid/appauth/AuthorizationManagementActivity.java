@@ -21,11 +21,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+
 import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AppCompatActivity;
 
 import net.openid.appauth.AuthorizationException.AuthorizationRequestErrors;
 import net.openid.appauth.internal.Logger;
+
 import org.json.JSONException;
 
 /**
