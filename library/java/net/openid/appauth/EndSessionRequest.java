@@ -33,7 +33,7 @@ import org.json.JSONObject;
  * @see "OpenID Connect Session Management 1.0 - draft 28, 5 RP-Initiated Logout
  * <https://openid.net/specs/openid-connect-session-1_0.html#RPLogout>"
  */
-public class EndSessionRequest extends AuthorizationManagementRequest {
+public class EndSessionRequest implements AuthorizationManagementRequest {
 
     private static final String PARAM_ID_TOKEN_HINT = "id_token_hint";
     private static final String PARAM_REDIRECT_URI = "post_logout_redirect_uri";
@@ -120,7 +120,7 @@ public class EndSessionRequest extends AuthorizationManagementRequest {
             setAuthorizationServiceConfiguration(configuration);
             setIdToken(idToken);
             setRedirectUri(redirectUri);
-            setState(AuthorizationManagementRequest.generateRandomState());
+            setState(AuthorizationManagementUtil.generateRandomState());
         }
 
         /**
@@ -200,6 +200,16 @@ public class EndSessionRequest extends AuthorizationManagementRequest {
         JsonUtil.put(json, KEY_REDIRECT_URI, redirectUri.toString());
         JsonUtil.put(json, KEY_STATE, state);
         return json;
+    }
+
+    /**
+     * Produces a JSON string representation of the request for persistent storage or
+     * local transmission (e.g. between activities). This method is just a convenience wrapper
+     * for {@link #jsonSerialize()}, converting the JSON object to its string form.
+     */
+    @Override
+    public String jsonSerializeString() {
+        return jsonSerialize().toString();
     }
 
     /**

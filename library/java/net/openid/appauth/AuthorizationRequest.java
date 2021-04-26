@@ -46,7 +46,7 @@ import java.util.Set;
  * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.1
  * <https://tools.ietf.org/html/rfc6749#section-4.1.1>"
  */
-public class AuthorizationRequest extends AuthorizationManagementRequest {
+public class AuthorizationRequest implements AuthorizationManagementRequest {
 
     /**
      * SHA-256 based code verifier challenge method.
@@ -586,8 +586,8 @@ public class AuthorizationRequest extends AuthorizationManagementRequest {
             setClientId(clientId);
             setResponseType(responseType);
             setRedirectUri(redirectUri);
-            setState(AuthorizationManagementRequest.generateRandomState());
-            setNonce(AuthorizationManagementRequest.generateRandomState());
+            setState(AuthorizationManagementUtil.generateRandomState());
+            setNonce(AuthorizationManagementUtil.generateRandomState());
             setCodeVerifier(CodeVerifierUtil.generateRandomCodeVerifier());
         }
 
@@ -1038,6 +1038,16 @@ public class AuthorizationRequest extends AuthorizationManagementRequest {
         JsonUtil.put(json, KEY_ADDITIONAL_PARAMETERS,
                 JsonUtil.mapToJsonObject(additionalParameters));
         return json;
+    }
+
+    /**
+     * Produces a JSON string representation of the request for persistent storage or
+     * local transmission (e.g. between activities). This method is just a convenience wrapper
+     * for {@link #jsonSerialize()}, converting the JSON object to its string form.
+     */
+    @Override
+    public String jsonSerializeString() {
+        return jsonSerialize().toString();
     }
 
     /**

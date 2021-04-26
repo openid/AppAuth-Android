@@ -15,51 +15,36 @@
 package net.openid.appauth;
 
 import android.net.Uri;
-import android.util.Base64;
 
 import org.json.JSONObject;
-
-import java.security.SecureRandom;
 
 /**
  * A base request for session management models
  * {@link AuthorizationRequest}
  * {@link EndSessionRequest}
  */
-abstract class AuthorizationManagementRequest {
-
-    private static final int STATE_LENGTH = 16;
-
-    static String generateRandomState() {
-        SecureRandom sr = new SecureRandom();
-        byte[] random = new byte[STATE_LENGTH];
-        sr.nextBytes(random);
-        return Base64.encodeToString(random, Base64.NO_WRAP | Base64.NO_PADDING | Base64.URL_SAFE);
-    }
+public interface AuthorizationManagementRequest {
 
     /**
      * Produces a JSON representation of the request for persistent storage or local transmission
      * (e.g. between activities).
      */
-    public abstract JSONObject jsonSerialize();
+    JSONObject jsonSerialize();
 
     /**
      * Produces a JSON string representation of the request for persistent storage or
      * local transmission (e.g. between activities). This method is just a convenience wrapper
      * for {@link #jsonSerialize()}, converting the JSON object to its string form.
      */
-    public String jsonSerializeString() {
-        return jsonSerialize().toString();
-    }
+    String jsonSerializeString();
 
     /**
      * An opaque value used by the client to maintain state between the request and callback.
      */
-    public abstract String getState();
+    String getState();
 
     /**
      * Produces a request URI, that can be used to dispatch the request.
      */
-    public abstract Uri toUri();
-
+    Uri toUri();
 }

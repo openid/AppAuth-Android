@@ -19,13 +19,25 @@ import static net.openid.appauth.Preconditions.checkNotNull;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Base64;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.security.SecureRandom;
+
 class AuthorizationManagementUtil {
+    private static final int STATE_LENGTH = 16;
+
+    static String generateRandomState() {
+        SecureRandom sr = new SecureRandom();
+        byte[] random = new byte[STATE_LENGTH];
+        sr.nextBytes(random);
+        return Base64.encodeToString(random, Base64.NO_WRAP | Base64.NO_PADDING | Base64.URL_SAFE);
+    }
+
     /**
      * Reads an authorization request from a JSON string representation produced by either
      * {@link AuthorizationRequest#jsonSerialize()} or {@link EndSessionRequest#jsonSerialize()}.
