@@ -61,7 +61,7 @@ public class RegistrationResponseTest {
             + "}";
 
     @RunWith(RobolectricTestRunner.class)
-
+    @Config(sdk=16)
     public static class RegistrationResponseSingleTest {
         private RegistrationResponse.Builder mMinimalBuilder;
         private JSONObject mJson;
@@ -171,7 +171,7 @@ public class RegistrationResponseTest {
     }
 
     @RunWith(ParameterizedRobolectricTestRunner.class)
-
+    @Config(sdk=16)
     public static class RegistrationResponseParameterTest {
         private JSONObject mJson;
         private RegistrationRequest mMinimalRegistrationRequest;
