@@ -8,6 +8,7 @@ import android.net.Uri;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -16,9 +17,21 @@ import org.robolectric.annotation.Config;
 import static org.junit.Assert.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Arrays;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 16)
 public class EndSessionRequestTest {
+
+    private EndSessionRequest.Builder mRequestBuilder;
+
+    @Before
+    public void setUp() {
+        mRequestBuilder = new EndSessionRequest.Builder(
+            getTestServiceConfig(),
+            TEST_ID_TOKEN,
+            TEST_APP_REDIRECT_URI);
+    }
 
     /* ********************************** Builder() ***********************************************/
     @Test(expected = NullPointerException.class)
@@ -61,6 +74,103 @@ public class EndSessionRequestTest {
             TEST_APP_REDIRECT_URI).build();
         assertNotNull(request.getState());
     }
+
+    /* ******************************** ui_locales ***********************************************/
+
+    @Test
+    public void testUiLocales_unspecified() {
+        EndSessionRequest request = mRequestBuilder.build();
+        assertThat(request.uiLocales).isNull();
+        assertThat(request.getUiLocales()).isNull();
+    }
+
+    @Test
+    public void testUiLocales() {
+        EndSessionRequest req = mRequestBuilder
+            .setUiLocales("en de fr-CA")
+            .build();
+
+        assertThat(req.uiLocales).isEqualTo("en de fr-CA");
+        assertThat(req.getUiLocales())
+            .hasSize(3)
+            .contains("en")
+            .contains("de")
+            .contains("fr-CA");
+    }
+
+    @Test
+    public void testUiLocales_nullValue() {
+        EndSessionRequest req = mRequestBuilder.setUiLocales(null).build();
+        assertThat(req.uiLocales).isNull();
+        assertThat(req.getUiLocales()).isNull();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUiLocales_empty() {
+        mRequestBuilder.setUiLocales("").build();
+    }
+
+    @Test
+    public void testUiLocales_withVarargs() {
+        EndSessionRequest req = mRequestBuilder
+            .setUiLocalesValues("en", "de", "fr-CA")
+            .build();
+
+        assertThat(req.uiLocales).isEqualTo("en de fr-CA");
+        assertThat(req.getUiLocales())
+            .hasSize(3)
+            .contains("en")
+            .contains("de")
+            .contains("fr-CA");
+    }
+
+    @Test
+    public void testUiLocales_withNullVarargsArray() {
+        EndSessionRequest req = mRequestBuilder.setUiLocalesValues((String[])null).build();
+        assertThat(req.uiLocales).isNull();
+        assertThat(req.getUiLocales()).isNull();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUiLocales_withNullStringInVarargs() {
+        mRequestBuilder.setUiLocalesValues("en", null).build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUiLocales_withEmptyStringInVarargs() {
+        mRequestBuilder.setUiLocalesValues("en", "").build();
+    }
+
+    @Test
+    public void testUiLocales_withIterable() {
+        EndSessionRequest req = mRequestBuilder
+            .setUiLocalesValues(Arrays.asList("en", "de", "fr-CA"))
+            .build();
+
+        assertThat(req.uiLocales).isEqualTo("en de fr-CA");
+
+        assertThat(req.getUiLocales())
+            .hasSize(3)
+            .contains("en")
+            .contains("de")
+            .contains("fr-CA");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUiLocales_withIterableContainingNullValue() {
+        mRequestBuilder
+            .setUiLocalesValues(Arrays.asList("en", null))
+            .build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUiLocales_withIterableContainingEmptyValue() {
+        mRequestBuilder
+            .setUiLocalesValues(Arrays.asList("en", ""))
+            .build();
+    }
+
+    /* ******************************* toUri() ****************************************************/
 
     @Test
     public void testToUri() {

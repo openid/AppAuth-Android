@@ -16,14 +16,19 @@ package net.openid.appauth;
 
 import static net.openid.appauth.Preconditions.checkNotEmpty;
 import static net.openid.appauth.Preconditions.checkNotNull;
+import static net.openid.appauth.Preconditions.checkNullOrNotEmpty;
 
 import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import net.openid.appauth.internal.UriUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Arrays;
+import java.util.Set;
 
 /**
  * An OpenID end session request.
@@ -38,6 +43,7 @@ public class EndSessionRequest extends AuthorizationManagementRequest {
     private static final String PARAM_ID_TOKEN_HINT = "id_token_hint";
     private static final String PARAM_REDIRECT_URI = "post_logout_redirect_uri";
     private static final String PARAM_STATE = "state";
+    private static final String PARAM_UI_LOCALES = "ui_locales";
     private static final String KEY_CONFIGURATION = "configuration";
 
     @VisibleForTesting
@@ -46,6 +52,8 @@ public class EndSessionRequest extends AuthorizationManagementRequest {
     static final String KEY_REDIRECT_URI = "post_logout_redirect_uri";
     @VisibleForTesting
     static final String KEY_STATE = "state";
+    @VisibleForTesting
+    static final String KEY_UI_LOCALES = "ui_locales";
 
     /**
      * The service's {@link AuthorizationServiceConfiguration configuration}.
@@ -97,6 +105,16 @@ public class EndSessionRequest extends AuthorizationManagementRequest {
     public final String state;
 
     /**
+     * This is a space-separated list of BCP47 [RFC5646] language tag values, ordered by preference.
+     * It represents End-User's preferred languages and scripts for the user interface.
+     *
+     * @see "OpenID Connect RP-Initiated Logout 1.0 - draft 01
+     * <https://openid.net/specs/openid-connect-rpinitiated-1_0.html#RPLogout>"
+     */
+    @Nullable
+    public final String uiLocales;
+
+    /**
      * Creates instances of {@link EndSessionRequest}.
      */
     public static final class Builder {
@@ -112,6 +130,9 @@ public class EndSessionRequest extends AuthorizationManagementRequest {
 
         @NonNull
         private String mState;
+
+        @Nullable
+        private String mUiLocales;
 
         public Builder(
                 @NonNull AuthorizationServiceConfiguration configuration,
@@ -147,6 +168,28 @@ public class EndSessionRequest extends AuthorizationManagementRequest {
             return this;
         }
 
+        public EndSessionRequest.Builder setUiLocales(@Nullable String uiLocales) {
+            mUiLocales = checkNullOrNotEmpty(uiLocales, "uiLocales must be null or not empty");
+            return this;
+        }
+
+        @NonNull
+        public EndSessionRequest.Builder setUiLocalesValues(@Nullable String... uiLocalesValues) {
+            if (uiLocalesValues == null) {
+                mUiLocales = null;
+                return this;
+            }
+
+            return setUiLocalesValues(Arrays.asList(uiLocalesValues));
+        }
+
+        @NonNull
+        public EndSessionRequest.Builder setUiLocalesValues(
+                @Nullable Iterable<String> uiLocalesValues) {
+            mUiLocales = AsciiStringListUtil.iterableToString(uiLocalesValues);
+            return this;
+        }
+
         /**
          * Constructs an end session request. All fields must be set.
          * Failure to specify any of these parameters will result in a runtime exception.
@@ -157,7 +200,8 @@ public class EndSessionRequest extends AuthorizationManagementRequest {
                 mConfiguration,
                 mIdToken,
                 mRedirectUri,
-                mState);
+                mState,
+                mUiLocales);
         }
     }
 
@@ -166,11 +210,13 @@ public class EndSessionRequest extends AuthorizationManagementRequest {
             @NonNull AuthorizationServiceConfiguration configuration,
             @NonNull String idToken,
             @NonNull Uri redirectUri,
-            @NonNull String state) {
+            @NonNull String state,
+            @Nullable String uiLocales) {
         this.configuration = configuration;
         this.idToken = idToken;
         this.redirectUri = redirectUri;
         this.state = state;
+        this.uiLocales = uiLocales;
     }
 
     @Override
@@ -179,12 +225,19 @@ public class EndSessionRequest extends AuthorizationManagementRequest {
         return state;
     }
 
+    public Set<String> getUiLocales() {
+        return AsciiStringListUtil.stringToSet(uiLocales);
+    }
+
     @Override
     public Uri toUri() {
         Uri.Builder uriBuilder = configuration.endSessionEndpoint.buildUpon()
                 .appendQueryParameter(PARAM_REDIRECT_URI, redirectUri.toString())
                 .appendQueryParameter(PARAM_ID_TOKEN_HINT, idToken)
                 .appendQueryParameter(PARAM_STATE, state);
+
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_UI_LOCALES, uiLocales);
+
         return  uriBuilder.build();
     }
 
@@ -199,6 +252,7 @@ public class EndSessionRequest extends AuthorizationManagementRequest {
         JsonUtil.put(json, KEY_ID_TOKEN_HINT, idToken);
         JsonUtil.put(json, KEY_REDIRECT_URI, redirectUri.toString());
         JsonUtil.put(json, KEY_STATE, state);
+        JsonUtil.putIfNotNull(json, KEY_UI_LOCALES, uiLocales);
         return json;
     }
 
@@ -207,15 +261,16 @@ public class EndSessionRequest extends AuthorizationManagementRequest {
      * {@link #jsonSerialize()}.
      * @throws JSONException if the provided JSON does not match the expected structure.
      */
-    public static EndSessionRequest jsonDeserialize(@NonNull JSONObject jsonObject)
+    public static EndSessionRequest jsonDeserialize(@NonNull JSONObject json)
             throws JSONException {
-        checkNotNull(jsonObject, "json cannot be null");
-        return new EndSessionRequest(
-            AuthorizationServiceConfiguration.fromJson(jsonObject.getJSONObject(KEY_CONFIGURATION)),
-            JsonUtil.getString(jsonObject, KEY_ID_TOKEN_HINT),
-            JsonUtil.getUri(jsonObject, KEY_REDIRECT_URI),
-            JsonUtil.getString(jsonObject, KEY_STATE)
-        );
+        checkNotNull(json, "json cannot be null");
+        EndSessionRequest.Builder builder = new EndSessionRequest.Builder(
+                AuthorizationServiceConfiguration.fromJson(json.getJSONObject(KEY_CONFIGURATION)),
+                JsonUtil.getString(json, KEY_ID_TOKEN_HINT),
+                JsonUtil.getUri(json, KEY_REDIRECT_URI))
+                .setState(JsonUtil.getString(json, KEY_STATE))
+                .setUiLocales(JsonUtil.getStringIfDefined(json, KEY_UI_LOCALES));
+        return builder.build();
     }
 
     /**
