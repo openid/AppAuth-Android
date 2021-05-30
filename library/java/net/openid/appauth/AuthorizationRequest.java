@@ -285,6 +285,9 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
     static final String PARAM_PROMPT = "prompt";
 
     @VisibleForTesting
+    static final String PARAM_UI_LOCALES = "ui_locales";
+
+    @VisibleForTesting
     static final String PARAM_REDIRECT_URI = "redirect_uri";
 
     @VisibleForTesting
@@ -309,6 +312,7 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
             PARAM_DISPLAY,
             PARAM_LOGIN_HINT,
             PARAM_PROMPT,
+            PARAM_UI_LOCALES,
             PARAM_REDIRECT_URI,
             PARAM_RESPONSE_MODE,
             PARAM_RESPONSE_TYPE,
@@ -320,6 +324,7 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
     private static final String KEY_DISPLAY = "display";
     private static final String KEY_LOGIN_HINT = "login_hint";
     private static final String KEY_PROMPT = "prompt";
+    private static final String KEY_UI_LOCALES = "ui_locales";
     private static final String KEY_RESPONSE_TYPE = "responseType";
     private static final String KEY_REDIRECT_URI = "redirectUri";
     private static final String KEY_SCOPE = "scope";
@@ -389,6 +394,17 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
      */
     @Nullable
     public final String prompt;
+
+    /**
+     * The OpenID Connect 1.0 `ui_locales` parameter. This is a space-separated list of
+     * BCP47 [RFC5646] language tag values, ordered by preference. It represents End-User's
+     * preferred languages and scripts for the user interface.
+     *
+     * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
+     */
+    @Nullable
+    public final String uiLocales;
 
     /**
      * The expected response type.
@@ -538,6 +554,9 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
         @Nullable
         private String mPrompt;
 
+        @Nullable
+        private String mUiLocales;
+
         // SuppressWarnings justification: static analysis incorrectly determines that this field
         // is not initialized, as it is indirectly initialized by setResponseType
         @NonNull
@@ -684,6 +703,54 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
         @NonNull
         public Builder setPromptValues(@Nullable Iterable<String> promptValues) {
             mPrompt = AsciiStringListUtil.iterableToString(promptValues);
+            return this;
+        }
+
+        /**
+         * Specifies the OpenID Connect 1.0 `ui_locales` parameter, which is a space-separated list
+         * of BCP47 [RFC5646] language tag values, ordered by preference. It represents End-User's
+         * preferred languages and scripts for the user interface. Replaces any previously
+         * specified ui_locales values.
+         *
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
+         */
+        public Builder setUiLocales(@Nullable String uiLocales) {
+            mUiLocales = checkNullOrNotEmpty(uiLocales, "uiLocales must be null or not empty");
+            return this;
+        }
+
+        /**
+         * Specifies the OpenID Connect 1.0 `ui_locales` parameter, which is a space-separated list
+         * of BCP47 [RFC5646] language tag values, ordered by preference. It represents End-User's
+         * preferred languages and scripts for the user interface. Replaces any previously
+         * specified ui_locales values.
+         *
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
+         */
+        @NonNull
+        public Builder setUiLocalesValues(@Nullable String... uiLocalesValues) {
+            if (uiLocalesValues == null) {
+                mUiLocales = null;
+                return this;
+            }
+
+            return setUiLocalesValues(Arrays.asList(uiLocalesValues));
+        }
+
+        /**
+         * Specifies the OpenID Connect 1.0 `ui_locales` parameter, which is a space-separated list
+         * of BCP47 [RFC5646] language tag values, ordered by preference. It represents End-User's
+         * preferred languages and scripts for the user interface. Replaces any previously
+         * specified ui_locales values.
+         *
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
+         */
+        @NonNull
+        public Builder setUiLocalesValues(@Nullable Iterable<String> uiLocalesValues) {
+            mUiLocales = AsciiStringListUtil.iterableToString(uiLocalesValues);
             return this;
         }
 
@@ -909,6 +976,7 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
                     mDisplay,
                     mLoginHint,
                     mPrompt,
+                    mUiLocales,
                     mScope,
                     mState,
                     mNonce,
@@ -928,6 +996,7 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
             @Nullable String display,
             @Nullable String loginHint,
             @Nullable String prompt,
+            @Nullable String uiLocales,
             @Nullable String scope,
             @Nullable String state,
             @Nullable String nonce,
@@ -947,6 +1016,7 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
         this.display = display;
         this.loginHint = loginHint;
         this.prompt = prompt;
+        this.uiLocales = uiLocales;
         this.scope = scope;
         this.state = state;
         this.nonce = nonce;
@@ -975,6 +1045,15 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
         return AsciiStringListUtil.stringToSet(prompt);
     }
 
+    /**
+     * Derives the set of ui_locales values from the consolidated, space-separated list of
+     * BCP47 [RFC5646] language tag values in the {@link #uiLocales} field. If no ui_locales values
+     * were specified for this request, the method will return `null`.
+     */
+    public Set<String> getUiLocales() {
+        return AsciiStringListUtil.stringToSet(uiLocales);
+    }
+
     @Override
     @Nullable
     public String getState() {
@@ -995,6 +1074,7 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_DISPLAY, display);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_LOGIN_HINT, loginHint);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_PROMPT, prompt);
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_UI_LOCALES, uiLocales);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_STATE, state);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_NONCE, nonce);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_SCOPE, scope);
@@ -1028,6 +1108,7 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
         JsonUtil.putIfNotNull(json, KEY_LOGIN_HINT, loginHint);
         JsonUtil.putIfNotNull(json, KEY_SCOPE, scope);
         JsonUtil.putIfNotNull(json, KEY_PROMPT, prompt);
+        JsonUtil.putIfNotNull(json, KEY_UI_LOCALES, uiLocales);
         JsonUtil.putIfNotNull(json, KEY_STATE, state);
         JsonUtil.putIfNotNull(json, KEY_NONCE, nonce);
         JsonUtil.putIfNotNull(json, KEY_CODE_VERIFIER, codeVerifier);
@@ -1067,6 +1148,7 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
                 .setDisplay(JsonUtil.getStringIfDefined(json, KEY_DISPLAY))
                 .setLoginHint(JsonUtil.getStringIfDefined(json, KEY_LOGIN_HINT))
                 .setPrompt(JsonUtil.getStringIfDefined(json, KEY_PROMPT))
+                .setUiLocales(JsonUtil.getStringIfDefined(json, KEY_UI_LOCALES))
                 .setState(JsonUtil.getStringIfDefined(json, KEY_STATE))
                 .setNonce(JsonUtil.getStringIfDefined(json, KEY_NONCE))
                 .setCodeVerifier(
