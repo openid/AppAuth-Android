@@ -209,6 +209,34 @@ public class AuthorizationManagementActivityTest {
     }
 
     @Test
+    public void testLoginSuccessFlow_withPendingIntentsAndNoState() {
+        AuthorizationRequest request = TestValues.getTestAuthRequestBuilder()
+            .setState(null)
+            .build();
+
+        emulateFlowToAuthorizationActivityLaunch(
+            createStartIntentWithPendingIntents(request, mCancelPendingIntent));
+
+        Uri successAuthRedirect = mAuthRequest.redirectUri.buildUpon()
+            .appendQueryParameter(AuthorizationResponse.KEY_AUTHORIZATION_CODE, "12345")
+            .build();
+
+        Intent nextStartedActivity = emulateAuthorizationResponseReceived(
+            AuthorizationManagementActivity.createResponseHandlingIntent(
+                mContext,
+                successAuthRedirect));
+
+        // after which the completion intent should be fired
+        assertThat(nextStartedActivity).hasAction("COMPLETE");
+        assertThat(nextStartedActivity).hasData(successAuthRedirect);
+        assertThat(nextStartedActivity).extras()
+            .containsKey(AuthorizationResponse.EXTRA_RESPONSE);
+        assertThat(nextStartedActivity).extras()
+            .doesNotContainKey(AuthorizationException.EXTRA_EXCEPTION);
+        assertThat(mActivity.isFinishing()).isTrue();
+    }
+
+    @Test
     public void testEndSessionSuccessFlow_withPendingIntentsAndNoState() {
         EndSessionRequest request = TestValues.getTestEndSessionRequestBuilder()
             .setState(null)
