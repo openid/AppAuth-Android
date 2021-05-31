@@ -1176,9 +1176,4 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
         checkNotNull(jsonStr, "json string cannot be null");
         return jsonDeserialize(new JSONObject(jsonStr));
     }
-
-    static boolean isAuthorizationRequest(JSONObject json) {
-        return json.has(KEY_REDIRECT_URI);
-    }
-
 }

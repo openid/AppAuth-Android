@@ -97,8 +97,8 @@ public class AuthorizationManagementActivityTest {
                 .appendQueryParameter(AuthorizationResponse.KEY_AUTHORIZATION_CODE, "12345")
                 .build();
 
-        mSuccessEndSessionRedirect = mEndSessionRequest.redirectUri.buildUpon()
-            .appendQueryParameter(EndSessionRequest.KEY_STATE, mEndSessionRequest.getState())
+        mSuccessEndSessionRedirect = mEndSessionRequest.postLogoutRedirectUri.buildUpon()
+            .appendQueryParameter(EndSessionResponse.KEY_STATE, mEndSessionRequest.getState())
             .build();
 
         mErrorAuthRedirect = mAuthRequest.redirectUri.buildUpon()
@@ -110,7 +110,7 @@ public class AuthorizationManagementActivityTest {
                         AuthorizationRequestErrors.ACCESS_DENIED.errorDescription)
                 .build();
 
-        mErrorEndSessionRedirect = mEndSessionRequest.redirectUri.buildUpon()
+        mErrorEndSessionRedirect = mEndSessionRequest.postLogoutRedirectUri.buildUpon()
             .appendQueryParameter(AuthorizationException.PARAM_ERROR,
                 AuthorizationRequestErrors.ACCESS_DENIED.error)
             .appendQueryParameter(
@@ -205,6 +205,30 @@ public class AuthorizationManagementActivityTest {
         Intent nextStartedActivity = mActivityShadow.getNextStartedActivity();
         assertThat(nextStartedActivity).hasAction("COMPLETE");
         assertThat(nextStartedActivity).hasData(mSuccessEndSessionRedirect);
+        assertThat(mActivity.isFinishing()).isTrue();
+    }
+
+    @Test
+    public void testEndSessionSuccessFlow_withPendingIntentsAndNoState() {
+        EndSessionRequest request = TestValues.getTestEndSessionRequestBuilder()
+            .setState(null)
+            .build();
+
+        emulateFlowToAuthorizationActivityLaunch(
+            createStartIntentWithPendingIntents(request, mCancelPendingIntent));
+
+        Uri authResponseUri = request.postLogoutRedirectUri;
+
+        Intent nextStartedActivity = emulateAuthorizationResponseReceived(
+            AuthorizationManagementActivity.createResponseHandlingIntent(
+                mContext,
+                authResponseUri));
+
+        // after which the completion intent should be fired
+        assertThat(nextStartedActivity).hasAction("COMPLETE");
+        assertThat(nextStartedActivity).hasData(authResponseUri);
+        assertThat(nextStartedActivity).extras()
+                .doesNotContainKey(AuthorizationException.EXTRA_EXCEPTION);
         assertThat(mActivity.isFinishing()).isTrue();
     }
 
@@ -532,8 +556,8 @@ public class AuthorizationManagementActivityTest {
     public void testEndSessionnMismatchedState_withPendingIntentsAndResponseDiffersFromRequest() {
         emulateFlowToAuthorizationActivityLaunch(mEndSessionIntentWithPendings);
 
-        Uri authResponseUri = mEndSessionRequest.redirectUri.buildUpon()
-            .appendQueryParameter(EndSessionRequest.KEY_STATE, "differentState")
+        Uri authResponseUri = mEndSessionRequest.postLogoutRedirectUri.buildUpon()
+            .appendQueryParameter(EndSessionResponse.KEY_STATE, "differentState")
             .build();
 
         Intent nextStartedActivity = emulateAuthorizationResponseReceived(
@@ -582,7 +606,7 @@ public class AuthorizationManagementActivityTest {
     public void testEndSessionMismatchedState_withoutPendingIntentsAndResponseDiffersFromRequest() {
         emulateFlowToAuthorizationActivityLaunch(mEndSessionForResultIntent);
 
-        Uri authResponseUri = mEndSessionRequest.redirectUri.buildUpon()
+        Uri authResponseUri = mEndSessionRequest.postLogoutRedirectUri.buildUpon()
             .appendQueryParameter(AuthorizationResponse.KEY_STATE, "differentState")
             .build();
 
@@ -635,17 +659,16 @@ public class AuthorizationManagementActivityTest {
 
     @Test
     public void testEndSessionMismatchedState_withPendingIntentsAndNoStateInRequestWithStateInResponse() {
-        EndSessionRequest request = new EndSessionRequest.Builder(
-            TestValues.getTestServiceConfig(),
-            TestValues.TEST_ID_TOKEN,
-            TestValues.TEST_APP_REDIRECT_URI)
+        EndSessionRequest request = new EndSessionRequest.Builder(TestValues.getTestServiceConfig())
+            .setIdTokenHint(TestValues.TEST_ID_TOKEN)
+            .setPostLogoutRedirectUri(TestValues.TEST_APP_REDIRECT_URI)
             .setState("state")
             .build();
 
         Intent startIntent = createStartIntentWithPendingIntents(request, mCancelPendingIntent);
         emulateFlowToAuthorizationActivityLaunch(startIntent);
 
-        Uri authResponseUri = mEndSessionRequest.redirectUri.buildUpon()
+        Uri authResponseUri = mEndSessionRequest.postLogoutRedirectUri.buildUpon()
             .appendQueryParameter(AuthorizationResponse.KEY_STATE, "differentState")
             .build();
 
@@ -692,17 +715,16 @@ public class AuthorizationManagementActivityTest {
 
     @Test
     public void testEndSessionMismatchedState_withoutPendingIntentsAndNoStateInRequestWithStateInResponse() {
-        EndSessionRequest request = new EndSessionRequest.Builder(
-            TestValues.getTestServiceConfig(),
-            TestValues.TEST_ID_TOKEN,
-            TestValues.TEST_APP_REDIRECT_URI)
+        EndSessionRequest request = new EndSessionRequest.Builder(TestValues.getTestServiceConfig())
+            .setIdTokenHint(TestValues.TEST_ID_TOKEN)
+            .setPostLogoutRedirectUri(TestValues.TEST_APP_REDIRECT_URI)
             .setState("state")
             .build();
 
         Intent startIntent = createStartForResultIntent(request);
         emulateFlowToAuthorizationActivityLaunch(startIntent);
 
-        Uri authResponseUri = mEndSessionRequest.redirectUri.buildUpon()
+        Uri authResponseUri = mEndSessionRequest.postLogoutRedirectUri.buildUpon()
             .appendQueryParameter(AuthorizationResponse.KEY_STATE, "differentState")
             .build();
 

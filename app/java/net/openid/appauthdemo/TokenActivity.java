@@ -418,10 +418,10 @@ public class TokenActivity extends AppCompatActivity {
                 currentState.getAuthorizationServiceConfiguration();
         if (config.endSessionEndpoint != null) {
             Intent endSessionIntent = mAuthService.getEndSessionRequestIntent(
-                    new EndSessionRequest.Builder(
-                        config,
-                        currentState.getIdToken(),
-                        mConfiguration.getEndSessionRedirectUri()).build());
+                    new EndSessionRequest.Builder(config)
+                        .setIdTokenHint(currentState.getIdToken())
+                        .setPostLogoutRedirectUri(mConfiguration.getEndSessionRedirectUri())
+                        .build());
             startActivityForResult(endSessionIntent, END_SESSION_REQUEST_CODE);
         } else {
             signOut();

@@ -14,8 +14,8 @@
 
 package net.openid.appauth;
 
-import static net.openid.appauth.Preconditions.checkNotEmpty;
 import static net.openid.appauth.Preconditions.checkNotNull;
+import static net.openid.appauth.Preconditions.checkNullOrNotEmpty;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -30,8 +30,8 @@ import org.json.JSONObject;
  * A response to end session request.
  *
  * @see EndSessionRequest
- * @see "OpenID Connect Session Management 1.0 - draft 28, 5 RP-Initiated Logout
- * <https://openid.net/specs/openid-connect-session-1_0.html#RPLogout>"
+ * @see "OpenID Connect RP-Initiated Logout 1.0 - draft 01
+ * <https://openid.net/specs/openid-connect-rpinitiated-1_0.html>"
  */
 public class EndSessionResponse extends AuthorizationManagementResponse {
 
@@ -57,7 +57,7 @@ public class EndSessionResponse extends AuthorizationManagementResponse {
      * The returned state parameter, which must match the value specified in the request.
      * AppAuth for Android ensures that this is the case.
      */
-    @NonNull
+    @Nullable
     public final String state;
 
     /**
@@ -67,7 +67,7 @@ public class EndSessionResponse extends AuthorizationManagementResponse {
         @NonNull
         private EndSessionRequest mRequest;
 
-        @NonNull
+        @Nullable
         private String mState;
 
 
@@ -77,7 +77,7 @@ public class EndSessionResponse extends AuthorizationManagementResponse {
 
         @VisibleForTesting
         Builder fromUri(@NonNull Uri uri) {
-            setState(uri.getQueryParameter(EndSessionRequest.KEY_STATE));
+            setState(uri.getQueryParameter(KEY_STATE));
             return this;
         }
 
@@ -86,8 +86,8 @@ public class EndSessionResponse extends AuthorizationManagementResponse {
             return this;
         }
 
-        public Builder setState(@NonNull String state) {
-            mState = checkNotEmpty(state, "state cannot be null or empty");
+        public Builder setState(@Nullable String state) {
+            mState = checkNullOrNotEmpty(state, "state must not be empty");
             return this;
         }
 
@@ -104,13 +104,13 @@ public class EndSessionResponse extends AuthorizationManagementResponse {
 
     private EndSessionResponse(
             @NonNull EndSessionRequest request,
-            @NonNull String state) {
+            @Nullable String state) {
         this.request = request;
         this.state = state;
     }
 
     @Override
-    @NonNull
+    @Nullable
     public String getState() {
         return state;
     }
@@ -147,7 +147,7 @@ public class EndSessionResponse extends AuthorizationManagementResponse {
 
         return new EndSessionResponse(
                 request,
-                JsonUtil.getString(json, KEY_STATE)
+                JsonUtil.getStringIfDefined(json, KEY_STATE)
             );
     }
 

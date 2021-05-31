@@ -30,6 +30,8 @@ import java.security.SecureRandom;
 
 class AuthorizationManagementUtil {
     private static final int STATE_LENGTH = 16;
+    public static final String REQUEST_TYPE_AUTHORIZATION = "authorization";
+    public static final String REQUEST_TYPE_END_SESSION = "end_session";
 
     static String generateRandomState() {
         SecureRandom sr = new SecureRandom();
@@ -38,21 +40,32 @@ class AuthorizationManagementUtil {
         return Base64.encodeToString(random, Base64.NO_WRAP | Base64.NO_PADDING | Base64.URL_SAFE);
     }
 
+    @Nullable
+    static String requestTypeFor(AuthorizationManagementRequest request) {
+        if (request instanceof AuthorizationRequest) {
+            return REQUEST_TYPE_AUTHORIZATION;
+        }
+        if (request instanceof EndSessionRequest) {
+            return REQUEST_TYPE_END_SESSION;
+        }
+        return null;
+    }
+
     /**
      * Reads an authorization request from a JSON string representation produced by either
      * {@link AuthorizationRequest#jsonSerialize()} or {@link EndSessionRequest#jsonSerialize()}.
      * @throws JSONException if the provided JSON does not match the expected structure.
      */
-    static AuthorizationManagementRequest requestFrom(String jsonStr)
+    static AuthorizationManagementRequest requestFrom(String jsonStr, String type)
             throws JSONException {
         checkNotNull(jsonStr, "jsonStr can not be null");
 
         JSONObject json = new JSONObject(jsonStr);
-        if (AuthorizationRequest.isAuthorizationRequest(json)) {
+        if (REQUEST_TYPE_AUTHORIZATION.equals(type)) {
             return AuthorizationRequest.jsonDeserialize(json);
         }
 
-        if (EndSessionRequest.isEndSessionRequest(json)) {
+        if (REQUEST_TYPE_END_SESSION.equals(type)) {
             return EndSessionRequest.jsonDeserialize(json);
         }
 

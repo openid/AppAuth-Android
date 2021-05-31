@@ -421,7 +421,7 @@ authState.performActionWithFreshTokens(service, new AuthStateAction() {
 });
 ```
 
-### Ending current session (Draft)
+### Ending current session
 
 Given you have a logged in session and you want to end it. In that case you need to get:
 - `AuthorizationServiceConfiguration`
@@ -432,11 +432,10 @@ First you have to build EndSessionRequest
 
 ```java
 EndSessionRequest endSessionRequest =
-    new EndSessionRequest.Builder(
-        authorizationServiceConfiguration,
-        idToken,
-        endSessionRedirectUri
-    ).build();
+    new EndSessionRequest.Builder(authorizationServiceConfiguration)
+        .setIdTokenHint(idToken)
+        .setPostLogoutRedirectUri(endSessionRedirectUri)
+        .build();
 ```
 This request can then be dispatched using one of two approaches.
 

@@ -132,6 +132,9 @@ public class AuthorizationManagementActivity extends AppCompatActivity {
     static final String KEY_AUTH_REQUEST = "authRequest";
 
     @VisibleForTesting
+    static final String KEY_AUTH_REQUEST_TYPE = "authRequestType";
+
+    @VisibleForTesting
     static final String KEY_COMPLETE_INTENT = "completeIntent";
 
     @VisibleForTesting
@@ -163,6 +166,7 @@ public class AuthorizationManagementActivity extends AppCompatActivity {
         Intent intent = createBaseIntent(context);
         intent.putExtra(KEY_AUTH_INTENT, authIntent);
         intent.putExtra(KEY_AUTH_REQUEST, request.jsonSerializeString());
+        intent.putExtra(KEY_AUTH_REQUEST_TYPE, AuthorizationManagementUtil.requestTypeFor(request));
         intent.putExtra(KEY_COMPLETE_INTENT, completeIntent);
         intent.putExtra(KEY_CANCEL_INTENT, cancelIntent);
         return intent;
@@ -254,6 +258,8 @@ public class AuthorizationManagementActivity extends AppCompatActivity {
         outState.putBoolean(KEY_AUTHORIZATION_STARTED, mAuthorizationStarted);
         outState.putParcelable(KEY_AUTH_INTENT, mAuthIntent);
         outState.putString(KEY_AUTH_REQUEST, mAuthRequest.jsonSerializeString());
+        outState.putString(KEY_AUTH_REQUEST_TYPE,
+                AuthorizationManagementUtil.requestTypeFor(mAuthRequest));
         outState.putParcelable(KEY_COMPLETE_INTENT, mCompleteIntent);
         outState.putParcelable(KEY_CANCEL_INTENT, mCancelIntent);
     }
@@ -293,8 +299,9 @@ public class AuthorizationManagementActivity extends AppCompatActivity {
         mCancelIntent = state.getParcelable(KEY_CANCEL_INTENT);
         try {
             String authRequestJson = state.getString(KEY_AUTH_REQUEST, null);
+            String authRequestType = state.getString(KEY_AUTH_REQUEST_TYPE, null);
             mAuthRequest = authRequestJson != null
-                    ? AuthorizationManagementUtil.requestFrom(authRequestJson)
+                    ? AuthorizationManagementUtil.requestFrom(authRequestJson, authRequestType)
                     : null;
         } catch (JSONException ex) {
             sendResult(
