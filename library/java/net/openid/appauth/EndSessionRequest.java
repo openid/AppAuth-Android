@@ -159,7 +159,8 @@ public class EndSessionRequest implements AuthorizationManagementRequest {
         private Map<String, String> mAdditionalParameters = new HashMap<>();
 
         /**
-         * Creates an end-session request builder with the specified mandatory properties.
+         * Creates an end-session request builder with the specified mandatory properties
+         * and preset value for {@link AuthorizationRequest#state}.
          */
         public Builder(@NonNull AuthorizationServiceConfiguration configuration) {
             setAuthorizationServiceConfiguration(configuration);

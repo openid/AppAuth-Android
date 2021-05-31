@@ -594,7 +594,9 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
         private Map<String, String> mAdditionalParameters = new HashMap<>();
 
         /**
-         * Creates an authorization request builder with the specified mandatory properties.
+         * Creates an authorization request builder with the specified mandatory properties,
+         * and preset values for {@link AuthorizationRequest#state},
+         * {@link AuthorizationRequest#nonce} and {@link AuthorizationRequest#codeVerifier}.
          */
         public Builder(
                 @NonNull AuthorizationServiceConfiguration configuration,
