@@ -490,8 +490,7 @@ public class AuthorizationService {
                 mClientConfiguration.getConnectionBuilder(),
                 SystemClock.INSTANCE,
                 callback,
-                mClientConfiguration.getSkipIssuerHttpsCheck(),
-                mClientConfiguration.getSkipNonceVerification())
+                mClientConfiguration.getSkipIssuerHttpsCheck())
                 .execute();
     }
 
@@ -570,7 +569,6 @@ public class AuthorizationService {
         private TokenResponseCallback mCallback;
         private Clock mClock;
         private boolean mSkipIssuerHttpsCheck;
-        private boolean mSkipNonceVerification;
 
         private AuthorizationException mException;
 
@@ -579,15 +577,13 @@ public class AuthorizationService {
                          @NonNull ConnectionBuilder connectionBuilder,
                          Clock clock,
                          TokenResponseCallback callback,
-                         Boolean skipIssuerHttpsCheck,
-                         Boolean skipNonceVerification) {
+                         Boolean skipIssuerHttpsCheck) {
             mRequest = request;
             mClientAuthentication = clientAuthentication;
             mConnectionBuilder = connectionBuilder;
             mClock = clock;
             mCallback = callback;
             mSkipIssuerHttpsCheck = skipIssuerHttpsCheck;
-            mSkipNonceVerification = skipNonceVerification;
         }
 
         @Override
@@ -698,8 +694,7 @@ public class AuthorizationService {
                     idToken.validate(
                             mRequest,
                             mClock,
-                            mSkipIssuerHttpsCheck,
-                            mSkipNonceVerification
+                            mSkipIssuerHttpsCheck
                     );
                 } catch (AuthorizationException ex) {
                     mCallback.onTokenRequestCompleted(null, ex);

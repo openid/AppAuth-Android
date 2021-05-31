@@ -157,6 +157,23 @@ public class IdTokenTest {
         idToken.validate(tokenRequest, clock);
     }
 
+    @Test
+    public void testValidate_withoutNonce() throws AuthorizationException {
+        Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
+        Long tenMinutesInSeconds = (long) (10 * 60);
+        IdToken idToken = new IdToken(
+            TEST_ISSUER,
+            TEST_SUBJECT,
+            Collections.singletonList(TEST_CLIENT_ID),
+            nowInSeconds + tenMinutesInSeconds,
+            nowInSeconds,
+            null
+        );
+        TokenRequest tokenRequest = getTestAuthCodeExchangeRequestBuilder().build();
+        Clock clock = SystemClock.INSTANCE;
+        idToken.validate(tokenRequest, clock);
+    }
+
     @Test(expected = AuthorizationException.class)
     public void testValidate_shouldFailOnIssuerMismatch() throws AuthorizationException {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
@@ -230,7 +247,7 @@ public class IdTokenTest {
             .setNonce(TEST_NONCE)
             .build();
         Clock clock = SystemClock.INSTANCE;
-        idToken.validate(tokenRequest, clock, true, false);
+        idToken.validate(tokenRequest, clock, true);
     }
 
     @Test(expected = AuthorizationException.class)
@@ -388,23 +405,6 @@ public class IdTokenTest {
         TokenRequest tokenRequest = getAuthCodeExchangeRequestWithNonce();
         Clock clock = SystemClock.INSTANCE;
         idToken.validate(tokenRequest, clock);
-    }
-
-    @Test
-    public void testValidate_shouldSkipNonceMismatch() throws AuthorizationException {
-        Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
-        Long tenMinutesInSeconds = (long) (10 * 60);
-        IdToken idToken = new IdToken(
-            TEST_ISSUER,
-            TEST_SUBJECT,
-            Collections.singletonList(TEST_CLIENT_ID),
-            nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds,
-            "some_other_nonce"
-        );
-        TokenRequest tokenRequest = getAuthCodeExchangeRequestWithNonce();
-        Clock clock = SystemClock.INSTANCE;
-        idToken.validate(tokenRequest, clock, false, true);
     }
 
     private static String base64UrlNoPaddingEncode(byte[] data) {

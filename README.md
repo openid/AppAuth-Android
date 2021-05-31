@@ -636,24 +636,12 @@ AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
     .build()
 ```
 
-- For services that don't correctly return the requested nonce there is [setSkipNonceVerification](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AppAuthConfiguration.java#L144). Please consider **raising an issue** with your Identity Provider and disabling this option once it is fixed.
+- For services that don't support nonce[s] resulting in **IdTokenException** `Nonce mismatch` just set nonce to `null` on the `AuthorizationRequest`. Please consider **raising an issue** with your Identity Provider and removing this once it is fixed.
 
 ```java
-AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
-    .setSkipNonceVerification(true)
-    .build()
-```
-
-Alternatively this can be bypassed by setting the nonce in `AuthorizationRequest` to null:
-
-```java
-val builder = AuthorizationRequest.Builder(
-    serviceConfiguration,
-    mClientId,
-    RESPONSE_TYPE,
-    redirectUri
-)
-builder.setNonce(null)
+AuthorizationRequest authRequest = authRequestBuilder
+    .setNonce(null)
+    .build();
 ```
 
 ## Dynamic client registration

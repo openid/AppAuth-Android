@@ -42,17 +42,13 @@ public class AppAuthConfiguration {
 
     private final boolean mSkipIssuerHttpsCheck;
 
-    private final boolean mSkipNonceVerification;
-
     private AppAuthConfiguration(
             @NonNull BrowserMatcher browserMatcher,
             @NonNull ConnectionBuilder connectionBuilder,
-            Boolean skipIssuerHttpsCheck,
-            Boolean skipNonceVerification) {
+            Boolean skipIssuerHttpsCheck) {
         mBrowserMatcher = browserMatcher;
         mConnectionBuilder = connectionBuilder;
         mSkipIssuerHttpsCheck = skipIssuerHttpsCheck;
-        mSkipNonceVerification = skipNonceVerification;
     }
 
     /**
@@ -79,14 +75,6 @@ public class AppAuthConfiguration {
      * @see Builder#setSkipIssuerHttpsCheck(Boolean)
      */
     public boolean getSkipIssuerHttpsCheck() { return mSkipIssuerHttpsCheck; }
-
-    /**
-     * Returns <code>true</code> if nonce verification on response is disabled, otherwise
-     * <code>false</code>.
-     *
-     * @see Builder#setSkipNonceVerification(Boolean)
-     */
-    public boolean getSkipNonceVerification() { return mSkipNonceVerification; }
 
     /**
      * Creates {@link AppAuthConfiguration} instances.
@@ -132,21 +120,6 @@ public class AppAuthConfiguration {
         }
 
         /**
-         * Disables nonce verification for value sent in the Authentication Request.
-         *
-         * <p>NOTE: Some Authorization Servers do not return the requested nonce value thus failing
-         * ID token validation. Please consider raising an issue with your Identity Provider and
-         * disabling this option once it is fixed.
-         *
-         * <p>Alternatively, you may avoid sending a nonce by passing <code>null</code> to
-         * {@link AuthorizationRequest.Builder#setNonce}
-         */
-        public Builder setSkipNonceVerification(Boolean skipNonceVerification) {
-            mSkipNonceVerification = skipNonceVerification;
-            return this;
-        }
-
-        /**
          * Creates the instance from the configured properties.
          */
         @NonNull
@@ -154,8 +127,7 @@ public class AppAuthConfiguration {
             return new AppAuthConfiguration(
                 mBrowserMatcher,
                 mConnectionBuilder,
-                mSkipIssuerHttpsCheck,
-                mSkipNonceVerification
+                mSkipIssuerHttpsCheck
             );
         }
 

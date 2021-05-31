@@ -112,13 +112,12 @@ class IdToken {
 
     @VisibleForTesting
     void validate(@NonNull TokenRequest tokenRequest, Clock clock) throws AuthorizationException {
-        validate(tokenRequest, clock, false, false);
+        validate(tokenRequest, clock, false);
     }
 
     void validate(@NonNull TokenRequest tokenRequest,
                   Clock clock,
-                  boolean skipIssuerHttpsCheck,
-                  boolean skipNonceVerification) throws AuthorizationException {
+                  boolean skipIssuerHttpsCheck) throws AuthorizationException {
         // OpenID Connect Core Section 3.1.3.7. rule #1
         // Not enforced: AppAuth does not support JWT encryption.
 
@@ -198,7 +197,7 @@ class IdToken {
             // OpenID Connect Core Section 3.1.3.7. rule #11
             // Validates the nonce.
             String expectedNonce = tokenRequest.nonce;
-            if (!skipNonceVerification && !TextUtils.equals(this.nonce, expectedNonce)) {
+            if (!TextUtils.equals(this.nonce, expectedNonce)) {
                 throw AuthorizationException.fromTemplate(GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
                     new IdTokenException("Nonce mismatch"));
             }

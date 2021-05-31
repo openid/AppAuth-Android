@@ -860,7 +860,7 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
          */
         @NonNull
         public Builder setNonce(@Nullable String nonce) {
-            mNonce = checkNullOrNotEmpty(nonce, "state cannot be empty if defined");
+            mNonce = checkNullOrNotEmpty(nonce, "nonce cannot be empty if defined");
             return this;
         }
 
