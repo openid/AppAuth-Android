@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.VisibleForTesting;
+import androidx.appcompat.app.AppCompatActivity;
 
 import net.openid.appauth.AuthorizationException.AuthorizationRequestErrors;
 import net.openid.appauth.internal.Logger;
@@ -122,13 +123,16 @@ import org.json.JSONException;
  *       {@link AuthorizationException} as appropriate.
  *       The AuthorizationManagementActivity finishes, removing itself from the back stack.
  */
-public class AuthorizationManagementActivity extends Activity {
+public class AuthorizationManagementActivity extends AppCompatActivity {
 
     @VisibleForTesting
     static final String KEY_AUTH_INTENT = "authIntent";
 
     @VisibleForTesting
     static final String KEY_AUTH_REQUEST = "authRequest";
+
+    @VisibleForTesting
+    static final String KEY_AUTH_REQUEST_TYPE = "authRequestType";
 
     @VisibleForTesting
     static final String KEY_COMPLETE_INTENT = "completeIntent";
@@ -162,6 +166,7 @@ public class AuthorizationManagementActivity extends Activity {
         Intent intent = createBaseIntent(context);
         intent.putExtra(KEY_AUTH_INTENT, authIntent);
         intent.putExtra(KEY_AUTH_REQUEST, request.jsonSerializeString());
+        intent.putExtra(KEY_AUTH_REQUEST_TYPE, AuthorizationManagementUtil.requestTypeFor(request));
         intent.putExtra(KEY_COMPLETE_INTENT, completeIntent);
         intent.putExtra(KEY_CANCEL_INTENT, cancelIntent);
         return intent;
@@ -253,6 +258,8 @@ public class AuthorizationManagementActivity extends Activity {
         outState.putBoolean(KEY_AUTHORIZATION_STARTED, mAuthorizationStarted);
         outState.putParcelable(KEY_AUTH_INTENT, mAuthIntent);
         outState.putString(KEY_AUTH_REQUEST, mAuthRequest.jsonSerializeString());
+        outState.putString(KEY_AUTH_REQUEST_TYPE,
+                AuthorizationManagementUtil.requestTypeFor(mAuthRequest));
         outState.putParcelable(KEY_COMPLETE_INTENT, mCompleteIntent);
         outState.putParcelable(KEY_CANCEL_INTENT, mCancelIntent);
     }
@@ -292,8 +299,9 @@ public class AuthorizationManagementActivity extends Activity {
         mCancelIntent = state.getParcelable(KEY_CANCEL_INTENT);
         try {
             String authRequestJson = state.getString(KEY_AUTH_REQUEST, null);
+            String authRequestType = state.getString(KEY_AUTH_REQUEST_TYPE, null);
             mAuthRequest = authRequestJson != null
-                    ? AuthorizationManagementUtil.requestFrom(authRequestJson)
+                    ? AuthorizationManagementUtil.requestFrom(authRequestJson, authRequestType)
                     : null;
         } catch (JSONException ex) {
             sendResult(

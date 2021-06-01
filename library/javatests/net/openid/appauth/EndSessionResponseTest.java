@@ -13,7 +13,7 @@ import org.robolectric.annotation.Config;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk=16)
+@Config(sdk = 16)
 public class EndSessionResponseTest {
 
     private static final EndSessionRequest TEST_REQUEST =  TestValues.getTestEndSessionRequest();
@@ -25,10 +25,11 @@ public class EndSessionResponseTest {
             .setState(TEST_REQUEST.state);
     }
 
-    @Test(expected = NullPointerException.class)
     public void testBuilder_nullState(){
-        new EndSessionResponse.Builder(TEST_REQUEST)
-            .setState(null);
+        EndSessionResponse res = new EndSessionResponse.Builder(TEST_REQUEST)
+            .setState(null).build();
+
+        assertThat(res.state).isNull();
     }
 
     @Test
@@ -44,14 +45,14 @@ public class EndSessionResponseTest {
 
         assertThat(deserializeResponse).isNotNull();
         assertThat(deserializeResponse.state).isEqualTo(endSessionResponse.request.state);
-        assertThat(deserializeResponse.request.redirectUri)
-            .isEqualTo(endSessionResponse.request.redirectUri);
+        assertThat(deserializeResponse.request.postLogoutRedirectUri)
+            .isEqualTo(endSessionResponse.request.postLogoutRedirectUri);
         assertThat(deserializeResponse.request.configuration.endSessionEndpoint)
             .isEqualTo(endSessionResponse.request.configuration.endSessionEndpoint);
         assertThat(deserializeResponse.request.state)
             .isEqualTo(endSessionResponse.request.state);
-        assertThat(deserializeResponse.request.idToken)
-            .isEqualTo(endSessionResponse.request.idToken);
+        assertThat(deserializeResponse.request.idTokenHint)
+            .isEqualTo(endSessionResponse.request.idTokenHint);
     }
 
     @Test
@@ -81,14 +82,14 @@ public class EndSessionResponseTest {
 
         assertThat(deserializeResponse).isNotNull();
         assertThat(deserializeResponse.state).isEqualTo(endSessionResponse.state);
-        assertThat(deserializeResponse.request.redirectUri)
-            .isEqualTo(endSessionResponse.request.redirectUri);
+        assertThat(deserializeResponse.request.postLogoutRedirectUri)
+            .isEqualTo(endSessionResponse.request.postLogoutRedirectUri);
         assertThat(deserializeResponse.request.configuration.endSessionEndpoint)
             .isEqualTo(endSessionResponse.request.configuration.endSessionEndpoint);
         assertThat(deserializeResponse.request.state)
             .isEqualTo(endSessionResponse.request.state);
-        assertThat(deserializeResponse.request.idToken)
-            .isEqualTo(endSessionResponse.request.idToken);
+        assertThat(deserializeResponse.request.idTokenHint)
+            .isEqualTo(endSessionResponse.request.idTokenHint);
     }
 
     @Test
@@ -108,14 +109,14 @@ public class EndSessionResponseTest {
                 .build();
         assertThat(endSessionResponseDeserialized).isNotNull();
         assertThat(endSessionResponseDeserialized.state).isEqualTo(endSessionResponse.state);
-        assertThat(endSessionResponseDeserialized.request.redirectUri)
-            .isEqualTo(endSessionResponse.request.redirectUri);
+        assertThat(endSessionResponseDeserialized.request.postLogoutRedirectUri)
+            .isEqualTo(endSessionResponse.request.postLogoutRedirectUri);
         assertThat(endSessionResponseDeserialized.request.configuration.endSessionEndpoint)
             .isEqualTo(endSessionResponse.request.configuration.endSessionEndpoint);
         assertThat(endSessionResponseDeserialized.request.state)
             .isEqualTo(endSessionResponse.request.state);
-        assertThat(endSessionResponseDeserialized.request.idToken)
-            .isEqualTo(endSessionResponse.request.idToken);
+        assertThat(endSessionResponseDeserialized.request.idTokenHint)
+            .isEqualTo(endSessionResponse.request.idTokenHint);
     }
 
     @Test

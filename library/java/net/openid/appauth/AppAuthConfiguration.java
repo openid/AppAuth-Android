@@ -40,11 +40,15 @@ public class AppAuthConfiguration {
     @NonNull
     private final ConnectionBuilder mConnectionBuilder;
 
+    private final boolean mSkipIssuerHttpsCheck;
+
     private AppAuthConfiguration(
             @NonNull BrowserMatcher browserMatcher,
-            @NonNull ConnectionBuilder connectionBuilder) {
+            @NonNull ConnectionBuilder connectionBuilder,
+            Boolean skipIssuerHttpsCheck) {
         mBrowserMatcher = browserMatcher;
         mConnectionBuilder = connectionBuilder;
+        mSkipIssuerHttpsCheck = skipIssuerHttpsCheck;
     }
 
     /**
@@ -65,12 +69,22 @@ public class AppAuthConfiguration {
     }
 
     /**
+     * Returns <code>true</code> if issuer https validation is disabled, otherwise
+     * <code>false</code>.
+     *
+     * @see Builder#setSkipIssuerHttpsCheck(Boolean)
+     */
+    public boolean getSkipIssuerHttpsCheck() { return mSkipIssuerHttpsCheck; }
+
+    /**
      * Creates {@link AppAuthConfiguration} instances.
      */
     public static class Builder {
 
         private BrowserMatcher mBrowserMatcher = AnyBrowserMatcher.INSTANCE;
         private ConnectionBuilder mConnectionBuilder = DefaultConnectionBuilder.INSTANCE;
+        private boolean mSkipIssuerHttpsCheck;
+        private boolean mSkipNonceVerification;
 
         /**
          * Specify the browser matcher to use, which controls the browsers that can be used
@@ -95,11 +109,26 @@ public class AppAuthConfiguration {
         }
 
         /**
+         * Disables https validation for the issuer identifier.
+         *
+         * <p>NOTE: Disabling issuer https validation implies the app is running against an
+         * insecure environment. Enabling this option is only recommended for testing purposes.
+         */
+        public Builder setSkipIssuerHttpsCheck(Boolean skipIssuerHttpsCheck) {
+            mSkipIssuerHttpsCheck = skipIssuerHttpsCheck;
+            return this;
+        }
+
+        /**
          * Creates the instance from the configured properties.
          */
         @NonNull
         public AppAuthConfiguration build() {
-            return new AppAuthConfiguration(mBrowserMatcher, mConnectionBuilder);
+            return new AppAuthConfiguration(
+                mBrowserMatcher,
+                mConnectionBuilder,
+                mSkipIssuerHttpsCheck
+            );
         }
 
 

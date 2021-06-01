@@ -37,7 +37,7 @@ Google) can be found here:
 AppAuth for Android is available on [MavenCentral](https://search.maven.org/search?q=g:net.openid%20appauth)
 
 ```groovy
-implementation 'net.openid:appauth:0.8.0'
+implementation 'net.openid:appauth:0.8.1'
 ```
 
 ## Requirements
@@ -62,7 +62,7 @@ build and configure this app, see the
 ## Codelabs, videos and other resources
 
 - A codelab featuring AppAuth was provided for Google I/O 2016:
-  [Achieving Single Sign-on with AppAuth](https://codelabs.developers.google.com/codelabs/appauth-android-codelab/index.html).
+  [Achieving Single Sign-on with AppAuth](https://kiosk-dot-codelabs-site.appspot.com/codelabs/appauth-android-codelab/index.html).
 
 - A talk providing an overview of using the library for enterprise single
   sign-on (produced by Google) can be found here:
@@ -421,7 +421,7 @@ authState.performActionWithFreshTokens(service, new AuthStateAction() {
 });
 ```
 
-### Ending current session (Draft)
+### Ending current session
 
 Given you have a logged in session and you want to end it. In that case you need to get:
 - `AuthorizationServiceConfiguration`
@@ -432,11 +432,10 @@ First you have to build EndSessionRequest
 
 ```java
 EndSessionRequest endSessionRequest =
-    new EndSessionRequest.Builder(
-        authorizationServiceConfiguration,
-        idToken,
-        endSessionRedirectUri
-    ).build();
+    new EndSessionRequest.Builder(authorizationServiceConfiguration)
+        .setIdTokenHint(idToken)
+        .setPostLogoutRedirectUri(endSessionRedirectUri)
+        .build();
 ```
 This request can then be dispatched using one of two approaches.
 
@@ -622,6 +621,26 @@ AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
         }
       }
     })
+    .build();
+```
+
+### Issues with [ID Token](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/IdToken.java#L118) validation
+
+ID Token validation was introduced in `0.8.0` but not all authorization servers or configurations support it correctly.
+
+- For testing environments [setSkipIssuerHttpsCheck](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AppAuthConfiguration.java#L129) can be used to bypass the fact the issuer needs to be HTTPS.
+
+```java
+AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
+    .setSkipIssuerHttpsCheck(true)
+    .build()
+```
+
+- For services that don't support nonce[s] resulting in **IdTokenException** `Nonce mismatch` just set nonce to `null` on the `AuthorizationRequest`. Please consider **raising an issue** with your Identity Provider and removing this once it is fixed.
+
+```java
+AuthorizationRequest authRequest = authRequestBuilder
+    .setNonce(null)
     .build();
 ```
 

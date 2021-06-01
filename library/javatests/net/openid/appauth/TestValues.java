@@ -127,10 +127,9 @@ class TestValues {
     }
 
     public static EndSessionRequest.Builder getTestEndSessionRequestBuilder() {
-        return new EndSessionRequest.Builder(
-            getTestServiceConfig(),
-            TEST_ID_TOKEN,
-            TEST_APP_REDIRECT_URI);
+        return new EndSessionRequest.Builder(getTestServiceConfig())
+            .setIdTokenHint(TEST_ID_TOKEN)
+            .setPostLogoutRedirectUri(TEST_APP_REDIRECT_URI);
     }
 
     public static AuthorizationRequest getTestAuthRequest() {

@@ -35,6 +35,7 @@ import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
+import net.openid.appauth.AuthorizationServiceConfiguration;
 import net.openid.appauth.AuthorizationServiceDiscovery;
 import net.openid.appauth.ClientAuthentication;
 import net.openid.appauth.EndSessionRequest;
@@ -412,12 +413,19 @@ public class TokenActivity extends AppCompatActivity {
 
     @MainThread
     private void endSession() {
-        Intent endSessionEnten = mAuthService.getEndSessionRequestIntent(
-                new EndSessionRequest.Builder(
-                mStateManager.getCurrent().getAuthorizationServiceConfiguration(),
-                mStateManager.getCurrent().getIdToken(),
-                mConfiguration.getEndSessionUri()).build());
-        startActivityForResult(endSessionEnten, END_SESSION_REQUEST_CODE);
+        AuthState currentState = mStateManager.getCurrent();
+        AuthorizationServiceConfiguration config =
+                currentState.getAuthorizationServiceConfiguration();
+        if (config.endSessionEndpoint != null) {
+            Intent endSessionIntent = mAuthService.getEndSessionRequestIntent(
+                    new EndSessionRequest.Builder(config)
+                        .setIdTokenHint(currentState.getIdToken())
+                        .setPostLogoutRedirectUri(mConfiguration.getEndSessionRedirectUri())
+                        .build());
+            startActivityForResult(endSessionIntent, END_SESSION_REQUEST_CODE);
+        } else {
+            signOut();
+        }
     }
 
     @MainThread

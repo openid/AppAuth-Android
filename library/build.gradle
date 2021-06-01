@@ -9,22 +9,14 @@ version = rootProject.versionName
 
 project.archivesBaseName = 'appauth'
 
-// use a separate build type for unit tests, so that we can configure the manifest placeholder
-// without interfering with other builds.
-android.buildTypes {
-    forTests {
-        initWith debug
-        manifestPlaceholders = [
-            'appAuthRedirectScheme': 'net.openid.appauth.test'
-        ]
-    }
+android.testOptions {
+    unitTests.includeAndroidResources = true
 }
-
-android.testBuildType "forTests"
 
 dependencies {
     api "androidx.browser:browser:${project.androidXVersions.browser}"
     implementation "androidx.annotation:annotation:${project.androidXVersions.annotation}"
+    implementation "androidx.appcompat:appcompat:${project.androidXVersions.appCompat}"
     apply from: '../config/testdeps.gradle', to:it
 }
 
@@ -91,13 +83,14 @@ publishing {
             name = "sonatype"
             url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             credentials {
-                username hasProperty('ossrhUsername') ? ossrhUsername : ''
-                password hasProperty('ossrhPassword') ? ossrhPassword : ''
+                username project.hasProperty('ossrhUsername') ? ossrhUsername : ''
+                password project.hasProperty('ossrhPassword') ? ossrhPassword : ''
             }
         }
     }
 }
 
 signing {
+    required { hasProperty('signing.keyId') }
     sign publishing.publications
 }

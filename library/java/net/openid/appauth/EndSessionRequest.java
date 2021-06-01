@@ -14,38 +14,58 @@
 
 package net.openid.appauth;
 
-import static net.openid.appauth.Preconditions.checkNotEmpty;
+import static net.openid.appauth.AdditionalParamsProcessor.builtInParams;
+import static net.openid.appauth.AdditionalParamsProcessor.checkAdditionalParams;
 import static net.openid.appauth.Preconditions.checkNotNull;
+import static net.openid.appauth.Preconditions.checkNullOrNotEmpty;
 
 import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import net.openid.appauth.internal.UriUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * An OpenID end session request.
  *
- * NOTE: That is a draft implementation
- *
- * @see "OpenID Connect Session Management 1.0 - draft 28, 5 RP-Initiated Logout
- * <https://openid.net/specs/openid-connect-session-1_0.html#RPLogout>"
+ * @see "OpenID Connect RP-Initiated Logout 1.0 - draft 01
+ * <https://openid.net/specs/openid-connect-rpinitiated-1_0.html>"
  */
-public class EndSessionRequest extends AuthorizationManagementRequest {
+public class EndSessionRequest implements AuthorizationManagementRequest {
 
-    private static final String PARAM_ID_TOKEN_HINT = "id_token_hint";
-    private static final String PARAM_REDIRECT_URI = "post_logout_redirect_uri";
-    private static final String PARAM_STATE = "state";
+    @VisibleForTesting
+    static final String PARAM_ID_TOKEN_HINT = "id_token_hint";
+
+    @VisibleForTesting
+    static final String PARAM_POST_LOGOUT_REDIRECT_URI = "post_logout_redirect_uri";
+
+    @VisibleForTesting
+    static final String PARAM_STATE = "state";
+
+    @VisibleForTesting
+    static final String PARAM_UI_LOCALES = "ui_locales";
+
+    private static final Set<String> BUILT_IN_PARAMS = builtInParams(
+            PARAM_ID_TOKEN_HINT,
+            PARAM_POST_LOGOUT_REDIRECT_URI,
+            PARAM_STATE,
+            PARAM_UI_LOCALES);
+
     private static final String KEY_CONFIGURATION = "configuration";
-
-    @VisibleForTesting
-    static final String KEY_ID_TOKEN_HINT = "id_token_hint";
-    @VisibleForTesting
-    static final String KEY_REDIRECT_URI = "post_logout_redirect_uri";
-    @VisibleForTesting
-    static final String KEY_STATE = "state";
+    private static final String KEY_ID_TOKEN_HINT = "id_token_hint";
+    private static final String KEY_POST_LOGOUT_REDIRECT_URI = "post_logout_redirect_uri";
+    private static final String KEY_STATE = "state";
+    private static final String KEY_UI_LOCALES = "ui_locales";
+    private static final String KEY_ADDITIONAL_PARAMETERS = "additionalParameters";
 
     /**
      * The service's {@link AuthorizationServiceConfiguration configuration}.
@@ -61,25 +81,25 @@ public class EndSessionRequest extends AuthorizationManagementRequest {
     public final AuthorizationServiceConfiguration configuration;
 
     /**
-     * An OpenID Connect ID Token. Contains claims about the authentication of an End-User by an
-     * Authorization Server.
+     * Previously issued ID Token passed to the end session endpoint as a hint about the End-User's
+     * current authenticated session with the Client
      *
      * @see "OpenID Connect Session Management 1.0 - draft 28, 5 RP-Initiated Logout
-     * <https://openid.net/specs/openid-connect-session-1_0.html#RPLogout>"
+     * <https://openid.net/specs/openid-connect-rpinitiated-1_0.html#RPLogout>"
      * @see "OpenID Connect Core ID Token, Section 2
      * <http://openid.net/specs/openid-connect-core-1_0.html#IDToken>"
      */
-    @NonNull
-    public final String idToken;
+    @Nullable
+    public final String idTokenHint;
 
     /**
      * The client's redirect URI.
      *
-     * @see "OpenID Connect Session Management 1.0 - draft 28, 5.1.  Redirection to RP After Logout
-     * <https://openid.net/specs/openid-connect-session-1_0.html#RedirectionAfterLogout>"
+     * @see "OpenID Connect RP-Initiated Logout 1.0 - draft 1, 3.  Redirection to RP After Logout
+     * <https://openid.net/specs/openid-connect-rpinitiated-1_0.html#RedirectionAfterLogout>"
      */
-    @NonNull
-    public final Uri redirectUri;
+    @Nullable
+    public final Uri postLogoutRedirectUri;
 
     /**
      * An opaque value used by the client to maintain state between the request and callback. If
@@ -88,13 +108,32 @@ public class EndSessionRequest extends AuthorizationManagementRequest {
      * the default implementation of this parameter be used wherever possible. Typically used to
      * prevent CSRF attacks, as recommended in
      *
-     * @see "OpenID Connect Session Management 1.0 - draft 28, 5  RP-Initiated Logout
-     * <https://openid.net/specs/openid-connect-session-1_0.html#RedirectionAfterLogout>"
+     * @see "OpenID Connect RP-Initiated Logout 1.0 - draft 1, 2.  RP-Initiated Logout
+     * <https://openid.net/specs/openid-connect-rpinitiated-1_0.html#RPLogout>"
      * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 5.3.5
      * <https://tools.ietf.org/html/rfc6749#section-5.3.5>"
      */
-    @NonNull
+    @Nullable
     public final String state;
+
+    /**
+     * This is a space-separated list of BCP47 [RFC5646] language tag values, ordered by preference.
+     * It represents End-User's preferred languages and scripts for the user interface.
+     *
+     * @see "OpenID Connect RP-Initiated Logout 1.0 - draft 01
+     * <https://openid.net/specs/openid-connect-rpinitiated-1_0.html#RPLogout>"
+     */
+    @Nullable
+    public final String uiLocales;
+
+    /**
+     * Additional parameters to be passed as part of the request.
+     *
+     * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.1
+     * <https://tools.ietf.org/html/rfc6749#section-3.1>"
+     */
+    @NonNull
+    public final Map<String, String> additionalParameters;
 
     /**
      * Creates instances of {@link EndSessionRequest}.
@@ -104,46 +143,89 @@ public class EndSessionRequest extends AuthorizationManagementRequest {
         @NonNull
         private AuthorizationServiceConfiguration mConfiguration;
 
-        @NonNull
-        private String mIdToken;
+        @Nullable
+        private String mIdTokenHint;
 
-        @NonNull
-        private Uri mRedirectUri;
+        @Nullable
+        private Uri mPostLogoutRedirectUri;
 
-        @NonNull
+        @Nullable
         private String mState;
 
-        public Builder(
-                @NonNull AuthorizationServiceConfiguration configuration,
-                @NonNull String idToken,
-                @NonNull Uri redirectUri) {
-            setAuthorizationServiceConfiguration(configuration);
-            setIdToken(idToken);
-            setRedirectUri(redirectUri);
-            setState(AuthorizationManagementRequest.generateRandomState());
-        }
+        @Nullable
+        private String mUiLocales;
+
+        @NonNull
+        private Map<String, String> mAdditionalParameters = new HashMap<>();
 
         /**
-         * Specifies the service configuration to be used in dispatching this request.
+         * Creates an end-session request builder with the specified mandatory properties
+         * and preset value for {@link AuthorizationRequest#state}.
          */
+        public Builder(@NonNull AuthorizationServiceConfiguration configuration) {
+            setAuthorizationServiceConfiguration(configuration);
+            setState(AuthorizationManagementUtil.generateRandomState());
+        }
+
+        /** @see EndSessionRequest#configuration */
+        @NonNull
         public Builder setAuthorizationServiceConfiguration(
                 @NonNull AuthorizationServiceConfiguration configuration) {
             mConfiguration = checkNotNull(configuration, "configuration cannot be null");
             return this;
         }
 
-        public Builder setIdToken(@NonNull String idToken) {
-            mIdToken = checkNotEmpty(idToken, "idToken cannot be null or empty");
+        /** @see EndSessionRequest#idTokenHint */
+        @NonNull
+        public Builder setIdTokenHint(@Nullable String idTokenHint) {
+            mIdTokenHint = checkNullOrNotEmpty(idTokenHint, "idTokenHint must not be empty");
             return this;
         }
 
-        public Builder setRedirectUri(@Nullable Uri redirectUri) {
-            mRedirectUri = checkNotNull(redirectUri, "redirect Uri cannot be null");
+        /** @see EndSessionRequest#postLogoutRedirectUri */
+        @NonNull
+        public Builder setPostLogoutRedirectUri(@Nullable Uri postLogoutRedirectUri) {
+            mPostLogoutRedirectUri = postLogoutRedirectUri;
             return this;
         }
 
-        public Builder setState(@NonNull String state) {
-            mState = checkNotEmpty(state, "state cannot be null or empty");
+        /** @see EndSessionRequest#state */
+        @NonNull
+        public Builder setState(@Nullable String state) {
+            mState = checkNullOrNotEmpty(state, "state must not be empty");
+            return this;
+        }
+
+        /** @see EndSessionRequest#uiLocales */
+        @NonNull
+        public Builder setUiLocales(@Nullable String uiLocales) {
+            mUiLocales = checkNullOrNotEmpty(uiLocales, "uiLocales must be null or not empty");
+            return this;
+        }
+
+        /** @see EndSessionRequest#uiLocales */
+        @NonNull
+        public Builder setUiLocalesValues(@Nullable String... uiLocalesValues) {
+            if (uiLocalesValues == null) {
+                mUiLocales = null;
+                return this;
+            }
+
+            return setUiLocalesValues(Arrays.asList(uiLocalesValues));
+        }
+
+        /** @see EndSessionRequest#uiLocales */
+        @NonNull
+        public Builder setUiLocalesValues(
+                @Nullable Iterable<String> uiLocalesValues) {
+            mUiLocales = AsciiStringListUtil.iterableToString(uiLocalesValues);
+            return this;
+        }
+
+        /** @see EndSessionRequest#additionalParameters */
+        @NonNull
+        public Builder setAdditionalParameters(@Nullable Map<String, String> additionalParameters) {
+            mAdditionalParameters = checkAdditionalParams(additionalParameters, BUILT_IN_PARAMS);
             return this;
         }
 
@@ -155,36 +237,56 @@ public class EndSessionRequest extends AuthorizationManagementRequest {
         public EndSessionRequest build() {
             return new EndSessionRequest(
                 mConfiguration,
-                mIdToken,
-                mRedirectUri,
-                mState);
+                mIdTokenHint,
+                mPostLogoutRedirectUri,
+                mState,
+                mUiLocales,
+                Collections.unmodifiableMap(new HashMap<>(mAdditionalParameters)));
         }
     }
 
-    @VisibleForTesting
     private EndSessionRequest(
             @NonNull AuthorizationServiceConfiguration configuration,
-            @NonNull String idToken,
-            @NonNull Uri redirectUri,
-            @NonNull String state) {
+            @Nullable String idTokenHint,
+            @Nullable Uri postLogoutRedirectUri,
+            @Nullable String state,
+            @Nullable String uiLocales,
+            @NonNull Map<String, String> additionalParameters) {
         this.configuration = configuration;
-        this.idToken = idToken;
-        this.redirectUri = redirectUri;
+        this.idTokenHint = idTokenHint;
+        this.postLogoutRedirectUri = postLogoutRedirectUri;
         this.state = state;
+        this.uiLocales = uiLocales;
+        this.additionalParameters = additionalParameters;
     }
 
     @Override
-    @NonNull
+    @Nullable
     public String getState() {
         return state;
     }
 
+    public Set<String> getUiLocales() {
+        return AsciiStringListUtil.stringToSet(uiLocales);
+    }
+
     @Override
     public Uri toUri() {
-        Uri.Builder uriBuilder = configuration.endSessionEndpoint.buildUpon()
-                .appendQueryParameter(PARAM_REDIRECT_URI, redirectUri.toString())
-                .appendQueryParameter(PARAM_ID_TOKEN_HINT, idToken)
-                .appendQueryParameter(PARAM_STATE, state);
+        Uri.Builder uriBuilder = configuration.endSessionEndpoint.buildUpon();
+
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_ID_TOKEN_HINT, idTokenHint);
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_STATE, state);
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_UI_LOCALES, uiLocales);
+
+        if (postLogoutRedirectUri != null) {
+            uriBuilder.appendQueryParameter(PARAM_POST_LOGOUT_REDIRECT_URI,
+                    postLogoutRedirectUri.toString());
+        }
+
+        for (Map.Entry<String, String> entry : additionalParameters.entrySet()) {
+            uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
+        }
+
         return  uriBuilder.build();
     }
 
@@ -196,10 +298,23 @@ public class EndSessionRequest extends AuthorizationManagementRequest {
     public JSONObject jsonSerialize() {
         JSONObject json = new JSONObject();
         JsonUtil.put(json, KEY_CONFIGURATION, configuration.toJson());
-        JsonUtil.put(json, KEY_ID_TOKEN_HINT, idToken);
-        JsonUtil.put(json, KEY_REDIRECT_URI, redirectUri.toString());
-        JsonUtil.put(json, KEY_STATE, state);
+        JsonUtil.putIfNotNull(json, KEY_ID_TOKEN_HINT, idTokenHint);
+        JsonUtil.putIfNotNull(json, KEY_POST_LOGOUT_REDIRECT_URI, postLogoutRedirectUri);
+        JsonUtil.putIfNotNull(json, KEY_STATE, state);
+        JsonUtil.putIfNotNull(json, KEY_UI_LOCALES, uiLocales);
+        JsonUtil.put(json, KEY_ADDITIONAL_PARAMETERS,
+                JsonUtil.mapToJsonObject(additionalParameters));
         return json;
+    }
+
+    /**
+     * Produces a JSON string representation of the request for persistent storage or
+     * local transmission (e.g. between activities). This method is just a convenience wrapper
+     * for {@link #jsonSerialize()}, converting the JSON object to its string form.
+     */
+    @Override
+    public String jsonSerializeString() {
+        return jsonSerialize().toString();
     }
 
     /**
@@ -207,15 +322,18 @@ public class EndSessionRequest extends AuthorizationManagementRequest {
      * {@link #jsonSerialize()}.
      * @throws JSONException if the provided JSON does not match the expected structure.
      */
-    public static EndSessionRequest jsonDeserialize(@NonNull JSONObject jsonObject)
+    public static EndSessionRequest jsonDeserialize(@NonNull JSONObject json)
             throws JSONException {
-        checkNotNull(jsonObject, "json cannot be null");
-        return new EndSessionRequest(
-            AuthorizationServiceConfiguration.fromJson(jsonObject.getJSONObject(KEY_CONFIGURATION)),
-            JsonUtil.getString(jsonObject, KEY_ID_TOKEN_HINT),
-            JsonUtil.getUri(jsonObject, KEY_REDIRECT_URI),
-            JsonUtil.getString(jsonObject, KEY_STATE)
-        );
+        checkNotNull(json, "json cannot be null");
+        EndSessionRequest.Builder builder = new EndSessionRequest.Builder(
+                AuthorizationServiceConfiguration.fromJson(json.getJSONObject(KEY_CONFIGURATION)))
+                .setIdTokenHint(JsonUtil.getStringIfDefined(json, KEY_ID_TOKEN_HINT))
+                .setPostLogoutRedirectUri(JsonUtil.getUriIfDefined(json,
+                        KEY_POST_LOGOUT_REDIRECT_URI))
+                .setState(JsonUtil.getStringIfDefined(json, KEY_STATE))
+                .setUiLocales(JsonUtil.getStringIfDefined(json, KEY_UI_LOCALES))
+                .setAdditionalParameters(JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
+        return builder.build();
     }
 
     /**
@@ -230,9 +348,4 @@ public class EndSessionRequest extends AuthorizationManagementRequest {
         checkNotNull(jsonStr, "json string cannot be null");
         return jsonDeserialize(new JSONObject(jsonStr));
     }
-
-    static boolean isEndSessionRequest(JSONObject json) {
-        return json.has(KEY_REDIRECT_URI);
-    }
-
 }

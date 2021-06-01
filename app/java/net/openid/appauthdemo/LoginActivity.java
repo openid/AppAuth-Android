@@ -216,8 +216,8 @@ public final class LoginActivity extends AppCompatActivity {
             AuthorizationServiceConfiguration config = new AuthorizationServiceConfiguration(
                     mConfiguration.getAuthEndpointUri(),
                     mConfiguration.getTokenEndpointUri(),
-                    mConfiguration.getEndSessionEndpoint(),
-                    mConfiguration.getRegistrationEndpointUri());
+                    mConfiguration.getRegistrationEndpointUri(),
+                    mConfiguration.getEndSessionEndpoint());
 
             mAuthStateManager.replace(new AuthState(config));
             initializeClient();
