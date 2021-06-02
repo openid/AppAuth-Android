@@ -4,8 +4,7 @@ apply from: 'config/keystore.gradle'
 
 buildscript {
     repositories {
-        maven { url "https://plugins.gradle.org/m2/" }
-        jcenter()
+        gradlePluginPortal()
         google()
     }
     dependencies {
@@ -18,8 +17,7 @@ buildscript {
 subprojects {
     repositories {
         google()
-        jcenter()
-        maven { url 'https://jitpack.io' }
+        mavenCentral()
     }
 }
 
