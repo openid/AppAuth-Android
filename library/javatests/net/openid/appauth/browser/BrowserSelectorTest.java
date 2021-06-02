@@ -16,8 +16,6 @@ package net.openid.appauth.browser;
 
 import static net.openid.appauth.browser.BrowserSelector.BROWSER_INTENT;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -32,12 +30,10 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.text.TextUtils;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import net.openid.appauth.BuildConfig;
 
 import org.junit.After;
 import org.junit.Before;
@@ -226,10 +222,10 @@ public class BrowserSelectorTest {
             .thenReturn(CHROME.mResolveInfo);
         List<BrowserDescriptor> allBrowsers = BrowserSelector.getAllBrowsers(mContext);
 
-        assertThat(allBrowsers.get(0).packageName.equals(CHROME.mPackageName));
-        assertFalse(allBrowsers.get(0).useCustomTab);
-        assertThat(allBrowsers.get(1).packageName.equals(FIREFOX.mPackageName));
-        assertFalse(allBrowsers.get(1).useCustomTab);
+        assertThat(allBrowsers.get(0).packageName).isEqualTo(CHROME.mPackageName);
+        assertThat(allBrowsers.get(0).useCustomTab).isFalse();
+        assertThat(allBrowsers.get(1).packageName).isEqualTo(FIREFOX.mPackageName);
+        assertThat(allBrowsers.get(1).useCustomTab).isFalse();
     }
 
     @Test
@@ -243,10 +239,10 @@ public class BrowserSelectorTest {
             .thenReturn(FIREFOX.mResolveInfo);
         List<BrowserDescriptor> allBrowsers = BrowserSelector.getAllBrowsers(mContext);
 
-        assertThat(allBrowsers.get(0).packageName.equals(FIREFOX.mPackageName));
-        assertFalse(allBrowsers.get(0).useCustomTab);
-        assertThat(allBrowsers.get(1).packageName.equals(CHROME.mPackageName));
-        assertTrue(allBrowsers.get(1).useCustomTab);
+        assertThat(allBrowsers.get(0).packageName).isEqualTo(FIREFOX.mPackageName);
+        assertThat(allBrowsers.get(0).useCustomTab).isFalse();
+        assertThat(allBrowsers.get(1).packageName).isEqualTo(CHROME.mPackageName);
+        assertThat(allBrowsers.get(1).useCustomTab).isTrue();
     }
 
     @Test
@@ -261,12 +257,12 @@ public class BrowserSelectorTest {
             .thenReturn(FIREFOX_CUSTOM_TAB.mResolveInfo);
         List<BrowserDescriptor> allBrowsers = BrowserSelector.getAllBrowsers(mContext);
 
-        assertThat(allBrowsers.get(0).packageName.equals(FIREFOX_CUSTOM_TAB.mPackageName));
-        assertTrue(allBrowsers.get(0).useCustomTab);
-        assertThat(allBrowsers.get(1).packageName.equals(FIREFOX_CUSTOM_TAB.mPackageName));
-        assertFalse(allBrowsers.get(1).useCustomTab);
-        assertThat(allBrowsers.get(2).packageName.equals(CHROME.mPackageName));
-        assertTrue(allBrowsers.get(2).useCustomTab);
+        assertThat(allBrowsers.get(0).packageName).isEqualTo(FIREFOX_CUSTOM_TAB.mPackageName);
+        assertThat(allBrowsers.get(0).useCustomTab).isTrue();
+        assertThat(allBrowsers.get(1).packageName).isEqualTo(FIREFOX_CUSTOM_TAB.mPackageName);
+        assertThat(allBrowsers.get(1).useCustomTab).isFalse();
+        assertThat(allBrowsers.get(2).packageName).isEqualTo(CHROME.mPackageName);
+        assertThat(allBrowsers.get(2).useCustomTab).isTrue();
     }
 
     @Test
