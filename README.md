@@ -168,8 +168,8 @@ AuthorizationServiceConfiguration.fetchFromIssuer(
         }
 
         // use serviceConfiguration as needed
-      }
-    });
+    }
+});
 ```
 
 This will attempt to download a discovery document from the standard location
@@ -179,9 +179,12 @@ document for your IDP is in some other non-standard location, you can instead
 provide the full URI as follows:
 
 ```java
-AuthorizationServiceConfiguration serviceConfig =
-    AuthorizationServiceConfiguration.fetchFromUrl(
-        Uri.parse("https://idp.example.com/exampletenant/openid-config"));
+AuthorizationServiceConfiguration.fetchFromUrl(
+    Uri.parse("https://idp.example.com/exampletenant/openid-config"),
+    new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
+        ...
+    }
+});
 ```
 
 If desired, this configuration can be used to seed an AuthState instance,
