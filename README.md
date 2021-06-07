@@ -261,16 +261,15 @@ capture this response, it must register with the Android OS as a handler for
 this redirect URI.
 
 We recommend using a custom scheme based redirect URI (i.e. those of form
-"my.scheme:/path"), as this is the most widely supported across all versions
-of Android. It is strongly recommended to use "reverse domain name notation",
-which is a naming convention based on the domain name system, but where the
-domain components are reversed. For example, if the web domain for your service
-is "service.example.com", then the reverse domain name form to use for a
-custom scheme would be "com.example.service". This is also, typically, the
-convention used for the package name of your app, e.g. "com.example.app". As
-such, the package name for your app can often be used as a custom scheme -
-there are some exceptions, such as when the package name contains underscores,
-as these are not legal characters for URI schemes.
+`my.scheme:/path`), as this is the most widely supported across all versions of
+Android. To avoid conflicts with other apps, it is recommended to configure a 
+distinct scheme using "reverse domain name notation". This can either match
+your service web domain (in reverse) e.g. `com.example.service` or your package
+name `com.example.app` or be something completely new as long as it's distinct
+enough. Using the package name of your app is quite common but it's not always
+possible if it contains illegal characters for URI schemes (like underscores)
+or if you already have another handler for that scheme - so just use something
+else.
 
 When a custom scheme is used, AppAuth can be easily configured to capture
 all redirects using this custom scheme through a manifest placeholder:
