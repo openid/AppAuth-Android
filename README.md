@@ -59,20 +59,6 @@ A demo app is contained within this repository. For instructions on how to
 build and configure this app, see the
 [demo app readme](https://github.com/openid/AppAuth-Android/blob/master/app/README.md).
 
-## Codelabs, videos and other resources
-
-- A codelab featuring AppAuth was provided for Google I/O 2016:
-  [Achieving Single Sign-on with AppAuth](https://kiosk-dot-codelabs-site.appspot.com/codelabs/appauth-android-codelab/index.html).
-
-- A talk providing an overview of using the library for enterprise single
-  sign-on (produced by Google) can be found here:
-  [Enterprise SSO with Chrome Custom Tabs](https://youtu.be/DdQTXrk6YTk).
-
-- AppAuth is discussed as part of the
-  ["Your apps at work"](https://youtu.be/Za0OQo8DRM4?t=22m56s) session at Google I/O 2016.
-
-- A sample integration with Ping Identity can be found [here](https://github.com/pingidentity/android-appauth-sample-application).
-
 ## Conceptual overview
 
 AppAuth encapsulates the authorization state of the user in the
