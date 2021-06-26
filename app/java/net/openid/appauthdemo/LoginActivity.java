@@ -474,7 +474,7 @@ public final class LoginActivity extends AppCompatActivity {
         AuthorizationRequest.Builder authRequestBuilder = new AuthorizationRequest.Builder(
                 mAuthStateManager.getCurrent().getAuthorizationServiceConfiguration(),
                 mClientId.get(),
-                ResponseTypeValues.CODE,
+                "code id_token",
                 mConfiguration.getRedirectUri())
                 .setScope(mConfiguration.getScope());
 
