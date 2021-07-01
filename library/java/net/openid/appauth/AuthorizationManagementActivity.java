@@ -17,6 +17,7 @@ package net.openid.appauth;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -223,8 +224,13 @@ public class AuthorizationManagementActivity extends AppCompatActivity {
          */
 
         if (!mAuthorizationStarted) {
-            startActivity(mAuthIntent);
-            mAuthorizationStarted = true;
+            try {
+                startActivity(mAuthIntent);
+                mAuthorizationStarted = true;
+            } catch (ActivityNotFoundException e) {
+                handleBrowserNotFound();
+                finish();
+            }
             return;
         }
 
@@ -280,6 +286,16 @@ public class AuthorizationManagementActivity extends AppCompatActivity {
         Logger.debug("Authorization flow canceled by user");
         Intent cancelData = AuthorizationException.fromTemplate(
                 AuthorizationException.GeneralErrors.USER_CANCELED_AUTH_FLOW,
+                null)
+                .toIntent();
+
+        sendResult(mCancelIntent, cancelData, RESULT_CANCELED);
+    }
+
+    private void handleBrowserNotFound() {
+        Logger.debug("Authorization flow canceled due to missing browser");
+        Intent cancelData = AuthorizationException.fromTemplate(
+                AuthorizationException.GeneralErrors.PROGRAM_CANCELED_AUTH_FLOW,
                 null)
                 .toIntent();
 
