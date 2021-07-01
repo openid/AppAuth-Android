@@ -192,6 +192,7 @@ public final class Configuration {
         Buffer configData = new Buffer();
         try {
             configSource.readAll(configData);
+            mConfigHash = configData.sha256().base64();
             mConfigJson = new JSONObject(configData.readString(Charset.forName("UTF-8")));
         } catch (IOException ex) {
             throw new InvalidConfigurationException(
@@ -201,7 +202,6 @@ public final class Configuration {
                     "Unable to parse configuration: " + ex.getMessage());
         }
 
-        mConfigHash = configData.sha256().base64();
         mClientId = getConfigString("client_id");
         mScope = getRequiredConfigString("authorization_scope");
         mRedirectUri = getRequiredConfigUri("redirect_uri");
