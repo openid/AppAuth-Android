@@ -449,6 +449,128 @@ public class AuthState {
 
     /**
      * Ensures that a non-expired access token is available before invoking the provided action.
+     * @return
+     */
+    @NonNull
+    public Tokens getSynchronousFreshToken(
+        @NonNull AuthorizationService service) throws AuthorizationException {
+        return getSynchronousFreshToken(
+            service,
+            NoClientAuthentication.INSTANCE,
+            Collections.<String, String>emptyMap(),
+            SystemClock.INSTANCE);
+    }
+
+    /**
+     * Ensures that a non-expired access token is available before invoking the provided action.
+     * @return
+     */
+    @NonNull
+    public Tokens getSynchronousFreshToken(
+        @NonNull AuthorizationService service,
+        @NonNull ClientAuthentication clientAuth) throws AuthorizationException {
+        return getSynchronousFreshToken(
+            service,
+            clientAuth,
+            Collections.<String, String>emptyMap(),
+            SystemClock.INSTANCE);
+    }
+
+    /**
+     * Ensures that a non-expired access token is available before invoking the provided action.
+     * If a token refresh is required, the provided additional parameters will be included in this
+     * refresh request.
+     * @return
+     */
+    @NonNull
+    public Tokens getSynchronousFreshToken(
+        @NonNull AuthorizationService service,
+        @NonNull Map<String, String> refreshTokenAdditionalParams) throws ClientAuthentication.UnsupportedAuthenticationMethod, AuthorizationException {
+        return getSynchronousFreshToken(
+            service,
+            getClientAuthentication(),
+            refreshTokenAdditionalParams,
+            SystemClock.INSTANCE);
+    }
+
+    /**
+     * Ensures that a non-expired access token is available before invoking the provided action.
+     * If a token refresh is required, the provided additional parameters will be included in this
+     * refresh request.
+     * @return
+     */
+    @NonNull
+    public Tokens getSynchronousFreshToken(
+        @NonNull AuthorizationService service,
+        @NonNull ClientAuthentication clientAuth,
+        @NonNull Map<String, String> refreshTokenAdditionalParams) throws AuthorizationException {
+        return getSynchronousFreshToken(
+            service,
+            clientAuth,
+            refreshTokenAdditionalParams,
+            SystemClock.INSTANCE);
+    }
+
+    @VisibleForTesting
+    @NonNull
+    Tokens getSynchronousFreshToken(
+        @NonNull final AuthorizationService service,
+        @NonNull final ClientAuthentication clientAuth,
+        @NonNull final Map<String, String> refreshTokenAdditionalParams,
+        @NonNull final Clock clock) throws AuthorizationException {
+        checkNotNull(service, "service cannot be null");
+        checkNotNull(clientAuth, "client authentication cannot be null");
+        checkNotNull(refreshTokenAdditionalParams,
+            "additional params cannot be null");
+        checkNotNull(clock, "clock cannot be null");
+
+        if (!getNeedsTokenRefresh(clock)) {
+            String accessToken = getAccessToken();
+            String idToken = getIdToken();
+            if (accessToken != null && idToken != null) {
+                return new Tokens(accessToken, idToken);
+            }
+        }
+
+        if (mRefreshToken == null) {
+            throw AuthorizationException.fromTemplate(
+                AuthorizationRequestErrors.CLIENT_ERROR,
+                new IllegalStateException("No refresh token available and token have expired"));
+        }
+
+        TokenResponse response = null;
+        AuthorizationException exception = null;
+        try {
+            response = service.performSynchronousTokenRequest(createTokenRefreshRequest(refreshTokenAdditionalParams), clientAuth);
+        } catch (AuthorizationException e) {
+            exception = e;
+        }
+
+        update(response, exception);
+
+        if (response != null) {
+            String accessToken = getAccessToken();
+            String idToken = getIdToken();
+            if (accessToken != null && idToken != null) {
+                return new Tokens(accessToken, idToken);
+            } else {
+                exception = AuthorizationException.fromTemplate(
+                    AuthorizationException.GeneralErrors.JSON_DESERIALIZATION_ERROR,
+                    new Exception(""));
+            }
+        }
+
+        if (exception != null) {
+            throw exception;
+        } else {
+            throw AuthorizationException.fromTemplate(
+                AuthorizationException.GeneralErrors.JSON_DESERIALIZATION_ERROR,
+                new Exception(""));
+        }
+    }
+
+    /**
+     * Ensures that a non-expired access token is available before invoking the provided action.
      */
     public void performActionWithFreshTokens(
             @NonNull AuthorizationService service,
@@ -741,6 +863,29 @@ public class AuthState {
                 @Nullable String accessToken,
                 @Nullable String idToken,
                 @Nullable AuthorizationException ex);
+    }
+
+    public static class Tokens {
+        /**
+         * Result of the synchronous function that return accessToken
+         */
+        private @NonNull final String accessToken;
+        private @NonNull final String idToken;
+
+        public Tokens(@NonNull String accessToken, @NonNull String idToken) {
+            this.accessToken = accessToken;
+            this.idToken = idToken;
+        }
+
+        @NonNull
+        public String getAccessToken() {
+            return accessToken;
+        }
+
+        @NonNull
+        public String getIdToken() {
+            return idToken;
+        }
     }
 
     /**
