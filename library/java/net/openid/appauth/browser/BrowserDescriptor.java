@@ -24,43 +24,36 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Represents a browser that may be used for an authorization flow.
- */
+/** Represents a browser that may be used for an authorization flow. */
 public class BrowserDescriptor {
 
     // See: http://stackoverflow.com/a/2816747
     private static final int PRIME_HASH_FACTOR = 92821;
 
-    private static final String DIGEST_SHA_512 = "SHA-512";
+    public static final String DIGEST_SHA_256 = "SHA-256";
+    public static final String DIGEST_SHA_512 = "SHA-512";
 
-    /**
-     * The package name of the browser app.
-     */
+    /** The package name of the browser app. */
     public final String packageName;
 
     /**
-     * The set of {@link android.content.pm.Signature signatures} of the browser app,
-     * which have been hashed with SHA-512, and Base-64 URL-safe encoded.
+     * The set of {@link android.content.pm.Signature signatures} of the browser app, which have
+     * been hashed with SHA-512, and Base-64 URL-safe encoded.
      */
     public final Set<String> signatureHashes;
 
-    /**
-     * The version string of the browser app.
-     */
+    /** The version string of the browser app. */
     public final String version;
 
-    /**
-     * Whether it is intended that the browser will be used via a custom tab.
-     */
+    /** Whether it is intended that the browser will be used via a custom tab. */
     public final Boolean useCustomTab;
 
     /**
-     * Creates a description of a browser from a {@link PackageInfo} object returned from the
-     * {@link android.content.pm.PackageManager}. The object is expected to include the
-     * signatures of the app, which can be retrieved with the
-     * {@link android.content.pm.PackageManager#GET_SIGNATURES GET_SIGNATURES} flag when
-     * calling {@link android.content.pm.PackageManager#getPackageInfo(String, int)}.
+     * Creates a description of a browser from a {@link PackageInfo} object returned from the {@link
+     * android.content.pm.PackageManager}. The object is expected to include the signatures of the
+     * app, which can be retrieved with the {@link android.content.pm.PackageManager#GET_SIGNATURES
+     * GET_SIGNATURES} flag when calling {@link
+     * android.content.pm.PackageManager#getPackageInfo(String, int)}.
      */
     public BrowserDescriptor(@NonNull PackageInfo packageInfo, boolean useCustomTab) {
         this(
@@ -72,19 +65,16 @@ public class BrowserDescriptor {
 
     /**
      * Creates a description of a browser from the core properties that are frequently used to
-     * decide whether a browser can be used for an authorization flow. In most cases, it is
-     * more convenient to use the other variant of the constructor that consumes a
-     * {@link PackageInfo} object provided by the package manager.
+     * decide whether a browser can be used for an authorization flow. In most cases, it is more
+     * convenient to use the other variant of the constructor that consumes a {@link PackageInfo}
+     * object provided by the package manager.
      *
-     * @param packageName
-     *     The Android package name of the browser.
-     * @param signatureHashes
-     *     The set of SHA-512, Base64 url safe encoded signatures for the app. This can be
-     *     generated for a signature by calling {@link #generateSignatureHash(Signature)}.
-     * @param version
-     *     The version name of the browser.
-     * @param useCustomTab
-     *     Whether it is intended to use the browser as a custom tab.
+     * @param packageName The Android package name of the browser.
+     * @param signatureHashes The set of SHA-512, Base64 url safe encoded signatures for the app.
+     *     This can be generated for a signature by calling {@link
+     *     #generateSignatureHash(Signature)}.
+     * @param version The version name of the browser.
+     * @param useCustomTab Whether it is intended to use the browser as a custom tab.
      */
     public BrowserDescriptor(
             @NonNull String packageName,
@@ -98,16 +88,12 @@ public class BrowserDescriptor {
     }
 
     /**
-     * Creates a copy of this browser descriptor, changing the intention to use it as a custom
-     * tab to the specified value.
+     * Creates a copy of this browser descriptor, changing the intention to use it as a custom tab
+     * to the specified value.
      */
     @NonNull
     public BrowserDescriptor changeUseCustomTab(boolean newUseCustomTabValue) {
-        return new BrowserDescriptor(
-                packageName,
-                signatureHashes,
-                version,
-                newUseCustomTabValue);
+        return new BrowserDescriptor(packageName, signatureHashes, version, newUseCustomTabValue);
     }
 
     @Override
@@ -141,30 +127,38 @@ public class BrowserDescriptor {
         return hash;
     }
 
-    /**
-     * Generates a SHA-512 hash, Base64 url-safe encoded, from a {@link Signature}.
-     */
+    /** Generates a SHA-* hash, Base64 url-safe encoded, from a {@link Signature}. */
     @NonNull
-    public static String generateSignatureHash(@NonNull Signature signature) {
+    public static String generateSignatureHash(
+            @NonNull Signature signature, @NonNull String digestSha) {
         try {
-            MessageDigest digest = MessageDigest.getInstance(DIGEST_SHA_512);
+            MessageDigest digest = MessageDigest.getInstance(digestSha);
             byte[] hashBytes = digest.digest(signature.toByteArray());
             return Base64.encodeToString(hashBytes, Base64.URL_SAFE | Base64.NO_WRAP);
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(
-                    "Platform does not support" + DIGEST_SHA_512 + " hashing");
+            throw new IllegalStateException("Platform does not support" + digestSha + " hashing");
         }
     }
 
     /**
-     * Generates a set of SHA-512, Base64 url-safe encoded signature hashes from the provided
-     * array of signatures.
+     * Generates a set of SHA-512, Base64 url-safe encoded signature hashes from the provided array
+     * of signatures.
      */
     @NonNull
     public static Set<String> generateSignatureHashes(@NonNull Signature[] signatures) {
+        return generateSignatureHashes(signatures, DIGEST_SHA_512);
+    }
+
+    /**
+     * Generates a set of SHA-*, Base64 url-safe encoded signature hashes from the provided array of
+     * signatures.
+     */
+    @NonNull
+    public static Set<String> generateSignatureHashes(
+            @NonNull Signature[] signatures, @NonNull String digestSha) {
         Set<String> signatureHashes = new HashSet<>();
         for (Signature signature : signatures) {
-            signatureHashes.add(generateSignatureHash(signature));
+            signatureHashes.add(generateSignatureHash(signature, digestSha));
         }
 
         return signatureHashes;
