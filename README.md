@@ -37,7 +37,7 @@ Google) can be found here:
 AppAuth for Android is available on [MavenCentral](https://search.maven.org/search?q=g:net.openid%20appauth)
 
 ```groovy
-implementation 'net.openid:appauth:0.9.0'
+implementation 'net.openid:appauth:0.9.1'
 ```
 
 ## Requirements
