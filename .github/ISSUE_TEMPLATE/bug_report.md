@@ -12,7 +12,7 @@ labels: bug
 - [ ] I searched for [existing GitHub issues](https://github.com/openid/AppAuth-Android/issues)
 - [ ] I read the [documentation](https://github.com/openid/AppAuth-Android/blob/master/README.md)
 - [ ] I verified the client configuration matches the information in the identity provider (or I am using dynamic client registration)
-- [ ] I am either using a custom URI scheme or `https` with (App Links)[https://developer.android.com/training/app-links] for client redirect.
+- [ ] I am either using a custom URI scheme or `https` with [App Links](https://developer.android.com/training/app-links) for client redirect.
 - [ ] I can reproduce the issue in the demo app (optional)
 
 ### Configuration
