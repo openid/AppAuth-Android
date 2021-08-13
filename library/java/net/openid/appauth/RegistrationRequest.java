@@ -454,21 +454,17 @@ public class RegistrationRequest {
     public static RegistrationRequest jsonDeserialize(@NonNull JSONObject json)
             throws JSONException {
         checkNotNull(json, "json must not be null");
-        List<Uri> redirectUris = JsonUtil.getUriList(json, PARAM_REDIRECT_URIS);
 
-        Builder builder = new Builder(
-                AuthorizationServiceConfiguration.fromJson(json.getJSONObject(KEY_CONFIGURATION)),
-                redirectUris)
-                .setResponseTypeValues(JsonUtil.getStringListIfDefined(json, PARAM_RESPONSE_TYPES))
-                .setGrantTypeValues(JsonUtil.getStringListIfDefined(json, PARAM_GRANT_TYPES))
-                .setSubjectType(JsonUtil.getStringIfDefined(json, PARAM_SUBJECT_TYPE))
-                .setJwksUri(JsonUtil.getUriIfDefined(json, PARAM_JWKS_URI))
-                .setJwks(JsonUtil.getJsonObjectIfDefined(json, PARAM_JWKS))
-                .setTokenEndpointAuthenticationMethod(JsonUtil.getStringIfDefined(json,
-                        PARAM_TOKEN_ENDPOINT_AUTHENTICATION_METHOD))
-                .setAdditionalParameters(JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
-
-        return builder.build();
+        return new RegistrationRequest(
+            AuthorizationServiceConfiguration.fromJson(json.getJSONObject(KEY_CONFIGURATION)),
+            JsonUtil.getUriList(json, PARAM_REDIRECT_URIS),
+            JsonUtil.getStringListIfDefined(json, PARAM_RESPONSE_TYPES),
+            JsonUtil.getStringListIfDefined(json, PARAM_GRANT_TYPES),
+            JsonUtil.getStringIfDefined(json, PARAM_SUBJECT_TYPE),
+            JsonUtil.getUriIfDefined(json, PARAM_JWKS_URI),
+            JsonUtil.getJsonObjectIfDefined(json, PARAM_JWKS),
+            JsonUtil.getStringIfDefined(json, PARAM_TOKEN_ENDPOINT_AUTHENTICATION_METHOD),
+            JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
     }
 
     /**

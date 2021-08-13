@@ -142,13 +142,9 @@ public class EndSessionResponse extends AuthorizationManagementResponse {
                 "authorization request not provided and not found in JSON");
         }
 
-        EndSessionRequest request =
-                EndSessionRequest.jsonDeserialize(json.getJSONObject(KEY_REQUEST));
-
         return new EndSessionResponse(
-                request,
-                JsonUtil.getStringIfDefined(json, KEY_STATE)
-            );
+                EndSessionRequest.jsonDeserialize(json.getJSONObject(KEY_REQUEST)),
+                JsonUtil.getStringIfDefined(json, KEY_STATE));
     }
 
     /**

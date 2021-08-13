@@ -1142,28 +1142,23 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
     public static AuthorizationRequest jsonDeserialize(@NonNull JSONObject json)
             throws JSONException {
         checkNotNull(json, "json cannot be null");
-        AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
+        return new AuthorizationRequest(
                 AuthorizationServiceConfiguration.fromJson(json.getJSONObject(KEY_CONFIGURATION)),
                 JsonUtil.getString(json, KEY_CLIENT_ID),
                 JsonUtil.getString(json, KEY_RESPONSE_TYPE),
-                JsonUtil.getUri(json, KEY_REDIRECT_URI))
-                .setDisplay(JsonUtil.getStringIfDefined(json, KEY_DISPLAY))
-                .setLoginHint(JsonUtil.getStringIfDefined(json, KEY_LOGIN_HINT))
-                .setPrompt(JsonUtil.getStringIfDefined(json, KEY_PROMPT))
-                .setUiLocales(JsonUtil.getStringIfDefined(json, KEY_UI_LOCALES))
-                .setState(JsonUtil.getStringIfDefined(json, KEY_STATE))
-                .setNonce(JsonUtil.getStringIfDefined(json, KEY_NONCE))
-                .setCodeVerifier(
-                        JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER),
-                        JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER_CHALLENGE),
-                        JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER_CHALLENGE_METHOD))
-                .setResponseMode(JsonUtil.getStringIfDefined(json, KEY_RESPONSE_MODE))
-                .setAdditionalParameters(JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
-
-        if (json.has(KEY_SCOPE)) {
-            builder.setScopes(AsciiStringListUtil.stringToSet(JsonUtil.getString(json, KEY_SCOPE)));
-        }
-        return builder.build();
+                JsonUtil.getUri(json, KEY_REDIRECT_URI),
+                JsonUtil.getStringIfDefined(json, KEY_DISPLAY),
+                JsonUtil.getStringIfDefined(json, KEY_LOGIN_HINT),
+                JsonUtil.getStringIfDefined(json, KEY_PROMPT),
+                JsonUtil.getStringIfDefined(json, KEY_UI_LOCALES),
+                JsonUtil.getStringIfDefined(json, KEY_SCOPE),
+                JsonUtil.getStringIfDefined(json, KEY_STATE),
+                JsonUtil.getStringIfDefined(json, KEY_NONCE),
+                JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER),
+                JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER_CHALLENGE),
+                JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER_CHALLENGE_METHOD),
+                JsonUtil.getStringIfDefined(json, KEY_RESPONSE_MODE),
+                JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
     }
 
     /**

@@ -510,20 +510,16 @@ public class AuthorizationResponse extends AuthorizationManagementResponse {
                 "authorization request not provided and not found in JSON");
         }
 
-        AuthorizationRequest request =
-                AuthorizationRequest.jsonDeserialize(json.getJSONObject(KEY_REQUEST));
-
-        return new AuthorizationResponse.Builder(request)
-                .setTokenType(JsonUtil.getStringIfDefined(json, KEY_TOKEN_TYPE))
-                .setAccessToken(JsonUtil.getStringIfDefined(json, KEY_ACCESS_TOKEN))
-                .setAuthorizationCode(JsonUtil.getStringIfDefined(json, KEY_AUTHORIZATION_CODE))
-                .setIdToken(JsonUtil.getStringIfDefined(json, KEY_ID_TOKEN))
-                .setScope(JsonUtil.getStringIfDefined(json, KEY_SCOPE))
-                .setState(JsonUtil.getStringIfDefined(json, KEY_STATE))
-                .setAccessTokenExpirationTime(JsonUtil.getLongIfDefined(json, KEY_EXPIRES_AT))
-                .setAdditionalParameters(
-                        JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS))
-                .build();
+        return new AuthorizationResponse(
+                AuthorizationRequest.jsonDeserialize(json.getJSONObject(KEY_REQUEST)),
+                JsonUtil.getStringIfDefined(json, KEY_STATE),
+                JsonUtil.getStringIfDefined(json, KEY_TOKEN_TYPE),
+                JsonUtil.getStringIfDefined(json, KEY_AUTHORIZATION_CODE),
+                JsonUtil.getStringIfDefined(json, KEY_ACCESS_TOKEN),
+                JsonUtil.getLongIfDefined(json, KEY_EXPIRES_AT),
+                JsonUtil.getStringIfDefined(json, KEY_ID_TOKEN),
+                JsonUtil.getStringIfDefined(json, KEY_SCOPE),
+                JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
     }
 
     /**

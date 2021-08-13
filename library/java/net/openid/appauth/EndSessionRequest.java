@@ -325,15 +325,13 @@ public class EndSessionRequest implements AuthorizationManagementRequest {
     public static EndSessionRequest jsonDeserialize(@NonNull JSONObject json)
             throws JSONException {
         checkNotNull(json, "json cannot be null");
-        EndSessionRequest.Builder builder = new EndSessionRequest.Builder(
-                AuthorizationServiceConfiguration.fromJson(json.getJSONObject(KEY_CONFIGURATION)))
-                .setIdTokenHint(JsonUtil.getStringIfDefined(json, KEY_ID_TOKEN_HINT))
-                .setPostLogoutRedirectUri(JsonUtil.getUriIfDefined(json,
-                        KEY_POST_LOGOUT_REDIRECT_URI))
-                .setState(JsonUtil.getStringIfDefined(json, KEY_STATE))
-                .setUiLocales(JsonUtil.getStringIfDefined(json, KEY_UI_LOCALES))
-                .setAdditionalParameters(JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
-        return builder.build();
+        return new EndSessionRequest(
+                AuthorizationServiceConfiguration.fromJson(json.getJSONObject(KEY_CONFIGURATION)),
+                JsonUtil.getStringIfDefined(json, KEY_ID_TOKEN_HINT),
+                JsonUtil.getUriIfDefined(json, KEY_POST_LOGOUT_REDIRECT_URI),
+                JsonUtil.getStringIfDefined(json, KEY_STATE),
+                JsonUtil.getStringIfDefined(json, KEY_UI_LOCALES),
+                JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
     }
 
     /**
