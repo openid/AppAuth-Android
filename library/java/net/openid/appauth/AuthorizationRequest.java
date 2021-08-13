@@ -305,6 +305,12 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
     @VisibleForTesting
     static final String PARAM_NONCE = "nonce";
 
+    @VisibleForTesting
+    static final String PARAM_CLAIMS = "claims";
+
+    @VisibleForTesting
+    static final String PARAM_CLAIMS_LOCALES = "claims_locales";
+
     private static final Set<String> BUILT_IN_PARAMS = builtInParams(
             PARAM_CLIENT_ID,
             PARAM_CODE_CHALLENGE,
@@ -317,7 +323,9 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
             PARAM_RESPONSE_MODE,
             PARAM_RESPONSE_TYPE,
             PARAM_SCOPE,
-            PARAM_STATE);
+            PARAM_STATE,
+            PARAM_CLAIMS,
+            PARAM_CLAIMS_LOCALES);
 
     private static final String KEY_CONFIGURATION = "configuration";
     private static final String KEY_CLIENT_ID = "clientId";
@@ -334,6 +342,8 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
     private static final String KEY_CODE_VERIFIER_CHALLENGE = "codeVerifierChallenge";
     private static final String KEY_CODE_VERIFIER_CHALLENGE_METHOD = "codeVerifierChallengeMethod";
     private static final String KEY_RESPONSE_MODE = "responseMode";
+    private static final String KEY_CLAIMS = "claims";
+    private static final String KEY_CLAIMS_LOCALES = "claimsLocales";
     private static final String KEY_ADDITIONAL_PARAMETERS = "additionalParameters";
 
     /**
@@ -520,6 +530,26 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
     public final String responseMode;
 
     /**
+     * Requests that specific Claims be returned.
+     * The value is a JSON object listing the requested Claims.
+     *
+     * @see "OpenID Connect Core 1.0, Section 5.5
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.5.5>"
+     */
+    @Nullable
+    public final JSONObject claims;
+
+    /**
+     * End-User's preferred languages and scripts for Claims being returned, represented as a
+     * space-separated list of BCP47 [RFC5646] language tag values, ordered by preference.
+     *
+     * @see "OpenID Connect Core 1.0, Section 5.2
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.5.2>"
+     */
+    @Nullable
+    public final String claimsLocales;
+
+    /**
      * Additional parameters to be passed as part of the request.
      *
      * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.1
@@ -589,6 +619,12 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
 
         @Nullable
         private String mResponseMode;
+
+        @Nullable
+        private JSONObject mClaims;
+
+        @Nullable
+        private String mClaimsLocales;
 
         @NonNull
         private Map<String, String> mAdditionalParameters = new HashMap<>();
@@ -946,6 +982,63 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
         }
 
         /**
+         * Requests that specific Claims be returned.
+         * The value is a JSON object listing the requested Claims.
+         *
+         * @see "OpenID Connect Core 1.0, Section 5.5
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.5.5>"
+         */
+        @NonNull
+        public Builder setClaims(@Nullable JSONObject claims) {
+            mClaims = claims;
+            return this;
+        }
+
+        /**
+         * End-User's preferred languages and scripts for Claims being returned, represented as a
+         * space-separated list of BCP47 [RFC5646] language tag values, ordered by preference.
+         *
+         * @see "OpenID Connect Core 1.0, Section 5.2
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.5.2>"
+         */
+        public Builder setClaimsLocales(@Nullable String claimsLocales) {
+            mClaimsLocales = checkNullOrNotEmpty(
+                    claimsLocales,
+                    "claimsLocales must be null or not empty");
+            return this;
+        }
+
+        /**
+         * End-User's preferred languages and scripts for Claims being returned, represented as a
+         * space-separated list of BCP47 [RFC5646] language tag values, ordered by preference.
+         *
+         * @see "OpenID Connect Core 1.0, Section 5.2
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.5.2>"
+         */
+        @NonNull
+        public Builder setClaimsLocalesValues(@Nullable String... claimsLocalesValues) {
+            if (claimsLocalesValues == null) {
+                mClaimsLocales = null;
+                return this;
+            }
+
+            return setClaimsLocalesValues(Arrays.asList(claimsLocalesValues));
+        }
+
+        /**
+         * End-User's preferred languages and scripts for Claims being returned, represented as a
+         * space-separated list of BCP47 [RFC5646] language tag values, ordered by preference.
+         *
+         * @see "OpenID Connect Core 1.0, Section 5.2
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.5.2>"
+         */
+        @NonNull
+        public Builder setClaimsLocalesValues(@Nullable Iterable<String> claimsLocalesValues) {
+            mClaimsLocales = AsciiStringListUtil.iterableToString(claimsLocalesValues);
+            return this;
+        }
+
+        /**
          * Specifies additional parameters. Replaces any previously provided set of parameters.
          * Parameter keys and values cannot be null or empty.
          *
@@ -986,6 +1079,8 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
                     mCodeVerifierChallenge,
                     mCodeVerifierChallengeMethod,
                     mResponseMode,
+                    mClaims,
+                    mClaimsLocales,
                     Collections.unmodifiableMap(new HashMap<>(mAdditionalParameters)));
         }
     }
@@ -1006,6 +1101,8 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
             @Nullable String codeVerifierChallenge,
             @Nullable String codeVerifierChallengeMethod,
             @Nullable String responseMode,
+            @Nullable JSONObject claims,
+            @Nullable String claimsLocales,
             @NonNull Map<String, String> additionalParameters) {
         // mandatory fields
         this.configuration = configuration;
@@ -1026,6 +1123,8 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
         this.codeVerifierChallenge = codeVerifierChallenge;
         this.codeVerifierChallengeMethod = codeVerifierChallengeMethod;
         this.responseMode = responseMode;
+        this.claims = claims;
+        this.claimsLocales = claimsLocales;
     }
 
     /**
@@ -1063,6 +1162,15 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
     }
 
     /**
+     * Derives the set of claims_locales values from the consolidated, space-separated list of
+     * BCP47 [RFC5646] language tag values in the {@link #claimsLocales} field. If no claims_locales
+     * values were specified for this request, the method will return `null`.
+     */
+    public Set<String> getClaimsLocales() {
+        return AsciiStringListUtil.stringToSet(claimsLocales);
+    }
+
+    /**
      * Produces a request URI, that can be used to dispatch the authorization request.
      */
     @Override
@@ -1086,6 +1194,9 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
             uriBuilder.appendQueryParameter(PARAM_CODE_CHALLENGE, codeVerifierChallenge)
                     .appendQueryParameter(PARAM_CODE_CHALLENGE_METHOD, codeVerifierChallengeMethod);
         }
+
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_CLAIMS, claims);
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_CLAIMS_LOCALES, claimsLocales);
 
         for (Entry<String, String> entry : additionalParameters.entrySet()) {
             uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
@@ -1118,6 +1229,8 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
         JsonUtil.putIfNotNull(json, KEY_CODE_VERIFIER_CHALLENGE_METHOD,
                 codeVerifierChallengeMethod);
         JsonUtil.putIfNotNull(json, KEY_RESPONSE_MODE, responseMode);
+        JsonUtil.putIfNotNull(json, KEY_CLAIMS, claims);
+        JsonUtil.putIfNotNull(json, KEY_CLAIMS_LOCALES, claimsLocales);
         JsonUtil.put(json, KEY_ADDITIONAL_PARAMETERS,
                 JsonUtil.mapToJsonObject(additionalParameters));
         return json;
@@ -1158,6 +1271,8 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
                 JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER_CHALLENGE),
                 JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER_CHALLENGE_METHOD),
                 JsonUtil.getStringIfDefined(json, KEY_RESPONSE_MODE),
+                JsonUtil.getJsonObjectIfDefined(json, KEY_CLAIMS),
+                JsonUtil.getStringIfDefined(json, KEY_CLAIMS_LOCALES),
                 JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
     }
 
