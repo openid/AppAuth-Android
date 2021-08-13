@@ -46,6 +46,7 @@ class IdToken {
     private static final String KEY_EXPIRATION = "exp";
     private static final String KEY_ISSUED_AT = "iat";
     private static final String KEY_NONCE = "nonce";
+    private static final String KEY_AUTHORIZED_PARTY = "azp";
     private static final Long MILLIS_PER_SECOND = 1000L;
     private static final Long TEN_MINUTES_IN_SECONDS = 600L;
 
@@ -55,19 +56,31 @@ class IdToken {
     public final Long expiration;
     public final Long issuedAt;
     public final String nonce;
+    public final String authorizedParty;
+
+    @VisibleForTesting
+    IdToken(@NonNull String issuer,
+            @NonNull String subject,
+            @NonNull List<String> audience,
+            @NonNull Long expiration,
+            @NonNull Long issuedAt) {
+        this(issuer, subject, audience, expiration, issuedAt, null, null);
+    }
 
     IdToken(@NonNull String issuer,
             @NonNull String subject,
             @NonNull List<String> audience,
             @NonNull Long expiration,
             @NonNull Long issuedAt,
-            @Nullable String nonce) {
+            @Nullable String nonce,
+            @Nullable String authorizedParty) {
         this.issuer = issuer;
         this.subject = subject;
         this.audience = audience;
         this.expiration = expiration;
         this.issuedAt = issuedAt;
         this.nonce = nonce;
+        this.authorizedParty = authorizedParty;
     }
 
     private static JSONObject parseJwtSection(String section) throws JSONException {
@@ -99,6 +112,7 @@ class IdToken {
         Long expiration = claims.getLong(KEY_EXPIRATION);
         Long issuedAt = claims.getLong(KEY_ISSUED_AT);
         String nonce = JsonUtil.getStringIfDefined(claims, KEY_NONCE);
+        String authorizedParty = JsonUtil.getStringIfDefined(claims, KEY_AUTHORIZED_PARTY);
 
         return new IdToken(
             issuer,
@@ -106,7 +120,8 @@ class IdToken {
             audience,
             expiration,
             issuedAt,
-            nonce
+            nonce,
+            authorizedParty
         );
     }
 
@@ -155,10 +170,11 @@ class IdToken {
         }
 
 
-        // OpenID Connect Core Section 3.1.3.7. rule #3
-        // Validates that the audience of the ID Token matches the client ID.
+        // OpenID Connect Core Section 3.1.3.7. rule #3 & Section 2 azp Claim
+        // Validates that the aud (audience) Claim contains the client ID, or that the azp
+        // (authorized party) Claim matches the client ID.
         String clientId = tokenRequest.clientId;
-        if (!this.audience.contains(clientId)) {
+        if (!this.audience.contains(clientId) && !clientId.equals(this.authorizedParty)) {
             throw AuthorizationException.fromTemplate(GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
                 new IdTokenException("Audience mismatch"));
         }

@@ -35,6 +35,7 @@ import static net.openid.appauth.TestValues.TEST_CODE_VERIFIER;
 import static net.openid.appauth.TestValues.TEST_ISSUER;
 import static net.openid.appauth.TestValues.TEST_NONCE;
 import static net.openid.appauth.TestValues.getDiscoveryDocumentJson;
+import static net.openid.appauth.TestValues.getTestAuthCodeExchangeRequest;
 import static net.openid.appauth.TestValues.getTestAuthCodeExchangeRequestBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -166,8 +167,7 @@ public class IdTokenTest {
             TEST_SUBJECT,
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds,
-            null
+            nowInSeconds
         );
         TokenRequest tokenRequest = getTestAuthCodeExchangeRequestBuilder().build();
         Clock clock = SystemClock.INSTANCE;
@@ -183,8 +183,7 @@ public class IdTokenTest {
             TEST_SUBJECT,
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds,
-            TEST_NONCE
+            nowInSeconds
         );
         TokenRequest tokenRequest = getAuthCodeExchangeRequestWithNonce();
         Clock clock = SystemClock.INSTANCE;
@@ -201,8 +200,7 @@ public class IdTokenTest {
             TEST_SUBJECT,
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds,
-            TEST_NONCE
+            nowInSeconds
         );
 
         String serviceDocJsonWithOtherIssuer = getDiscoveryDocJsonWithIssuer("http://other.issuer");
@@ -230,8 +228,7 @@ public class IdTokenTest {
             TEST_SUBJECT,
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds,
-            TEST_NONCE
+            nowInSeconds
         );
 
         String serviceDocJsonWithOtherIssuer = getDiscoveryDocJsonWithIssuer("http://other.issuer");
@@ -244,7 +241,6 @@ public class IdTokenTest {
             .setCodeVerifier(TEST_CODE_VERIFIER)
             .setGrantType(GrantTypeValues.AUTHORIZATION_CODE)
             .setRedirectUri(TEST_APP_REDIRECT_URI)
-            .setNonce(TEST_NONCE)
             .build();
         Clock clock = SystemClock.INSTANCE;
         idToken.validate(tokenRequest, clock, true);
@@ -260,8 +256,7 @@ public class IdTokenTest {
             TEST_SUBJECT,
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds,
-            TEST_NONCE
+            nowInSeconds
         );
 
         String serviceDocJsonWithIssuerMissingHost = getDiscoveryDocJsonWithIssuer("https://");
@@ -289,8 +284,7 @@ public class IdTokenTest {
             TEST_SUBJECT,
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds,
-            TEST_NONCE
+            nowInSeconds
         );
 
         String serviceDocJsonWithIssuerMissingHost = getDiscoveryDocJsonWithIssuer(
@@ -319,8 +313,7 @@ public class IdTokenTest {
             TEST_SUBJECT,
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds,
-            TEST_NONCE
+            nowInSeconds
         );
 
         String serviceDocJsonWithIssuerMissingHost = getDiscoveryDocJsonWithIssuer(
@@ -339,6 +332,22 @@ public class IdTokenTest {
         idToken.validate(tokenRequest, clock);
     }
 
+    @Test
+    public void testValidate_audienceMatch() throws AuthorizationException {
+        Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
+        Long tenMinutesInSeconds = (long) (10 * 60);
+        IdToken idToken = new IdToken(
+            TEST_ISSUER,
+            TEST_SUBJECT,
+            Collections.singletonList(TEST_CLIENT_ID),
+            nowInSeconds + tenMinutesInSeconds,
+            nowInSeconds
+        );
+        TokenRequest tokenRequest = getTestAuthCodeExchangeRequest();
+        Clock clock = SystemClock.INSTANCE;
+        idToken.validate(tokenRequest, clock);
+    }
+
     @Test(expected = AuthorizationException.class)
     public void testValidate_shouldFailOnAudienceMismatch() throws AuthorizationException {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
@@ -348,8 +357,44 @@ public class IdTokenTest {
             TEST_SUBJECT,
             Collections.singletonList("some_other_audience"),
             nowInSeconds + tenMinutesInSeconds,
+            nowInSeconds
+        );
+        TokenRequest tokenRequest = getAuthCodeExchangeRequestWithNonce();
+        Clock clock = SystemClock.INSTANCE;
+        idToken.validate(tokenRequest, clock);
+    }
+
+    @Test
+    public void testValidate_authorizedPartyMatch() throws AuthorizationException {
+        Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
+        Long tenMinutesInSeconds = (long) (10 * 60);
+        IdToken idToken = new IdToken(
+            TEST_ISSUER,
+            TEST_SUBJECT,
+            Collections.singletonList("some_other_audience"),
+            nowInSeconds + tenMinutesInSeconds,
             nowInSeconds,
-            TEST_NONCE
+            TEST_NONCE,
+            TEST_CLIENT_ID
+        );
+        TokenRequest tokenRequest = getAuthCodeExchangeRequestWithNonce();
+        Clock clock = SystemClock.INSTANCE;
+        idToken.validate(tokenRequest, clock);
+    }
+
+    @Test(expected = AuthorizationException.class)
+    public void testValidate_shouldFailOnAudienceAndAuthorizedPartyMismatch()
+            throws AuthorizationException {
+        Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
+        Long tenMinutesInSeconds = (long) (10 * 60);
+        IdToken idToken = new IdToken(
+            TEST_ISSUER,
+            TEST_SUBJECT,
+            Collections.singletonList("some_other_audience"),
+            nowInSeconds + tenMinutesInSeconds,
+            nowInSeconds,
+            TEST_NONCE,
+            "some_other_party"
         );
         TokenRequest tokenRequest = getAuthCodeExchangeRequestWithNonce();
         Clock clock = SystemClock.INSTANCE;
@@ -365,8 +410,7 @@ public class IdTokenTest {
             TEST_SUBJECT,
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds - tenMinutesInSeconds,
-            nowInSeconds,
-            TEST_NONCE
+            nowInSeconds
         );
         TokenRequest tokenRequest = getAuthCodeExchangeRequestWithNonce();
         Clock clock = SystemClock.INSTANCE;
@@ -382,8 +426,7 @@ public class IdTokenTest {
             TEST_SUBJECT,
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds - (tenMinutesInSeconds * 2),
-            TEST_NONCE
+            nowInSeconds - (tenMinutesInSeconds * 2)
         );
         TokenRequest tokenRequest = getAuthCodeExchangeRequestWithNonce();
         Clock clock = SystemClock.INSTANCE;
@@ -400,7 +443,8 @@ public class IdTokenTest {
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds + tenMinutesInSeconds,
             nowInSeconds,
-            "some_other_nonce"
+            "some_other_nonce",
+            null
         );
         TokenRequest tokenRequest = getAuthCodeExchangeRequestWithNonce();
         Clock clock = SystemClock.INSTANCE;
@@ -444,7 +488,8 @@ public class IdTokenTest {
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds + tenMinutesInSeconds,
             nowInSeconds,
-            TEST_NONCE
+            TEST_NONCE,
+            TEST_CLIENT_ID
         );
     }
 
