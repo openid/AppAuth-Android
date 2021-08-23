@@ -409,6 +409,10 @@ authState.performActionWithFreshTokens(service, new AuthStateAction() {
 });
 ```
 
+This also updates the AuthState object with current access, id, and refresh tokens.
+If you are storing your AuthState in persistent storage, you should write the updated
+copy in the callback to this method.
+
 ### Ending current session
 
 Given you have a logged in session and you want to end it. In that case you need to get:
