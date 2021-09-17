@@ -19,6 +19,7 @@ import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -200,7 +201,28 @@ public class AuthorizationManagementActivity extends AppCompatActivity {
     }
 
     private static Intent createBaseIntent(Context context) {
-        return new Intent(context, AuthorizationManagementActivity.class);
+        Intent intent = new Intent(context, AuthorizationManagementActivity.class);
+
+        /*
+         * Starting an activity from a non-activity context will result in a crash as it needs the
+         * FLAG_ACTIVITY_NEW_TASK flag. We make sure we are not working with a wrapped context by
+         * unpacking it, and if it's not an Activity context we will add the NEW_TASK flag.
+         */
+        boolean isActivity = false;
+        Context baseContext = context;
+        while (baseContext instanceof ContextWrapper) {
+            if (baseContext instanceof Activity) {
+                isActivity = true;
+                break;
+            }
+            baseContext = ((ContextWrapper) baseContext).getBaseContext();
+        }
+
+        if (!isActivity) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
+
+        return intent;
     }
 
     @Override
