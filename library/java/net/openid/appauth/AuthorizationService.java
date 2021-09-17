@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -336,13 +337,28 @@ public class AuthorizationService {
         checkNotNull(customTabsIntent);
 
         Intent authIntent = prepareAuthorizationRequestIntent(request, customTabsIntent);
-        mContext.startActivity(AuthorizationManagementActivity.createStartIntent(
+        Intent startIntent = AuthorizationManagementActivity.createStartIntent(
                 mContext,
                 request,
                 authIntent,
                 completedIntent,
-                canceledIntent));
+                canceledIntent);
 
+        // Calling start activity from outside an activity requires FLAG_ACTIVITY_NEW_TASK.
+        if (!isActivity(mContext)) {
+            startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
+        mContext.startActivity(startIntent);
+    }
+
+    private boolean isActivity(Context context) {
+        while (context instanceof ContextWrapper) {
+            if (context instanceof Activity) {
+                return true;
+            }
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        return false;
     }
 
     /**
