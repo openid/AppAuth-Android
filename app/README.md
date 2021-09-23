@@ -16,7 +16,7 @@ The configuration file MUST contain a JSON object. The following properties can 
     The value specified here should match the value specified for `appAuthRedirectScheme` in the
     `build.gradle` (Module: app), so that the demo app can capture the response.
 
-  - `end_session_uri` (required): The redirect URI to use for receiving the end session response.
+  - `end_session_redirect_uri` (required): The redirect URI to use for receiving the end session response.
     This should be a custom scheme URI (com.example.app:/oauth2redirect/example-provider). 
     Consult the documentation for your authorization server. 
 
