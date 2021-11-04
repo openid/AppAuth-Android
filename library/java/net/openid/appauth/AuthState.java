@@ -271,6 +271,27 @@ public class AuthState {
     }
 
     /**
+     * The current parsed ID token, if available.
+     */
+    @Nullable
+    public IdToken getParsedIdToken() {
+        String stringToken = getIdToken();
+        IdToken token;
+
+        if (stringToken != null) {
+            try {
+                token = IdToken.from(stringToken);
+            } catch (JSONException | IdToken.IdTokenException ex) {
+                token = null;
+            }
+        } else {
+            token = null;
+        }
+
+        return token;
+    }
+
+    /**
      * The current client secret, if available.
      */
     public String getClientSecret() {

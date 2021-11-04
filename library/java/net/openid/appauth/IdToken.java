@@ -14,6 +14,8 @@
 
 package net.openid.appauth;
 
+import static net.openid.appauth.AdditionalParamsProcessor.builtInParams;
+
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -26,7 +28,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * An OpenID Connect ID Token. Contains claims about the authentication of an End-User by an
@@ -38,7 +43,7 @@ import java.util.List;
  * @see "OpenID Connect Core ID Token Validation, Section 3.1.3.7
  * <http://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation>"
  */
-class IdToken {
+public class IdToken {
 
     private static final String KEY_ISSUER = "iss";
     private static final String KEY_SUBJECT = "sub";
@@ -50,13 +55,65 @@ class IdToken {
     private static final Long MILLIS_PER_SECOND = 1000L;
     private static final Long TEN_MINUTES_IN_SECONDS = 600L;
 
+    private static final Set<String> BUILT_IN_CLAIMS = builtInParams(
+            KEY_ISSUER,
+            KEY_SUBJECT,
+            KEY_AUDIENCE,
+            KEY_EXPIRATION,
+            KEY_ISSUED_AT,
+            KEY_NONCE,
+            KEY_AUTHORIZED_PARTY);
+
+    /**
+     * Issuer Identifier for the Issuer of the response.
+     */
+    @NonNull
     public final String issuer;
+
+    /**
+     * Subject Identifier. A locally unique and never reassigned identifier within the Issuer
+     * for the End-User.
+     */
+    @NonNull
     public final String subject;
+
+    /**
+     * Audience(s) that this ID Token is intended for.
+     */
+    @NonNull
     public final List<String> audience;
+
+    /**
+     * Expiration time on or after which the ID Token MUST NOT be accepted for processing.
+     */
+    @NonNull
     public final Long expiration;
+
+    /**
+     * Time at which the JWT was issued.
+     */
+    @NonNull
     public final Long issuedAt;
+
+    /**
+     * String value used to associate a Client session with an ID Token,
+     * and to mitigate replay attacks.
+     */
+    @Nullable
     public final String nonce;
+
+    /**
+     * Authorized party - the party to which the ID Token was issued.
+     * If present, it MUST contain the OAuth 2.0 Client ID of this party.
+     */
+    @Nullable
     public final String authorizedParty;
+
+    /**
+     * Additional claims present in this ID Token.
+     */
+    @NonNull
+    public final Map<String, Object> additionalClaims;
 
     @VisibleForTesting
     IdToken(@NonNull String issuer,
@@ -64,7 +121,19 @@ class IdToken {
             @NonNull List<String> audience,
             @NonNull Long expiration,
             @NonNull Long issuedAt) {
-        this(issuer, subject, audience, expiration, issuedAt, null, null);
+        this(issuer, subject, audience, expiration, issuedAt, null, null, Collections.emptyMap());
+    }
+
+    @VisibleForTesting
+    IdToken(@NonNull String issuer,
+            @NonNull String subject,
+            @NonNull List<String> audience,
+            @NonNull Long expiration,
+            @NonNull Long issuedAt,
+            @Nullable String nonce,
+            @Nullable String authorizedParty) {
+        this(issuer, subject, audience, expiration, issuedAt,
+                nonce, authorizedParty, Collections.emptyMap());
     }
 
     IdToken(@NonNull String issuer,
@@ -73,7 +142,8 @@ class IdToken {
             @NonNull Long expiration,
             @NonNull Long issuedAt,
             @Nullable String nonce,
-            @Nullable String authorizedParty) {
+            @Nullable String authorizedParty,
+            @NonNull Map<String, Object> additionalClaims) {
         this.issuer = issuer;
         this.subject = subject;
         this.audience = audience;
@@ -81,10 +151,11 @@ class IdToken {
         this.issuedAt = issuedAt;
         this.nonce = nonce;
         this.authorizedParty = authorizedParty;
+        this.additionalClaims = additionalClaims;
     }
 
     private static JSONObject parseJwtSection(String section) throws JSONException {
-        byte[] decodedSection = Base64.decode(section,Base64.URL_SAFE);
+        byte[] decodedSection = Base64.decode(section, Base64.URL_SAFE);
         String jsonString = new String(decodedSection);
         return new JSONObject(jsonString);
     }
@@ -100,8 +171,8 @@ class IdToken {
         parseJwtSection(sections[0]);
         JSONObject claims = parseJwtSection(sections[1]);
 
-        String issuer = JsonUtil.getString(claims, KEY_ISSUER);
-        String subject = JsonUtil.getString(claims, KEY_SUBJECT);
+        final String issuer = JsonUtil.getString(claims, KEY_ISSUER);
+        final String subject = JsonUtil.getString(claims, KEY_SUBJECT);
         List<String> audience;
         try {
             audience = JsonUtil.getStringList(claims, KEY_AUDIENCE);
@@ -109,10 +180,15 @@ class IdToken {
             audience = new ArrayList<>();
             audience.add(JsonUtil.getString(claims, KEY_AUDIENCE));
         }
-        Long expiration = claims.getLong(KEY_EXPIRATION);
-        Long issuedAt = claims.getLong(KEY_ISSUED_AT);
-        String nonce = JsonUtil.getStringIfDefined(claims, KEY_NONCE);
-        String authorizedParty = JsonUtil.getStringIfDefined(claims, KEY_AUTHORIZED_PARTY);
+        final Long expiration = claims.getLong(KEY_EXPIRATION);
+        final Long issuedAt = claims.getLong(KEY_ISSUED_AT);
+        final String nonce = JsonUtil.getStringIfDefined(claims, KEY_NONCE);
+        final String authorizedParty = JsonUtil.getStringIfDefined(claims, KEY_AUTHORIZED_PARTY);
+
+        for (String key: BUILT_IN_CLAIMS) {
+            claims.remove(key);
+        }
+        Map<String, Object> additionalClaims = JsonUtil.toMap(claims);
 
         return new IdToken(
             issuer,
@@ -121,7 +197,8 @@ class IdToken {
             expiration,
             issuedAt,
             nonce,
-            authorizedParty
+            authorizedParty,
+            additionalClaims
         );
     }
 

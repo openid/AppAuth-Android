@@ -1,11 +1,16 @@
 package net.openid.appauth;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.util.Base64;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import net.openid.appauth.AuthorizationServiceDiscovery.MissingArgumentException;
 import net.openid.appauth.IdToken.IdTokenException;
 import org.json.JSONArray;
@@ -63,6 +68,30 @@ public class IdTokenTest {
         assertEquals(TEST_SUBJECT, idToken.subject);
         assertThat(idToken.audience, contains(TEST_AUDIENCE));
         assertEquals(TEST_NONCE, idToken.nonce);
+    }
+
+    @Test
+    public void testFrom_withAdditionalClaims() throws Exception {
+        Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
+        Long tenMinutesInSeconds = (long) (10 * 60);
+
+        Map<String, Object> additionalClaims = new HashMap<>();
+        additionalClaims.put("claim1", "value1");
+        additionalClaims.put("claim2", Arrays.asList("value2", "value3"));
+
+        String testToken = getUnsignedIdToken(
+            TEST_ISSUER,
+            TEST_SUBJECT,
+            TEST_AUDIENCE,
+            nowInSeconds + tenMinutesInSeconds,
+            nowInSeconds,
+            TEST_NONCE,
+            additionalClaims
+        );
+
+        IdToken idToken = IdToken.from(testToken);
+        assertEquals("value1", idToken.additionalClaims.get("claim1"));
+        assertEquals("value2", ((ArrayList<String>)idToken.additionalClaims.get("claim2")).get(0));
     }
 
     @Test
@@ -387,6 +416,7 @@ public class IdTokenTest {
             throws AuthorizationException {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
         Long tenMinutesInSeconds = (long) (10 * 60);
+        Map<String, Object> additionalClaims = new HashMap<>();
         IdToken idToken = new IdToken(
             TEST_ISSUER,
             TEST_SUBJECT,
@@ -394,7 +424,8 @@ public class IdTokenTest {
             nowInSeconds + tenMinutesInSeconds,
             nowInSeconds,
             TEST_NONCE,
-            "some_other_party"
+            "some_other_party",
+            additionalClaims
         );
         TokenRequest tokenRequest = getAuthCodeExchangeRequestWithNonce();
         Clock clock = SystemClock.INSTANCE;
@@ -482,6 +513,7 @@ public class IdTokenTest {
     private static IdToken getValidIdToken() {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
         Long tenMinutesInSeconds = (long) (10 * 60);
+        Map<String, Object> additionalClaims = new HashMap<>();
         return new IdToken(
             TEST_ISSUER,
             TEST_SUBJECT,
@@ -489,7 +521,8 @@ public class IdTokenTest {
             nowInSeconds + tenMinutesInSeconds,
             nowInSeconds,
             TEST_NONCE,
-            TEST_CLIENT_ID
+            TEST_CLIENT_ID,
+            additionalClaims
         );
     }
 
@@ -556,6 +589,17 @@ public class IdTokenTest {
         @Nullable Long expiration,
         @Nullable Long issuedAt,
         @Nullable String nonce) {
+        return getUnsignedIdToken(issuer, subject, audience, expiration, issuedAt, nonce, Collections.emptyMap());
+    }
+
+    static String getUnsignedIdToken(
+        @Nullable String issuer,
+        @Nullable String subject,
+        @Nullable String audience,
+        @Nullable Long expiration,
+        @Nullable Long issuedAt,
+        @Nullable String nonce,
+        @NonNull Map<String, Object> additionalClaims) {
         JSONObject header = new JSONObject();
         JsonUtil.put(header, "typ", "JWT");
 
@@ -567,6 +611,9 @@ public class IdTokenTest {
         JsonUtil.putIfNotNull(claims, "iat", issuedAt != null ? String.valueOf(issuedAt) : null);
         JsonUtil.putIfNotNull(claims, "nonce", nonce);
 
+        for (String key: additionalClaims.keySet()) {
+            JsonUtil.putIfNotNull(claims, key, additionalClaims.get(key));
+        }
 
         String encodedHeader = base64UrlNoPaddingEncode(header.toString().getBytes());
         String encodedClaims = base64UrlNoPaddingEncode(claims.toString().getBytes());

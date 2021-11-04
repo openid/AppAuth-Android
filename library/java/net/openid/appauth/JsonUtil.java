@@ -19,12 +19,15 @@ import static net.openid.appauth.Preconditions.checkNotNull;
 import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -155,6 +158,34 @@ final class JsonUtil {
         }
         try {
             json.put(field, value);
+        } catch (JSONException ex) {
+            throw new IllegalStateException("JSONException thrown in violation of contract", ex);
+        }
+    }
+
+    @VisibleForTesting
+    static void putIfNotNull(
+            @NonNull JSONObject json,
+            @NonNull String field,
+            @Nullable Object value) {
+        checkNotNull(json, "json must not be null");
+        checkNotNull(field, "field must not be null");
+        if (value == null) {
+            return;
+        }
+        try {
+            if (value instanceof Collection) {
+                json.put(field, new JSONArray((Collection) value));
+            } else if (value instanceof Map) {
+                Map<String, Object> map = (Map<String, Object>)value;
+                JSONObject valueObj = new JSONObject();
+                for (String key : map.keySet()) {
+                    JsonUtil.putIfNotNull(valueObj, key, map.get(key));
+                }
+                json.put(field, valueObj);
+            } else {
+                json.put(field, value);
+            }
         } catch (JSONException ex) {
             throw new IllegalStateException("JSONException thrown in violation of contract", ex);
         }
@@ -334,6 +365,42 @@ final class JsonUtil {
             }
         }
         return arrayList;
+    }
+
+    @NonNull
+    public static Map<String, Object> toMap(@NonNull  JSONObject json) throws JSONException {
+        checkNotNull(json, "json must not be null");
+
+        Map<String, Object> map = new HashMap<>();
+        Iterator<String> keys = json.keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            Object value = json.get(key);
+            if (value instanceof JSONArray) {
+                value = toList((JSONArray) value);
+            } else if (value instanceof JSONObject) {
+                value = toMap((JSONObject) value);
+            }
+            map.put(key, value);
+        }
+        return map;
+    }
+
+    @NonNull
+    public static List<Object> toList(@NonNull JSONArray jsonArray) throws JSONException {
+        checkNotNull(jsonArray, "jsonArray must not be null");
+
+        List<Object> list = new ArrayList<>();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            Object value = jsonArray.get(i);
+            if (value instanceof JSONArray) {
+                value = toList((JSONArray) value);
+            } else if (value instanceof JSONObject) {
+                value = toMap((JSONObject) value);
+            }
+            list.add(value);
+        }
+        return list;
     }
 
     @NonNull
