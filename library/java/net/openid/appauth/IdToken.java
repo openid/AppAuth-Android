@@ -22,11 +22,16 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import net.openid.appauth.AuthorizationException.GeneralErrors;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * An OpenID Connect ID Token. Contains claims about the authentication of an End-User by an
@@ -38,7 +43,7 @@ import java.util.List;
  * @see "OpenID Connect Core ID Token Validation, Section 3.1.3.7
  * <http://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation>"
  */
-class IdToken {
+public class IdToken {
 
     private static final String KEY_ISSUER = "iss";
     private static final String KEY_SUBJECT = "sub";
@@ -58,13 +63,16 @@ class IdToken {
     public final String nonce;
     public final String authorizedParty;
 
+    public final Map<String, Object> additionalClaims;
+
     @VisibleForTesting
     IdToken(@NonNull String issuer,
             @NonNull String subject,
             @NonNull List<String> audience,
             @NonNull Long expiration,
-            @NonNull Long issuedAt) {
-        this(issuer, subject, audience, expiration, issuedAt, null, null);
+            @NonNull Long issuedAt,
+            @NonNull Map<String, Object> additionalClaims) {
+        this(issuer, subject, audience, expiration, issuedAt, null, null, additionalClaims);
     }
 
     IdToken(@NonNull String issuer,
@@ -73,7 +81,8 @@ class IdToken {
             @NonNull Long expiration,
             @NonNull Long issuedAt,
             @Nullable String nonce,
-            @Nullable String authorizedParty) {
+            @Nullable String authorizedParty,
+            @NonNull Map<String, Object> additionalClaims) {
         this.issuer = issuer;
         this.subject = subject;
         this.audience = audience;
@@ -81,6 +90,7 @@ class IdToken {
         this.issuedAt = issuedAt;
         this.nonce = nonce;
         this.authorizedParty = authorizedParty;
+        this.additionalClaims = additionalClaims;
     }
 
     private static JSONObject parseJwtSection(String section) throws JSONException {
@@ -114,6 +124,16 @@ class IdToken {
         String nonce = JsonUtil.getStringIfDefined(claims, KEY_NONCE);
         String authorizedParty = JsonUtil.getStringIfDefined(claims, KEY_AUTHORIZED_PARTY);
 
+        claims.remove(KEY_ISSUER);
+        claims.remove(KEY_SUBJECT);
+        claims.remove(KEY_AUDIENCE);
+        claims.remove(KEY_EXPIRATION);
+        claims.remove(KEY_ISSUED_AT);
+        claims.remove(KEY_NONCE);
+        claims.remove(KEY_AUTHORIZED_PARTY);
+
+        Map<String, Object> additionalClaims = toMap(claims);
+
         return new IdToken(
             issuer,
             subject,
@@ -121,7 +141,8 @@ class IdToken {
             expiration,
             issuedAt,
             nonce,
-            authorizedParty
+            authorizedParty,
+            additionalClaims
         );
     }
 
@@ -229,5 +250,34 @@ class IdToken {
         IdTokenException(String message) {
             super(message);
         }
+    }
+
+    public static Map<String, Object> toMap(JSONObject jsonObj)  throws JSONException {
+        Map<String, Object> map = new HashMap<>();
+        Iterator<String> keys = jsonObj.keys();
+        while(keys.hasNext()) {
+            String key = keys.next();
+            Object value = jsonObj.get(key);
+            if (value instanceof JSONArray) {
+                value = toList((JSONArray) value);
+            } else if (value instanceof JSONObject) {
+                value = toMap((JSONObject) value);
+            }
+            map.put(key, value);
+        }   return map;
+    }
+
+    public static List<Object> toList(JSONArray array) throws JSONException {
+        List<Object> list = new ArrayList<>();
+        for(int i = 0; i < array.length(); i++) {
+            Object value = array.get(i);
+            if (value instanceof JSONArray) {
+                value = toList((JSONArray) value);
+            }
+            else if (value instanceof JSONObject) {
+                value = toMap((JSONObject) value);
+            }
+            list.add(value);
+        }   return list;
     }
 }

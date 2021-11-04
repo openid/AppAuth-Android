@@ -5,7 +5,10 @@ import android.util.Base64;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import net.openid.appauth.AuthorizationServiceDiscovery.MissingArgumentException;
 import net.openid.appauth.IdToken.IdTokenException;
 import org.json.JSONArray;
@@ -162,12 +165,14 @@ public class IdTokenTest {
     public void testValidate_withoutNonce() throws AuthorizationException {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
         Long tenMinutesInSeconds = (long) (10 * 60);
+        Map<String, Object> additionalClaims = new HashMap<>();
         IdToken idToken = new IdToken(
             TEST_ISSUER,
             TEST_SUBJECT,
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds
+            nowInSeconds,
+            additionalClaims
         );
         TokenRequest tokenRequest = getTestAuthCodeExchangeRequestBuilder().build();
         Clock clock = SystemClock.INSTANCE;
@@ -178,12 +183,14 @@ public class IdTokenTest {
     public void testValidate_shouldFailOnIssuerMismatch() throws AuthorizationException {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
         Long tenMinutesInSeconds = (long) (10 * 60);
+        Map<String, Object> additionalClaims = new HashMap<>();
         IdToken idToken = new IdToken(
             "https://other.issuer",
             TEST_SUBJECT,
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds
+            nowInSeconds,
+            additionalClaims
         );
         TokenRequest tokenRequest = getAuthCodeExchangeRequestWithNonce();
         Clock clock = SystemClock.INSTANCE;
@@ -195,12 +202,14 @@ public class IdTokenTest {
         throws AuthorizationException, JSONException, MissingArgumentException {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
         Long tenMinutesInSeconds = (long) (10 * 60);
+        Map<String, Object> additionalClaims = new HashMap<>();
         IdToken idToken = new IdToken(
             "http://other.issuer",
             TEST_SUBJECT,
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds
+            nowInSeconds,
+            additionalClaims
         );
 
         String serviceDocJsonWithOtherIssuer = getDiscoveryDocJsonWithIssuer("http://other.issuer");
@@ -223,12 +232,14 @@ public class IdTokenTest {
         throws AuthorizationException, JSONException, MissingArgumentException {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
         Long tenMinutesInSeconds = (long) (10 * 60);
+        Map<String, Object> additionalClaims = new HashMap<>();
         IdToken idToken = new IdToken(
             "http://other.issuer",
             TEST_SUBJECT,
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds
+            nowInSeconds,
+            additionalClaims
         );
 
         String serviceDocJsonWithOtherIssuer = getDiscoveryDocJsonWithIssuer("http://other.issuer");
@@ -251,12 +262,14 @@ public class IdTokenTest {
         throws AuthorizationException, JSONException, MissingArgumentException {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
         Long tenMinutesInSeconds = (long) (10 * 60);
+        Map<String, Object> additionalClaims = new HashMap<>();
         IdToken idToken = new IdToken(
             "https://",
             TEST_SUBJECT,
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds
+            nowInSeconds,
+            additionalClaims
         );
 
         String serviceDocJsonWithIssuerMissingHost = getDiscoveryDocJsonWithIssuer("https://");
@@ -279,12 +292,14 @@ public class IdTokenTest {
         throws AuthorizationException, JSONException, MissingArgumentException {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
         Long tenMinutesInSeconds = (long) (10 * 60);
+        Map<String, Object> additionalClaims = new HashMap<>();
         IdToken idToken = new IdToken(
             "https://some.issuer?param=value",
             TEST_SUBJECT,
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds
+            nowInSeconds,
+            additionalClaims
         );
 
         String serviceDocJsonWithIssuerMissingHost = getDiscoveryDocJsonWithIssuer(
@@ -308,12 +323,14 @@ public class IdTokenTest {
         throws AuthorizationException, JSONException, MissingArgumentException {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
         Long tenMinutesInSeconds = (long) (10 * 60);
+        Map<String, Object> additionalClaims = new HashMap<>();
         IdToken idToken = new IdToken(
             "https://some.issuer/#/fragment",
             TEST_SUBJECT,
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds
+            nowInSeconds,
+            additionalClaims
         );
 
         String serviceDocJsonWithIssuerMissingHost = getDiscoveryDocJsonWithIssuer(
@@ -336,12 +353,14 @@ public class IdTokenTest {
     public void testValidate_audienceMatch() throws AuthorizationException {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
         Long tenMinutesInSeconds = (long) (10 * 60);
+        Map<String, Object> additionalClaims = new HashMap<>();
         IdToken idToken = new IdToken(
             TEST_ISSUER,
             TEST_SUBJECT,
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds
+            nowInSeconds,
+            additionalClaims
         );
         TokenRequest tokenRequest = getTestAuthCodeExchangeRequest();
         Clock clock = SystemClock.INSTANCE;
@@ -352,12 +371,14 @@ public class IdTokenTest {
     public void testValidate_shouldFailOnAudienceMismatch() throws AuthorizationException {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
         Long tenMinutesInSeconds = (long) (10 * 60);
+        Map<String, Object> additionalClaims = new HashMap<>();
         IdToken idToken = new IdToken(
             TEST_ISSUER,
             TEST_SUBJECT,
             Collections.singletonList("some_other_audience"),
             nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds
+            nowInSeconds,
+            additionalClaims
         );
         TokenRequest tokenRequest = getAuthCodeExchangeRequestWithNonce();
         Clock clock = SystemClock.INSTANCE;
@@ -368,6 +389,7 @@ public class IdTokenTest {
     public void testValidate_authorizedPartyMatch() throws AuthorizationException {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
         Long tenMinutesInSeconds = (long) (10 * 60);
+        Map<String, Object> additionalClaims = new HashMap<>();
         IdToken idToken = new IdToken(
             TEST_ISSUER,
             TEST_SUBJECT,
@@ -375,7 +397,8 @@ public class IdTokenTest {
             nowInSeconds + tenMinutesInSeconds,
             nowInSeconds,
             TEST_NONCE,
-            TEST_CLIENT_ID
+            TEST_CLIENT_ID,
+            additionalClaims
         );
         TokenRequest tokenRequest = getAuthCodeExchangeRequestWithNonce();
         Clock clock = SystemClock.INSTANCE;
@@ -387,6 +410,7 @@ public class IdTokenTest {
             throws AuthorizationException {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
         Long tenMinutesInSeconds = (long) (10 * 60);
+        Map<String, Object> additionalClaims = new HashMap<>();
         IdToken idToken = new IdToken(
             TEST_ISSUER,
             TEST_SUBJECT,
@@ -394,7 +418,8 @@ public class IdTokenTest {
             nowInSeconds + tenMinutesInSeconds,
             nowInSeconds,
             TEST_NONCE,
-            "some_other_party"
+            "some_other_party",
+            additionalClaims
         );
         TokenRequest tokenRequest = getAuthCodeExchangeRequestWithNonce();
         Clock clock = SystemClock.INSTANCE;
@@ -405,12 +430,14 @@ public class IdTokenTest {
     public void testValidate_shouldFailOnExpiredToken() throws AuthorizationException {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
         Long tenMinutesInSeconds = (long) (10 * 60);
+        Map<String, Object> additionalClaims = new HashMap<>();
         IdToken idToken = new IdToken(
             TEST_ISSUER,
             TEST_SUBJECT,
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds - tenMinutesInSeconds,
-            nowInSeconds
+            nowInSeconds,
+            additionalClaims
         );
         TokenRequest tokenRequest = getAuthCodeExchangeRequestWithNonce();
         Clock clock = SystemClock.INSTANCE;
@@ -421,12 +448,14 @@ public class IdTokenTest {
     public void testValidate_shouldFailOnIssuedAtOverTenMinutesAgo() throws AuthorizationException {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
         Long tenMinutesInSeconds = (long) (10 * 60);
+        Map<String, Object> additionalClaims = new HashMap<>();
         IdToken idToken = new IdToken(
             TEST_ISSUER,
             TEST_SUBJECT,
             Collections.singletonList(TEST_CLIENT_ID),
             nowInSeconds + tenMinutesInSeconds,
-            nowInSeconds - (tenMinutesInSeconds * 2)
+            nowInSeconds - (tenMinutesInSeconds * 2),
+            additionalClaims
         );
         TokenRequest tokenRequest = getAuthCodeExchangeRequestWithNonce();
         Clock clock = SystemClock.INSTANCE;
@@ -437,6 +466,7 @@ public class IdTokenTest {
     public void testValidate_shouldFailOnNonceMismatch() throws AuthorizationException {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
         Long tenMinutesInSeconds = (long) (10 * 60);
+        Map<String, Object> additionalClaims = new HashMap<>();
         IdToken idToken = new IdToken(
             TEST_ISSUER,
             TEST_SUBJECT,
@@ -444,7 +474,8 @@ public class IdTokenTest {
             nowInSeconds + tenMinutesInSeconds,
             nowInSeconds,
             "some_other_nonce",
-            null
+            null,
+            additionalClaims
         );
         TokenRequest tokenRequest = getAuthCodeExchangeRequestWithNonce();
         Clock clock = SystemClock.INSTANCE;
@@ -482,6 +513,7 @@ public class IdTokenTest {
     private static IdToken getValidIdToken() {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
         Long tenMinutesInSeconds = (long) (10 * 60);
+        Map<String, Object> additionalClaims = new HashMap<>();
         return new IdToken(
             TEST_ISSUER,
             TEST_SUBJECT,
@@ -489,7 +521,8 @@ public class IdTokenTest {
             nowInSeconds + tenMinutesInSeconds,
             nowInSeconds,
             TEST_NONCE,
-            TEST_CLIENT_ID
+            TEST_CLIENT_ID,
+            additionalClaims
         );
     }
 
