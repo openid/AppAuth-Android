@@ -98,7 +98,7 @@ public class IdToken {
         return new JSONObject(jsonString);
     }
 
-    static IdToken from(String token) throws JSONException, IdTokenException {
+    public static IdToken from(String token) throws JSONException, IdTokenException {
         String[] sections = token.split("\\.");
 
         if (sections.length <= 1) {
@@ -251,7 +251,7 @@ public class IdToken {
         }
     }
 
-    public static Map<String, Object> toMap(JSONObject jsonObj) throws JSONException {
+    static Map<String, Object> toMap(JSONObject jsonObj) throws JSONException {
         Map<String, Object> map = new HashMap<>();
         Iterator<String> keys = jsonObj.keys();
         while (keys.hasNext()) {
@@ -267,7 +267,7 @@ public class IdToken {
         return map;
     }
 
-    public static List<Object> toList(JSONArray array) throws JSONException {
+    static List<Object> toList(JSONArray array) throws JSONException {
         List<Object> list = new ArrayList<>();
         for (int i = 0; i < array.length(); i++) {
             Object value = array.get(i);
