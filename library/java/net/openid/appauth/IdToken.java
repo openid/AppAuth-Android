@@ -22,7 +22,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import net.openid.appauth.AuthorizationException.GeneralErrors;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -94,7 +93,7 @@ public class IdToken {
     }
 
     private static JSONObject parseJwtSection(String section) throws JSONException {
-        byte[] decodedSection = Base64.decode(section,Base64.URL_SAFE);
+        byte[] decodedSection = Base64.decode(section, Base64.URL_SAFE);
         String jsonString = new String(decodedSection);
         return new JSONObject(jsonString);
     }
@@ -110,8 +109,8 @@ public class IdToken {
         parseJwtSection(sections[0]);
         JSONObject claims = parseJwtSection(sections[1]);
 
-        String issuer = JsonUtil.getString(claims, KEY_ISSUER);
-        String subject = JsonUtil.getString(claims, KEY_SUBJECT);
+        final String issuer = JsonUtil.getString(claims, KEY_ISSUER);
+        final String subject = JsonUtil.getString(claims, KEY_SUBJECT);
         List<String> audience;
         try {
             audience = JsonUtil.getStringList(claims, KEY_AUDIENCE);
@@ -119,10 +118,10 @@ public class IdToken {
             audience = new ArrayList<>();
             audience.add(JsonUtil.getString(claims, KEY_AUDIENCE));
         }
-        Long expiration = claims.getLong(KEY_EXPIRATION);
-        Long issuedAt = claims.getLong(KEY_ISSUED_AT);
-        String nonce = JsonUtil.getStringIfDefined(claims, KEY_NONCE);
-        String authorizedParty = JsonUtil.getStringIfDefined(claims, KEY_AUTHORIZED_PARTY);
+        final Long expiration = claims.getLong(KEY_EXPIRATION);
+        final Long issuedAt = claims.getLong(KEY_ISSUED_AT);
+        final String nonce = JsonUtil.getStringIfDefined(claims, KEY_NONCE);
+        final String authorizedParty = JsonUtil.getStringIfDefined(claims, KEY_AUTHORIZED_PARTY);
 
         claims.remove(KEY_ISSUER);
         claims.remove(KEY_SUBJECT);
@@ -252,10 +251,10 @@ public class IdToken {
         }
     }
 
-    public static Map<String, Object> toMap(JSONObject jsonObj)  throws JSONException {
+    public static Map<String, Object> toMap(JSONObject jsonObj) throws JSONException {
         Map<String, Object> map = new HashMap<>();
         Iterator<String> keys = jsonObj.keys();
-        while(keys.hasNext()) {
+        while (keys.hasNext()) {
             String key = keys.next();
             Object value = jsonObj.get(key);
             if (value instanceof JSONArray) {
@@ -264,20 +263,21 @@ public class IdToken {
                 value = toMap((JSONObject) value);
             }
             map.put(key, value);
-        }   return map;
+        }
+        return map;
     }
 
     public static List<Object> toList(JSONArray array) throws JSONException {
         List<Object> list = new ArrayList<>();
-        for(int i = 0; i < array.length(); i++) {
+        for (int i = 0; i < array.length(); i++) {
             Object value = array.get(i);
             if (value instanceof JSONArray) {
                 value = toList((JSONArray) value);
-            }
-            else if (value instanceof JSONObject) {
+            } else if (value instanceof JSONObject) {
                 value = toMap((JSONObject) value);
             }
             list.add(value);
-        }   return list;
+        }
+        return list;
     }
 }
