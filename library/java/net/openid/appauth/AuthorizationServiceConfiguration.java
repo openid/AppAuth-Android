@@ -58,6 +58,7 @@ public class AuthorizationServiceConfiguration {
             "openid-configuration";
 
     private static final String KEY_AUTHORIZATION_ENDPOINT = "authorizationEndpoint";
+    private static final String KEY_DEVICE_AUTHORIZATION_ENDPOINT = "deviceAuthorizationEndpoint";
     private static final String KEY_TOKEN_ENDPOINT = "tokenEndpoint";
     private static final String KEY_REGISTRATION_ENDPOINT = "registrationEndpoint";
     private static final String KEY_DISCOVERY_DOC = "discoveryDoc";
@@ -87,6 +88,11 @@ public class AuthorizationServiceConfiguration {
     @Nullable
     public final Uri registrationEndpoint;
 
+    /**
+     * The device authorization service's endpoint.
+     */
+    @Nullable
+    public final Uri deviceAuthorizationEndpoint;
 
     /**
      * The discovery document describing the service, if it is an OpenID Connect provider.
@@ -146,10 +152,37 @@ public class AuthorizationServiceConfiguration {
             @NonNull Uri tokenEndpoint,
             @Nullable Uri registrationEndpoint,
             @Nullable Uri endSessionEndpoint) {
+        this(authorizationEndpoint, tokenEndpoint, registrationEndpoint, endSessionEndpoint, null);
+    }
+
+    /**
+     * Creates a service configuration for a basic OAuth2 provider.
+     * @param authorizationEndpoint The
+     *     [authorization endpoint URI](https://tools.ietf.org/html/rfc6749#section-3.1)
+     *     for the service.
+     * @param tokenEndpoint The
+     *     [token endpoint URI](https://tools.ietf.org/html/rfc6749#section-3.2)
+     *     for the service.
+     * @param registrationEndpoint The optional
+     *     [client registration endpoint URI](https://tools.ietf.org/html/rfc7591#section-3)
+     * @param endSessionEndpoint The optional
+     *     [end session endpoint URI](https://tools.ietf.org/html/rfc6749#section-2.2)
+     *     for the service.
+     * @param deviceAuthorizationEndpoint The optional
+     *     [authorization endpoint URI](https://tools.ietf.org/html/rfc8628#section-4)
+     *     for the service.
+     */
+    public AuthorizationServiceConfiguration(
+            @NonNull Uri authorizationEndpoint,
+            @NonNull Uri tokenEndpoint,
+            @Nullable Uri registrationEndpoint,
+            @Nullable Uri endSessionEndpoint,
+            @Nullable Uri deviceAuthorizationEndpoint) {
         this.authorizationEndpoint = checkNotNull(authorizationEndpoint);
         this.tokenEndpoint = checkNotNull(tokenEndpoint);
         this.registrationEndpoint = registrationEndpoint;
         this.endSessionEndpoint = endSessionEndpoint;
+        this.deviceAuthorizationEndpoint = deviceAuthorizationEndpoint;
         this.discoveryDoc = null;
     }
 
@@ -167,6 +200,7 @@ public class AuthorizationServiceConfiguration {
         this.tokenEndpoint = discoveryDoc.getTokenEndpoint();
         this.registrationEndpoint = discoveryDoc.getRegistrationEndpoint();
         this.endSessionEndpoint = discoveryDoc.getEndSessionEndpoint();
+        this.deviceAuthorizationEndpoint = discoveryDoc.getDeviceAuthorizationEndpoint();
     }
 
     /**
@@ -182,6 +216,10 @@ public class AuthorizationServiceConfiguration {
         }
         if (endSessionEndpoint != null) {
             JsonUtil.put(json, KEY_END_SESSION_ENPOINT, endSessionEndpoint.toString());
+        }
+        if (deviceAuthorizationEndpoint != null) {
+            JsonUtil.put(json, KEY_DEVICE_AUTHORIZATION_ENDPOINT,
+                    deviceAuthorizationEndpoint.toString());
         }
         if (discoveryDoc != null) {
             JsonUtil.put(json, KEY_DISCOVERY_DOC, discoveryDoc.docJson);
@@ -224,7 +262,8 @@ public class AuthorizationServiceConfiguration {
                     JsonUtil.getUri(json, KEY_AUTHORIZATION_ENDPOINT),
                     JsonUtil.getUri(json, KEY_TOKEN_ENDPOINT),
                     JsonUtil.getUriIfDefined(json, KEY_REGISTRATION_ENDPOINT),
-                    JsonUtil.getUriIfDefined(json, KEY_END_SESSION_ENPOINT));
+                    JsonUtil.getUriIfDefined(json, KEY_END_SESSION_ENPOINT),
+                    JsonUtil.getUriIfDefined(json, KEY_DEVICE_AUTHORIZATION_ENDPOINT));
         }
     }
 
