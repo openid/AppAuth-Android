@@ -55,6 +55,13 @@ class TestValues {
         null
     );
     public static final String TEST_REFRESH_TOKEN = "asdfghjkl";
+    public static final String TEST_DEVICE_CODE = "zzbbbdddz";
+    public static final String TEST_DEVICE_USER_CODE = "abcd-efgh";
+    public static final String TEST_DEVICE_VERIFICATION_URI = "https://testidp.example.com/device";
+    public static final String TEST_DEVICE_VERIFICATION_COMPLETE_URI =
+        "https://testidp.example.com/device?code=ABCDEF";
+    public static final Long TEST_DEVICE_CODE_EXPIRES_IN = 79L;
+    public static final Long TEST_DEVICE_CODE_POLL_INTERVAL = 3L;
 
     public static final Long TEST_CLIENT_SECRET_EXPIRES_AT = 78L;
     public static final String TEST_CLIENT_SECRET = "test_client_secret";
@@ -71,6 +78,7 @@ class TestValues {
         String tokenEndpoint,
         String userInfoEndpoint,
         String registrationEndpoint,
+        String deviceAuthorizationEndpoint,
         String endSessionEndpoint,
         String jwksUri,
         List<String> responseTypesSupported,
@@ -87,6 +95,7 @@ class TestValues {
             + " \"userinfo_endpoint\": \"" + userInfoEndpoint + "\",\n"
             + " \"end_session_endpoint\": \"" + endSessionEndpoint + "\",\n"
             + " \"registration_endpoint\": \"" + registrationEndpoint + "\",\n"
+            + " \"device_authorization_endpoint\": \"" + deviceAuthorizationEndpoint + "\",\n"
             + " \"jwks_uri\": \"" + jwksUri + "\",\n"
             + " \"response_types_supported\": " + toJson(responseTypesSupported) + ",\n"
             + " \"subject_types_supported\": " + toJson(subjectTypesSupported) + ",\n"
@@ -185,8 +194,20 @@ class TestValues {
                 Arrays.asList(TEST_APP_REDIRECT_URI));
     }
 
+    public static DeviceAuthorizationRequest.Builder getTestDeviceAuthorizationRequestBuilder() {
+        return new DeviceAuthorizationRequest.Builder(getTestServiceConfig(), TEST_CLIENT_ID);
+    }
+
     public static RegistrationRequest getTestRegistrationRequest() {
         return getTestRegistrationRequestBuilder().build();
+    }
+
+    public static DeviceAuthorizationRequest getTestDeviceAuthorizationRequest() {
+        return getTestDeviceAuthorizationRequestBuilder().build();
+    }
+
+    public static DeviceAuthorizationRequest.Builder getMinimalDeviceAuthRequestBuilder() {
+        return new DeviceAuthorizationRequest.Builder(getTestServiceConfig(), TEST_CLIENT_ID);
     }
 
     public static RegistrationResponse.Builder getTestRegistrationResponseBuilder() {
@@ -194,11 +215,25 @@ class TestValues {
                 .setClientId(TEST_CLIENT_ID);
     }
 
+    public static DeviceAuthorizationResponse.Builder getTestDeviceAuthorizationResponseBuilder() {
+        return new DeviceAuthorizationResponse.Builder(getTestDeviceAuthorizationRequest());
+    }
+
     public static RegistrationResponse getTestRegistrationResponse() {
         return getTestRegistrationResponseBuilder()
                 .setClientSecret(TEST_CLIENT_SECRET)
                 .setClientSecretExpiresAt(TEST_CLIENT_SECRET_EXPIRES_AT)
                 .build();
+    }
+
+    public static DeviceAuthorizationResponse getTestDeviceAuthorizationResponse() {
+        return getTestDeviceAuthorizationResponseBuilder()
+            .setDeviceCode(TEST_DEVICE_CODE)
+            .setVerificationUri(TEST_DEVICE_VERIFICATION_URI)
+            .setVerificationUriComplete(TEST_DEVICE_VERIFICATION_COMPLETE_URI)
+            .setCodeExpiresIn(TEST_DEVICE_CODE_EXPIRES_IN)
+            .setTokenPollingIntervalTime(TEST_DEVICE_CODE_POLL_INTERVAL)
+            .build();
     }
 
     public static String getTestIdTokenWithNonce(String nonce) {
