@@ -21,7 +21,7 @@ task jacocoTestReport(type: JacocoReport, dependsOn: "testDebugUnitTest") {
     afterEvaluate {
         getClassDirectories().setFrom(
             fileTree(
-                dir: 'build/intermediates/classes/debug',
+                dir: 'build/intermediates/javac/debug/classes',
                 excludes: ['**/BuildConfig.class']
             )
         )
