@@ -31,7 +31,8 @@
                 android:name=".LoginActivity"
                 android:label="@string/app_name_short"
                 android:theme="@style/AppTheme"
-                android:windowSoftInputMode="stateHidden" >
+                android:windowSoftInputMode="stateHidden"
+                android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -61,7 +62,9 @@
 
         To the list of attributes on the activity element.
         -->
-        <activity android:name="net.openid.appauth.RedirectUriReceiverActivity">
+        <activity
+            android:name="net.openid.appauth.RedirectUriReceiverActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
