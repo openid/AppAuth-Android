@@ -3,7 +3,6 @@
 [![Download](https://img.shields.io/maven-central/v/net.openid/appauth)](https://search.maven.org/search?q=g:net.openid%20appauth)
 [![Javadocs](http://javadoc.io/badge/net.openid/appauth.svg)](http://javadoc.io/doc/net.openid/appauth)
 [![Build Status](https://github.com/openid/AppAuth-Android/actions/workflows/build.yml/badge.svg)](https://github.com/openid/AppAuth-Android/actions/workflows/build.yml)
-[![Codacy Badge](https://api.codacy.com/project/badge/grade/321412eec811478085ec6c4c923ad8a1)](https://www.codacy.com/app/iainmcgin/AppAuth-Android)
 [![codecov.io](https://codecov.io/github/openid/AppAuth-Android/coverage.svg?branch=master)](https://codecov.io/github/openid/AppAuth-Android?branch=master)
 
 AppAuth for Android is a client SDK for communicating with
