@@ -3,28 +3,30 @@ configurations {
 }
 
 dependencies {
-    mdDoclet 'org.jdrupes.mdoclet:doclet:1.0.10'
+    mdDoclet 'org.jdrupes.mdoclet:doclet:2.0.0'
 }
 
-task androidJavadoc(type: Javadoc) {
-    afterEvaluate {
-        source = android.sourceSets.main.java.srcDirs
-        title = "AppAuth for Android"
-        classpath += files(project.android.getBootClasspath())
-        options {
-            doclet "org.jdrupes.mdoclet.MDoclet"
-            docletpath(*configurations.mdDoclet.files.asType(List))
-            links "http://docs.oracle.com/javase/7/docs/api/"
-            linksOffline "http://d.android.com/reference", "${android.sdkDirectory}/docs/reference"
-        }
-        exclude '**/BuildConfig.java'
-        exclude '**/R.java'
-    }
+task androidJavadoc(type: JavaExec) {
+    jvmArgs = ['--add-exports=jdk.javadoc/jdk.javadoc.internal.tool=ALL-UNNAMED']
+    classpath files(project.android.getBootClasspath())
+    main = 'jdk.javadoc.internal.tool.Main'
+    ext.destinationDir = file("${project.buildDir}/docs/javadoc")
+    args = ['-doctitle', "AppAuth for Android",
+            '-use',
+            '-linksource',
+            '-link', 'https://developer.android.com/reference/',
+            '-linkoffline', 'https://developer.android.com/reference/', 'https://developer.android.com/reference/androidx/',
+            '-doclet', 'org.jdrupes.mdoclet.MDoclet',
+            '-docletpath', configurations.mdDoclet.files.asType(List).join(":"),
+            '-source', '8',
+            '-d', ext.destinationDir,
+            '-Xdoclint:none',
+    ] + android.sourceSets.main.java.sourceFiles.files
 }
 
 task javadocJar(type: Jar, dependsOn: androidJavadoc) {
     classifier = 'javadoc'
-    from androidJavadoc.destinationDir
+    from androidJavadoc.ext.destinationDir
 }
 
 afterEvaluate {
