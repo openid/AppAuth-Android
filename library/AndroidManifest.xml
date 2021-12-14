@@ -20,6 +20,7 @@
   <application>
     <activity android:name=".AuthorizationManagementActivity"
       android:exported="false"
+      android:configChanges="orientation|screenSize"
       android:theme="@style/Theme.AppCompat.Translucent.NoTitleBar"
       android:launchMode="singleTask" />
 
