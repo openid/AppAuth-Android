@@ -35,8 +35,8 @@ public final class DefaultConnectionBuilder implements ConnectionBuilder {
      */
     public static final DefaultConnectionBuilder INSTANCE = new DefaultConnectionBuilder();
 
-    private static final int CONNECTION_TIMEOUT_MS = (int) TimeUnit.SECONDS.toMillis(15);
-    private static final int READ_TIMEOUT_MS = (int) TimeUnit.SECONDS.toMillis(10);
+    private static final int CONNECTION_TIMEOUT_MS = (int) TimeUnit.SECONDS.toMillis(60);
+    private static final int READ_TIMEOUT_MS = (int) TimeUnit.SECONDS.toMillis(60);
 
     private static final String HTTPS_SCHEME = "https";
 
