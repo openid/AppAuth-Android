@@ -223,6 +223,12 @@ public class AuthorizationResponse extends AuthorizationManagementResponse {
         @NonNull
         @VisibleForTesting
         Builder fromUri(@NonNull Uri uri, @NonNull Clock clock) {
+            // if response is in fragment, use fragment because it wont work otherwise :(
+            String fragment = uri.getFragment();
+            if(fragment != null) {
+                uri =  Uri.parse(uri.toString().replace(fragment, "").replace("#","") + "?" + uri.getFragment().replace("#", ""));
+            }
+            
             setState(uri.getQueryParameter(KEY_STATE));
             setTokenType(uri.getQueryParameter(KEY_TOKEN_TYPE));
             setAuthorizationCode(uri.getQueryParameter(KEY_AUTHORIZATION_CODE));
