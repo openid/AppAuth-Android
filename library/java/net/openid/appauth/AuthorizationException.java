@@ -510,7 +510,7 @@ public final class AuthorizationException extends Exception {
             @Nullable String errorOverride,
             @Nullable String errorDescriptionOverride,
             @Nullable Uri errorUriOverride,
-            @NonNull JSONObject responseJson) {
+            @Nullable JSONObject responseJson) {
         return new AuthorizationException(
                 ex.type,
                 ex.code,
