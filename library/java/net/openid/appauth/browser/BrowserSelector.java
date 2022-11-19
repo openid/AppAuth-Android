@@ -104,9 +104,8 @@ public final class BrowserSelector {
             try {
                 int defaultBrowserIndex = 0;
                 PackageInfo packageInfo = pm.getPackageInfo(
-                        info.activityInfo.packageName,
-                        VERSION.SDK_INT >= VERSION_CODES.P ?
-                            PackageManager.GET_SIGNING_CERTIFICATES : PackageManager.GET_SIGNATURES);
+                        info.activityInfo.packageName, VERSION.SDK_INT >= VERSION_CODES.P
+                        ? PackageManager.GET_SIGNING_CERTIFICATES : PackageManager.GET_SIGNATURES);
 
                 if (hasWarmupService(pm, info.activityInfo.packageName)) {
                     BrowserDescriptor customTabBrowserDescriptor =

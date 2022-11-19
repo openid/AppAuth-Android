@@ -310,15 +310,16 @@ public class AuthorizationManagementActivity extends AppCompatActivity {
             return;
         }
 
-        mAuthIntent = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ?
-                    state.getParcelable(KEY_AUTH_INTENT, Intent.class) : state.getParcelable(KEY_AUTH_INTENT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            mAuthIntent = state.getParcelable(KEY_AUTH_INTENT, Intent.class);
+            mCompleteIntent = state.getParcelable(KEY_COMPLETE_INTENT, PendingIntent.class);
+            mCancelIntent = state.getParcelable(KEY_CANCEL_INTENT, PendingIntent.class);
+        } else {
+            mAuthIntent = state.getParcelable(KEY_AUTH_INTENT);
+            mCompleteIntent = state.getParcelable(KEY_CANCEL_INTENT);
+            mCancelIntent = state.getParcelable(KEY_CANCEL_INTENT);
+        }
         mAuthorizationStarted = state.getBoolean(KEY_AUTHORIZATION_STARTED, false);
-        mCompleteIntent = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ?
-                    state.getParcelable(KEY_COMPLETE_INTENT, PendingIntent.class) :
-                    state.getParcelable(KEY_COMPLETE_INTENT);
-        mCancelIntent = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ?
-                    state.getParcelable(KEY_CANCEL_INTENT, PendingIntent.class) :
-                    state.getParcelable(KEY_CANCEL_INTENT);
         try {
             String authRequestJson = state.getString(KEY_AUTH_REQUEST, null);
             String authRequestType = state.getString(KEY_AUTH_REQUEST_TYPE, null);
