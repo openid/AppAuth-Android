@@ -44,7 +44,7 @@ import org.robolectric.annotation.Config;
 public class JsonUtilTest {
     private static final String TEST_KEY = "key";
     private static final String TEST_STRING = "value";
-    private static final Long TEST_LONG = new Long(123);
+    private static final Long TEST_LONG = 123L;
     private static final String TEST_URI_STRING = "https://openid.net/";
     private static final Uri TEST_URI = Uri.parse(TEST_URI_STRING);
     private static final JSONObject TEST_JSON = new JSONObject();
