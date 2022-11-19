@@ -313,17 +313,11 @@ public class BrowserSelectorTest {
         List<ResolveInfo> resolveInfos = new ArrayList<>();
 
         for (TestBrowser browser : browsers) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                when(mPackageManager.getPackageInfo(
-                    eq(browser.mPackageInfo.packageName),
-                    eq(PackageManager.GET_SIGNING_CERTIFICATES)))
-                    .thenReturn(browser.mPackageInfo);
-            } else {
-                when(mPackageManager.getPackageInfo(
-                    eq(browser.mPackageInfo.packageName),
-                    eq(PackageManager.GET_SIGNATURES)))
-                    .thenReturn(browser.mPackageInfo);
-            }
+            when(mPackageManager.getPackageInfo(
+                eq(browser.mPackageInfo.packageName),
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                    ? eq(PackageManager.GET_SIGNING_CERTIFICATES) : eq(PackageManager.GET_SIGNATURES)
+            )).thenReturn(browser.mPackageInfo);
             resolveInfos.add(browser.mResolveInfo);
         }
 
