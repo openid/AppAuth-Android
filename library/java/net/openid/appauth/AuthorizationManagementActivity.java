@@ -316,7 +316,7 @@ public class AuthorizationManagementActivity extends AppCompatActivity {
             mCancelIntent = state.getParcelable(KEY_CANCEL_INTENT, PendingIntent.class);
         } else {
             mAuthIntent = state.getParcelable(KEY_AUTH_INTENT);
-            mCompleteIntent = state.getParcelable(KEY_CANCEL_INTENT);
+            mCompleteIntent = state.getParcelable(KEY_COMPLETE_INTENT);
             mCancelIntent = state.getParcelable(KEY_CANCEL_INTENT);
         }
         mAuthorizationStarted = state.getBoolean(KEY_AUTHORIZATION_STARTED, false);
