@@ -23,6 +23,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
+import androidx.browser.customtabs.CustomTabColorSchemeParams;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
@@ -208,7 +209,8 @@ public class AuthorizationServiceTest {
     @Test
     public void testAuthorizationRequest_customization() throws Exception {
         CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
-                .setToolbarColor(Color.GREEN)
+                .setDefaultColorSchemeParams(new CustomTabColorSchemeParams.Builder()
+                    .setToolbarColor(Color.GREEN).build())
                 .build();
         mService.performAuthorizationRequest(
                 getTestAuthRequestBuilder().build(),

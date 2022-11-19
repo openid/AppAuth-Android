@@ -29,6 +29,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
+import android.os.Build;
 import android.text.TextUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -313,9 +314,10 @@ public class BrowserSelectorTest {
 
         for (TestBrowser browser : browsers) {
             when(mPackageManager.getPackageInfo(
-                    eq(browser.mPackageInfo.packageName),
-                    eq(PackageManager.GET_SIGNATURES)))
-                    .thenReturn(browser.mPackageInfo);
+                eq(browser.mPackageInfo.packageName),
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                    ? eq(PackageManager.GET_SIGNING_CERTIFICATES) : eq(PackageManager.GET_SIGNATURES)
+            )).thenReturn(browser.mPackageInfo);
             resolveInfos.add(browser.mResolveInfo);
         }
 
