@@ -21,6 +21,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AppCompatActivity;
@@ -309,10 +310,15 @@ public class AuthorizationManagementActivity extends AppCompatActivity {
             return;
         }
 
-        mAuthIntent = state.getParcelable(KEY_AUTH_INTENT);
+        mAuthIntent = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ?
+                    state.getParcelable(KEY_AUTH_INTENT, Intent.class) : state.getParcelable(KEY_AUTH_INTENT);
         mAuthorizationStarted = state.getBoolean(KEY_AUTHORIZATION_STARTED, false);
-        mCompleteIntent = state.getParcelable(KEY_COMPLETE_INTENT);
-        mCancelIntent = state.getParcelable(KEY_CANCEL_INTENT);
+        mCompleteIntent = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ?
+                    state.getParcelable(KEY_COMPLETE_INTENT, PendingIntent.class) :
+                    state.getParcelable(KEY_COMPLETE_INTENT);
+        mCancelIntent = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ?
+                    state.getParcelable(KEY_CANCEL_INTENT, PendingIntent.class) :
+                    state.getParcelable(KEY_CANCEL_INTENT);
         try {
             String authRequestJson = state.getString(KEY_AUTH_REQUEST, null);
             String authRequestType = state.getString(KEY_AUTH_REQUEST_TYPE, null);
