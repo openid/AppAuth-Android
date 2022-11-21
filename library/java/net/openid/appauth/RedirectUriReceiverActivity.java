@@ -14,8 +14,8 @@
 
 package net.openid.appauth;
 
-import android.app.Activity;
 import android.os.Bundle;
+import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * Activity that receives the redirect Uri sent by the OpenID endpoint. It forwards the data
@@ -42,7 +42,7 @@ import android.os.Bundle;
  * </intent-filter>
  * ```
  */
-public class RedirectUriReceiverActivity extends Activity {
+public class RedirectUriReceiverActivity extends AppCompatActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceBundle) {

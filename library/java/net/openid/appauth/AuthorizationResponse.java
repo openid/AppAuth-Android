@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
  * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.2
  * <https://tools.ietf.org/html/rfc6749#section-4.1.2>"
  */
-public class AuthorizationResponse {
+public class AuthorizationResponse extends AuthorizationManagementResponse {
 
     /**
      * The extra string used to store an {@link AuthorizationResponse} in an intent by
@@ -469,10 +469,17 @@ public class AuthorizationResponse {
                 .build();
     }
 
+    @Override
+    @Nullable
+    public String getState() {
+        return state;
+    }
+
     /**
      * Produces a JSON representation of the authorization response for persistent storage or local
      * transmission (e.g. between activities).
      */
+    @Override
     @NonNull
     public JSONObject jsonSerialize() {
         JSONObject json = new JSONObject();
@@ -490,16 +497,6 @@ public class AuthorizationResponse {
     }
 
     /**
-     * Produces a JSON representation of the authorization response for persistent storage or local
-     * transmission (e.g. between activities). This method is just a convenience wrapper
-     * for {@link #jsonSerialize()}, converting the JSON object to its string form.
-     */
-    @NonNull
-    public String jsonSerializeString() {
-        return jsonSerialize().toString();
-    }
-
-    /**
      * Reads an authorization response from a JSON string representation produced by
      * {@link #jsonSerialize()}.
      *
@@ -513,20 +510,16 @@ public class AuthorizationResponse {
                 "authorization request not provided and not found in JSON");
         }
 
-        AuthorizationRequest request =
-                AuthorizationRequest.jsonDeserialize(json.getJSONObject(KEY_REQUEST));
-
-        return new AuthorizationResponse.Builder(request)
-                .setTokenType(JsonUtil.getStringIfDefined(json, KEY_TOKEN_TYPE))
-                .setAccessToken(JsonUtil.getStringIfDefined(json, KEY_ACCESS_TOKEN))
-                .setAuthorizationCode(JsonUtil.getStringIfDefined(json, KEY_AUTHORIZATION_CODE))
-                .setIdToken(JsonUtil.getStringIfDefined(json, KEY_ID_TOKEN))
-                .setScope(JsonUtil.getStringIfDefined(json, KEY_SCOPE))
-                .setState(JsonUtil.getStringIfDefined(json, KEY_STATE))
-                .setAccessTokenExpirationTime(JsonUtil.getLongIfDefined(json, KEY_EXPIRES_AT))
-                .setAdditionalParameters(
-                        JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS))
-                .build();
+        return new AuthorizationResponse(
+                AuthorizationRequest.jsonDeserialize(json.getJSONObject(KEY_REQUEST)),
+                JsonUtil.getStringIfDefined(json, KEY_STATE),
+                JsonUtil.getStringIfDefined(json, KEY_TOKEN_TYPE),
+                JsonUtil.getStringIfDefined(json, KEY_AUTHORIZATION_CODE),
+                JsonUtil.getStringIfDefined(json, KEY_ACCESS_TOKEN),
+                JsonUtil.getLongIfDefined(json, KEY_EXPIRES_AT),
+                JsonUtil.getStringIfDefined(json, KEY_ID_TOKEN),
+                JsonUtil.getStringIfDefined(json, KEY_SCOPE),
+                JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
     }
 
     /**
@@ -547,6 +540,7 @@ public class AuthorizationResponse {
      * authorization response to the registered handler after a call to
      * {@link AuthorizationService#performAuthorizationRequest}.
      */
+    @Override
     @NonNull
     public Intent toIntent() {
         Intent data = new Intent();
@@ -571,5 +565,9 @@ public class AuthorizationResponse {
         } catch (JSONException ex) {
             throw new IllegalArgumentException("Intent contains malformed auth response", ex);
         }
+    }
+
+    static boolean containsAuthorizationResponse(@NonNull Intent intent) {
+        return intent.hasExtra(EXTRA_RESPONSE);
     }
 }

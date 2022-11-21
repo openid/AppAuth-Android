@@ -14,8 +14,8 @@
 
 package net.openid.appauth;
 
-import static junit.framework.Assert.fail;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 import java.security.SecureRandom;
 import org.junit.Test;
@@ -24,7 +24,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk=16)
+@Config(sdk = 16)
 public class CodeVerifierUtilTest {
 
     @Test

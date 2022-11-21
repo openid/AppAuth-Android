@@ -14,6 +14,7 @@
 
 package net.openid.appauthdemo;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -34,8 +35,10 @@ import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
+import net.openid.appauth.AuthorizationServiceConfiguration;
 import net.openid.appauth.AuthorizationServiceDiscovery;
 import net.openid.appauth.ClientAuthentication;
+import net.openid.appauth.EndSessionRequest;
 import net.openid.appauth.TokenRequest;
 import net.openid.appauth.TokenResponse;
 import okio.Okio;
@@ -45,8 +48,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -64,6 +65,8 @@ public class TokenActivity extends AppCompatActivity {
     private static final String TAG = "TokenActivity";
 
     private static final String KEY_USER_INFO = "userInfo";
+
+    private static final int END_SESSION_REQUEST_CODE = 911;
 
     private AuthorizationService mAuthService;
     private AuthStateManager mStateManager;
@@ -186,7 +189,7 @@ public class TokenActivity extends AppCompatActivity {
 
         AuthState state = mStateManager.getCurrent();
 
-        TextView refreshTokenInfoView = (TextView) findViewById(R.id.refresh_token_info);
+        TextView refreshTokenInfoView = findViewById(R.id.refresh_token_info);
         refreshTokenInfoView.setText((state.getRefreshToken() == null)
                 ? R.string.no_refresh_token_returned
                 : R.string.refresh_token_returned);
@@ -230,7 +233,7 @@ public class TokenActivity extends AppCompatActivity {
             viewProfileButton.setOnClickListener((View view) -> fetchUserInfo());
         }
 
-        ((Button)findViewById(R.id.sign_out)).setOnClickListener((View view) -> signOut());
+        findViewById(R.id.sign_out).setOnClickListener((View view) -> endSession());
 
         View userInfoCard = findViewById(R.id.userinfo_card);
         JSONObject userInfo = mUserInfoJson.get();
@@ -346,23 +349,15 @@ public class TokenActivity extends AppCompatActivity {
                         .getAuthorizationServiceConfiguration()
                         .discoveryDoc;
 
-        URL userInfoEndpoint;
-        try {
-            userInfoEndpoint =
+        Uri userInfoEndpoint =
                     mConfiguration.getUserInfoEndpointUri() != null
-                        ? new URL(mConfiguration.getUserInfoEndpointUri().toString())
-                        : new URL(discovery.getUserinfoEndpoint().toString());
-        } catch (MalformedURLException urlEx) {
-            Log.e(TAG, "Failed to construct user info endpoint URL", urlEx);
-            mUserInfoJson.set(null);
-            runOnUiThread(this::displayAuthorized);
-            return;
-        }
+                        ? Uri.parse(mConfiguration.getUserInfoEndpointUri().toString())
+                        : Uri.parse(discovery.getUserinfoEndpoint().toString());
 
         mExecutor.submit(() -> {
             try {
-                HttpURLConnection conn =
-                        (HttpURLConnection) userInfoEndpoint.openConnection();
+                HttpURLConnection conn = mConfiguration.getConnectionBuilder().openConnection(
+                        userInfoEndpoint);
                 conn.setRequestProperty("Authorization", "Bearer " + accessToken);
                 conn.setInstanceFollowRedirects(false);
                 String response = Okio.buffer(Okio.source(conn.getInputStream()))
@@ -380,12 +375,47 @@ public class TokenActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == END_SESSION_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            signOut();
+            finish();
+        } else {
+            displayEndSessionCancelled();
+        }
+    }
+
+    private void displayEndSessionCancelled() {
+        Snackbar.make(findViewById(R.id.coordinator),
+            "Sign out canceled",
+            Snackbar.LENGTH_SHORT)
+                .show();
+    }
+
     @MainThread
     private void showSnackbar(String message) {
         Snackbar.make(findViewById(R.id.coordinator),
                 message,
                 Snackbar.LENGTH_SHORT)
                 .show();
+    }
+
+    @MainThread
+    private void endSession() {
+        AuthState currentState = mStateManager.getCurrent();
+        AuthorizationServiceConfiguration config =
+                currentState.getAuthorizationServiceConfiguration();
+        if (config.endSessionEndpoint != null) {
+            Intent endSessionIntent = mAuthService.getEndSessionRequestIntent(
+                    new EndSessionRequest.Builder(config)
+                        .setIdTokenHint(currentState.getIdToken())
+                        .setPostLogoutRedirectUri(mConfiguration.getEndSessionRedirectUri())
+                        .build());
+            startActivityForResult(endSessionIntent, END_SESSION_REQUEST_CODE);
+        } else {
+            signOut();
+        }
     }
 
     @MainThread

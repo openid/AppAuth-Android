@@ -4,6 +4,7 @@ android {
         unitTests.all {
             jacoco {
                 includeNoLocationClasses = true
+                jacoco.excludes = ['jdk.internal.*']
             }
         }
     }
@@ -20,7 +21,7 @@ task jacocoTestReport(type: JacocoReport, dependsOn: "testDebugUnitTest") {
     afterEvaluate {
         getClassDirectories().setFrom(
             fileTree(
-                dir: 'build/intermediates/classes/debug',
+                dir: 'build/intermediates/javac/debug/classes',
                 excludes: ['**/BuildConfig.class']
             )
         )

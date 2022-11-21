@@ -14,7 +14,8 @@
 
 package net.openid.appauth;
 
-import static org.assertj.android.api.Assertions.assertThat;
+import static androidx.test.ext.truth.content.IntentSubject.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.content.Intent;
@@ -27,7 +28,7 @@ import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk=16)
+@Config(sdk = 16)
 public class RedirectUriReceiverActivityTest {
 
     @Test
@@ -45,7 +46,7 @@ public class RedirectUriReceiverActivityTest {
 
         Intent nextIntent = shadowOf(redirectActivity).getNextStartedActivity();
         assertThat(nextIntent).hasData(redirectUri);
-        assertThat(redirectActivity).isFinishing();
+        assertThat(redirectActivity.isFinishing()).isTrue();
     }
 
 }

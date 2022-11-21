@@ -25,7 +25,7 @@ import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk=16)
+@Config(sdk = 16)
 public class NoClientAuthenticationTest {
 
     @Test

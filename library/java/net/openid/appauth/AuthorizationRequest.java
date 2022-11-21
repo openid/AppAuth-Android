@@ -23,7 +23,6 @@ import static net.openid.appauth.Preconditions.checkNullOrNotEmpty;
 
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Base64;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -32,7 +31,6 @@ import net.openid.appauth.internal.UriUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,7 +46,7 @@ import java.util.Set;
  * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.1.1
  * <https://tools.ietf.org/html/rfc6749#section-4.1.1>"
  */
-public class AuthorizationRequest {
+public class AuthorizationRequest implements AuthorizationManagementRequest {
 
     /**
      * SHA-256 based code verifier challenge method.
@@ -287,6 +285,9 @@ public class AuthorizationRequest {
     static final String PARAM_PROMPT = "prompt";
 
     @VisibleForTesting
+    static final String PARAM_UI_LOCALES = "ui_locales";
+
+    @VisibleForTesting
     static final String PARAM_REDIRECT_URI = "redirect_uri";
 
     @VisibleForTesting
@@ -304,6 +305,12 @@ public class AuthorizationRequest {
     @VisibleForTesting
     static final String PARAM_NONCE = "nonce";
 
+    @VisibleForTesting
+    static final String PARAM_CLAIMS = "claims";
+
+    @VisibleForTesting
+    static final String PARAM_CLAIMS_LOCALES = "claims_locales";
+
     private static final Set<String> BUILT_IN_PARAMS = builtInParams(
             PARAM_CLIENT_ID,
             PARAM_CODE_CHALLENGE,
@@ -311,17 +318,21 @@ public class AuthorizationRequest {
             PARAM_DISPLAY,
             PARAM_LOGIN_HINT,
             PARAM_PROMPT,
+            PARAM_UI_LOCALES,
             PARAM_REDIRECT_URI,
             PARAM_RESPONSE_MODE,
             PARAM_RESPONSE_TYPE,
             PARAM_SCOPE,
-            PARAM_STATE);
+            PARAM_STATE,
+            PARAM_CLAIMS,
+            PARAM_CLAIMS_LOCALES);
 
     private static final String KEY_CONFIGURATION = "configuration";
     private static final String KEY_CLIENT_ID = "clientId";
     private static final String KEY_DISPLAY = "display";
     private static final String KEY_LOGIN_HINT = "login_hint";
     private static final String KEY_PROMPT = "prompt";
+    private static final String KEY_UI_LOCALES = "ui_locales";
     private static final String KEY_RESPONSE_TYPE = "responseType";
     private static final String KEY_REDIRECT_URI = "redirectUri";
     private static final String KEY_SCOPE = "scope";
@@ -331,14 +342,16 @@ public class AuthorizationRequest {
     private static final String KEY_CODE_VERIFIER_CHALLENGE = "codeVerifierChallenge";
     private static final String KEY_CODE_VERIFIER_CHALLENGE_METHOD = "codeVerifierChallengeMethod";
     private static final String KEY_RESPONSE_MODE = "responseMode";
+    private static final String KEY_CLAIMS = "claims";
+    private static final String KEY_CLAIMS_LOCALES = "claimsLocales";
     private static final String KEY_ADDITIONAL_PARAMETERS = "additionalParameters";
-    private static final int STATE_LENGTH = 16;
 
     /**
      * The service's {@link AuthorizationServiceConfiguration configuration}.
      * This configuration specifies how to connect to a particular OAuth provider.
      * Configurations may be
-     * {@link AuthorizationServiceConfiguration#AuthorizationServiceConfiguration(Uri, Uri, Uri)}
+     * {@link
+     * AuthorizationServiceConfiguration#AuthorizationServiceConfiguration(Uri, Uri, Uri, Uri)}
      * created manually}, or {@link AuthorizationServiceConfiguration#fetchFromUrl(Uri,
      * AuthorizationServiceConfiguration.RetrieveConfigurationCallback)} via an OpenID Connect
      * Discovery Document}.
@@ -391,6 +404,17 @@ public class AuthorizationRequest {
      */
     @Nullable
     public final String prompt;
+
+    /**
+     * The OpenID Connect 1.0 `ui_locales` parameter. This is a space-separated list of
+     * BCP47 [RFC5646] language tag values, ordered by preference. It represents End-User's
+     * preferred languages and scripts for the user interface.
+     *
+     * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
+     */
+    @Nullable
+    public final String uiLocales;
 
     /**
      * The expected response type.
@@ -506,6 +530,26 @@ public class AuthorizationRequest {
     public final String responseMode;
 
     /**
+     * Requests that specific Claims be returned.
+     * The value is a JSON object listing the requested Claims.
+     *
+     * @see "OpenID Connect Core 1.0, Section 5.5
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.5.5>"
+     */
+    @Nullable
+    public final JSONObject claims;
+
+    /**
+     * End-User's preferred languages and scripts for Claims being returned, represented as a
+     * space-separated list of BCP47 [RFC5646] language tag values, ordered by preference.
+     *
+     * @see "OpenID Connect Core 1.0, Section 5.2
+     * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.5.2>"
+     */
+    @Nullable
+    public final String claimsLocales;
+
+    /**
      * Additional parameters to be passed as part of the request.
      *
      * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.1
@@ -540,6 +584,9 @@ public class AuthorizationRequest {
         @Nullable
         private String mPrompt;
 
+        @Nullable
+        private String mUiLocales;
+
         // SuppressWarnings justification: static analysis incorrectly determines that this field
         // is not initialized, as it is indirectly initialized by setResponseType
         @NonNull
@@ -573,11 +620,19 @@ public class AuthorizationRequest {
         @Nullable
         private String mResponseMode;
 
+        @Nullable
+        private JSONObject mClaims;
+
+        @Nullable
+        private String mClaimsLocales;
+
         @NonNull
         private Map<String, String> mAdditionalParameters = new HashMap<>();
 
         /**
-         * Creates an authorization request builder with the specified mandatory properties.
+         * Creates an authorization request builder with the specified mandatory properties,
+         * and preset values for {@link AuthorizationRequest#state},
+         * {@link AuthorizationRequest#nonce} and {@link AuthorizationRequest#codeVerifier}.
          */
         public Builder(
                 @NonNull AuthorizationServiceConfiguration configuration,
@@ -588,8 +643,8 @@ public class AuthorizationRequest {
             setClientId(clientId);
             setResponseType(responseType);
             setRedirectUri(redirectUri);
-            setState(AuthorizationRequest.generateRandomState());
-            setNonce(AuthorizationRequest.generateRandomState());
+            setState(AuthorizationManagementUtil.generateRandomState());
+            setNonce(AuthorizationManagementUtil.generateRandomState());
             setCodeVerifier(CodeVerifierUtil.generateRandomCodeVerifier());
         }
 
@@ -686,6 +741,54 @@ public class AuthorizationRequest {
         @NonNull
         public Builder setPromptValues(@Nullable Iterable<String> promptValues) {
             mPrompt = AsciiStringListUtil.iterableToString(promptValues);
+            return this;
+        }
+
+        /**
+         * Specifies the OpenID Connect 1.0 `ui_locales` parameter, which is a space-separated list
+         * of BCP47 [RFC5646] language tag values, ordered by preference. It represents End-User's
+         * preferred languages and scripts for the user interface. Replaces any previously
+         * specified ui_locales values.
+         *
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
+         */
+        public Builder setUiLocales(@Nullable String uiLocales) {
+            mUiLocales = checkNullOrNotEmpty(uiLocales, "uiLocales must be null or not empty");
+            return this;
+        }
+
+        /**
+         * Specifies the OpenID Connect 1.0 `ui_locales` parameter, which is a space-separated list
+         * of BCP47 [RFC5646] language tag values, ordered by preference. It represents End-User's
+         * preferred languages and scripts for the user interface. Replaces any previously
+         * specified ui_locales values.
+         *
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
+         */
+        @NonNull
+        public Builder setUiLocalesValues(@Nullable String... uiLocalesValues) {
+            if (uiLocalesValues == null) {
+                mUiLocales = null;
+                return this;
+            }
+
+            return setUiLocalesValues(Arrays.asList(uiLocalesValues));
+        }
+
+        /**
+         * Specifies the OpenID Connect 1.0 `ui_locales` parameter, which is a space-separated list
+         * of BCP47 [RFC5646] language tag values, ordered by preference. It represents End-User's
+         * preferred languages and scripts for the user interface. Replaces any previously
+         * specified ui_locales values.
+         *
+         * @see "OpenID Connect Core 1.0, Section 3.1.2.1
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1>"
+         */
+        @NonNull
+        public Builder setUiLocalesValues(@Nullable Iterable<String> uiLocalesValues) {
+            mUiLocales = AsciiStringListUtil.iterableToString(uiLocalesValues);
             return this;
         }
 
@@ -795,7 +898,7 @@ public class AuthorizationRequest {
          */
         @NonNull
         public Builder setNonce(@Nullable String nonce) {
-            mNonce = checkNullOrNotEmpty(nonce, "state cannot be empty if defined");
+            mNonce = checkNullOrNotEmpty(nonce, "nonce cannot be empty if defined");
             return this;
         }
 
@@ -879,6 +982,63 @@ public class AuthorizationRequest {
         }
 
         /**
+         * Requests that specific Claims be returned.
+         * The value is a JSON object listing the requested Claims.
+         *
+         * @see "OpenID Connect Core 1.0, Section 5.5
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.5.5>"
+         */
+        @NonNull
+        public Builder setClaims(@Nullable JSONObject claims) {
+            mClaims = claims;
+            return this;
+        }
+
+        /**
+         * End-User's preferred languages and scripts for Claims being returned, represented as a
+         * space-separated list of BCP47 [RFC5646] language tag values, ordered by preference.
+         *
+         * @see "OpenID Connect Core 1.0, Section 5.2
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.5.2>"
+         */
+        public Builder setClaimsLocales(@Nullable String claimsLocales) {
+            mClaimsLocales = checkNullOrNotEmpty(
+                    claimsLocales,
+                    "claimsLocales must be null or not empty");
+            return this;
+        }
+
+        /**
+         * End-User's preferred languages and scripts for Claims being returned, represented as a
+         * space-separated list of BCP47 [RFC5646] language tag values, ordered by preference.
+         *
+         * @see "OpenID Connect Core 1.0, Section 5.2
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.5.2>"
+         */
+        @NonNull
+        public Builder setClaimsLocalesValues(@Nullable String... claimsLocalesValues) {
+            if (claimsLocalesValues == null) {
+                mClaimsLocales = null;
+                return this;
+            }
+
+            return setClaimsLocalesValues(Arrays.asList(claimsLocalesValues));
+        }
+
+        /**
+         * End-User's preferred languages and scripts for Claims being returned, represented as a
+         * space-separated list of BCP47 [RFC5646] language tag values, ordered by preference.
+         *
+         * @see "OpenID Connect Core 1.0, Section 5.2
+         * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.5.2>"
+         */
+        @NonNull
+        public Builder setClaimsLocalesValues(@Nullable Iterable<String> claimsLocalesValues) {
+            mClaimsLocales = AsciiStringListUtil.iterableToString(claimsLocalesValues);
+            return this;
+        }
+
+        /**
          * Specifies additional parameters. Replaces any previously provided set of parameters.
          * Parameter keys and values cannot be null or empty.
          *
@@ -911,6 +1071,7 @@ public class AuthorizationRequest {
                     mDisplay,
                     mLoginHint,
                     mPrompt,
+                    mUiLocales,
                     mScope,
                     mState,
                     mNonce,
@@ -918,6 +1079,8 @@ public class AuthorizationRequest {
                     mCodeVerifierChallenge,
                     mCodeVerifierChallengeMethod,
                     mResponseMode,
+                    mClaims,
+                    mClaimsLocales,
                     Collections.unmodifiableMap(new HashMap<>(mAdditionalParameters)));
         }
     }
@@ -930,6 +1093,7 @@ public class AuthorizationRequest {
             @Nullable String display,
             @Nullable String loginHint,
             @Nullable String prompt,
+            @Nullable String uiLocales,
             @Nullable String scope,
             @Nullable String state,
             @Nullable String nonce,
@@ -937,6 +1101,8 @@ public class AuthorizationRequest {
             @Nullable String codeVerifierChallenge,
             @Nullable String codeVerifierChallengeMethod,
             @Nullable String responseMode,
+            @Nullable JSONObject claims,
+            @Nullable String claimsLocales,
             @NonNull Map<String, String> additionalParameters) {
         // mandatory fields
         this.configuration = configuration;
@@ -949,6 +1115,7 @@ public class AuthorizationRequest {
         this.display = display;
         this.loginHint = loginHint;
         this.prompt = prompt;
+        this.uiLocales = uiLocales;
         this.scope = scope;
         this.state = state;
         this.nonce = nonce;
@@ -956,6 +1123,8 @@ public class AuthorizationRequest {
         this.codeVerifierChallenge = codeVerifierChallenge;
         this.codeVerifierChallengeMethod = codeVerifierChallengeMethod;
         this.responseMode = responseMode;
+        this.claims = claims;
+        this.claimsLocales = claimsLocales;
     }
 
     /**
@@ -978,8 +1147,33 @@ public class AuthorizationRequest {
     }
 
     /**
-     * Produces a request URI, that can be used to dispath the authorization request.
+     * Derives the set of ui_locales values from the consolidated, space-separated list of
+     * BCP47 [RFC5646] language tag values in the {@link #uiLocales} field. If no ui_locales values
+     * were specified for this request, the method will return `null`.
      */
+    public Set<String> getUiLocales() {
+        return AsciiStringListUtil.stringToSet(uiLocales);
+    }
+
+    @Override
+    @Nullable
+    public String getState() {
+        return state;
+    }
+
+    /**
+     * Derives the set of claims_locales values from the consolidated, space-separated list of
+     * BCP47 [RFC5646] language tag values in the {@link #claimsLocales} field. If no claims_locales
+     * values were specified for this request, the method will return `null`.
+     */
+    public Set<String> getClaimsLocales() {
+        return AsciiStringListUtil.stringToSet(claimsLocales);
+    }
+
+    /**
+     * Produces a request URI, that can be used to dispatch the authorization request.
+     */
+    @Override
     @NonNull
     public Uri toUri() {
         Uri.Builder uriBuilder = configuration.authorizationEndpoint.buildUpon()
@@ -990,6 +1184,7 @@ public class AuthorizationRequest {
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_DISPLAY, display);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_LOGIN_HINT, loginHint);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_PROMPT, prompt);
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_UI_LOCALES, uiLocales);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_STATE, state);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_NONCE, nonce);
         UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_SCOPE, scope);
@@ -999,6 +1194,9 @@ public class AuthorizationRequest {
             uriBuilder.appendQueryParameter(PARAM_CODE_CHALLENGE, codeVerifierChallenge)
                     .appendQueryParameter(PARAM_CODE_CHALLENGE_METHOD, codeVerifierChallengeMethod);
         }
+
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_CLAIMS, claims);
+        UriUtil.appendQueryParameterIfNotNull(uriBuilder, PARAM_CLAIMS_LOCALES, claimsLocales);
 
         for (Entry<String, String> entry : additionalParameters.entrySet()) {
             uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
@@ -1011,6 +1209,7 @@ public class AuthorizationRequest {
      * Produces a JSON representation of the authorization request for persistent storage or local
      * transmission (e.g. between activities).
      */
+    @Override
     @NonNull
     public JSONObject jsonSerialize() {
         JSONObject json = new JSONObject();
@@ -1022,6 +1221,7 @@ public class AuthorizationRequest {
         JsonUtil.putIfNotNull(json, KEY_LOGIN_HINT, loginHint);
         JsonUtil.putIfNotNull(json, KEY_SCOPE, scope);
         JsonUtil.putIfNotNull(json, KEY_PROMPT, prompt);
+        JsonUtil.putIfNotNull(json, KEY_UI_LOCALES, uiLocales);
         JsonUtil.putIfNotNull(json, KEY_STATE, state);
         JsonUtil.putIfNotNull(json, KEY_NONCE, nonce);
         JsonUtil.putIfNotNull(json, KEY_CODE_VERIFIER, codeVerifier);
@@ -1029,16 +1229,19 @@ public class AuthorizationRequest {
         JsonUtil.putIfNotNull(json, KEY_CODE_VERIFIER_CHALLENGE_METHOD,
                 codeVerifierChallengeMethod);
         JsonUtil.putIfNotNull(json, KEY_RESPONSE_MODE, responseMode);
+        JsonUtil.putIfNotNull(json, KEY_CLAIMS, claims);
+        JsonUtil.putIfNotNull(json, KEY_CLAIMS_LOCALES, claimsLocales);
         JsonUtil.put(json, KEY_ADDITIONAL_PARAMETERS,
                 JsonUtil.mapToJsonObject(additionalParameters));
         return json;
     }
 
     /**
-     * Produces a JSON string representation of the authorization request for persistent storage or
+     * Produces a JSON string representation of the request for persistent storage or
      * local transmission (e.g. between activities). This method is just a convenience wrapper
      * for {@link #jsonSerialize()}, converting the JSON object to its string form.
      */
+    @Override
     public String jsonSerializeString() {
         return jsonSerialize().toString();
     }
@@ -1052,27 +1255,25 @@ public class AuthorizationRequest {
     public static AuthorizationRequest jsonDeserialize(@NonNull JSONObject json)
             throws JSONException {
         checkNotNull(json, "json cannot be null");
-        AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
+        return new AuthorizationRequest(
                 AuthorizationServiceConfiguration.fromJson(json.getJSONObject(KEY_CONFIGURATION)),
                 JsonUtil.getString(json, KEY_CLIENT_ID),
                 JsonUtil.getString(json, KEY_RESPONSE_TYPE),
-                JsonUtil.getUri(json, KEY_REDIRECT_URI))
-                .setDisplay(JsonUtil.getStringIfDefined(json, KEY_DISPLAY))
-                .setLoginHint(JsonUtil.getStringIfDefined(json, KEY_LOGIN_HINT))
-                .setPrompt(JsonUtil.getStringIfDefined(json, KEY_PROMPT))
-                .setState(JsonUtil.getStringIfDefined(json, KEY_STATE))
-                .setNonce(JsonUtil.getStringIfDefined(json, KEY_NONCE))
-                .setCodeVerifier(
-                        JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER),
-                        JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER_CHALLENGE),
-                        JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER_CHALLENGE_METHOD))
-                .setResponseMode(JsonUtil.getStringIfDefined(json, KEY_RESPONSE_MODE))
-                .setAdditionalParameters(JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
-
-        if (json.has(KEY_SCOPE)) {
-            builder.setScopes(AsciiStringListUtil.stringToSet(JsonUtil.getString(json, KEY_SCOPE)));
-        }
-        return builder.build();
+                JsonUtil.getUri(json, KEY_REDIRECT_URI),
+                JsonUtil.getStringIfDefined(json, KEY_DISPLAY),
+                JsonUtil.getStringIfDefined(json, KEY_LOGIN_HINT),
+                JsonUtil.getStringIfDefined(json, KEY_PROMPT),
+                JsonUtil.getStringIfDefined(json, KEY_UI_LOCALES),
+                JsonUtil.getStringIfDefined(json, KEY_SCOPE),
+                JsonUtil.getStringIfDefined(json, KEY_STATE),
+                JsonUtil.getStringIfDefined(json, KEY_NONCE),
+                JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER),
+                JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER_CHALLENGE),
+                JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER_CHALLENGE_METHOD),
+                JsonUtil.getStringIfDefined(json, KEY_RESPONSE_MODE),
+                JsonUtil.getJsonObjectIfDefined(json, KEY_CLAIMS),
+                JsonUtil.getStringIfDefined(json, KEY_CLAIMS_LOCALES),
+                JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
     }
 
     /**
@@ -1086,12 +1287,5 @@ public class AuthorizationRequest {
             throws JSONException {
         checkNotNull(jsonStr, "json string cannot be null");
         return jsonDeserialize(new JSONObject(jsonStr));
-    }
-
-    private static String generateRandomState() {
-        SecureRandom sr = new SecureRandom();
-        byte[] random = new byte[STATE_LENGTH];
-        sr.nextBytes(random);
-        return Base64.encodeToString(random, Base64.NO_WRAP | Base64.NO_PADDING | Base64.URL_SAFE);
     }
 }
