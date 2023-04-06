@@ -1,3 +1,5 @@
+import org.ajoberstar.grgit.Grgit
+
 apply from: 'config/keystore.gradle'
 
 buildscript {
@@ -23,9 +25,16 @@ ext.verifyKeystore()
 
 project.ext {
     minSdkVersion = 16
-    compileSdkVersion = 31
-    project.ext.versionID = "0.11.1"
-    project.ext.versionName = """$versionID-skyscanner"""
+    compileSdkVersion = 33
+    versionID = "0.11.1"
+    versionName = """$versionID-skyscanner"""
+
+    try {
+        def grgit = Grgit.open(currentDir: project.rootDir)
+        versionCode = grgit.log(includes: ['HEAD']).size()
+    } catch (Exception ignored) {
+        versionCode = 1
+    }
 
     googleVersions = [
         glide                 : '4.12.0',
@@ -46,5 +55,6 @@ task showVersion {
     doLast {
         logger.lifecycle("Version ID: " + project.versionID)
         logger.lifecycle("Version Name: " + project.versionName)
+        logger.lifecycle("Version Code: " + project.versionCode)
     }
 }
