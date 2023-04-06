@@ -75,7 +75,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * - Initiate the authorization request using the built-in heuristics or a user-selected browser.
  *
  * _NOTE_: From a clean checkout of this project, the authorization service is not configured.
- * Edit `res/values/auth_config.xml` to provide the required configuration properties. See the
+ * Edit `res/raw/auth_config.json` to provide the required configuration properties. See the
  * README.md in the app/ directory for configuration instructions, and the adjacent IDP-specific
  * instructions.
  */
@@ -216,7 +216,8 @@ public final class LoginActivity extends AppCompatActivity {
             AuthorizationServiceConfiguration config = new AuthorizationServiceConfiguration(
                     mConfiguration.getAuthEndpointUri(),
                     mConfiguration.getTokenEndpointUri(),
-                    mConfiguration.getRegistrationEndpointUri());
+                    mConfiguration.getRegistrationEndpointUri(),
+                    mConfiguration.getEndSessionEndpoint());
 
             mAuthStateManager.replace(new AuthState(config));
             initializeClient();
@@ -350,15 +351,20 @@ public final class LoginActivity extends AppCompatActivity {
         }
 
         if (mUsePendingIntents) {
-            Intent completionIntent = new Intent(this, TokenActivity.class);
-            Intent cancelIntent = new Intent(this, LoginActivity.class);
+            final Intent completionIntent = new Intent(this, TokenActivity.class);
+            final Intent cancelIntent = new Intent(this, LoginActivity.class);
             cancelIntent.putExtra(EXTRA_FAILED, true);
             cancelIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
+            int flags = 0;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                flags |= PendingIntent.FLAG_MUTABLE;
+            }
+
             mAuthService.performAuthorizationRequest(
                     mAuthRequest.get(),
-                    PendingIntent.getActivity(this, 0, completionIntent, 0),
-                    PendingIntent.getActivity(this, 0, cancelIntent, 0),
+                    PendingIntent.getActivity(this, 0, completionIntent, flags),
+                    PendingIntent.getActivity(this, 0, cancelIntent, flags),
                     mAuthIntent.get());
         } else {
             Intent intent = mAuthService.getAuthorizationRequestIntent(

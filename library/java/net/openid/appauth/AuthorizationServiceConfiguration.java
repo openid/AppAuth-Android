@@ -61,6 +61,7 @@ public class AuthorizationServiceConfiguration {
     private static final String KEY_TOKEN_ENDPOINT = "tokenEndpoint";
     private static final String KEY_REGISTRATION_ENDPOINT = "registrationEndpoint";
     private static final String KEY_DISCOVERY_DOC = "discoveryDoc";
+    private static final String KEY_END_SESSION_ENPOINT = "endSessionEndpoint";
 
     /**
      * The authorization service's endpoint.
@@ -73,6 +74,12 @@ public class AuthorizationServiceConfiguration {
      */
     @NonNull
     public final Uri tokenEndpoint;
+
+    /**
+     * The end session service's endpoint;
+     */
+    @Nullable
+    public final Uri endSessionEndpoint;
 
     /**
      * The authorization service's client registration endpoint.
@@ -104,7 +111,6 @@ public class AuthorizationServiceConfiguration {
 
     /**
      * Creates a service configuration for a basic OAuth2 provider.
-     *
      * @param authorizationEndpoint The
      *     [authorization endpoint URI](https://tools.ietf.org/html/rfc6749#section-3.1)
      *     for the service.
@@ -113,15 +119,37 @@ public class AuthorizationServiceConfiguration {
      *     for the service.
      * @param registrationEndpoint The optional
      *     [client registration endpoint URI](https://tools.ietf.org/html/rfc7591#section-3)
-     *     for the service.
      */
     public AuthorizationServiceConfiguration(
             @NonNull Uri authorizationEndpoint,
             @NonNull Uri tokenEndpoint,
             @Nullable Uri registrationEndpoint) {
+        this(authorizationEndpoint, tokenEndpoint, registrationEndpoint, null);
+    }
+
+    /**
+     * Creates a service configuration for a basic OAuth2 provider.
+     * @param authorizationEndpoint The
+     *     [authorization endpoint URI](https://tools.ietf.org/html/rfc6749#section-3.1)
+     *     for the service.
+     * @param tokenEndpoint The
+     *     [token endpoint URI](https://tools.ietf.org/html/rfc6749#section-3.2)
+     *     for the service.
+     * @param registrationEndpoint The optional
+     *     [client registration endpoint URI](https://tools.ietf.org/html/rfc7591#section-3)
+     * @param endSessionEndpoint The optional
+     *     [end session endpoint URI](https://tools.ietf.org/html/rfc6749#section-2.2)
+     *     for the service.
+     */
+    public AuthorizationServiceConfiguration(
+            @NonNull Uri authorizationEndpoint,
+            @NonNull Uri tokenEndpoint,
+            @Nullable Uri registrationEndpoint,
+            @Nullable Uri endSessionEndpoint) {
         this.authorizationEndpoint = checkNotNull(authorizationEndpoint);
         this.tokenEndpoint = checkNotNull(tokenEndpoint);
         this.registrationEndpoint = registrationEndpoint;
+        this.endSessionEndpoint = endSessionEndpoint;
         this.discoveryDoc = null;
     }
 
@@ -138,6 +166,7 @@ public class AuthorizationServiceConfiguration {
         this.authorizationEndpoint = discoveryDoc.getAuthorizationEndpoint();
         this.tokenEndpoint = discoveryDoc.getTokenEndpoint();
         this.registrationEndpoint = discoveryDoc.getRegistrationEndpoint();
+        this.endSessionEndpoint = discoveryDoc.getEndSessionEndpoint();
     }
 
     /**
@@ -150,6 +179,9 @@ public class AuthorizationServiceConfiguration {
         JsonUtil.put(json, KEY_TOKEN_ENDPOINT, tokenEndpoint.toString());
         if (registrationEndpoint != null) {
             JsonUtil.put(json, KEY_REGISTRATION_ENDPOINT, registrationEndpoint.toString());
+        }
+        if (endSessionEndpoint != null) {
+            JsonUtil.put(json, KEY_END_SESSION_ENPOINT, endSessionEndpoint.toString());
         }
         if (discoveryDoc != null) {
             JsonUtil.put(json, KEY_DISCOVERY_DOC, discoveryDoc.docJson);
@@ -191,7 +223,8 @@ public class AuthorizationServiceConfiguration {
             return new AuthorizationServiceConfiguration(
                     JsonUtil.getUri(json, KEY_AUTHORIZATION_ENDPOINT),
                     JsonUtil.getUri(json, KEY_TOKEN_ENDPOINT),
-                    JsonUtil.getUriIfDefined(json, KEY_REGISTRATION_ENDPOINT));
+                    JsonUtil.getUriIfDefined(json, KEY_REGISTRATION_ENDPOINT),
+                    JsonUtil.getUriIfDefined(json, KEY_END_SESSION_ENPOINT));
         }
     }
 
@@ -222,6 +255,28 @@ public class AuthorizationServiceConfiguration {
     public static void fetchFromIssuer(@NonNull Uri openIdConnectIssuerUri,
             @NonNull RetrieveConfigurationCallback callback) {
         fetchFromUrl(buildConfigurationUriFromIssuer(openIdConnectIssuerUri), callback);
+    }
+
+    /**
+     * Fetch an AuthorizationServiceConfiguration from an OpenID Connect issuer URI, using
+     * the {@link DefaultConnectionBuilder default connection builder}.
+     * This method is equivalent to {@link #fetchFromUrl(Uri, RetrieveConfigurationCallback,
+     * ConnectionBuilder)}, but automatically appends the OpenID connect well-known
+     * configuration path to the URI.
+     *
+     * @param openIdConnectIssuerUri The issuer URI, e.g. "https://accounts.google.com"
+     * @param connectionBuilder      The connection builder that is used to establish a connection
+     *                               to the resource server.
+     * @param callback               The callback to invoke upon completion.
+     * @see "OpenID Connect discovery 1.0
+     * <https://openid.net/specs/openid-connect-discovery-1_0.html>"
+     */
+    public static void fetchFromIssuer(@NonNull Uri openIdConnectIssuerUri,
+                                       @NonNull RetrieveConfigurationCallback callback,
+                                       @NonNull ConnectionBuilder connectionBuilder) {
+        fetchFromUrl(buildConfigurationUriFromIssuer(openIdConnectIssuerUri),
+                callback,
+                connectionBuilder);
     }
 
     static Uri buildConfigurationUriFromIssuer(Uri openIdConnectIssuerUri) {

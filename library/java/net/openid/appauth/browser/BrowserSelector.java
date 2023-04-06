@@ -56,14 +56,14 @@ public final class BrowserSelector {
             CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION;
 
     /**
-     * An arbitrary (but unregistrable, per
-     * <a href="https://www.iana.org/domains/reserved">IANA rules</a>) web intent used to query
-     * for installed web browsers on the system.
+     * Intent for querying installed web browsers as seen at
+     * https://cs.android.com/android/platform/superproject/+/master:packages/modules/Permission/PermissionController/src/com/android/permissioncontroller/role/model/BrowserRoleBehavior.java
      */
     @VisibleForTesting
-    static final Intent BROWSER_INTENT = new Intent(
-            Intent.ACTION_VIEW,
-            Uri.parse("http://www.example.com"));
+    static final Intent BROWSER_INTENT = new Intent()
+            .setAction(Intent.ACTION_VIEW)
+            .addCategory(Intent.CATEGORY_BROWSABLE)
+            .setData(Uri.fromParts("http", "", null));
 
     /**
      * Retrieves the full list of browsers installed on the device. Two entries will exist
@@ -181,9 +181,9 @@ public final class BrowserSelector {
 
     private static boolean isFullBrowser(ResolveInfo resolveInfo) {
         // The filter must match ACTION_VIEW, CATEGORY_BROWSEABLE, and at least one scheme,
-        if (!resolveInfo.filter.hasAction(Intent.ACTION_VIEW)
-                || !(resolveInfo.filter.hasCategory(Intent.CATEGORY_BROWSABLE)
-                    || (resolveInfo.filter.hasCategory(Intent.CATEGORY_APP_BROWSER)))
+        if (resolveInfo.filter == null
+                || !resolveInfo.filter.hasAction(Intent.ACTION_VIEW)
+                || !resolveInfo.filter.hasCategory(Intent.CATEGORY_BROWSABLE)
                 || resolveInfo.filter.schemesIterator() == null) {
             return false;
         }

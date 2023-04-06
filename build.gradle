@@ -4,60 +4,64 @@ apply from: 'config/keystore.gradle'
 
 buildscript {
     repositories {
-        jcenter()
+        gradlePluginPortal()
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.0'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
-        classpath 'org.ajoberstar:gradle-git:1.7.2'
-        classpath "org.jacoco:org.jacoco.core:0.8.5"
+        classpath 'com.android.tools.build:gradle:4.2.1'
+        classpath 'org.ajoberstar.grgit:grgit-gradle:4.1.1'
+        classpath 'org.jacoco:org.jacoco.core:0.8.7'
     }
 }
 
 subprojects {
     repositories {
         google()
-        jcenter()
-        maven { url 'https://jitpack.io' }
+        mavenCentral()
     }
 }
 
 ext.verifyKeystore()
 
-project.ext {
-    try {
-        def grgit = Grgit.open(dir: '.')
-        versionNum = grgit.log(includes: ['HEAD']).size()
-    } catch (Exception ignored) {
-        versionNum = 0
-    }
+try {
+    def grgit = Grgit.open(currentDir: project.rootDir)
+    def lastCommit = grgit.head()
 
+    project.ext.versionNum = grgit.log(includes:['HEAD']).size()
+    project.ext.versionName = grgit.describe()
+    project.ext.versionDate = lastCommit.getDate()
+    if (project.ext.versionName == null) {
+        project.ext.versionName = 'DEV'
+    }
+} catch (Exception ignored) {
+    project.ext.versionNum = 1
+    project.ext.versionName = 'DEV'
+    project.ext.versionDate = new Date()
+}
+
+project.ext {
     minSdkVersion = 16
-    compileSdkVersion = 30
-    buildToolsVersion = '30.0.0'
-    versionID = "0.8.1"
-    versionName = """$versionID-skyscanner"""
+    compileSdkVersion = 31
 
     googleVersions = [
-            glide   : '4.11.0',
-            material: '1.1.0',
+        glide                 : '4.12.0',
+        material              : '1.3.0',
     ]
 
     androidXVersions = [
-            annotation: '1.1.0',
-            appCompat : '1.1.0',
-            browser   : '1.2.0',
+        annotation            : '1.2.0',
+        appCompat             : '1.3.0',
+        browser               : '1.3.0',
     ]
 
-    okioVersion = '1.17.5'
-    jodaVersion = '2.10.6'
+    okioVersion = '2.10.0'
+    jodaVersion = '2.10.10'
 }
 
 task showVersion {
     doLast {
-        logger.lifecycle("Version ID: " + project.versionID)
+        logger.lifecycle("Version ID: " + project.versionNum)
         logger.lifecycle("Version Name: " + project.versionName)
+        logger.lifecycle("Version Date: " + project.versionDate)
     }
 }

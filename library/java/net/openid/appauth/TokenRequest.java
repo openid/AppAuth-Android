@@ -63,6 +63,8 @@ public class TokenRequest {
     @VisibleForTesting
     static final String KEY_REFRESH_TOKEN = "refreshToken";
     @VisibleForTesting
+    static final String KEY_CODE_VERIFIER = "codeVerifier";
+    @VisibleForTesting
     static final String KEY_ADDITIONAL_PARAMETERS = "additionalParameters";
 
     public static final String PARAM_CLIENT_ID = "client_id";
@@ -118,8 +120,9 @@ public class TokenRequest {
      * The service's {@link AuthorizationServiceConfiguration configuration}.
      * This configuration specifies how to connect to a particular OAuth provider.
      * Configurations may be
-     * {@link AuthorizationServiceConfiguration#AuthorizationServiceConfiguration(Uri,
-     * Uri, Uri) created manually}, or
+     * {@link
+     * AuthorizationServiceConfiguration#AuthorizationServiceConfiguration(Uri, Uri, Uri, Uri)
+     * created manually}, or
      * {@link AuthorizationServiceConfiguration#fetchFromUrl(Uri,
      * AuthorizationServiceConfiguration.RetrieveConfigurationCallback)
      * via an OpenID Connect Discovery Document}.
@@ -550,6 +553,7 @@ public class TokenRequest {
         JsonUtil.putIfNotNull(json, KEY_SCOPE, scope);
         JsonUtil.putIfNotNull(json, KEY_AUTHORIZATION_CODE, authorizationCode);
         JsonUtil.putIfNotNull(json, KEY_REFRESH_TOKEN, refreshToken);
+        JsonUtil.putIfNotNull(json, KEY_CODE_VERIFIER, codeVerifier);
         JsonUtil.put(json, KEY_ADDITIONAL_PARAMETERS,
                 JsonUtil.mapToJsonObject(additionalParameters));
         return json;
@@ -574,21 +578,17 @@ public class TokenRequest {
     public static TokenRequest jsonDeserialize(JSONObject json) throws JSONException {
         checkNotNull(json, "json object cannot be null");
 
-        TokenRequest.Builder builder = new TokenRequest.Builder(
+        return new TokenRequest(
                 AuthorizationServiceConfiguration.fromJson(json.getJSONObject(KEY_CONFIGURATION)),
-                JsonUtil.getString(json, KEY_CLIENT_ID))
-                .setRedirectUri(JsonUtil.getUriIfDefined(json, KEY_REDIRECT_URI))
-                .setGrantType(JsonUtil.getString(json, KEY_GRANT_TYPE))
-                .setRefreshToken(JsonUtil.getStringIfDefined(json, KEY_REFRESH_TOKEN))
-                .setAuthorizationCode(JsonUtil.getStringIfDefined(json, KEY_AUTHORIZATION_CODE))
-                .setAdditionalParameters(JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS))
-                .setNonce(JsonUtil.getStringIfDefined(json, KEY_NONCE));
-
-        if (json.has(KEY_SCOPE)) {
-            builder.setScopes(AsciiStringListUtil.stringToSet(JsonUtil.getString(json, KEY_SCOPE)));
-        }
-
-        return builder.build();
+                JsonUtil.getString(json, KEY_CLIENT_ID),
+                JsonUtil.getStringIfDefined(json, KEY_NONCE),
+                JsonUtil.getString(json, KEY_GRANT_TYPE),
+                JsonUtil.getUriIfDefined(json, KEY_REDIRECT_URI),
+                JsonUtil.getStringIfDefined(json, KEY_SCOPE),
+                JsonUtil.getStringIfDefined(json, KEY_AUTHORIZATION_CODE),
+                JsonUtil.getStringIfDefined(json, KEY_REFRESH_TOKEN),
+                JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER),
+                JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
     }
 
     /**
