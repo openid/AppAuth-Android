@@ -10,10 +10,6 @@
  * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Copyright 2023 Skyscanner
- * Changes made to the original file:
-  - Nullability check for the mAuthIntent, finishing the activity if so.
  */
 
 package net.openid.appauth;

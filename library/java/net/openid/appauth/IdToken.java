@@ -279,7 +279,8 @@ public class IdToken {
         // OpenID Connect Core Section 3.1.3.7. rule #10
         // Validates that the issued at time is not more than +/- 10 minutes on the current
         // time.
-        // Not enforced. Time-based rules will break if users set the time in their device settings manually
+        // Not enforced. Time-based rules will break if users set the time in their device
+        // settings manually
 
 
         // Only relevant for the authorization_code response type
