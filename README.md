@@ -1,9 +1,8 @@
 ![AppAuth for Android](https://rawgit.com/openid/AppAuth-Android/master/appauth_lockup.svg)
 
-[![Download](https://api.bintray.com/packages/openid/net.openid/appauth/images/download.svg) ](https://bintray.com/openid/net.openid/appauth/_latestVersion)
+[![Download](https://img.shields.io/maven-central/v/net.openid/appauth)](https://search.maven.org/search?q=g:net.openid%20appauth)
 [![Javadocs](http://javadoc.io/badge/net.openid/appauth.svg)](http://javadoc.io/doc/net.openid/appauth)
-[![Build Status](https://travis-ci.org/openid/AppAuth-Android.svg?branch=master)](https://travis-ci.org/openid/AppAuth-Android)
-[![Codacy Badge](https://api.codacy.com/project/badge/grade/321412eec811478085ec6c4c923ad8a1)](https://www.codacy.com/app/iainmcgin/AppAuth-Android)
+[![Build Status](https://github.com/openid/AppAuth-Android/actions/workflows/build.yml/badge.svg)](https://github.com/openid/AppAuth-Android/actions/workflows/build.yml)
 [![codecov.io](https://codecov.io/github/openid/AppAuth-Android/coverage.svg?branch=master)](https://codecov.io/github/openid/AppAuth-Android?branch=master)
 
 AppAuth for Android is a client SDK for communicating with
@@ -34,9 +33,11 @@ Google) can be found here:
 
 ## Download
 
-Instructions for downloading the binary releases of AppAuth, or to add a
-dependency using Maven, Gradle or Ivy, can be found on our
-[Bintray page](https://bintray.com/openid/net.openid/appauth).
+AppAuth for Android is available on [MavenCentral](https://search.maven.org/search?q=g:net.openid%20appauth)
+
+```groovy
+implementation 'net.openid:appauth:<version>'
+```
 
 ## Requirements
 
@@ -76,20 +77,6 @@ to enable AppAuth searching for usable installed browsers.
 A demo app is contained within this repository. For instructions on how to
 build and configure this app, see the
 [demo app readme](https://github.com/openid/AppAuth-Android/blob/master/app/README.md).
-
-## Codelabs, videos and other resources
-
-- A codelab featuring AppAuth was provided for Google I/O 2016:
-  [Achieving Single Sign-on with AppAuth](https://codelabs.developers.google.com/codelabs/appauth-android-codelab/index.html).
-
-- A talk providing an overview of using the library for enterprise single
-  sign-on (produced by Google) can be found here:
-  [Enterprise SSO with Chrome Custom Tabs](https://youtu.be/DdQTXrk6YTk).
-
-- AppAuth is discussed as part of the
-  ["Your apps at work"](https://youtu.be/Za0OQo8DRM4?t=22m56s) session at Google I/O 2016.
-
-- A sample integration with Ping Identity can be found [here](https://github.com/pingidentity/android-appauth-sample-application).
 
 ## Conceptual overview
 
@@ -174,21 +161,20 @@ AuthorizationServiceConfiguration serviceConfig =
 Where available, using an OpenID Connect discovery document is preferable:
 
 ```java
-AuthorizationServiceConfiguration serviceConfig =
-    AuthorizationServiceConfiguration.fetchFromIssuer(
-        Uri.parse("https://idp.example.com"),
-        new RetrieveConfigurationCallback() {
-          void onFetchConfigurationCompleted(
-              @Nullable AuthorizationServiceConfiguration serviceConfiguration,
-              @Nullable AuthorizationException ex) {
-            if (ex != null) {
-              Log.e(TAG, "failed to fetch configuration");
-              return;
-            }
+AuthorizationServiceConfiguration.fetchFromIssuer(
+    Uri.parse("https://idp.example.com"),
+    new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
+      public void onFetchConfigurationCompleted(
+          @Nullable AuthorizationServiceConfiguration serviceConfiguration,
+          @Nullable AuthorizationException ex) {
+        if (ex != null) {
+          Log.e(TAG, "failed to fetch configuration");
+          return;
+        }
 
-            // use serviceConfiguration as needed
-          }
-        });
+        // use serviceConfiguration as needed
+    }
+});
 ```
 
 This will attempt to download a discovery document from the standard location
@@ -198,9 +184,12 @@ document for your IDP is in some other non-standard location, you can instead
 provide the full URI as follows:
 
 ```java
-AuthorizationServiceConfiguration serviceConfig =
-    AuthorizationServiceConfiguration.fetchFromUrl(
-        Uri.parse("https://idp.example.com/exampletenant/openid-config"));
+AuthorizationServiceConfiguration.fetchFromUrl(
+    Uri.parse("https://idp.example.com/exampletenant/openid-config"),
+    new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
+        ...
+    }
+});
 ```
 
 If desired, this configuration can be used to seed an AuthState instance,
@@ -291,16 +280,15 @@ capture this response, it must register with the Android OS as a handler for
 this redirect URI.
 
 We recommend using a custom scheme based redirect URI (i.e. those of form
-"my.scheme:/path"), as this is the most widely supported across all versions
-of Android. It is strongly recommended to use "reverse domain name notation",
-which is a naming convention based on the domain name system, but where the
-domain components are reversed. For example, if the web domain for your service
-is "service.example.com", then the reverse domain name form to use for a
-custom scheme would be "com.example.service". This is also, typically, the
-convention used for the package name of your app, e.g. "com.example.app". As
-such, the package name for your app can often be used as a custom scheme -
-there are some exceptions, such as when the package name contains underscores,
-as these are not legal characters for URI schemes.
+`my.scheme:/path`), as this is the most widely supported across all versions of
+Android. To avoid conflicts with other apps, it is recommended to configure a 
+distinct scheme using "reverse domain name notation". This can either match
+your service web domain (in reverse) e.g. `com.example.service` or your package
+name `com.example.app` or be something completely new as long as it's distinct
+enough. Using the package name of your app is quite common but it's not always
+possible if it contains illegal characters for URI schemes (like underscores)
+or if you already have another handler for that scheme - so just use something
+else.
 
 When a custom scheme is used, AppAuth can be easily configured to capture
 all redirects using this custom scheme through a manifest placeholder:
@@ -440,6 +428,81 @@ authState.performActionWithFreshTokens(service, new AuthStateAction() {
 });
 ```
 
+This also updates the AuthState object with current access, id, and refresh tokens.
+If you are storing your AuthState in persistent storage, you should write the updated
+copy in the callback to this method.
+
+### Ending current session
+
+Given you have a logged in session and you want to end it. In that case you need to get:
+- `AuthorizationServiceConfiguration`
+- valid Open Id Token that you should get after authentication
+- End of session URI that should be provided within you OpenId service config
+
+First you have to build EndSessionRequest
+
+```java
+EndSessionRequest endSessionRequest =
+    new EndSessionRequest.Builder(authorizationServiceConfiguration)
+        .setIdTokenHint(idToken)
+        .setPostLogoutRedirectUri(endSessionRedirectUri)
+        .build();
+```
+This request can then be dispatched using one of two approaches.
+
+a `startActivityForResult` call using an Intent returned from the `AuthorizationService`,
+or by calling `performEndSessionRequest` and providing pending intent for completion
+and cancelation handling activities.
+
+The startActivityForResult approach is simpler to use but may require more processing of the result:
+
+```java
+private void endSession() {
+  AuthorizationService authService = new AuthorizationService(this);
+  Intent endSessionItent = authService.getEndSessionRequestIntent(endSessionRequest);
+  startActivityForResult(endSessionItent, RC_END_SESSION);
+}
+
+@Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+  if (requestCode == RC_END_SESSION) {
+    EndSessionResonse resp = EndSessionResonse.fromIntent(data);
+    AuthorizationException ex = AuthorizationException.fromIntent(data);
+    // ... process the response or exception ...
+  } else {
+    // ...
+  }
+}
+```
+If instead you wish to directly transition to another activity on completion or cancelation,
+you can use `performEndSessionRequest`:
+
+```java
+AuthorizationService authService = new AuthorizationService(this);
+
+authService.performEndSessionRequest(
+    endSessionRequest,
+    PendingIntent.getActivity(this, 0, new Intent(this, MyAuthCompleteActivity.class), 0),
+    PendingIntent.getActivity(this, 0, new Intent(this, MyAuthCanceledActivity.class), 0));
+```
+
+End session flow will also work involving browser mechanism that is described in authorization
+mechanism session.
+Handling response mechanism with transition to another activity should be as follows:
+
+ ```java
+public void onCreate(Bundle b) {
+  EndSessionResponse resp = EndSessionResponse.fromIntent(getIntent());
+  AuthorizationException ex = AuthorizationException.fromIntent(getIntent());
+  if (resp != null) {
+    // authorization completed
+  } else {
+    // authorization failed, check ex for more details
+  }
+  // ...
+}
+```
+
 ### AuthState persistence
 
 Instances of `AuthState` keep track of the authorization and token
@@ -451,10 +514,9 @@ store private to the app:
 ```java
 @NonNull public AuthState readAuthState() {
   SharedPreferences authPrefs = getSharedPreferences("auth", MODE_PRIVATE);
-  String stateJson = authPrefs.getString("stateJson");
-  AuthState state;
-  if (stateStr != null) {
-    return AuthState.fromJsonString(stateJson);
+  String stateJson = authPrefs.getString("stateJson", null);
+  if (stateJson != null) {
+    return AuthState.jsonDeserialize(stateJson);
   } else {
     return new AuthState();
   }
@@ -463,7 +525,7 @@ store private to the app:
 public void writeAuthState(@NonNull AuthState state) {
   SharedPreferences authPrefs = getSharedPreferences("auth", MODE_PRIVATE);
   authPrefs.edit()
-      .putString("stateJson", state.toJsonString())
+      .putString("stateJson", state.jsonSerializeString())
       .apply();
 }
 ```
@@ -570,6 +632,26 @@ AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
         }
       }
     })
+    .build();
+```
+
+### Issues with [ID Token](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/IdToken.java#L118) validation
+
+ID Token validation was introduced in `0.8.0` but not all authorization servers or configurations support it correctly.
+
+- For testing environments [setSkipIssuerHttpsCheck](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AppAuthConfiguration.java#L129) can be used to bypass the fact the issuer needs to be HTTPS.
+
+```java
+AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
+    .setSkipIssuerHttpsCheck(true)
+    .build()
+```
+
+- For services that don't support nonce[s] resulting in **IdTokenException** `Nonce mismatch` just set nonce to `null` on the `AuthorizationRequest`. Please consider **raising an issue** with your Identity Provider and removing this once it is fixed.
+
+```java
+AuthorizationRequest authRequest = authRequestBuilder
+    .setNonce(null)
     .build();
 ```
 

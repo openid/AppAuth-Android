@@ -10,12 +10,12 @@ import org.robolectric.annotation.Config;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk=16)
+@Config(sdk=16)
 public class DeprecationMigrationTest {
 
     @Test
     public void testMatches_emptyDenyList() {
-        BrowserDenyList denyList = new BrowserBlacklist();
+        BrowserDenyList denyList = new BrowserDenyList();
         assertThat(denyList.matches(Browsers.Chrome.customTab("46"))).isTrue();
         assertThat(denyList.matches(Browsers.Firefox.standaloneBrowser("10"))).isTrue();
         assertThat(denyList.matches(Browsers.SBrowser.standaloneBrowser("11"))).isTrue();
@@ -23,7 +23,7 @@ public class DeprecationMigrationTest {
 
     @Test
     public void testMatches_singleBrowser() {
-        BrowserDenyList denyList = new BrowserBlacklist(VersionedBrowserMatcher.FIREFOX_BROWSER);
+        BrowserDenyList denyList = new BrowserDenyList(VersionedBrowserMatcher.FIREFOX_BROWSER);
         assertThat(denyList.matches(Browsers.Chrome.customTab("46"))).isTrue();
         assertThat(denyList.matches(Browsers.Firefox.standaloneBrowser("10"))).isFalse();
         assertThat(denyList.matches(Browsers.SBrowser.standaloneBrowser("11"))).isTrue();
@@ -31,7 +31,7 @@ public class DeprecationMigrationTest {
 
     @Test
     public void testMatches_customTabs() {
-        BrowserDenyList denyList = new BrowserBlacklist(
+        BrowserDenyList denyList = new BrowserDenyList(
             VersionedBrowserMatcher.CHROME_CUSTOM_TAB,
             VersionedBrowserMatcher.SAMSUNG_CUSTOM_TAB);
 
@@ -44,7 +44,7 @@ public class DeprecationMigrationTest {
 
     @Test
     public void testMatches_emptyAllowList() {
-        BrowserAllowList allowList = new BrowserWhitelist();
+        BrowserAllowList allowList = new BrowserAllowList();
         assertThat(allowList.matches(Browsers.Chrome.customTab("46"))).isFalse();
         assertThat(allowList.matches(Browsers.Firefox.standaloneBrowser("10"))).isFalse();
         assertThat(allowList.matches(Browsers.Firefox.customTab("57"))).isFalse();
@@ -53,7 +53,7 @@ public class DeprecationMigrationTest {
 
     @Test
     public void testMatches_chromeBrowserOnly() {
-        BrowserAllowList allowList = new BrowserWhitelist(VersionedBrowserMatcher.CHROME_BROWSER);
+        BrowserAllowList allowList = new BrowserAllowList(VersionedBrowserMatcher.CHROME_BROWSER);
         assertThat(allowList.matches(Browsers.Chrome.standaloneBrowser("46"))).isTrue();
         assertThat(allowList.matches(Browsers.Chrome.customTab("46"))).isFalse();
         assertThat(allowList.matches(Browsers.Firefox.standaloneBrowser("10"))).isFalse();
@@ -62,7 +62,7 @@ public class DeprecationMigrationTest {
 
     @Test
     public void testMatches_chromeCustomTabOrBrowser() {
-        BrowserAllowList allowList = new BrowserWhitelist(
+        BrowserAllowList allowList = new BrowserAllowList(
             VersionedBrowserMatcher.CHROME_BROWSER,
             VersionedBrowserMatcher.CHROME_CUSTOM_TAB);
         assertThat(allowList.matches(Browsers.Chrome.standaloneBrowser("46"))).isTrue();
@@ -73,7 +73,7 @@ public class DeprecationMigrationTest {
 
     @Test
     public void testMatches_firefoxOrSamsung() {
-        BrowserAllowList allowList = new BrowserWhitelist(
+        BrowserAllowList allowList = new BrowserAllowList(
             VersionedBrowserMatcher.FIREFOX_BROWSER,
             VersionedBrowserMatcher.FIREFOX_CUSTOM_TAB,
             VersionedBrowserMatcher.SAMSUNG_BROWSER,

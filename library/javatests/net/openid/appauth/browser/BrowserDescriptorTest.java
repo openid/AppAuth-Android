@@ -16,15 +16,15 @@ package net.openid.appauth.browser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-import net.openid.appauth.BuildConfig;
+import com.google.common.collect.Sets;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk=16)
+@Config(sdk = 16)
 public class BrowserDescriptorTest {
 
     @Test
@@ -65,7 +65,7 @@ public class BrowserDescriptorTest {
         @SuppressWarnings("unchecked")
         BrowserDescriptor b = new BrowserDescriptor(
                 a.packageName,
-                Collections.singleton("DIFFERENT_SIGNATURE"),
+                Sets.newHashSet("DIFFERENT_SIGNATURE"),
                 a.version,
                 a.useCustomTab);
         assertThat(a).isNotEqualTo(b);

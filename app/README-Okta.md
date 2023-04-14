@@ -13,7 +13,8 @@ You can create an Okta developer account at [https://developer.okta.com/](https:
 | Setting             | Value                                               |
 | ------------------- | --------------------------------------------------- |
 | Application Name    | OpenId Connect App *(must be unique)* |
-| Redirect URIs       | com.oktapreview.yoursubdomain://callback_url|
+| Login redirect URIs | com.oktapreview.yoursubdomain://callback_url|
+| Logout redirect URIs| com.oktapreview.yoursubdomain://callback_url|
 | Allowed grant types | Authorization Code |
 
   1. Click **Finish** to redirect back to the *General Settings* of your application.
@@ -27,6 +28,7 @@ You can create an Okta developer account at [https://developer.okta.com/](https:
 {
 "client_id": "{{YourClientID}}",
 "redirect_uri": "com.oktapreview.{{yourOrg}}:/oauth",
+"end_session_uri": "com.oktapreview.{{yourOrg}}:/{logoutCallback}",
 "authorization_scope": "openid email profile",
 "discovery_uri": "https://{{yourOrg}}.okta.com/.well-known/openid-configuration"
 }

@@ -35,21 +35,25 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk=16)
+@Config(sdk = 16)
 public final class LoggerTest {
 
     private static final int INT = 100;
+
+    private AutoCloseable mMockitoCloseable;
+
     @Mock
     private Logger.LogWrapper mMockLockWrap;
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        mMockitoCloseable = MockitoAnnotations.openMocks(this);
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
         Logger.setInstance(null);
+        mMockitoCloseable.close();
     }
 
     @Test
