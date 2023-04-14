@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.VisibleForTesting;
-import androidx.appcompat.app.AppCompatActivity;
 
 import net.openid.appauth.AuthorizationException.AuthorizationRequestErrors;
 import net.openid.appauth.internal.Logger;
@@ -124,7 +123,7 @@ import org.json.JSONException;
  *       {@link AuthorizationException} as appropriate.
  *       The AuthorizationManagementActivity finishes, removing itself from the back stack.
  */
-public class AuthorizationManagementActivity extends AppCompatActivity {
+public class AuthorizationManagementActivity extends Activity {
 
     @VisibleForTesting
     static final String KEY_AUTH_INTENT = "authIntent";
