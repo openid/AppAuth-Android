@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 
 import android.util.Log;
 
-import net.openid.appauth.BuildConfig;
 
 import org.junit.After;
 import org.junit.Before;

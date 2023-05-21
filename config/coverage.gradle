@@ -8,6 +8,9 @@ android {
             }
         }
     }
+    unitTestVariants.all {
+        it.mergedFlavor.manifestPlaceholders = ['appAuthRedirectScheme': 'net.openid.appauthdemo']
+    }
 }
 
 task jacocoTestReport(type: JacocoReport, dependsOn: "testDebugUnitTest") {
