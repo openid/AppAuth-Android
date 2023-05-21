@@ -8,7 +8,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.2.1'
+        classpath 'com.android.tools.build:gradle:8.0.1'
         classpath 'org.ajoberstar.grgit:grgit-gradle:4.1.1'
         classpath 'org.jacoco:org.jacoco.core:0.8.7'
     }
@@ -41,7 +41,7 @@ try {
 
 project.ext {
     minSdkVersion = 16
-    compileSdkVersion = 31
+    compileSdkVersion = 33
 
     googleVersions = [
         glide                 : '4.12.0',

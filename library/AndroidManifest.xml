@@ -12,8 +12,7 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="net.openid.appauth">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
   <uses-permission android:name="android.permission.INTERNET" />
 

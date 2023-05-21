@@ -9,7 +9,7 @@ dependencies {
 task androidJavadoc(type: JavaExec) {
     jvmArgs = ['--add-exports=jdk.javadoc/jdk.javadoc.internal.tool=ALL-UNNAMED']
     classpath files(project.android.getBootClasspath())
-    main = 'jdk.javadoc.internal.tool.Main'
+    mainClass = 'jdk.javadoc.internal.tool.Main'
     ext.destinationDir = file("${project.buildDir}/docs/javadoc")
     args = ['-doctitle', "AppAuth for Android",
             '-use',
@@ -25,7 +25,7 @@ task androidJavadoc(type: JavaExec) {
 }
 
 task javadocJar(type: Jar, dependsOn: androidJavadoc) {
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
     from androidJavadoc.ext.destinationDir
 }
 
