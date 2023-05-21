@@ -31,6 +31,10 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    lintOptions {
+        lintConfig = file("${projectDir}/lint.xml")
+    }
+
     buildTypes {
         debug {
             signingConfig signingConfigs.debugAndRelease

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<lint>
+    <issue id="NotificationPermission">
+        <ignore regexp="com.bumptech.glide.request.target.NotificationTarget" />
+    </issue>
+</lint>
