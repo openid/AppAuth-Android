@@ -4,6 +4,7 @@ apply from: '../config/android-common.gradle'
 apply from: '../config/keystore.gradle'
 
 android {
+    namespace 'net.openid.appauthdemo'
     defaultConfig {
         applicationId 'net.openid.appauthdemo'
         project.archivesBaseName = 'appauth-demoapp'
@@ -28,6 +29,10 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        lintConfig = file("${projectDir}/lint.xml")
     }
 
     buildTypes {

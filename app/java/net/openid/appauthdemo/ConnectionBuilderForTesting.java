@@ -55,7 +55,7 @@ public final class ConnectionBuilderForTesting implements ConnectionBuilder {
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
 
-    @SuppressLint("TrustAllX509TrustManager")
+    @SuppressLint({"TrustAllX509TrustManager", "CustomX509TrustManager"})
     private static final TrustManager[] ANY_CERT_MANAGER = new TrustManager[] {
             new X509TrustManager() {
                 public X509Certificate[] getAcceptedIssuers() {

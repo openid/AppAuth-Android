@@ -19,8 +19,6 @@ import android.net.UrlQuerySanitizer;
 import android.os.Bundle;
 import androidx.browser.customtabs.CustomTabsService;
 
-import net.openid.appauth.BuildConfig;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,7 +64,7 @@ public class UriUtilTest {
         parameters.put("test2", "value2 value3");
         String query = UriUtil.formUrlEncode(parameters);
 
-        assertThat(query.contains("value2+value3"));
+        assertThat(query).contains("value2+value3");
         mSanitizer.parseQuery(query);
         for (Map.Entry<String, String> param : parameters.entrySet()) {
             assertThat(mSanitizer.getValue(param.getKey())).isEqualTo(param.getValue());

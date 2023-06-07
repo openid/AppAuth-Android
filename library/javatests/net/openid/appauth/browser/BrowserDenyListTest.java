@@ -16,7 +16,6 @@ package net.openid.appauth.browser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import net.openid.appauth.BuildConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;

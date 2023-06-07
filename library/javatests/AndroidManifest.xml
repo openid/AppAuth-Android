@@ -13,12 +13,11 @@
  * limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="net.openid.appauth">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application>
         <activity android:name=".RedirectUriReceiverActivity"
-            android:exported="true" tools:node="replace">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>

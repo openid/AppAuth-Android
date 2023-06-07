@@ -14,7 +14,6 @@ import androidx.browser.customtabs.CustomTabsService;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
 import androidx.browser.customtabs.CustomTabsSession;
 import java.util.List;
-import net.openid.appauth.BuildConfig;
 
 import org.junit.After;
 import org.junit.Before;
