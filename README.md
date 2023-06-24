@@ -446,7 +446,7 @@ private void endSession() {
 @Override
 protected void onActivityResult(int requestCode, int resultCode, Intent data) {
   if (requestCode == RC_END_SESSION) {
-    EndSessionResonse resp = EndSessionResonse.fromIntent(data);
+    EndSessionResponse resp = EndSessionResponse.fromIntent(data);
     AuthorizationException ex = AuthorizationException.fromIntent(data);
     // ... process the response or exception ...
   } else {
