@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Looper;
+
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsClient;
@@ -56,6 +58,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static androidx.browser.customtabs.CustomTabsIntent.EXTRA_TITLE_VISIBILITY_STATE;
 import static androidx.browser.customtabs.CustomTabsIntent.EXTRA_TOOLBAR_COLOR;
@@ -67,6 +73,11 @@ import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
 import static net.openid.appauth.TestValues.TEST_CLIENT_ID;
 import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
 import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET_EXPIRES_AT;
+import static net.openid.appauth.TestValues.TEST_DEVICE_CODE;
+import static net.openid.appauth.TestValues.TEST_DEVICE_CODE_EXPIRES_IN;
+import static net.openid.appauth.TestValues.TEST_DEVICE_CODE_POLL_INTERVAL;
+import static net.openid.appauth.TestValues.TEST_DEVICE_USER_CODE;
+import static net.openid.appauth.TestValues.TEST_DEVICE_VERIFICATION_URI;
 import static net.openid.appauth.TestValues.TEST_ID_TOKEN;
 import static net.openid.appauth.TestValues.TEST_NONCE;
 import static net.openid.appauth.TestValues.TEST_REFRESH_TOKEN;
@@ -74,11 +85,14 @@ import static net.openid.appauth.TestValues.TEST_STATE;
 import static net.openid.appauth.TestValues.getTestAuthCodeExchangeRequest;
 import static net.openid.appauth.TestValues.getTestAuthCodeExchangeRequestBuilder;
 import static net.openid.appauth.TestValues.getTestAuthRequestBuilder;
+import static net.openid.appauth.TestValues.getTestDeviceAuthorizationRequest;
+import static net.openid.appauth.TestValues.getTestDeviceAuthorizationRequestBuilder;
 import static net.openid.appauth.TestValues.getTestEndSessionRequest;
 import static net.openid.appauth.TestValues.getTestEndSessionRequestBuilder;
 import static net.openid.appauth.TestValues.getTestIdTokenWithNonce;
 import static net.openid.appauth.TestValues.getTestRegistrationRequest;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -108,6 +122,14 @@ public class AuthorizationServiceTest {
             + " \"application_type\": " + RegistrationRequest.APPLICATION_TYPE_NATIVE + "\n"
             + "}";
 
+    private static final String DEVICE_AUTH_RESPONSE_JSON = "{\n"
+            + " \"device_code\": \"" + TEST_DEVICE_CODE + "\",\n"
+            + " \"user_code\": \"" + TEST_DEVICE_USER_CODE + "\",\n"
+            + " \"verification_uri\": \"" + TEST_DEVICE_VERIFICATION_URI + "\",\n"
+            + " \"expires_in\": " + TEST_DEVICE_CODE_EXPIRES_IN + ",\n"
+            + " \"interval\": " + TEST_DEVICE_CODE_POLL_INTERVAL + "\n"
+            + "}";
+
     private static final String INVALID_GRANT_RESPONSE_JSON = "{\n"
             + "  \"error\": \"invalid_grant\",\n"
             + "  \"error_description\": \"invalid_grant description\"\n"
@@ -122,6 +144,7 @@ public class AuthorizationServiceTest {
     private AutoCloseable mMockitoCloseable;
     private AuthorizationCallback mAuthCallback;
     private RegistrationCallback mRegistrationCallback;
+    private DeviceAuthorizationCallback mDeviceAuthCallback;
     private AuthorizationService mService;
     private OutputStream mOutputStream;
     private BrowserDescriptor mBrowserDescriptor;
@@ -139,6 +162,7 @@ public class AuthorizationServiceTest {
         mMockitoCloseable = MockitoAnnotations.openMocks(this);
         mAuthCallback = new AuthorizationCallback();
         mRegistrationCallback = new RegistrationCallback();
+        mDeviceAuthCallback = new DeviceAuthorizationCallback();
         mBrowserDescriptor = Browsers.Chrome.customTab("46");
         mService = new AuthorizationService(
                 mContext,
@@ -446,6 +470,129 @@ public class AuthorizationServiceTest {
     }
 
     @Test
+    public void testTokenPollRequest() throws Exception {
+        InputStream is = new ByteArrayInputStream(getAuthCodeExchangeResponseJson().getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(is);
+        when(mHttpConnection.getRequestProperty("Accept")).thenReturn(null);
+        when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        TokenRequest request = getTestAuthCodeExchangeRequest();
+        Long currentTime = SystemClock.INSTANCE.getCurrentTimeMillis();
+        Long expirationTime = currentTime + TimeUnit.SECONDS.toMillis(TEST_EXPIRES_IN);
+        mService.performTokenPollRequest(request,
+            0L,
+            expirationTime,
+            mAuthCallback);
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
+        assertTokenResponse(mAuthCallback.response, request);
+        String postBody = mOutputStream.toString();
+
+        // by default, we set application/json as an acceptable response type if a value was not
+        // already set
+        verify(mHttpConnection).setRequestProperty("Accept", "application/json");
+
+        Map<String, String> params = UriUtil.formUrlDecodeUnique(postBody);
+
+        for (Map.Entry<String, String> requestParam : request.getRequestParameters().entrySet()) {
+            assertThat(params).containsEntry(requestParam.getKey(), requestParam.getValue());
+        }
+
+        assertThat(params).containsEntry(TokenRequest.PARAM_CLIENT_ID, request.clientId);
+    }
+
+    @Test
+    public void testTokenPollRequest_withSlowDown() throws Exception {
+        InputStream slowDownIs = new ByteArrayInputStream(getDeviceAuthSlowDownJson().getBytes());
+        InputStream successIs = new ByteArrayInputStream(getAuthCodeExchangeResponseJson().getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(slowDownIs, successIs);
+        when(mHttpConnection.getRequestProperty("Accept")).thenReturn(null);
+        when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        TokenRequest request = getTestAuthCodeExchangeRequest();
+        Long currentTime = SystemClock.INSTANCE.getCurrentTimeMillis();
+        Long expirationTime = currentTime + TimeUnit.SECONDS.toMillis(TEST_EXPIRES_IN);
+        mService.performTokenPollRequest(request,
+            0L,
+            expirationTime,
+            mAuthCallback);
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
+        assertTokenResponse(mAuthCallback.response, request);
+
+        Long interval = TimeUnit.SECONDS.toMillis(AuthorizationService.TokenRequestPollingTask.DEFAULT_INTERVAL);
+        assertThat(SystemClock.INSTANCE.getCurrentTimeMillis() - currentTime)
+            .isGreaterThanOrEqualTo(interval);
+    }
+
+    @Test
+    public void testTokenPollRequest_withPending() throws Exception {
+        InputStream pendingIs = new ByteArrayInputStream(getDeviceAuthPendingJson().getBytes());
+        InputStream successIs = new ByteArrayInputStream(getAuthCodeExchangeResponseJson().getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(pendingIs, successIs);
+        when(mHttpConnection.getRequestProperty("Accept")).thenReturn(null);
+        when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        TokenRequest request = getTestAuthCodeExchangeRequest();
+        Long currentTime = SystemClock.INSTANCE.getCurrentTimeMillis();
+        Long expirationTime = currentTime + TimeUnit.SECONDS.toMillis(TEST_EXPIRES_IN);
+        mService.performTokenPollRequest(request,
+            0L,
+            expirationTime,
+            mAuthCallback);
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
+        assertTokenResponse(mAuthCallback.response, request);
+    }
+
+    @Test
+    public void testTokenPollRequest_withExpiration() throws Exception {
+        InputStream is = new ByteArrayInputStream(getDeviceAuthPendingJson().getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(is);
+        when(mHttpConnection.getRequestProperty("Accept")).thenReturn(null);
+        when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        TokenRequest request = getTestAuthCodeExchangeRequest();
+        Long currentTime = SystemClock.INSTANCE.getCurrentTimeMillis();
+        mService.performTokenPollRequest(request,
+            0L,
+            currentTime,
+            mAuthCallback);
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
+        assertNotNull(mAuthCallback.error);
+        assertEquals(AuthorizationException.DeviceCodeRequestErrors.EXPIRED_TOKEN, mAuthCallback.error);
+    }
+
+    @Test
+    public void testTokenPollRequest_interruptException() throws Exception {
+        when(mHttpConnection.getInputStream()).thenAnswer(invocation ->
+            new ByteArrayInputStream(getDeviceAuthPendingJson().getBytes()));
+        when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        Long currentTime = SystemClock.INSTANCE.getCurrentTimeMillis();
+        Long expirationTime = currentTime + TimeUnit.SECONDS.toMillis(TEST_EXPIRES_IN);
+
+        CancelAsyncTaskRunnable cancelRunnable = mService.performTokenPollRequest(
+                getTestAuthCodeExchangeRequest(),
+                TEST_DEVICE_CODE_POLL_INTERVAL,
+                expirationTime,
+                mAuthCallback);
+        cancelRunnable.run();
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
+        assertNotNull(mAuthCallback.error);
+        assertEquals(AuthorizationException.DeviceCodeRequestErrors.CLIENT_ERROR, mAuthCallback.error);
+    }
+
+    @Test
+    public void testTokenPollRequest_ioException() throws Exception {
+        Exception ex = new IOException();
+        when(mHttpConnection.getInputStream()).thenThrow(ex);
+        when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        mService.performTokenPollRequest(getTestAuthCodeExchangeRequest(), 0L, 0L, mAuthCallback);
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
+        assertNotNull(mAuthCallback.error);
+        assertEquals(GeneralErrors.NETWORK_ERROR, mAuthCallback.error);
+    }
+
+    @Test
     public void testRegistrationRequest() throws Exception {
         InputStream is = new ByteArrayInputStream(REGISTRATION_RESPONSE_JSON.getBytes());
         when(mHttpConnection.getInputStream()).thenReturn(is);
@@ -467,6 +614,42 @@ public class AuthorizationServiceTest {
         shadowOf(getMainLooper()).idle();
         assertNotNull(mRegistrationCallback.error);
         assertEquals(GeneralErrors.NETWORK_ERROR, mRegistrationCallback.error);
+    }
+
+    @Test
+    public void testDeviceAuthRequest() throws Exception {
+        InputStream is = new ByteArrayInputStream(DEVICE_AUTH_RESPONSE_JSON.getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(is);
+        when(mHttpConnection.getRequestProperty("Accept")).thenReturn(null);
+        when(mHttpConnection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        DeviceAuthorizationRequest request = getTestDeviceAuthorizationRequest();
+        mService.performDeviceAuthorizationRequest(request, mDeviceAuthCallback);
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
+        assertDeviceAuthResponse(mDeviceAuthCallback.response, request);
+        String postBody = mOutputStream.toString();
+
+        verify(mHttpConnection).setRequestProperty("Accept", "application/json");
+
+        Map<String, String> params = UriUtil.formUrlDecodeUnique(postBody);
+
+        for (Map.Entry<String, String> requestParam : request.getRequestParameters().entrySet()) {
+            assertThat(params).containsEntry(requestParam.getKey(), requestParam.getValue());
+        }
+
+        assertThat(params).containsEntry(TokenRequest.PARAM_CLIENT_ID, request.clientId);
+    }
+
+    @Test
+    public void testDeviceAuthRequest_IoException() throws Exception {
+        Exception ex = new IOException();
+        when(mHttpConnection.getInputStream()).thenThrow(ex);
+        mService.performDeviceAuthorizationRequest(getTestDeviceAuthorizationRequest(),
+                mDeviceAuthCallback);
+        mPausedExecutorService.runAll();
+        shadowOf(getMainLooper()).idle();
+        assertNotNull(mDeviceAuthCallback.error);
+        assertEquals(GeneralErrors.NETWORK_ERROR, mDeviceAuthCallback.error);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -537,6 +720,16 @@ public class AuthorizationServiceTest {
         assertThat(response.clientSecretExpiresAt).isEqualTo(TEST_CLIENT_SECRET_EXPIRES_AT);
     }
 
+    private void assertDeviceAuthResponse(DeviceAuthorizationResponse response,
+                                          DeviceAuthorizationRequest expectedRequest) {
+        assertThat(response).isNotNull();
+        assertThat(response.request).isEqualTo(expectedRequest);
+        assertThat(response.deviceCode).isEqualTo(TEST_DEVICE_CODE);
+        assertThat(response.userCode).isEqualTo(TEST_DEVICE_USER_CODE);
+        assertThat(response.tokenPollingIntervalTime).isEqualTo(TEST_DEVICE_CODE_POLL_INTERVAL);
+        assertThat(response.codeExpirationTime).isNotNull();
+    }
+
     private void assertTokenRequestBody(
             String requestBody, Map<String, String> expectedParameters) {
         Uri postBody = new Uri.Builder().encodedQuery(requestBody).build();
@@ -575,6 +768,21 @@ public class AuthorizationServiceTest {
         }
     }
 
+    private static class DeviceAuthorizationCallback implements
+            AuthorizationService.DeviceAuthorizationResponseCallback {
+        public DeviceAuthorizationResponse response;
+        public AuthorizationException error;
+
+        @Override
+        public void onDeviceAuthorizationRequestCompleted(
+                @Nullable DeviceAuthorizationResponse deviceAuthResponse,
+                @Nullable AuthorizationException ex) {
+            assertTrue((deviceAuthResponse == null) ^ (ex == null));
+            this.response = deviceAuthResponse;
+            this.error = ex;
+        }
+    }
+
     private void assertRequestIntent(Intent intent, Integer color) {
         assertEquals(Intent.ACTION_VIEW, intent.getAction());
         assertColorMatch(intent, color);
@@ -605,6 +813,18 @@ public class AuthorizationServiceTest {
 
     String getAuthCodeExchangeResponseJson() {
         return getAuthCodeExchangeResponseJson(null);
+    }
+
+    String getDeviceAuthPendingJson() {
+        return "{\n"
+            + "\"error\":\"authorization_pending\"\n"
+            + "}";
+    }
+
+    String getDeviceAuthSlowDownJson() {
+        return "{\n"
+            + "\"error\":\"slow_down\"\n"
+            + "}";
     }
 
     String getAuthCodeExchangeResponseJson(@Nullable String idToken) {

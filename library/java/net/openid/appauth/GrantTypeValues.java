@@ -29,6 +29,14 @@ public final class GrantTypeValues {
     public static final String AUTHORIZATION_CODE = "authorization_code";
 
     /**
+     * The grant type used when obtaining a device access token.
+     *
+     * @see " OAuth 2.0 Device Grant (RFC 8628), Section 3.4
+     * <https://tools.ietf.org/html/rfc8628#section-3.4>"
+     */
+    public static final String DEVICE_CODE = "urn:ietf:params:oauth:grant-type:device_code";
+
+    /**
      * The grant type used when obtaining an access token.
      *
      * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 4.2

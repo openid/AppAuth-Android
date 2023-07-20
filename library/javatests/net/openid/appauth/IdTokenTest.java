@@ -23,6 +23,7 @@ import org.robolectric.annotation.Config;
 
 import static net.openid.appauth.AuthorizationServiceDiscoveryTest.TEST_AUTHORIZATION_ENDPOINT;
 import static net.openid.appauth.AuthorizationServiceDiscoveryTest.TEST_CLAIMS_SUPPORTED;
+import static net.openid.appauth.AuthorizationServiceDiscoveryTest.TEST_DEVICE_AUTHORIZATION_ENDPOINT;
 import static net.openid.appauth.AuthorizationServiceDiscoveryTest.TEST_END_SESSION_ENDPOINT;
 import static net.openid.appauth.AuthorizationServiceDiscoveryTest.TEST_ID_TOKEN_SIGNING_ALG_VALUES;
 import static net.openid.appauth.AuthorizationServiceDiscoveryTest.TEST_JWKS_URI;
@@ -493,6 +494,7 @@ public class IdTokenTest {
             TEST_TOKEN_ENDPOINT,
             TEST_USERINFO_ENDPOINT,
             TEST_REGISTRATION_ENDPOINT,
+            TEST_DEVICE_AUTHORIZATION_ENDPOINT,
             TEST_END_SESSION_ENDPOINT,
             TEST_JWKS_URI,
             TEST_RESPONSE_TYPES_SUPPORTED,
