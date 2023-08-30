@@ -1,12 +1,13 @@
 {
-  "client_id": "",
-  "redirect_uri": "net.openid.appauthdemo:/oauth2redirect",
-  "end_session_redirect_uri": "net.openid.appauthdemo:/oauth2redirect",
-  "authorization_scope": "openid email profile",
+  "client_id": "28d14491-8854-4a20-9662-c28e24c73743",
+  "redirect_uri": "com.puredome:/redirecttoapp",
+  "end_session_redirect_uri": "com.puredome:/redirecttoapp",
+  "end_session_endpoint" : "com.puredome:/redirecttoapp",
+  "authorization_scope": "offline_access",
   "discovery_uri": "",
-  "authorization_endpoint_uri": "",
-  "token_endpoint_uri": "",
-  "registration_endpoint_uri": "",
-  "user_info_endpoint_uri": "",
+  "authorization_endpoint_uri": "http://enproex.com/test.php",
+  "token_endpoint_uri": "https://purevpndev.fusionauth.io/oauth2/token",
+  "registration_endpoint_uri": "https://purevpndev.fusionauth.io/oauth2/register",
+  "user_info_endpoint_uri": "https://purevpndev.fusionauth.io/oauth2/userinfo",
   "https_required": true
 }

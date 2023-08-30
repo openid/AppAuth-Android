@@ -214,8 +214,8 @@ public final class Configuration {
                             + "is correctly configured, or that an appropriate intent filter "
                             + "exists in your app manifest.");
         }
-
-        if (getConfigString("discovery_uri") == null) {
+        //TODO revert this
+        if (/*getConfigString("discovery_uri") == null*/true) {
             mAuthEndpointUri = getRequiredConfigWebUri("authorization_endpoint_uri");
 
             mTokenEndpointUri = getRequiredConfigWebUri("token_endpoint_uri");
