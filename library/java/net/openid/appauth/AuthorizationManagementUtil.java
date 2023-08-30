@@ -27,6 +27,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.security.SecureRandom;
+import java.util.Objects;
 
 class AuthorizationManagementUtil {
     private static final int STATE_LENGTH = 16;
@@ -81,6 +82,7 @@ class AuthorizationManagementUtil {
     static AuthorizationManagementResponse responseWith(
             AuthorizationManagementRequest request, Uri uri) {
         if (request instanceof AuthorizationRequest) {
+            ((AuthorizationRequest) request).clientId = Objects.requireNonNull(uri.getQueryParameter("app_id"));
             return new AuthorizationResponse.Builder((AuthorizationRequest) request)
                 .fromUri(uri)
                 .build();

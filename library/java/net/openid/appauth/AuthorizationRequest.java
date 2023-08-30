@@ -368,7 +368,7 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
      * <https://tools.ietf.org/html/rfc6749#section-4.1.1>"
      */
     @NonNull
-    public final String clientId;
+    public String clientId;
 
     /**
      * The OpenID Connect 1.0 `display` parameter. This is a string that specifies how the

@@ -461,7 +461,7 @@ public class AuthorizationResponse extends AuthorizationManagementResponse {
                 request.configuration,
                 request.clientId)
                 .setGrantType(GrantTypeValues.AUTHORIZATION_CODE)
-                .setRedirectUri(request.redirectUri)
+                .setRedirectUri(Uri.parse(request.redirectUri +"?app_id="+request.clientId))
                 .setCodeVerifier(request.codeVerifier)
                 .setAuthorizationCode(authorizationCode)
                 .setAdditionalParameters(additionalExchangeParameters)
