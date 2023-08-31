@@ -82,7 +82,6 @@ class AuthorizationManagementUtil {
     static AuthorizationManagementResponse responseWith(
             AuthorizationManagementRequest request, Uri uri) {
         if (request instanceof AuthorizationRequest) {
-            ((AuthorizationRequest) request).clientId = Objects.requireNonNull(uri.getQueryParameter("app_id"));
             return new AuthorizationResponse.Builder((AuthorizationRequest) request)
                 .fromUri(uri)
                 .build();

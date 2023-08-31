@@ -370,6 +370,8 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
     @NonNull
     public String clientId;
 
+    public boolean isContainAppId;
+
     /**
      * The OpenID Connect 1.0 `display` parameter. This is a string that specifies how the
      * Authorization Server displays the authentication and consent user interface pages to the
@@ -1107,6 +1109,7 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
         // mandatory fields
         this.configuration = configuration;
         this.clientId = clientId;
+        this.isContainAppId = false;
         this.responseType = responseType;
         this.redirectUri = redirectUri;
         this.additionalParameters = additionalParameters;
