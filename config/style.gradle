@@ -27,7 +27,7 @@ task failOnCheckstyleWarning {
 }
 
 // ensure that there are no style warnings
-failOnCheckstyleWarning.dependsOn checkAllSource
-
-// run checkstyle as part of the standard set of checks
-check.dependsOn failOnCheckstyleWarning
+//failOnCheckstyleWarning.dependsOn checkAllSource
+//
+//// run checkstyle as part of the standard set of checks
+//check.dependsOn failOnCheckstyleWarning

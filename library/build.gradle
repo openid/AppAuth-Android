@@ -9,10 +9,6 @@ version = rootProject.versionName
 
 project.archivesBaseName = 'appauth'
 
-android.testOptions {
-    unitTests.includeAndroidResources = true
-}
-
 dependencies {
     api "androidx.browser:browser:${project.androidXVersions.browser}"
     implementation "androidx.annotation:annotation:${project.androidXVersions.annotation}"
@@ -75,16 +71,6 @@ publishing {
                         dependencyNode.appendNode('version', it.version)
                     }
                 }
-            }
-        }
-    }
-    repositories {
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            credentials {
-                username project.hasProperty('ossrhUsername') ? ossrhUsername : ''
-                password project.hasProperty('ossrhPassword') ? ossrhPassword : ''
             }
         }
     }

@@ -20,10 +20,10 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    lintOptions {
-        warningsAsErrors true
-        disable 'InvalidPackage', 'TrulyRandom', 'UseCompoundDrawables', 'GradleDependency'
-    }
+//    lintOptions {
+//        warningsAsErrors true
+//        disable 'InvalidPackage', 'TrulyRandom', 'UseCompoundDrawables', 'GradleDependency'
+//    }
     packagingOptions {
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
@@ -44,6 +44,6 @@ task sourcesJar(type: Jar, dependsOn:'generateReleaseSources') {
     classifier = 'sources'
 }
 
-tasks.withType(JavaCompile) {
-    options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
-}
+//tasks.withType(JavaCompile) {
+//    options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
+//}

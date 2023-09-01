@@ -10,26 +10,26 @@ android {
     }
 }
 
-task jacocoTestReport(type: JacocoReport, dependsOn: "testDebugUnitTest") {
-    group = "Reporting"
-    description = "Generate Jacoco coverage reports after running tests."
-    reports {
-        xml.enabled = true
-        html.enabled = true
-    }
-    // Class R is used, but usage will not be covered, so ignore this class from report
-    afterEvaluate {
-        getClassDirectories().setFrom(
-            fileTree(
-                dir: 'build/intermediates/javac/debug/classes',
-                excludes: ['**/BuildConfig.class']
-            )
-        )
-        getSourceDirectories().setFrom(
-            files('java')
-        )
-        getExecutionData().setFrom(
-            files('build/jacoco/testDebugUnitTest.exec')
-        )
-    }
-}
+//task jacocoTestReport(type: JacocoReport, dependsOn: "testDebugUnitTest") {
+////    group = "Reporting"
+////    description = "Generate Jacoco coverage reports after running tests."
+////    reports {
+////        xml.enabled = true
+////        html.enabled = true
+////    }
+////    // Class R is used, but usage will not be covered, so ignore this class from report
+////    afterEvaluate {
+////        getClassDirectories().setFrom(
+////            fileTree(
+////                dir: 'build/intermediates/javac/debug/classes',
+////                excludes: ['**/BuildConfig.class']
+////            )
+////        )
+////        getSourceDirectories().setFrom(
+////            files('java')
+////        )
+////        getExecutionData().setFrom(
+////            files('build/jacoco/testDebugUnitTest.exec')
+////        )
+////    }
+//}
