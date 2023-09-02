@@ -101,6 +101,13 @@ public class AuthorizationServiceTest {
     private static final int TEST_EXPIRES_IN = 3600;
     private static final String TEST_BROWSER_PACKAGE = "com.browser.test";
 
+    private static final String INITIAL_ACCESS_TOKEN = "initial-access-token";
+    private static final String UNAUTHORIZED_REQUEST = "{\n" +
+        "    \"error\": \"invalid_token\",\n" +
+        "    \"error_uri\": \"https://human-readable-error-description\",\n" +
+        "    \"error_description\": \"token-unknown\"\n" +
+        "}";
+
     private static final String REGISTRATION_RESPONSE_JSON = "{\n"
             + " \"client_id\": \"" + TEST_CLIENT_ID + "\",\n"
             + " \"client_secret\": \"" + TEST_CLIENT_SECRET + "\",\n"
@@ -465,6 +472,40 @@ public class AuthorizationServiceTest {
         mService.performRegistrationRequest(getTestRegistrationRequest(), mRegistrationCallback);
         mPausedExecutorService.runAll();
         shadowOf(getMainLooper()).idle();
+        assertNotNull(mRegistrationCallback.error);
+        assertEquals(GeneralErrors.NETWORK_ERROR, mRegistrationCallback.error);
+    }
+
+    @Test
+    public void testRegistrationRequestWithInitialAccessToken() throws Exception {
+        InputStream is = new ByteArrayInputStream(REGISTRATION_RESPONSE_JSON.getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(is);
+        RegistrationRequest request = getTestRegistrationRequest();
+        mService.performRegistrationRequest(request, mRegistrationCallback, INITIAL_ACCESS_TOKEN);
+        mRegistrationCallback.waitForCallback();
+        assertRegistrationResponse(mRegistrationCallback.response, request);
+        String postBody = mOutputStream.toString();
+        assertThat(postBody).isEqualTo(request.toJsonString());
+    }
+
+    @Test
+    public void testRegistrationRequestWithInitialAccessToken_Unauthorized() throws Exception {
+        InputStream is = new ByteArrayInputStream(UNAUTHORIZED_REQUEST.getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(is);
+        RegistrationRequest request = getTestRegistrationRequest();
+        mService.performRegistrationRequest(request, mRegistrationCallback, "");
+        mRegistrationCallback.waitForCallback();
+        assertNotNull(mRegistrationCallback.error);
+        String postBody = mOutputStream.toString();
+        assertThat(postBody).isEqualTo(request.toJsonString());
+    }
+
+    @Test
+    public void testRegistrationRequestWithInitialAccessToken_IoException() throws Exception {
+        Exception ex = new IOException();
+        when(mHttpConnection.getInputStream()).thenThrow(ex);
+        mService.performRegistrationRequest(getTestRegistrationRequest(), mRegistrationCallback, INITIAL_ACCESS_TOKEN);
+        mRegistrationCallback.waitForCallback();
         assertNotNull(mRegistrationCallback.error);
         assertEquals(GeneralErrors.NETWORK_ERROR, mRegistrationCallback.error);
     }
