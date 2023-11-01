@@ -8,7 +8,7 @@
 - [ ] I updated the documentation if necessary.
 
 ### Motivation and Context
-<!-- Why is this change required? What problem does it solve? If it addreses an existing issue pleaase provide a link. -->
+<!-- Why is this change required? What problem does it solve? If it addresses an existing issue please provide a link. -->
 
 ### Description
 <!-- Describe your changes in detail. -->
