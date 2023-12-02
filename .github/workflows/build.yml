@@ -1,4 +1,4 @@
----
+https://github.com/openid/AppAuth-Android/actions/workflows/build.yml/badge.svg---
 name: build
 
 on: [push, pull_request]
