@@ -1,3 +1,4 @@
+https://github.com/openid/AppAuth-Android/blob/5966cc7efc1c7cacf78598ecae45b5e7d9365f9c/README.md
 ![AppAuth for Android](https://rawgit.com/openid/AppAuth-Android/master/appauth_lockup.svg)
 
 [![Download](https://img.shields.io/maven-central/v/net.openid/appauth)](https://search.maven.org/search?q=g:net.openid%20appauth)
