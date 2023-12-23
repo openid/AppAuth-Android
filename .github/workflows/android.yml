@@ -1,0 +1,62 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build with Gradle
+      run: ./gradlew build
+      
+      - nombre: Verificación previa a la implementación de Lightstep
+  # Puedes fijar la confirmación exacta o la versión.
+  # usos: lightstep/lightstep-action-predeploy@22bec553a6d0fb3de5026acb1159085601f76408
+  usos: lightstep/lightstep-action-predeploy@v0.2.6
+  con:
+    # La organización asociada con su cuenta Lightstep (generalmente el nombre de su empresa)
+    lightstep_organization: # opcional
+    # El proyecto Lightstep asociado con este repositorio
+    lightstep_project: # opcional
+    # La clave para acceder a la API pública de Lightstep
+    lightstep_api_key: # opcional
+    # El token para acceder a la API de Rollbar
+    rollbar_api_token: # opcional
+    # El token para acceder a la API de PagerDuty
+    pagerduty_api_token: # opcional
+    # Si se establece en verdadero, colapsa todas las condiciones en una sola fila de la tabla
+    rollup_condiciones: # opcional
+    # Si se establece en verdadero, no agregará un comentario a las solicitudes de extracción
+    desactivar_comentario: # opcional
+                     - nombre: github-action-auto-formato
+  # Puedes fijar la confirmación exacta o la versión.
+  # usos: cloudposse/github-action-auto-format@970af4c15a720047204400fe5b5ae52fb2991e9b
+  usos: cloudposse/github-action-auto-format@v0.12.0
+  con:
+    # La ruta en github-runner donde se desprotegen los scripts de acción de formato automático en tiempo de ejecución
+    action-files-checkout-path: # opcional, el valor predeterminado es github-action-auto-format
+    # Nombre de usuario de GitHub para escribir nuevas confirmaciones
+    nombre-bot: # opcional, el valor predeterminado es cloudpossebot
+    # Dirección de correo electrónico asociada con el usuario de GitHub para escribir nuevas confirmaciones
+    correo electrónico del bot: # opcional
+    # Nombre de la tarea de formato a ejecutar. (Las opciones incluyen: Léame, github, terraform y contexto).
+    tarea de formato:
+    # GitHub Token para usar en `github_format.sh` y los pasos de creación de relaciones públicas. A este token se le deben conceder permisos de "flujos de trabajo".
+    token de flujo de trabajo:
+           
