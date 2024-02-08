@@ -52,7 +52,6 @@ import java.net.HttpURLConnection;
 import java.net.URLConnection;
 import java.util.Map;
 
-
 /**
  * Dispatches requests to an OAuth2 authorization service. Note that instances of this class
  * _must be manually disposed_ when no longer required, to avoid leaks
@@ -673,7 +672,8 @@ public class AuthorizationService {
                             error,
                             json.optString(AuthorizationException.PARAM_ERROR_DESCRIPTION, null),
                             UriUtil.parseUriIfAvailable(
-                                    json.optString(AuthorizationException.PARAM_ERROR_URI)));
+                                    json.optString(AuthorizationException.PARAM_ERROR_URI)),
+                            json);
                 } catch (JSONException jsonEx) {
                     ex = AuthorizationException.fromTemplate(
                             GeneralErrors.JSON_DESERIALIZATION_ERROR,
@@ -742,7 +742,6 @@ public class AuthorizationService {
     public interface TokenResponseCallback {
         /**
          * Invoked when the request completes successfully or fails.
-         *
          * Exactly one of `response` or `ex` will be non-null. If `response` is `null`, a failure
          * occurred during the request. This can happen if a bad URI was provided, no connection
          * to the server could be established, or the response JSON was incomplete or incorrectly
@@ -821,7 +820,8 @@ public class AuthorizationService {
                             error,
                             json.getString(AuthorizationException.PARAM_ERROR_DESCRIPTION),
                             UriUtil.parseUriIfAvailable(
-                                    json.getString(AuthorizationException.PARAM_ERROR_URI)));
+                                    json.getString(AuthorizationException.PARAM_ERROR_URI)),
+                            json);
                 } catch (JSONException jsonEx) {
                     ex = AuthorizationException.fromTemplate(
                             GeneralErrors.JSON_DESERIALIZATION_ERROR,
@@ -862,7 +862,6 @@ public class AuthorizationService {
     public interface RegistrationResponseCallback {
         /**
          * Invoked when the request completes successfully or fails.
-         *
          * Exactly one of `response` or `ex` will be non-null. If `response` is `null`, a failure
          * occurred during the request. This can happen if an invalid URI was provided, no
          * connection to the server could be established, or the response JSON was incomplete or
