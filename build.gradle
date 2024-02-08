@@ -8,7 +8,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.0.1'
+        classpath 'com.android.tools.build:gradle:8.0.2'
         classpath 'org.ajoberstar.grgit:grgit-gradle:4.1.1'
         classpath 'org.jacoco:org.jacoco.core:0.8.7'
     }
@@ -23,21 +23,9 @@ subprojects {
 
 ext.verifyKeystore()
 
-try {
-    def grgit = Grgit.open(currentDir: project.rootDir)
-    def lastCommit = grgit.head()
-
-    project.ext.versionNum = grgit.log(includes:['HEAD']).size()
-    project.ext.versionName = grgit.describe()
-    project.ext.versionDate = lastCommit.getDate()
-    if (project.ext.versionName == null) {
-        project.ext.versionName = 'DEV'
-    }
-} catch (Exception ignored) {
-    project.ext.versionNum = 1
-    project.ext.versionName = 'DEV'
-    project.ext.versionDate = new Date()
-}
+project.ext.versionNum = 1
+project.ext.versionName = '0.11.1-agile'
+project.ext.versionDate = new Date()
 
 project.ext {
     minSdkVersion = 16
