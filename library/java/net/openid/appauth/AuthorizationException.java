@@ -32,11 +32,9 @@ import java.util.Map;
 
 /**
  * Returned as a response to OAuth2 requests if they fail. Specifically:
- *
  * - The {@link net.openid.appauth.AuthorizationService.TokenResponseCallback response} to
  * {@link AuthorizationService#performTokenRequest(net.openid.appauth.TokenRequest,
  * AuthorizationService.TokenResponseCallback) token requests},
- *
  * - The {@link net.openid.appauth.AuthorizationServiceConfiguration.RetrieveConfigurationCallback
  * response}
  * to
@@ -464,22 +462,22 @@ public final class AuthorizationException extends Exception {
 
     private static AuthorizationException generalEx(int code, @Nullable String errorDescription) {
         return new AuthorizationException(
-                TYPE_GENERAL_ERROR, code, null, errorDescription, null, null);
+                TYPE_GENERAL_ERROR, code, null, errorDescription, null, null, null);
     }
 
     private static AuthorizationException authEx(int code, @Nullable String error) {
         return new AuthorizationException(
-                TYPE_OAUTH_AUTHORIZATION_ERROR, code, error, null, null, null);
+                TYPE_OAUTH_AUTHORIZATION_ERROR, code, error, null, null, null, null);
     }
 
     private static AuthorizationException tokenEx(int code, @Nullable String error) {
         return new AuthorizationException(
-                TYPE_OAUTH_TOKEN_ERROR, code, error, null, null, null);
+                TYPE_OAUTH_TOKEN_ERROR, code, error, null, null, null, null);
     }
 
     private static AuthorizationException registrationEx(int code, @Nullable String error) {
         return new AuthorizationException(
-                TYPE_OAUTH_REGISTRATION_ERROR, code, error, null, null, null);
+                TYPE_OAUTH_REGISTRATION_ERROR, code, error, null, null, null, null);
     }
 
     /**
@@ -496,6 +494,7 @@ public final class AuthorizationException extends Exception {
                 ex.error,
                 ex.errorDescription,
                 ex.errorUri,
+                ex.responseJson,
                 rootCause);
     }
 
@@ -508,13 +507,15 @@ public final class AuthorizationException extends Exception {
             @NonNull AuthorizationException ex,
             @Nullable String errorOverride,
             @Nullable String errorDescriptionOverride,
-            @Nullable Uri errorUriOverride) {
+            @Nullable Uri errorUriOverride,
+            @Nullable JSONObject responseJson) {
         return new AuthorizationException(
                 ex.type,
                 ex.code,
                 (errorOverride != null) ? errorOverride : ex.error,
                 (errorDescriptionOverride != null) ? errorDescriptionOverride : ex.errorDescription,
                 (errorUriOverride != null) ? errorUriOverride : ex.errorUri,
+                responseJson,
                 null);
     }
 
@@ -533,6 +534,7 @@ public final class AuthorizationException extends Exception {
                 error,
                 errorDescription != null ? errorDescription : base.errorDescription,
                 errorUri != null ? Uri.parse(errorUri) : base.errorUri,
+                base.responseJson,
                 null);
     }
 
@@ -559,6 +561,7 @@ public final class AuthorizationException extends Exception {
                 JsonUtil.getStringIfDefined(json, KEY_ERROR),
                 JsonUtil.getStringIfDefined(json, KEY_ERROR_DESCRIPTION),
                 JsonUtil.getUriIfDefined(json, KEY_ERROR_URI),
+                json,
                 null);
     }
 
@@ -632,6 +635,12 @@ public final class AuthorizationException extends Exception {
     public final Uri errorUri;
 
     /**
+     * The raw error json object
+     */
+    @Nullable
+    public final JSONObject responseJson;
+
+    /**
      * Instantiates an authorization request with optional root cause information.
      */
     public AuthorizationException(
@@ -640,6 +649,7 @@ public final class AuthorizationException extends Exception {
             @Nullable String error,
             @Nullable String errorDescription,
             @Nullable Uri errorUri,
+            @Nullable JSONObject responseJson,
             @Nullable Throwable rootCause) {
         super(errorDescription, rootCause);
         this.type = type;
@@ -647,6 +657,7 @@ public final class AuthorizationException extends Exception {
         this.error = error;
         this.errorDescription = errorDescription;
         this.errorUri = errorUri;
+        this.responseJson = responseJson;
     }
 
     /**
