@@ -327,15 +327,15 @@ public class AuthorizationManagementActivity extends AppCompatActivity {
         }
     }
 
-    private void sendResult(PendingIntent callback, Intent cancelData, int resultCode) {
+    private void sendResult(PendingIntent callback, Intent intentData, int resultCode) {
         if (callback != null) {
             try {
-                callback.send(this, 0, cancelData);
+                callback.send(this, 0, intentData);
             } catch (CanceledException e) {
-                Logger.error("Failed to send cancel intent", e);
+                Logger.errorWithStack(e, "Failed to send intent");
             }
         } else {
-            setResult(resultCode, cancelData);
+            setResult(resultCode, intentData);
         }
     }
 
