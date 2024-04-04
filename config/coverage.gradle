@@ -14,8 +14,8 @@ task jacocoTestReport(type: JacocoReport, dependsOn: "testDebugUnitTest") {
     group = "Reporting"
     description = "Generate Jacoco coverage reports after running tests."
     reports {
-        xml.enabled = true
-        html.enabled = true
+        xml.required.set(true)
+        html.required.set(true)
     }
     // Class R is used, but usage will not be covered, so ignore this class from report
     afterEvaluate {

@@ -4,6 +4,7 @@ apply from: '../config/android-common.gradle'
 apply from: '../config/keystore.gradle'
 
 android {
+    namespace 'net.openid.appauthdemo'
     defaultConfig {
         applicationId 'net.openid.appauthdemo'
         project.archivesBaseName = 'appauth-demoapp'
