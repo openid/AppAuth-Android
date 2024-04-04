@@ -218,6 +218,14 @@ public class IdToken {
         AuthorizationServiceDiscovery discoveryDoc = tokenRequest.configuration.discoveryDoc;
         if (discoveryDoc != null) {
             String expectedIssuer = discoveryDoc.getIssuer();
+
+            if (expectedIssuer.contains("{tenantid}")) {
+                String tid = (String) this.additionalClaims.get("tid");
+                if (tid != null && !tid.isEmpty()) {
+                    expectedIssuer = expectedIssuer.replace("{tenantid}", tid);
+                }
+            }
+
             if (!this.issuer.equals(expectedIssuer)) {
                 throw AuthorizationException.fromTemplate(GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
                     new IdTokenException("Issuer mismatch"));
