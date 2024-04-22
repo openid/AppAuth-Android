@@ -30,3 +30,5 @@ jobs:
 
       - name: Codecov
         uses: codecov/codecov-action@v3
+build
+Node.js 12 actions are deprecated. Please update the following actions to use Node.js 16: actions/setup-java@v2. For more information see: https://github.blog/changelog/2022-09-22-github-actions-all-actions-will-begin-running-on-node16-instead-of-node12/.
