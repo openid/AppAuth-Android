@@ -3,13 +3,14 @@ configurations {
 }
 
 dependencies {
-    mdDoclet 'org.jdrupes.mdoclet:doclet:2.0.0'
+    mdDoclet 'org.jdrupes.mdoclet:doclet:3.1.0'
 }
 
 task androidJavadoc(type: JavaExec) {
-    jvmArgs = ['--add-exports=jdk.javadoc/jdk.javadoc.internal.tool=ALL-UNNAMED']
+    jvmArgs = ['--add-exports=jdk.javadoc/jdk.javadoc.internal.tool=ALL-UNNAMED',
+               '--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED']
     classpath files(project.android.getBootClasspath())
-    main = 'jdk.javadoc.internal.tool.Main'
+    mainClass = 'jdk.javadoc.internal.tool.Main'
     ext.destinationDir = file("${project.buildDir}/docs/javadoc")
     args = ['-doctitle', "AppAuth for Android",
             '-use',
@@ -22,10 +23,11 @@ task androidJavadoc(type: JavaExec) {
             '-d', ext.destinationDir,
             '-Xdoclint:none',
     ] + android.sourceSets.main.java.sourceFiles.files
+    mustRunAfter(':library:assembleRelease', ':library:assembleDebug')
 }
 
 task javadocJar(type: Jar, dependsOn: androidJavadoc) {
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
     from androidJavadoc.ext.destinationDir
 }
 

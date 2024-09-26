@@ -10,7 +10,7 @@ task checkAllSource(type: Checkstyle) {
     afterEvaluate {
         source 'java'
         include '**/*.java'
-        classpath = files project.configurations.compile.files
+        classpath = files()
     }
 }
 
