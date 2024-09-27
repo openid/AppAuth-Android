@@ -8,21 +8,15 @@ with an invalid configuration.
 The configuration file MUST contain a JSON object. The following properties can be specified:
 
   - `redirect_uri` (required): The redirect URI to use for receiving the authorization response.
-    This can either be a custom scheme URI (com.example.app:/oauth2redirect/example-provider) or 
-    an https app link (https://www.example.com/path). Custom scheme URIs are better supported 
-    across all versions of Android, however many authorization server implementations require an 
+    This can either be a custom scheme URI (com.example.app:/oauth2redirect/example-provider) or
+    an https app link (https://www.example.com/path). Custom scheme URIs are better supported
+    across all versions of Android, however many authorization server implementations require an
     https URI. Consult the documentation for your authorization server.
 
-    The value specified here should match the value specified for `appAuthRedirectScheme` in the
-    `build.gradle` (Module: app), so that the demo app can capture the response.
-
   - `end_session_redirect_uri` (required): The redirect URI to use for receiving the end session response.
-    This should be a custom scheme URI (com.example.app:/oauth2redirect/example-provider). 
-    Consult the documentation for your authorization server. 
+    This should be a custom scheme URI (com.example.app:/oauth2redirect/example-provider).
+    Consult the documentation for your authorization server.
 
-    The value specified here should match the value specified for `appAuthRedirectScheme` in the
-    `build.gradle` (Module: app), so that the demo app can capture the response.
-    
     NOTE: Scheme of the URI should be the same as `redirect_uri` but callback should be different.
 
   - `authorization_scope` (required): The scope string to use for the authorization request.

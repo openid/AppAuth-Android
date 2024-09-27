@@ -209,10 +209,7 @@ public final class Configuration {
 
         if (!isRedirectUriRegistered()) {
             throw new InvalidConfigurationException(
-                    "redirect_uri is not handled by any activity in this app! "
-                            + "Ensure that the appAuthRedirectScheme in your build.gradle file "
-                            + "is correctly configured, or that an appropriate intent filter "
-                            + "exists in your app manifest.");
+                    "redirect_uri is not handled by any activity in this app!");
         }
 
         if (getConfigString("discovery_uri") == null) {

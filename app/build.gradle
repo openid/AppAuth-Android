@@ -9,12 +9,6 @@ android {
         applicationId 'net.openid.appauthdemo'
         project.archivesBaseName = 'appauth-demoapp'
         vectorDrawables.useSupportLibrary = true
-
-        // Make sure this is consistent with the redirect URI used in res/raw/auth_config.json,
-        // or specify additional redirect URIs in AndroidManifest.xml
-        manifestPlaceholders = [
-                'appAuthRedirectScheme': 'net.openid.appauthdemo'
-        ]
     }
 
     signingConfigs {

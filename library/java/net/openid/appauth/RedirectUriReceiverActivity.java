@@ -23,14 +23,6 @@ import android.os.Bundle;
  * destroys the browser tab before returning the result to the completion
  * {@link android.app.PendingIntent}
  * provided to {@link AuthorizationService#performAuthorizationRequest}.
- *
- * App developers using this library must override the `appAuthRedirectScheme`
- * property in their `build.gradle` to specify the custom scheme that will be used for
- * the OAuth2 redirect. If custom scheme redirect cannot be used with the identity provider
- * you are integrating with, then a custom intent filter should be defined in your
- * application manifest instead. For example, to handle
- * `https://www.example.com/oauth2redirect`:
- *
  * ```xml
  * <intent-filter>
  *   <action android:name="android.intent.action.VIEW"/>

@@ -23,14 +23,7 @@
       android:theme="@style/Theme.AppCompat.Translucent.NoTitleBar"
       android:launchMode="singleTask" />
 
-    <activity android:name=".RedirectUriReceiverActivity" android:exported="true">
-      <intent-filter>
-        <action android:name="android.intent.action.VIEW"/>
-        <category android:name="android.intent.category.DEFAULT"/>
-        <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="${appAuthRedirectScheme}"/>
-      </intent-filter>
-    </activity>
+    <activity android:name=".RedirectUriReceiverActivity" android:exported="true"/>
   </application>
 
   <queries>

@@ -281,7 +281,7 @@ this redirect URI.
 
 We recommend using a custom scheme based redirect URI (i.e. those of form
 `my.scheme:/path`), as this is the most widely supported across all versions of
-Android. To avoid conflicts with other apps, it is recommended to configure a 
+Android. To avoid conflicts with other apps, it is recommended to configure a
 distinct scheme using "reverse domain name notation". This can either match
 your service web domain (in reverse) e.g. `com.example.service` or your package
 name `com.example.app` or be something completely new as long as it's distinct
@@ -289,15 +289,6 @@ enough. Using the package name of your app is quite common but it's not always
 possible if it contains illegal characters for URI schemes (like underscores)
 or if you already have another handler for that scheme - so just use something
 else.
-
-When a custom scheme is used, AppAuth can be easily configured to capture
-all redirects using this custom scheme through a manifest placeholder:
-
-```groovy
-android.defaultConfig.manifestPlaceholders = [
-  'appAuthRedirectScheme': 'com.example.app'
-]
-```
 
 Alternatively, the redirect URI can be directly configured by adding an
 intent-filter for AppAuth's RedirectUriReceiverActivity to your
