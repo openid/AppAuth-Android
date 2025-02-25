@@ -244,8 +244,9 @@ AuthorizationService authService = new AuthorizationService(this);
 
 authService.performAuthorizationRequest(
     authRequest,
-    PendingIntent.getActivity(this, 0, new Intent(this, MyAuthCompleteActivity.class), 0),
-    PendingIntent.getActivity(this, 0, new Intent(this, MyAuthCanceledActivity.class), 0));
+    PendingIntent.getActivity(this, 0, new Intent(this, MyAuthCompleteActivity.class), PendingIntent.FLAG_MUTABLE),
+    PendingIntent.getActivity(this, 0, new Intent(this, MyAuthCanceledActivity.class), PendingIntent.FLAG_MUTABLE)
+);
 ```
 
 The intents may be customized to carry any additional data or flags required
