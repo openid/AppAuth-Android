@@ -430,7 +430,7 @@ public class AuthState {
             // developer that this is unexpected.
             Logger.warn(
                     "AuthState.update should not be called in an error state (%s), call update"
-                            + "with the result of the fresh authorization response first",
+                            + " with the result of the fresh authorization response first",
                     mAuthorizationException);
             mAuthorizationException = null;
         }
