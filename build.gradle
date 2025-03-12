@@ -3,6 +3,7 @@ import org.ajoberstar.grgit.Grgit
 apply from: 'config/keystore.gradle'
 
 buildscript {
+    ext.kotlin_version = '1.4.30'
     repositories {
         gradlePluginPortal()
         google()
