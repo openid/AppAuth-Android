@@ -33,8 +33,7 @@ Google) can be found here:
 
 ## Download
 
-AppAuth for Android is available
-on [MavenCentral](https://search.maven.org/search?q=g:net.openid%20appauth)
+AppAuth for Android is available on [MavenCentral](https://search.maven.org/search?q=g:net.openid%20appauth)
 
 ```groovy
 implementation 'net.openid:appauth:<version>'
@@ -80,18 +79,14 @@ Authorizing the user occurs via the user's web browser, and the request
 is described using instances of
 [AuthorizationRequest](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AuthorizationRequest.java).
 The request is dispatched using
-[performAuthorizationRequest()](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AuthorizationService.java#L159)
-on an AuthorizationService instance, and the response (an
-[AuthorizationResponse](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AuthorizationResponse.java)
-instance) will be dispatched to the activity of your choice,
+[performAuthorizationRequest()](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AuthorizationService.java#L159) on an AuthorizationService instance, and the response (an
+[AuthorizationResponse](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AuthorizationResponse.java) instance) will be dispatched to the activity of your choice,
 expressed via an Intent.
 
 Token requests, such as obtaining a new access token using a refresh token,
 follow a similar pattern:
-[TokenRequest](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/TokenRequest.java)
-instances are dispatched using
-[performTokenRequest()](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AuthorizationService.java#L252)
-on an AuthorizationService instance, and a
+[TokenRequest](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/TokenRequest.java) instances are dispatched using
+[performTokenRequest()](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AuthorizationService.java#L252) on an AuthorizationService instance, and a
 [TokenResponse](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/TokenResponse.java)
 instance is returned via a callback.
 
@@ -148,15 +143,13 @@ Where available, using an OpenID Connect discovery document is preferable:
 ```java
 AuthorizationServiceConfiguration.fetchFromIssuer(
     Uri.parse("https://idp.example.com"),
-    new AuthorizationServiceConfiguration.
-
-RetrieveConfigurationCallback() {
-    public void onFetchConfigurationCompleted (
-        @Nullable AuthorizationServiceConfiguration serviceConfiguration,
-        @Nullable AuthorizationException ex){
+    new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
+      public void onFetchConfigurationCompleted(
+          @Nullable AuthorizationServiceConfiguration serviceConfiguration,
+          @Nullable AuthorizationException ex) {
         if (ex != null) {
-            Log.e(TAG, "failed to fetch configuration");
-            return;
+          Log.e(TAG, "failed to fetch configuration");
+          return;
         }
 
         // use serviceConfiguration as needed
@@ -173,11 +166,9 @@ provide the full URI as follows:
 ```java
 AuthorizationServiceConfiguration.fetchFromUrl(
     Uri.parse("https://idp.example.com/exampletenant/openid-config"),
-    new AuthorizationServiceConfiguration.
-
-RetrieveConfigurationCallback() {
+    new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
         ...
-}
+    }
 });
 ```
 
@@ -228,20 +219,20 @@ more processing of the result:
 
 ```java
 private void doAuthorization() {
-    AuthorizationService authService = new AuthorizationService(this);
-    Intent authIntent = authService.getAuthorizationRequestIntent(authRequest);
-    startActivityForResult(authIntent, RC_AUTH);
+  AuthorizationService authService = new AuthorizationService(this);
+  Intent authIntent = authService.getAuthorizationRequestIntent(authRequest);
+  startActivityForResult(authIntent, RC_AUTH);
 }
 
 @Override
 protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if (requestCode == RC_AUTH) {
-        AuthorizationResponse resp = AuthorizationResponse.fromIntent(data);
-        AuthorizationException ex = AuthorizationException.fromIntent(data);
-        // ... process the response or exception ...
-    } else {
-        // ...
-    }
+  if (requestCode == RC_AUTH) {
+    AuthorizationResponse resp = AuthorizationResponse.fromIntent(data);
+    AuthorizationException ex = AuthorizationException.fromIntent(data);
+    // ... process the response or exception ...
+  } else {
+    // ...
+  }
 }
 ```
 
@@ -251,14 +242,10 @@ or cancelation, you can use `performAuthorizationRequest`:
 ```java
 AuthorizationService authService = new AuthorizationService(this);
 
-authService.
-
-performAuthorizationRequest(
+authService.performAuthorizationRequest(
     authRequest,
-    PendingIntent.getActivity(this, 0,new Intent(this, MyAuthCompleteActivity .class), 0),
-    PendingIntent.
-
-getActivity(this,0,new Intent(this, MyAuthCanceledActivity .class), 0));
+    PendingIntent.getActivity(this, 0, new Intent(this, MyAuthCompleteActivity.class), 0),
+    PendingIntent.getActivity(this, 0, new Intent(this, MyAuthCanceledActivity.class), 0));
 ```
 
 The intents may be customized to carry any additional data or flags required
@@ -288,7 +275,7 @@ all redirects using this custom scheme through a manifest placeholder:
 
 ```groovy
 android.defaultConfig.manifestPlaceholders = [
-    'appAuthRedirectScheme': 'com.example.app'
+  'appAuthRedirectScheme': 'com.example.app'
 ]
 ```
 
@@ -297,13 +284,14 @@ intent-filter for AppAuth's RedirectUriReceiverActivity to your
 AndroidManifest.xml:
 
 ```xml
-
-<activity android:name="net.openid.appauth.RedirectUriReceiverActivity" tools:node="replace">
+<activity
+        android:name="net.openid.appauth.RedirectUriReceiverActivity"
+        tools:node="replace">
     <intent-filter>
-        <action android:name="android.intent.action.VIEW" />
-        <category android:name="android.intent.category.DEFAULT" />
-        <category android:name="android.intent.category.BROWSABLE" />
-        <data android:scheme="com.example.app" />
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="com.example.app"/>
     </intent-filter>
 </activity>
 ```
@@ -312,14 +300,16 @@ If an HTTPS redirect URI is required instead of a custom scheme, the same
 approach (modifying your AndroidManifest.xml) is used:
 
 ```xml
-
-<activity android:name="net.openid.appauth.RedirectUriReceiverActivity" tools:node="replace">
+<activity
+        android:name="net.openid.appauth.RedirectUriReceiverActivity"
+        tools:node="replace">
     <intent-filter>
-        <action android:name="android.intent.action.VIEW" />
-        <category android:name="android.intent.category.DEFAULT" />
-        <category android:name="android.intent.category.BROWSABLE" />
-        <data android:scheme="https" android:host="app.example.com"
-            android:path="/oauth2redirect" />
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="https"
+              android:host="app.example.com"
+              android:path="/oauth2redirect"/>
     </intent-filter>
 </activity>
 ```
@@ -340,14 +330,14 @@ AuthorizationException respectively:
 
 ```java
 public void onCreate(Bundle b) {
-    AuthorizationResponse resp = AuthorizationResponse.fromIntent(getIntent());
-    AuthorizationException ex = AuthorizationException.fromIntent(getIntent());
-    if (resp != null) {
-        // authorization completed
-    } else {
-        // authorization failed, check ex for more details
-    }
-    // ...
+  AuthorizationResponse resp = AuthorizationResponse.fromIntent(getIntent());
+  AuthorizationException ex = AuthorizationException.fromIntent(getIntent());
+  if (resp != null) {
+    // authorization completed
+  } else {
+    // authorization failed, check ex for more details
+  }
+  // ...
 }
 ```
 
@@ -363,9 +353,9 @@ that AppAuth does not provide, this is also provided to your activity:
 
 ```java
 public void onCreate(Bundle b) {
-    // ...
-    Uri redirectUri = getIntent().getData();
-    // ...
+  // ...
+  Uri redirectUri = getIntent().getData();
+  // ...
 }
 ```
 
@@ -377,18 +367,16 @@ a token request can be made to exchange the code for a refresh token:
 ```java
 authService.performTokenRequest(
     resp.createTokenExchangeRequest(),
-    new AuthorizationService.
-
-TokenResponseCallback() {
-    @Override public void onTokenRequestCompleted (
-        TokenResponse resp, AuthorizationException ex){
-        if (resp != null) {
+    new AuthorizationService.TokenResponseCallback() {
+      @Override public void onTokenRequestCompleted(
+            TokenResponse resp, AuthorizationException ex) {
+          if (resp != null) {
             // exchange succeeded
-        } else {
+          } else {
             // authorization failed, check ex for more details
+          }
         }
-    }
-});
+    });
 ```
 
 The token response can also be used to update an AuthState instance:
@@ -406,17 +394,17 @@ token response. However, in most cases, it is simpler to use the
 
 ```java
 authState.performActionWithFreshTokens(service, new AuthStateAction() {
-    @Override public void execute (
-        String accessToken,
-        String idToken,
-        AuthorizationException ex){
-        if (ex != null) {
-            // negotiation for fresh tokens failed, check ex for more details
-            return;
-        }
-
-        // use the access token to do something ...
+  @Override public void execute(
+      String accessToken,
+      String idToken,
+      AuthorizationException ex) {
+    if (ex != null) {
+      // negotiation for fresh tokens failed, check ex for more details
+      return;
     }
+
+    // use the access token to do something ...
+  }
 });
 ```
 
@@ -427,7 +415,6 @@ copy in the callback to this method.
 ### Ending current session
 
 Given you have a logged in session and you want to end it. In that case you need to get:
-
 - `AuthorizationServiceConfiguration`
 - valid Open Id Token that you should get after authentication
 - End of session URI that should be provided within you OpenId service config
@@ -441,7 +428,6 @@ EndSessionRequest endSessionRequest =
         .setPostLogoutRedirectUri(endSessionRedirectUri)
         .build();
 ```
-
 This request can then be dispatched using one of two approaches.
 
 a `startActivityForResult` call using an Intent returned from the `AuthorizationService`,
@@ -452,37 +438,32 @@ The startActivityForResult approach is simpler to use but may require more proce
 
 ```java
 private void endSession() {
-    AuthorizationService authService = new AuthorizationService(this);
-    Intent endSessionItent = authService.getEndSessionRequestIntent(endSessionRequest);
-    startActivityForResult(endSessionItent, RC_END_SESSION);
+  AuthorizationService authService = new AuthorizationService(this);
+  Intent endSessionItent = authService.getEndSessionRequestIntent(endSessionRequest);
+  startActivityForResult(endSessionItent, RC_END_SESSION);
 }
 
 @Override
 protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if (requestCode == RC_END_SESSION) {
-        EndSessionResponse resp = EndSessionResponse.fromIntent(data);
-        AuthorizationException ex = AuthorizationException.fromIntent(data);
-        // ... process the response or exception ...
-    } else {
-        // ...
-    }
+  if (requestCode == RC_END_SESSION) {
+    EndSessionResponse resp = EndSessionResponse.fromIntent(data);
+    AuthorizationException ex = AuthorizationException.fromIntent(data);
+    // ... process the response or exception ...
+  } else {
+    // ...
+  }
 }
 ```
-
 If instead you wish to directly transition to another activity on completion or cancelation,
 you can use `performEndSessionRequest`:
 
 ```java
 AuthorizationService authService = new AuthorizationService(this);
 
-authService.
-
-performEndSessionRequest(
+authService.performEndSessionRequest(
     endSessionRequest,
-    PendingIntent.getActivity(this, 0,new Intent(this, MyAuthCompleteActivity .class), 0),
-    PendingIntent.
-
-getActivity(this,0,new Intent(this, MyAuthCanceledActivity .class), 0));
+    PendingIntent.getActivity(this, 0, new Intent(this, MyAuthCompleteActivity.class), 0),
+    PendingIntent.getActivity(this, 0, new Intent(this, MyAuthCanceledActivity.class), 0));
 ```
 
 End session flow will also work involving browser mechanism that is described in authorization
@@ -491,14 +472,14 @@ Handling response mechanism with transition to another activity should be as fol
 
  ```java
 public void onCreate(Bundle b) {
-    EndSessionResponse resp = EndSessionResponse.fromIntent(getIntent());
-    AuthorizationException ex = AuthorizationException.fromIntent(getIntent());
-    if (resp != null) {
-        // authorization completed
-    } else {
-        // authorization failed, check ex for more details
-    }
-    // ...
+  EndSessionResponse resp = EndSessionResponse.fromIntent(getIntent());
+  AuthorizationException ex = AuthorizationException.fromIntent(getIntent());
+  if (resp != null) {
+    // authorization completed
+  } else {
+    // authorization failed, check ex for more details
+  }
+  // ...
 }
 ```
 
@@ -511,28 +492,25 @@ storing the authorization state in SharedPreferences or some other persistent
 store private to the app:
 
 ```java
-
-@NonNull
-public AuthState readAuthState() {
-    SharedPreferences authPrefs = getSharedPreferences("auth", MODE_PRIVATE);
-    String stateJson = authPrefs.getString("stateJson", null);
-    if (stateJson != null) {
-        return AuthState.jsonDeserialize(stateJson);
-    } else {
-        return new AuthState();
-    }
+@NonNull public AuthState readAuthState() {
+  SharedPreferences authPrefs = getSharedPreferences("auth", MODE_PRIVATE);
+  String stateJson = authPrefs.getString("stateJson", null);
+  if (stateJson != null) {
+    return AuthState.jsonDeserialize(stateJson);
+  } else {
+    return new AuthState();
+  }
 }
 
 public void writeAuthState(@NonNull AuthState state) {
-    SharedPreferences authPrefs = getSharedPreferences("auth", MODE_PRIVATE);
-    authPrefs.edit()
-        .putString("stateJson", state.jsonSerializeString())
-        .apply();
+  SharedPreferences authPrefs = getSharedPreferences("auth", MODE_PRIVATE);
+  authPrefs.edit()
+      .putString("stateJson", state.jsonSerializeString())
+      .apply();
 }
 ```
 
-The demo app has
-an [AuthStateManager](https://github.com/openid/AppAuth-Android/blob/master/app/java/net/openid/appauthdemo/AuthStateManager.java)
+The demo app has an [AuthStateManager](https://github.com/openid/AppAuth-Android/blob/master/app/java/net/openid/appauthdemo/AuthStateManager.java)
 type which demonstrates this in more detail.
 
 ## Advanced configuration
@@ -551,15 +529,13 @@ second factor authentication to work, or require that some custom browser
 is used for authentication in an enterprise environment.
 
 Control over which browsers can be used can be achieved by defining a
-[BrowserMatcher](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/browser/BrowserMatcher.java),
-and supplying this to the builder of AppAuthConfiguration.
+[BrowserMatcher](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/browser/BrowserMatcher.java), and supplying this to the builder of AppAuthConfiguration.
 A BrowserMatcher is suppled with a
 [BrowserDescriptor](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/browser/BrowserDescriptor.java)
 instance, and must decide whether this browser is permitted for the
 authorization flow.
 
-By
-default, [AnyBrowserMatcher](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/browser/AnyBrowserMatcher.java)
+By default, [AnyBrowserMatcher](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/browser/AnyBrowserMatcher.java)
 is used.
 
 For your convenience, utility classes to help define a browser matcher are
@@ -571,8 +547,7 @@ provided, such as:
 - [VersionedBrowserMatcher](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/browser/VersionedBrowserMatcher.java):
   will match a browser if it has a matching package name and signature, and
   a version number within a defined
-  [VersionRange](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/browser/VersionRange.java).
-  This class also provides some static instances for matching
+  [VersionRange](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/browser/VersionRange.java). This class also provides some static instances for matching
   Chrome, Firefox and Samsung SBrowser.
 - [BrowserAllowList](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/browser/BrowserAllowList.java):
   takes a list of BrowserMatcher instances, and will match a browser if any
@@ -592,7 +567,7 @@ AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
         VersionedBrowserMatcher.SAMSUNG_CUSTOM_TAB))
     .build();
 AuthorizationService authService =
-    new AuthorizationService(context, appAuthConfig);
+        new AuthorizationService(context, appAuthConfig);
 ```
 
 Or, to prevent the use of a buggy version of the custom tabs in
@@ -609,7 +584,7 @@ AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
         )))
     .build();
 AuthorizationService authService =
-    new AuthorizationService(context, appAuthConfig);
+        new AuthorizationService(context, appAuthConfig);
 ```
 
 ### Customizing the connection builder for HTTP requests
@@ -627,37 +602,32 @@ For example, to custom the SSL socket factory used, one could do the following:
 ```java
 AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
     .setConnectionBuilder(new ConnectionBuilder() {
-        public HttpURLConnection openConnect(Uri uri) throws IOException {
-            URL url = new URL(uri.toString());
-            HttpURLConnection connection =
-                (HttpURLConnection) url.openConnection();
-            if (connection instanceof HttpsUrlConnection) {
-                HttpsURLConnection connection = (HttpsURLConnection) connection;
-                connection.setSSLSocketFactory(MySocketFactory.getInstance());
-            }
+      public HttpURLConnection openConnect(Uri uri) throws IOException {
+        URL url = new URL(uri.toString());
+        HttpURLConnection connection =
+            (HttpURLConnection) url.openConnection();
+        if (connection instanceof HttpsUrlConnection) {
+          HttpsURLConnection connection = (HttpsURLConnection) connection;
+          connection.setSSLSocketFactory(MySocketFactory.getInstance());
         }
+      }
     })
     .build();
 ```
 
 ### Issues with [ID Token](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/IdToken.java#L118) validation
 
-ID Token validation was introduced in `0.8.0` but not all authorization servers or configurations
-support it correctly.
+ID Token validation was introduced in `0.8.0` but not all authorization servers or configurations support it correctly.
 
-- For testing
-  environments [setSkipIssuerHttpsCheck](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AppAuthConfiguration.java#L143)
-  can be used to bypass the fact the issuer needs to be HTTPS.
+- For testing environments [setSkipIssuerHttpsCheck](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AppAuthConfiguration.java#L141) can be used to bypass the fact the issuer needs to be HTTPS.
 
 ```java
 AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
     .setSkipIssuerHttpsCheck(true)
-    .build()
+    .build();
 ```
 
-- For services that don't support nonce[s] resulting in **IdTokenException** `Nonce mismatch` just
-  set nonce to `null` on the `AuthorizationRequest`. Please consider **raising an issue** with your
-  Identity Provider and removing this once it is fixed.
+- For services that don't support nonce[s] resulting in **IdTokenException** `Nonce mismatch` just set nonce to `null` on the `AuthorizationRequest`. Please consider **raising an issue** with your Identity Provider and removing this once it is fixed.
 
 ```java
 AuthorizationRequest authRequest = authRequestBuilder
@@ -665,33 +635,29 @@ AuthorizationRequest authRequest = authRequestBuilder
     .build();
 ```
 
-- To change the default allowed time skew of 10 minutes for the issue
-  time, [setAllowedIssueTimeSkew](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AppAuthConfiguration.java#L159)
-  can be used.
+- For testing environments [setSkipTimeValidation](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AppAuthConfiguration.java#L149) can be used to bypass the issue time validation.
 
 ```java
 AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
-    .setAllowedIssueTimeSkew(THIRTY_MINUTES_IN_SECONDS)
+    .setSkipTimeValidation(true)
     .build();
 ```
 
-- For testing
-  environments [setSkipIssueTimeValidation](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AppAuthConfiguration.java#L151)
-  can be used to bypass the issue time validation.
+- To change the default allowed time skew of 10 minutes for the issue time, [setAllowedTimeSkew](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AppAuthConfiguration.java#L157) can be used.
 
 ```java
 AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
-    .setSkipIssueTimeValidation(true)
+    .setAllowedTimeSkew(TWENTY_MINUTES_IN_SECONDS)
     .build();
 ```
+
 
 ## Dynamic client registration
 
 AppAuth supports the
 [OAuth2 dynamic client registration protocol](https://tools.ietf.org/html/rfc7591).
 In order to dynamically register a client, create a
-[RegistrationRequest](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/RegistrationRequest.java)
-and dispatch it using
+[RegistrationRequest](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/RegistrationRequest.java) and dispatch it using
 [performRegistrationRequest](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AuthorizationService.java#L278)
 on your AuthorizationService instance.
 
@@ -714,18 +680,18 @@ request is asynchronous the response is passed to a callback:
 service.performRegistrationRequest(
     registrationRequest,
     new AuthorizationService.RegistrationResponseCallback() {
-    @Override public void onRegistrationRequestCompleted (
-        @Nullable RegistrationResponse resp,
-        @Nullable AuthorizationException ex){
-        if (resp != null) {
-            // registration succeeded, store the registration response
-            AuthState state = new AuthState(resp);
-            //proceed to authorization...
-        } else {
-            // registration failed, check ex for more details
-        }
-    }
-});
+        @Override public void onRegistrationRequestCompleted(
+            @Nullable RegistrationResponse resp,
+            @Nullable AuthorizationException ex) {
+            if (resp != null) {
+                // registration succeeded, store the registration response
+                AuthState state = new AuthState(resp);
+                //proceed to authorization...
+            } else {
+              // registration failed, check ex for more details
+            }
+         }
+    });
 ```
 
 ## Utilizing client secrets (DANGEROUS)
@@ -739,8 +705,7 @@ integrating with, we strongly recommend performing the code exchange step
 on your backend, where the client secret can be kept hidden.
 
 Having said this, in some cases using client secrets is unavoidable. In these
-cases,
-a [ClientAuthentication](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/ClientAuthentication.java)
+cases, a [ClientAuthentication](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/ClientAuthentication.java)
 instance can be provided to AppAuth when performing a token request. This
 allows additional parameters (both HTTP headers and request body parameters) to
 be added to token requests. Two standard implementations of
@@ -757,18 +722,14 @@ write:
 ```java
 ClientAuthentication clientAuth = new ClientSecretBasic(MY_CLIENT_SECRET);
 TokenRequest req = ...;
-    authService.
-
-performTokenRequest(req, clientAuth, callback);
+authService.performTokenRequest(req, clientAuth, callback);
 ```
 
 This can also be done when using `performActionWithFreshTokens` on AuthState:
 
 ```java
 ClientAuthentication clientAuth = new ClientSecretPost(MY_CLIENT_SECRET);
-authState.
-
-performActionWithFreshTokens(
+authState.performActionWithFreshTokens(
     authService,
     clientAuth,
     action);
