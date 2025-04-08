@@ -42,13 +42,20 @@ public class AppAuthConfiguration {
 
     private final boolean mSkipIssuerHttpsCheck;
 
+    private final boolean mSkipTimeValidation;
+
+    private final Long mAllowedTimeSkew;
     private AppAuthConfiguration(
             @NonNull BrowserMatcher browserMatcher,
             @NonNull ConnectionBuilder connectionBuilder,
-            Boolean skipIssuerHttpsCheck) {
+            Boolean skipIssuerHttpsCheck,
+            Boolean skipTimeValidation,
+            Long allowedTimeSkew) {
         mBrowserMatcher = browserMatcher;
         mConnectionBuilder = connectionBuilder;
         mSkipIssuerHttpsCheck = skipIssuerHttpsCheck;
+        mSkipTimeValidation = skipTimeValidation;
+        mAllowedTimeSkew = allowedTimeSkew;
     }
 
     /**
@@ -77,6 +84,22 @@ public class AppAuthConfiguration {
     public boolean getSkipIssuerHttpsCheck() { return mSkipIssuerHttpsCheck; }
 
     /**
+     * Returns <code>true</code> if the ID token issue time validation is disables,
+     * otherwise <code>false</code>.
+     *
+     * @see Builder#setSkipTimeValidation(Boolean)
+     */
+    public boolean getSkipTimeValidation() { return mSkipTimeValidation; }
+
+    /**
+     * Returns the time in seconds that the ID token issue time is allowed to be
+     * skewed.
+     *
+     * @see Builder#setAllowedTimeSkew(Long)
+     */
+    public Long getAllowedTimeSkew() { return mAllowedTimeSkew; }
+
+    /**
      * Creates {@link AppAuthConfiguration} instances.
      */
     public static class Builder {
@@ -85,7 +108,8 @@ public class AppAuthConfiguration {
         private ConnectionBuilder mConnectionBuilder = DefaultConnectionBuilder.INSTANCE;
         private boolean mSkipIssuerHttpsCheck;
         private boolean mSkipNonceVerification;
-
+        private boolean mSkipTimeValidation;
+        private Long mAllowedTimeSkew;
         /**
          * Specify the browser matcher to use, which controls the browsers that can be used
          * for authorization.
@@ -120,6 +144,21 @@ public class AppAuthConfiguration {
         }
 
         /**
+         * Disables issue time validation for the id token.
+         */
+        public Builder setSkipTimeValidation(Boolean skipTimeValidation) {
+            mSkipTimeValidation = skipTimeValidation;
+            return this;
+        }
+
+        /**
+         * Sets the allowed time skew in seconds for id token issue time validation.
+         */
+        public Builder setAllowedTimeSkew(Long allowedTimeSkew) {
+            mAllowedTimeSkew = allowedTimeSkew;
+            return this;
+        }
+        /**
          * Creates the instance from the configured properties.
          */
         @NonNull
@@ -127,7 +166,9 @@ public class AppAuthConfiguration {
             return new AppAuthConfiguration(
                 mBrowserMatcher,
                 mConnectionBuilder,
-                mSkipIssuerHttpsCheck
+                mSkipIssuerHttpsCheck,
+                mSkipTimeValidation,
+                mAllowedTimeSkew
             );
         }
 

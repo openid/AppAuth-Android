@@ -19,6 +19,7 @@ import static net.openid.appauth.AdditionalParamsProcessor.builtInParams;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Base64;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -204,12 +205,14 @@ public class IdToken {
 
     @VisibleForTesting
     void validate(@NonNull TokenRequest tokenRequest, Clock clock) throws AuthorizationException {
-        validate(tokenRequest, clock, false);
+        validate(tokenRequest, clock, false, false, null);
     }
 
     void validate(@NonNull TokenRequest tokenRequest,
                   Clock clock,
-                  boolean skipIssuerHttpsCheck) throws AuthorizationException {
+                  boolean skipIssuerHttpsCheck,
+                  boolean skipTimeValidation,
+                  @Nullable Long allowedTimeSkew) throws AuthorizationException {
         // OpenID Connect Core Section 3.1.3.7. rule #1
         // Not enforced: AppAuth does not support JWT encryption.
 
@@ -271,18 +274,22 @@ public class IdToken {
         // OpenID Connect Core Section 3.1.3.7. rule #9
         // Validates that the current time is before the expiry time.
         Long nowInSeconds = clock.getCurrentTimeMillis() / MILLIS_PER_SECOND;
-        if (nowInSeconds > this.expiration) {
-            throw AuthorizationException.fromTemplate(GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
-                new IdTokenException("ID Token expired"));
+        if (!skipTimeValidation) {
+            if (nowInSeconds > this.expiration) {
+                throw AuthorizationException.fromTemplate(GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
+                    new IdTokenException("ID Token expired"));
+            }
         }
 
-        // OpenID Connect Core Section 3.1.3.7. rule #10
-        // Validates that the issued at time is not more than +/- 10 minutes on the current
-        // time.
-        if (Math.abs(nowInSeconds - this.issuedAt) > TEN_MINUTES_IN_SECONDS) {
-            throw AuthorizationException.fromTemplate(GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
-                new IdTokenException("Issued at time is more than 10 minutes "
-                    + "before or after the current time"));
+        if (!skipTimeValidation) {
+            // OpenID Connect Core Section 3.1.3.7. rule #10
+            // Validates that the issued at time is not more than the +/- configured allowed time skew,
+            // or +/- 10 minutes as a default, on the current time.
+            if (Math.abs(nowInSeconds - this.issuedAt) > (allowedTimeSkew == null ? TEN_MINUTES_IN_SECONDS : allowedTimeSkew)) {
+                throw AuthorizationException.fromTemplate(GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
+                    new IdTokenException("Issued at time is more than 10 minutes "
+                        + "before or after the current time"));
+            }
         }
 
         // Only relevant for the authorization_code response type
