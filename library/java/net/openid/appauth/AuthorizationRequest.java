@@ -171,6 +171,17 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
          * <https://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.6>"
          */
         public static final String SELECT_ACCOUNT = "select_account";
+
+        /**
+         * A value of create indicates to the OpenID Provider that the client desires that the user
+         * be shown the account creation UX rather than the login flow. Care must be taken if
+         * combining this value with other prompt values. Mutually exclusive conditions can
+         * arise so it is RECOMMENDED that create not be combined with any other values.
+         *
+         * @see "Initiating User Registration via OpenID Connect 1.0
+         * <https://openid.net/specs/openid-connect-prompt-create-1_0-final.html>"
+         */
+        public static final String CREATE = "create";
     }
 
     /**
