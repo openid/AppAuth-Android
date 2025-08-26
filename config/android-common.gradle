@@ -4,7 +4,7 @@ android {
     defaultConfig {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.compileSdkVersion
-        versionCode rootProject.versionNum
+        versionCode rootProject.versionCode
         versionName rootProject.versionName
     }
     sourceSets {

@@ -23,25 +23,18 @@ subprojects {
 
 ext.verifyKeystore()
 
-try {
-    def grgit = Grgit.open(currentDir: project.rootDir)
-    def lastCommit = grgit.head()
-
-    project.ext.versionNum = grgit.log(includes:['HEAD']).size()
-    project.ext.versionName = grgit.describe()
-    project.ext.versionDate = lastCommit.getDate()
-    if (project.ext.versionName == null) {
-        project.ext.versionName = 'DEV'
-    }
-} catch (Exception ignored) {
-    project.ext.versionNum = 1
-    project.ext.versionName = 'DEV'
-    project.ext.versionDate = new Date()
-}
-
 project.ext {
     minSdkVersion = 16
     compileSdkVersion = 33
+    versionID = "0.11.2"
+    versionName = """$versionID-skyscanner"""
+
+    try {
+        def grgit = Grgit.open(currentDir: project.rootDir)
+        versionCode = grgit.log(includes: ['HEAD']).size()
+    } catch (Exception ignored) {
+        versionCode = 1
+    }
 
     googleVersions = [
         glide                 : '4.12.0',
@@ -60,8 +53,8 @@ project.ext {
 
 task showVersion {
     doLast {
-        logger.lifecycle("Version ID: " + project.versionNum)
+        logger.lifecycle("Version ID: " + project.versionID)
         logger.lifecycle("Version Name: " + project.versionName)
-        logger.lifecycle("Version Date: " + project.versionDate)
+        logger.lifecycle("Version Code: " + project.versionCode)
     }
 }

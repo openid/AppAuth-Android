@@ -52,6 +52,26 @@ either through custom URI scheme redirects, or App Links.
 AS's that assume all clients are web-based or require clients to maintain
 confidentiality of the client secrets may not work well.
 
+From Android API 30 (R) and above, set [queries](https://developer.android.com/preview/privacy/package-visibility) in the manifest,
+to enable AppAuth searching for usable installed browsers.
+```xml
+<manifest package="com.example.game">
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.APP_BROWSER" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+    ...
+</manifest>
+```
+
 ## Demo app
 
 A demo app is contained within this repository. For instructions on how to
@@ -261,7 +281,7 @@ this redirect URI.
 
 We recommend using a custom scheme based redirect URI (i.e. those of form
 `my.scheme:/path`), as this is the most widely supported across all versions of
-Android. To avoid conflicts with other apps, it is recommended to configure a 
+Android. To avoid conflicts with other apps, it is recommended to configure a
 distinct scheme using "reverse domain name notation". This can either match
 your service web domain (in reverse) e.g. `com.example.service` or your package
 name `com.example.app` or be something completely new as long as it's distinct
@@ -272,12 +292,6 @@ else.
 
 When a custom scheme is used, AppAuth can be easily configured to capture
 all redirects using this custom scheme through a manifest placeholder:
-
-```groovy
-android.defaultConfig.manifestPlaceholders = [
-  'appAuthRedirectScheme': 'com.example.app'
-]
-```
 
 Alternatively, the redirect URI can be directly configured by adding an
 intent-filter for AppAuth's RedirectUriReceiverActivity to your
