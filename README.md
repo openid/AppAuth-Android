@@ -1,4 +1,4 @@
-![AppAuth for Android](https://rawgit.com/openid/AppAuth-Android/master/appauth_lockup.svg)
+ko![AppAuth for Android](https://rawgit.com/openid/AppAuth-Android/master/appauth_lockup.svg)
 
 [![Download](https://img.shields.io/maven-central/v/net.openid/appauth)](https://search.maven.org/search?q=g:net.openid%20appauth)
 [![Javadocs](http://javadoc.io/badge/net.openid/appauth.svg)](http://javadoc.io/doc/net.openid/appauth)
