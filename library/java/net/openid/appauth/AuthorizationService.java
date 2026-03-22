@@ -506,7 +506,9 @@ public class AuthorizationService {
                 mClientConfiguration.getConnectionBuilder(),
                 SystemClock.INSTANCE,
                 callback,
-                mClientConfiguration.getSkipIssuerHttpsCheck())
+                mClientConfiguration.getSkipIssuerHttpsCheck(),
+                mClientConfiguration.getSkipTimeValidation(),
+                mClientConfiguration.getAllowedTimeSkew())
                 .execute();
     }
 
@@ -585,7 +587,8 @@ public class AuthorizationService {
         private TokenResponseCallback mCallback;
         private Clock mClock;
         private boolean mSkipIssuerHttpsCheck;
-
+        private boolean mSkipTimeValidation;
+        private Long mAllowedTimeSkew;
         private AuthorizationException mException;
 
         TokenRequestTask(TokenRequest request,
@@ -593,13 +596,17 @@ public class AuthorizationService {
                          @NonNull ConnectionBuilder connectionBuilder,
                          Clock clock,
                          TokenResponseCallback callback,
-                         Boolean skipIssuerHttpsCheck) {
+                         Boolean skipIssuerHttpsCheck,
+                         Boolean skipTimeValidation,
+                         Long allowedTimeSkew) {
             mRequest = request;
             mClientAuthentication = clientAuthentication;
             mConnectionBuilder = connectionBuilder;
             mClock = clock;
             mCallback = callback;
             mSkipIssuerHttpsCheck = skipIssuerHttpsCheck;
+            mSkipTimeValidation = skipTimeValidation;
+            mAllowedTimeSkew = allowedTimeSkew;
         }
 
         @Override
@@ -710,7 +717,9 @@ public class AuthorizationService {
                     idToken.validate(
                             mRequest,
                             mClock,
-                            mSkipIssuerHttpsCheck
+                            mSkipIssuerHttpsCheck,
+                            mSkipTimeValidation,
+                            mAllowedTimeSkew
                     );
                 } catch (AuthorizationException ex) {
                     mCallback.onTokenRequestCompleted(null, ex);

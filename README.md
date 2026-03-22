@@ -261,7 +261,7 @@ this redirect URI.
 
 We recommend using a custom scheme based redirect URI (i.e. those of form
 `my.scheme:/path`), as this is the most widely supported across all versions of
-Android. To avoid conflicts with other apps, it is recommended to configure a 
+Android. To avoid conflicts with other apps, it is recommended to configure a
 distinct scheme using "reverse domain name notation". This can either match
 your service web domain (in reverse) e.g. `com.example.service` or your package
 name `com.example.app` or be something completely new as long as it's distinct
@@ -619,12 +619,12 @@ AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
 
 ID Token validation was introduced in `0.8.0` but not all authorization servers or configurations support it correctly.
 
-- For testing environments [setSkipIssuerHttpsCheck](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AppAuthConfiguration.java#L129) can be used to bypass the fact the issuer needs to be HTTPS.
+- For testing environments [setSkipIssuerHttpsCheck](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AppAuthConfiguration.java#L141) can be used to bypass the fact the issuer needs to be HTTPS.
 
 ```java
 AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
     .setSkipIssuerHttpsCheck(true)
-    .build()
+    .build();
 ```
 
 - For services that don't support nonce[s] resulting in **IdTokenException** `Nonce mismatch` just set nonce to `null` on the `AuthorizationRequest`. Please consider **raising an issue** with your Identity Provider and removing this once it is fixed.
@@ -634,6 +634,23 @@ AuthorizationRequest authRequest = authRequestBuilder
     .setNonce(null)
     .build();
 ```
+
+- For testing environments [setSkipTimeValidation](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AppAuthConfiguration.java#L149) can be used to bypass the issue time validation.
+
+```java
+AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
+    .setSkipTimeValidation(true)
+    .build();
+```
+
+- To change the default allowed time skew of 10 minutes for the issue time, [setAllowedTimeSkew](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/AppAuthConfiguration.java#L157) can be used.
+
+```java
+AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
+    .setAllowedTimeSkew(TWENTY_MINUTES_IN_SECONDS)
+    .build();
+```
+
 
 ## Dynamic client registration
 
