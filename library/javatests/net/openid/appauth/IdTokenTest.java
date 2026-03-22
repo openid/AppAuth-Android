@@ -361,6 +361,34 @@ public class IdTokenTest {
         idToken.validate(tokenRequest, clock);
     }
 
+    @Test(expected = AuthorizationException.class)
+    public void testValidate_shouldFailOnIssuerMissingScheme()
+        throws AuthorizationException, JSONException, MissingArgumentException {
+        Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;
+        Long tenMinutesInSeconds = (long) (10 * 60);
+        IdToken idToken = new IdToken(
+            "some.issuer",
+            TEST_SUBJECT,
+            Collections.singletonList(TEST_CLIENT_ID),
+            nowInSeconds + tenMinutesInSeconds,
+            nowInSeconds
+        );
+
+        String serviceDocJsonWithIssuerMissingHost = getDiscoveryDocJsonWithIssuer("some.issuer");
+        AuthorizationServiceDiscovery discoveryDoc = new AuthorizationServiceDiscovery(
+            new JSONObject(serviceDocJsonWithIssuerMissingHost));
+        AuthorizationServiceConfiguration serviceConfiguration =
+            new AuthorizationServiceConfiguration(discoveryDoc);
+        TokenRequest tokenRequest = new TokenRequest.Builder(serviceConfiguration, TEST_CLIENT_ID)
+            .setAuthorizationCode(TEST_AUTH_CODE)
+            .setCodeVerifier(TEST_CODE_VERIFIER)
+            .setGrantType(GrantTypeValues.AUTHORIZATION_CODE)
+            .setRedirectUri(TEST_APP_REDIRECT_URI)
+            .build();
+        Clock clock = SystemClock.INSTANCE;
+        idToken.validate(tokenRequest, clock);
+    }
+
     @Test
     public void testValidate_audienceMatch() throws AuthorizationException {
         Long nowInSeconds = SystemClock.INSTANCE.getCurrentTimeMillis() / 1000;

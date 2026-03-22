@@ -229,7 +229,8 @@ public class IdToken {
             // components.
             Uri issuerUri = Uri.parse(this.issuer);
 
-            if (!skipIssuerHttpsCheck && !issuerUri.getScheme().equals("https")) {
+            String issuerScheme = issuerUri.getScheme();
+            if (!skipIssuerHttpsCheck && (issuerScheme == null || !issuerScheme.equals("https"))) {
                 throw AuthorizationException.fromTemplate(GeneralErrors.ID_TOKEN_VALIDATION_ERROR,
                     new IdTokenException("Issuer must be an https URL"));
             }
