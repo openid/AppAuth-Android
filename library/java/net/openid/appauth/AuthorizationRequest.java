@@ -264,6 +264,14 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
          * <http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#rfc.section.2.1>"
          */
         public static final String FRAGMENT = "fragment";
+
+        /**
+         * Instructs the authorization server to send response parameters using
+         * the HTTP POST method.
+         * @see "OAuth 2.0 Multiple Response Type Encoding Practices, Section 2.1
+         * <https://openid.net/specs/oauth-v2-form-post-response-mode-1_0.html>"
+         */
+        public static final String FORM_POST = "form_post";
     }
 
     @VisibleForTesting
