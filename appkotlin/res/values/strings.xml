@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name_short">AppAuth</string>
+    <string name="auth_granted">Authorization granted</string>
+    <string name="intro_header">OpenID AppAuth Demo</string>
+    <string name="openid_logo_content_description">AppAuth Logo</string>
+    <string name="refresh_token">Refresh token</string>
+    <string name="access_token_expires_at">Access token expires at: %s</string>
+    <string name="no_access_token_returned">No access token returned</string>
+    <string name="no_refresh_token_returned">No refresh token returned</string>
+    <string name="refresh_token_returned">Refresh token returned</string>
+    <string name="no_id_token_returned">No ID token returned</string>
+    <string name="id_token_returned">ID token returned</string>
+    <string name="view_profile">View user info</string>
+    <string name="userinfo_profile_content_description">User profile picture</string>
+    <string name="login_hint_value">Account ID (e.g. test@example.com)</string>
+    <string name="account_id_description">The Account ID is optional. If specified, it is transmitted as a login_hint parameter in the authorization request.</string>
+    <string name="auth_options">Authorization options:</string>
+    <string name="browser_selector_label">Use browser:</string>
+    <string name="browser_icon_contentDescription">Browser app icon</string>
+    <string name="browser_appauth_default_label">AppAuth heuristic selection</string>
+    <string name="custom_tab_label">"%1$s (custom tab)"</string>
+    <string name="retry_label">Retry</string>
+    <string name="not_authorized">Not authorized</string>
+    <string name="start_authorization">Start authorization</string>
+    <string name="reauthorize">Reauthorize</string>
+    <string name="sign_out">Sign out</string>
+    <string name="no_access_token_expiry">Access time has no defined expiry</string>
+    <string name="access_token_expired">Access token has expired</string>
+    <string name="auth_settings">Authorization settings in use:</string>
+    <string name="use_pending_intents">Use PendingIntent\'s for completion</string>
+</resources>
