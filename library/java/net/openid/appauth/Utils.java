@@ -22,7 +22,7 @@ import java.io.InputStreamReader;
 /**
  * Utility class for common operations.
  */
-class Utils {
+public class Utils {
     private static final int INITIAL_READ_BUFFER_SIZE = 1024;
 
     private Utils() {
