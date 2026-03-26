@@ -176,6 +176,52 @@ public final class Browsers {
         }
     }
 
+    public static final class Edge {
+
+        /**
+         * The package name for edge.
+         */
+        public static final String PACKAGE_NAME = "com.microsoft.emmx";
+
+        /**
+         * The SHA-512 hash (Base64 url-safe encoded) of the public key for edge.
+         */
+        public static final String SIGNATURE =
+            "Ivy-Rk6ztai_IudfbyUrSHugzRqAtHWslFvHT0PTvLMsEKLUIgv7ZZbVxygWy_M5mOPpfjZrd3vOx3t-cA6fVQ==";
+
+        /**
+         * The set of signature hashes for Edge.
+         */
+        public static final Set<String> SIGNATURE_SET =
+            Collections.singleton(SIGNATURE);
+
+        /**
+         * The version in which Custom Tabs were introduced in Edge.
+         */
+        public static final DelimitedVersion MINIMUM_VERSION_FOR_CUSTOM_TAB =
+            DelimitedVersion.parse("45");
+
+        /**
+         * Creates a browser descriptor for the specified version of Edge, when used as a
+         * standalone browser.
+         */
+        public static BrowserDescriptor standaloneBrowser(@NonNull String version) {
+            return new BrowserDescriptor(PACKAGE_NAME, SIGNATURE_SET, version, false);
+        }
+
+        /**
+         * Creates a browser descriptor for the specified version of Edge, when used as
+         * a custom tab.
+         */
+        public static BrowserDescriptor customTab(@NonNull String version) {
+            return new BrowserDescriptor(PACKAGE_NAME, SIGNATURE_SET, version, true);
+        }
+
+        private Edge() {
+            // no need to construct this class
+        }
+    }
+
     private Browsers() {
         // no need to construct this class
     }

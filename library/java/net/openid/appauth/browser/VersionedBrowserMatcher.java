@@ -79,6 +79,15 @@ public class VersionedBrowserMatcher implements BrowserMatcher {
             true,
             VersionRange.atLeast(Browsers.SBrowser.MINIMUM_VERSION_FOR_CUSTOM_TAB));
 
+    /**
+     * Matches any version of SBrowser for use as a edge tab.
+     */
+    public static final VersionedBrowserMatcher EDGE_CUSTOM_TAB = new VersionedBrowserMatcher(
+        Browsers.Edge.PACKAGE_NAME,
+        Browsers.Edge.SIGNATURE_SET,
+        true,
+        VersionRange.ANY_VERSION);
+
     private String mPackageName;
     private Set<String> mSignatureHashes;
     private VersionRange mVersionRange;
