@@ -58,9 +58,10 @@ Each identity provider is free to submit a set of instructions for configuring t
 interact with their authorization endpoints. Those who have submitted instructions are listed
 below:
 
+- [FusionAuth](README-FusionAuth.md)
+- [Gluu](README-Gluu.md)
 - [Google](README-Google.md)
 - [Okta](README-Okta.md)
-- [Gluu](README-Gluu.md)
 
 ## Should I use this same configuration pattern in my own apps?
 
