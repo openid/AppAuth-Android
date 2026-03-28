@@ -843,9 +843,9 @@ public class AuthorizationService {
                 return;
             } catch (RegistrationResponse.MissingArgumentException ex) {
                 Logger.errorWithStack(ex, "Malformed registration response");
-                mException = AuthorizationException.fromTemplate(
+                mCallback.onRegistrationRequestCompleted(null, AuthorizationException.fromTemplate(
                         GeneralErrors.INVALID_REGISTRATION_RESPONSE,
-                        ex);
+                        ex));
                 return;
             }
             Logger.debug("Dynamic registration with %s completed",

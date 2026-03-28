@@ -108,6 +108,12 @@ public class AuthorizationServiceTest {
             + " \"application_type\": " + RegistrationRequest.APPLICATION_TYPE_NATIVE + "\n"
             + "}";
 
+    private static final String INVALID_REGISTRATION_RESPONSE_JSON = "{\n"
+        + " \"client_id\": \"" + TEST_CLIENT_ID + "\",\n"
+        + " \"client_secret\": \"" + TEST_CLIENT_SECRET + "\",\n"
+        + " \"application_type\": " + RegistrationRequest.APPLICATION_TYPE_NATIVE + "\n"
+        + "}";
+
     private static final String INVALID_GRANT_RESPONSE_JSON = "{\n"
             + "  \"error\": \"invalid_grant\",\n"
             + "  \"error_description\": \"invalid_grant description\"\n"
@@ -467,6 +473,16 @@ public class AuthorizationServiceTest {
         shadowOf(getMainLooper()).idle();
         assertNotNull(mRegistrationCallback.error);
         assertEquals(GeneralErrors.NETWORK_ERROR, mRegistrationCallback.error);
+    }
+
+    @Test
+    public void testRegistrationRequest_MissingArgumentException() throws Exception {
+        InputStream is = new ByteArrayInputStream(INVALID_REGISTRATION_RESPONSE_JSON.getBytes());
+        when(mHttpConnection.getInputStream()).thenReturn(is);
+        mService.performRegistrationRequest(getTestRegistrationRequest(), mRegistrationCallback);
+        mRegistrationCallback.waitForCallback();
+        assertNotNull(mRegistrationCallback.error);
+        assertEquals(GeneralErrors.INVALID_REGISTRATION_RESPONSE, mRegistrationCallback.error);
     }
 
     @Test(expected = IllegalStateException.class)
