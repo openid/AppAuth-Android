@@ -14,6 +14,8 @@
 
 package net.openid.appauth;
 
+import static net.openid.appauth.AuthorizationException.DeviceCodeRequestErrors.AUTHORIZATION_PENDING;
+import static net.openid.appauth.AuthorizationException.DeviceCodeRequestErrors.SLOW_DOWN;
 import static net.openid.appauth.Preconditions.checkNotNull;
 
 import android.annotation.TargetApi;
@@ -51,6 +53,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URLConnection;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -420,6 +423,23 @@ public class AuthorizationService {
     }
 
     /**
+     * Sends a request to the authorization service as part of a device authorization request.
+     * The result of this request will be sent to the provided callback handler.
+     */
+    public void performDeviceAuthorizationRequest(
+            @NonNull DeviceAuthorizationRequest request,
+            @NonNull DeviceAuthorizationResponseCallback callback) {
+        checkNotDisposed();
+        Logger.debug("Initiating device authorization request to %s",
+                request.configuration.deviceAuthorizationEndpoint);
+        new DeviceAuthorizationRequestTask(
+                request,
+                mClientConfiguration.getConnectionBuilder(),
+                callback)
+            .execute();
+    }
+
+    /**
      * Constructs an intent that encapsulates the provided request and custom tabs intent,
      * and is intended to be launched via {@link Activity#startActivityForResult}.
      * The parameters of this request are determined by both the authorization service
@@ -511,6 +531,57 @@ public class AuthorizationService {
     }
 
     /**
+     * Performs a polling sequence that sends requests to the authorization service to exchange a
+     * device code granted as part of a device authorization request for a token. The result of
+     * this polling sequence will be sent to the provided callback handler.
+     *
+     * @return The runnable used to cancel the ongoing polling request
+     */
+    public CancelAsyncTaskRunnable performTokenPollRequest(
+            @NonNull TokenRequest request,
+            @Nullable Long pollingInterval,
+            @NonNull Long expirationTime,
+            @NonNull TokenResponseCallback callback) {
+        return performTokenPollRequest(
+                request,
+                NoClientAuthentication.INSTANCE,
+                pollingInterval,
+                expirationTime,
+                callback);
+    }
+
+    /**
+     * Performs a polling sequence that sends requests to the authorization service to exchange a
+     * device code granted as part of a device authorization request for a token. The result of
+     * this polling sequence will be sent to the provided callback handler.
+     *
+     * @return The runnable used to cancel the ongoing polling request
+     */
+    public CancelAsyncTaskRunnable performTokenPollRequest(
+            @NonNull TokenRequest request,
+            @NonNull ClientAuthentication clientAuthentication,
+            @Nullable Long pollingInterval,
+            @Nullable Long expirationTime,
+            @NonNull TokenResponseCallback callback) {
+        checkNotDisposed();
+        Logger.debug("Initiating device code exchange polling requests to %s",
+                request.configuration.tokenEndpoint);
+        TokenRequestPollingTask pollingTask = new TokenRequestPollingTask(
+                request,
+                clientAuthentication,
+                pollingInterval,
+                expirationTime,
+                mClientConfiguration.getConnectionBuilder(),
+                SystemClock.INSTANCE,
+                callback,
+                mClientConfiguration.getSkipIssuerHttpsCheck());
+        CancelAsyncTaskRunnable cancelPollingTask = new CancelAsyncTaskRunnable(
+                pollingTask);
+        pollingTask.execute();
+        return cancelPollingTask;
+    }
+
+    /**
      * Sends a request to the authorization service to dynamically register a client.
      * The result of this request will be sent to the provided callback handler.
      */
@@ -576,6 +647,93 @@ public class AuthorizationService {
         return intent;
     }
 
+    static class TokenRequestPollingTask extends TokenRequestTask {
+
+        /**
+         * As defined in RFC 8628, default interval for polling should be of 5 seconds.
+         *
+         * @see "OAuth 2.0 Device Grant" (RFC 8628), Section 3.5
+         * <https://tools.ietf.org/html/rfc8628#section-3.5>"
+         */
+        @VisibleForTesting
+        public static final Long DEFAULT_INTERVAL = 5L;
+
+        private Clock mClock;
+        private Long mPollingInterval;
+        private Long mExpirationTime;
+        private TokenResponseCallback mCallback;
+
+        TokenRequestPollingTask(TokenRequest request,
+                                @NonNull ClientAuthentication clientAuthentication,
+                                @Nullable Long pollingInterval,
+                                @Nullable Long expirationTime,
+                                @NonNull ConnectionBuilder connectionBuilder,
+                                Clock clock,
+                                TokenResponseCallback callback,
+                                Boolean skipIssuerHttpsCheck) {
+            super(request, clientAuthentication, connectionBuilder, clock, callback,
+                    skipIssuerHttpsCheck);
+            mPollingInterval = TimeUnit.SECONDS.toMillis(
+                    pollingInterval != null ? pollingInterval : DEFAULT_INTERVAL);
+            mExpirationTime = expirationTime;
+            mClock = clock;
+            mCallback = callback;
+        }
+
+        @Override
+        protected JSONObject doInBackground(Void... voids) {
+            do {
+                try {
+                    Thread.sleep(mPollingInterval);
+                } catch (InterruptedException ex) {
+                    mException = AuthorizationException.fromTemplate(
+                        AuthorizationException.DeviceCodeRequestErrors.CLIENT_ERROR, ex);
+                    return null;
+                }
+
+                JSONObject json = super.doInBackground(voids);
+                if (json != null && json.has(AuthorizationException.PARAM_ERROR)) {
+                    AuthorizationException ex;
+                    try {
+                        String error = json.getString(AuthorizationException.PARAM_ERROR);
+                        ex = AuthorizationException.DeviceCodeRequestErrors.byString(error);
+                        if (ex == AUTHORIZATION_PENDING) {
+                            continue;
+                        } else if (ex == SLOW_DOWN) {
+                            mPollingInterval += TimeUnit.SECONDS.toMillis(DEFAULT_INTERVAL);
+                            continue;
+                        }
+                        mException = ex;
+                    } catch (JSONException jsonEx) {
+                        mException = AuthorizationException.fromTemplate(
+                            GeneralErrors.JSON_DESERIALIZATION_ERROR,
+                            jsonEx);
+                    }
+                }
+                return json;
+            } while (mClock.getCurrentTimeMillis() < mExpirationTime && !isCancelled());
+            if (mClock.getCurrentTimeMillis() < mExpirationTime) {
+                mException = AuthorizationException.fromTemplate(
+                    AuthorizationException.DeviceCodeRequestErrors.CLIENT_ERROR,
+                    new InterruptedException());
+            } else {
+                mException = AuthorizationException.fromTemplate(
+                    AuthorizationException.DeviceCodeRequestErrors.EXPIRED_TOKEN, null);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onCancelled(JSONObject json) {
+            if (mException == null) {
+                mException = AuthorizationException.fromTemplate(
+                    AuthorizationException.DeviceCodeRequestErrors.CLIENT_ERROR,
+                    new InterruptedException());
+            }
+            mCallback.onTokenRequestCompleted(null, mException);
+        }
+    }
+
     private static class TokenRequestTask
             extends AsyncTask<Void, Void, JSONObject> {
 
@@ -586,7 +744,7 @@ public class AuthorizationService {
         private Clock mClock;
         private boolean mSkipIssuerHttpsCheck;
 
-        private AuthorizationException mException;
+        protected AuthorizationException mException;
 
         TokenRequestTask(TokenRequest request,
                          @NonNull ClientAuthentication clientAuthentication,
@@ -612,7 +770,6 @@ public class AuthorizationService {
                 conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 addJsonToAcceptHeader(conn);
                 conn.setDoOutput(true);
-
                 Map<String, String> headers = mClientAuthentication
                         .getRequestHeaders(mRequest.clientId);
                 if (headers != null) {
@@ -783,6 +940,7 @@ public class AuthorizationService {
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json");
                 conn.setDoOutput(true);
+
                 conn.setRequestProperty("Content-Length", String.valueOf(postData.length()));
                 OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
                 wr.write(postData);
@@ -874,5 +1032,141 @@ public class AuthorizationService {
          */
         void onRegistrationRequestCompleted(@Nullable RegistrationResponse response,
                                             @Nullable AuthorizationException ex);
+    }
+
+    private static class DeviceAuthorizationRequestTask
+            extends AsyncTask<Void, Void, JSONObject> {
+        private DeviceAuthorizationRequest mRequest;
+        private final ConnectionBuilder mConnectionBuilder;
+        private DeviceAuthorizationResponseCallback mCallback;
+
+        private AuthorizationException mException;
+
+        DeviceAuthorizationRequestTask(DeviceAuthorizationRequest request,
+                                       ConnectionBuilder connectionBuilder,
+                                       DeviceAuthorizationResponseCallback callback) {
+            mRequest = request;
+            mConnectionBuilder = connectionBuilder;
+            mCallback = callback;
+        }
+
+        @Override
+        protected JSONObject doInBackground(Void... voids) {
+            InputStream is = null;
+            try {
+                HttpURLConnection conn = mConnectionBuilder.openConnection(
+                        mRequest.configuration.deviceAuthorizationEndpoint);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                addJsonToAcceptHeader(conn);
+                conn.setDoOutput(true);
+
+                Map<String, String> parameters = mRequest.getRequestParameters();
+
+                String queryData = UriUtil.formUrlEncode(parameters);
+                conn.setRequestProperty("Content-Length", String.valueOf(queryData.length()));
+                OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+
+                wr.write(queryData);
+                wr.flush();
+
+                if (conn.getResponseCode() >= HttpURLConnection.HTTP_OK
+                        && conn.getResponseCode() < HttpURLConnection.HTTP_MULT_CHOICE) {
+                    is = conn.getInputStream();
+                } else {
+                    is = conn.getErrorStream();
+                }
+                String response = Utils.readInputStream(is);
+                return new JSONObject(response);
+            } catch (IOException ex) {
+                Logger.debugWithStack(ex, "Failed to complete device authorization request");
+                mException = AuthorizationException.fromTemplate(
+                    GeneralErrors.NETWORK_ERROR, ex);
+            } catch (JSONException ex) {
+                Logger.debugWithStack(ex, "Failed to complete device authorization request");
+                mException = AuthorizationException.fromTemplate(
+                    GeneralErrors.JSON_DESERIALIZATION_ERROR, ex);
+            } finally {
+                Utils.closeQuietly(is);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject json) {
+            if (mException != null) {
+                mCallback.onDeviceAuthorizationRequestCompleted(null, mException);
+                return;
+            }
+
+            if (json.has(AuthorizationException.PARAM_ERROR)) {
+                AuthorizationException ex;
+                try {
+                    String error = json.getString(AuthorizationException.PARAM_ERROR);
+                    ex = AuthorizationException.fromOAuthTemplate(
+                        AuthorizationException.AuthorizationRequestErrors.byString(error),
+                        error,
+                        json.getString(AuthorizationException.PARAM_ERROR_DESCRIPTION),
+                        UriUtil.parseUriIfAvailable(
+                            json.getString(AuthorizationException.PARAM_ERROR_URI)));
+                } catch (JSONException jsonEx) {
+                    ex = AuthorizationException.fromTemplate(
+                        GeneralErrors.JSON_DESERIALIZATION_ERROR,
+                        jsonEx);
+                }
+                mCallback.onDeviceAuthorizationRequestCompleted(null, ex);
+                return;
+            }
+
+            DeviceAuthorizationResponse response;
+            try {
+                response = new DeviceAuthorizationResponse.Builder(mRequest)
+                    .fromResponseJson(json).build();
+            } catch (JSONException jsonEx) {
+                mCallback.onDeviceAuthorizationRequestCompleted(null,
+                        AuthorizationException.fromTemplate(
+                                GeneralErrors.JSON_DESERIALIZATION_ERROR,
+                                jsonEx));
+                return;
+            }
+            Logger.debug("Device authorization request with %s completed",
+                    mRequest.configuration.deviceAuthorizationEndpoint);
+            mCallback.onDeviceAuthorizationRequestCompleted(response, null);
+        }
+
+        /**
+         * GitHub will only return a spec-compliant response if JSON is explicitly defined
+         * as an acceptable response type. As this is essentially harmless for all other
+         * spec-compliant IDPs, we add this header if no existing Accept header has been set
+         * by the connection builder.
+         */
+        private void addJsonToAcceptHeader(URLConnection conn) {
+            if (TextUtils.isEmpty(conn.getRequestProperty("Accept"))) {
+                conn.setRequestProperty("Accept", "application/json");
+            }
+        }
+    }
+
+    /**
+     * Callback interface for device authorization requests.
+     *
+     * @see AuthorizationService#performDeviceAuthorizationRequest
+     */
+    public interface DeviceAuthorizationResponseCallback {
+        /**
+         * Invoked when the request completes successfully or fails.
+         *
+         * Exactly one of `response` or `ex` will be non-null. If `response` is `null`, a failure
+         * occurred during the request. This can happen if an invalid URI was provided, no
+         * connection to the server could be established, or the response JSON was incomplete or
+         * incorrectly formatted.
+         *
+         * @param response the retrieved device authorization response, if successful; `null`
+         *                otherwise.
+         * @param ex a description of the failure, if one occurred: `null` otherwise.
+         * @see AuthorizationException.DeviceCodeRequestErrors
+         */
+        void onDeviceAuthorizationRequestCompleted(@Nullable DeviceAuthorizationResponse response,
+                                                   @Nullable AuthorizationException ex);
     }
 }

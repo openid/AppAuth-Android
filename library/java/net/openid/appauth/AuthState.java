@@ -52,6 +52,8 @@ public class AuthState {
     private static final String KEY_REFRESH_TOKEN = "refreshToken";
     private static final String KEY_SCOPE = "scope";
     private static final String KEY_LAST_AUTHORIZATION_RESPONSE = "lastAuthorizationResponse";
+    private static final String KEY_LAST_DEVICE_AUTHORIZATION_RESPONSE =
+            "lastDeviceAuthorizationResponse";
     private static final String KEY_LAST_TOKEN_RESPONSE = "mLastTokenResponse";
     private static final String KEY_AUTHORIZATION_EXCEPTION = "mAuthorizationException";
     private static final String KEY_LAST_REGISTRATION_RESPONSE = "lastRegistrationResponse";
@@ -69,6 +71,9 @@ public class AuthState {
     private AuthorizationResponse mLastAuthorizationResponse;
 
     @Nullable
+    private DeviceAuthorizationResponse mLastDeviceAuthorizationResponse;
+
+    @Nullable
     private TokenResponse mLastTokenResponse;
 
     @Nullable
@@ -76,6 +81,9 @@ public class AuthState {
 
     @Nullable
     private AuthorizationException mAuthorizationException;
+
+    @Nullable
+    private CancelAsyncTaskRunnable mCancelTokenPollingTask;
 
     private final Object mPendingActionsSyncObject = new Object();
     private List<AuthStateAction> mPendingActions;
@@ -125,6 +133,15 @@ public class AuthState {
     }
 
     /**
+     * Creates an {@link AuthState} based on a device authorization exchange.
+     */
+    public AuthState(
+            @NonNull DeviceAuthorizationResponse deviceAuthResponse,
+            @Nullable AuthorizationException authException) {
+        update(deviceAuthResponse, authException);
+    }
+
+    /**
      * The most recent refresh token received from the server, if available. Rather than using
      * this property directly as part of any request depending on authorization state, it is
      * recommended to call {@link #performActionWithFreshTokens(AuthorizationService,
@@ -167,6 +184,22 @@ public class AuthState {
     }
 
     /**
+     * The most recent device authorization response used to update the authorization state. For
+     * the device authorization flow, this will contain the device code, the complete and simple
+     * verification uris. It is rarely necessary to directly use the response; instead convenience
+     * methods are provided to retrieve the
+     * {@link #getVerificationUri() verification uri},
+     * {@link #getVerificationUriComplete() complete verification uri},
+     * {@link #getUserCode() user code},
+     * {@link #getCodeExpirationTime() code expiration time}
+     * and {@link #getScopeSet() scope} regardless of the flow used to retrieve them.
+     */
+    @Nullable
+    public DeviceAuthorizationResponse getLastDeviceAuthorizationResponse() {
+        return mLastDeviceAuthorizationResponse;
+    }
+
+    /**
      * The most recent token response used to update this authorization state. For the
      * authorization code flow, this will contain the latest access token. It is rarely necessary
      * to directly use the response; instead convenience methods are provided to retrieve the
@@ -201,6 +234,10 @@ public class AuthState {
     public AuthorizationServiceConfiguration getAuthorizationServiceConfiguration() {
         if (mLastAuthorizationResponse != null) {
             return mLastAuthorizationResponse.request.configuration;
+        }
+
+        if (mLastDeviceAuthorizationResponse != null) {
+            return mLastDeviceAuthorizationResponse.request.configuration;
         }
 
         return mConfig;
@@ -317,6 +354,103 @@ public class AuthState {
     }
 
     /**
+     * The current end-user device verification URI, if available.
+     */
+    @Nullable
+    public String getVerificationUri() {
+        if (mLastDeviceAuthorizationResponse != null) {
+            return mLastDeviceAuthorizationResponse.verificationUri;
+        }
+
+        return null;
+    }
+
+    /**
+     * The current end-user complete device verification URI with the user code, if available.
+     */
+    @Nullable
+    public String getVerificationUriComplete() {
+        if (mLastDeviceAuthorizationResponse != null) {
+            return mLastDeviceAuthorizationResponse.verificationUriComplete;
+        }
+
+        return null;
+    }
+
+    /**
+     * The current end-user verification code, if available.
+     */
+    @Nullable
+    public String getUserCode() {
+        if (mLastDeviceAuthorizationResponse != null) {
+            return mLastDeviceAuthorizationResponse.userCode;
+        }
+
+        return null;
+    }
+
+    /**
+     * The expiration time of the current device code and user code (if available), as milliseconds
+     * from the UNIX epoch (consistent with {@link System#currentTimeMillis()}).
+     */
+    @Nullable
+    public Long getCodeExpirationTime() {
+        if (mLastDeviceAuthorizationResponse != null) {
+            return mLastDeviceAuthorizationResponse.codeExpirationTime;
+        }
+
+        return null;
+    }
+
+    /**
+     * The current {@link AuthorizationServiceConfiguration}, if available.
+     */
+    @Nullable
+    public AuthorizationServiceConfiguration getConfiguration() {
+        if (mAuthorizationException != null) {
+            return null;
+        }
+
+        if (mLastTokenResponse != null) {
+            return mLastTokenResponse.request.configuration;
+        }
+
+        if (mLastDeviceAuthorizationResponse != null) {
+            return mLastDeviceAuthorizationResponse.request.configuration;
+        }
+
+        if (mLastAuthorizationResponse != null) {
+            return mLastAuthorizationResponse.request.configuration;
+        }
+
+        return null;
+    }
+
+    /**
+     * The current client id, if available.
+     */
+    @Nullable
+    public String getClientId() {
+        if (mAuthorizationException != null) {
+            return null;
+        }
+
+        if (mLastTokenResponse != null) {
+            return mLastTokenResponse.request.clientId;
+        }
+
+        if (mLastDeviceAuthorizationResponse != null) {
+            return mLastDeviceAuthorizationResponse.request.clientId;
+        }
+
+        if (mLastAuthorizationResponse != null) {
+            return mLastAuthorizationResponse.request.clientId;
+        }
+
+        return null;
+    }
+
+    /**
      * Determines whether the current state represents a successful authorization,
      * from which at least either an access token or an ID token have been retrieved.
      */
@@ -404,6 +538,7 @@ public class AuthState {
         // the last token response and refresh token are now stale, as they are associated with
         // any previous authorization response
         mLastAuthorizationResponse = authResponse;
+        mLastDeviceAuthorizationResponse = null;
         mConfig = null;
         mLastTokenResponse = null;
         mRefreshToken = null;
@@ -412,6 +547,32 @@ public class AuthState {
         // if the response's mScope is null, it means that it equals that of the request
         // see: https://tools.ietf.org/html/rfc6749#section-5.1
         mScope = (authResponse.scope != null) ? authResponse.scope : authResponse.request.scope;
+    }
+
+    /**
+     * Updates the authorization state based on a new device authorization response.
+     */
+    public void update(
+            @Nullable DeviceAuthorizationResponse deviceAuthResponse,
+            @Nullable AuthorizationException authException) {
+        checkArgument(deviceAuthResponse != null ^ authException != null,
+                "exactly one of deviceAuthResponse or authException should be non-null");
+        if (authException != null) {
+            if (authException.type == AuthorizationException.TYPE_OAUTH_TOKEN_DEVICE_CODE_ERROR) {
+                mAuthorizationException = authException;
+            }
+            return;
+        }
+
+        // the last token response and refresh token are now stale, as they are associated with
+        // any previous authorization response
+        mLastDeviceAuthorizationResponse = deviceAuthResponse;
+        mLastAuthorizationResponse = null;
+        mConfig = null;
+        mLastTokenResponse = null;
+        mRefreshToken = null;
+        mAuthorizationException = null;
+        mScope = deviceAuthResponse.request.scope;
     }
 
     /**
@@ -464,6 +625,7 @@ public class AuthState {
         mRefreshToken = null;
         mScope = null;
         mLastAuthorizationResponse = null;
+        mLastDeviceAuthorizationResponse = null;
         mLastTokenResponse = null;
         mAuthorizationException = null;
     }
@@ -631,19 +793,80 @@ public class AuthState {
         if (mRefreshToken == null) {
             throw new IllegalStateException("No refresh token available for refresh request");
         }
-        if (mLastAuthorizationResponse == null) {
+
+        AuthorizationServiceConfiguration configuration = getConfiguration();
+        if (configuration == null) {
             throw new IllegalStateException(
                     "No authorization configuration available for refresh request");
         }
 
-        return new TokenRequest.Builder(
-                mLastAuthorizationResponse.request.configuration,
-                mLastAuthorizationResponse.request.clientId)
+        String clientId = getClientId();
+        if (clientId == null) {
+            throw new IllegalStateException("No client id available for refresh request");
+        }
+
+        return new TokenRequest.Builder(configuration, clientId)
                 .setGrantType(GrantTypeValues.REFRESH_TOKEN)
                 .setScope(null)
                 .setRefreshToken(mRefreshToken)
                 .setAdditionalParameters(additionalParameters)
                 .build();
+    }
+
+    /**
+     * Performs a token request through a polling sequence.
+     */
+    public void performTokenPollRequest(
+            @NonNull final AuthorizationService service,
+            @NonNull final AuthorizationService.TokenResponseCallback callback) {
+        try {
+            performTokenPollRequest(service, getClientAuthentication(), callback);
+        } catch (ClientAuthentication.UnsupportedAuthenticationMethod ex) {
+            callback.onTokenRequestCompleted(null, AuthorizationException.fromTemplate(
+                    AuthorizationException.DeviceCodeRequestErrors.CLIENT_ERROR, ex));
+        }
+    }
+
+    /**
+     * Performs a token request through a polling sequence.
+     */
+    public void performTokenPollRequest(
+            @NonNull final AuthorizationService service,
+            @NonNull final ClientAuthentication clientAuth,
+            @NonNull final AuthorizationService.TokenResponseCallback callback) {
+        performTokenPollRequest(service, clientAuth, Collections.emptyMap(), callback);
+    }
+
+    /**
+     * Performs a token request through a polling sequence.
+     */
+    public void performTokenPollRequest(
+            @NonNull final AuthorizationService service,
+            @NonNull final ClientAuthentication clientAuth,
+            @NonNull final Map<String, String> additionalParameters,
+            @NonNull final AuthorizationService.TokenResponseCallback callback) {
+        if (mLastDeviceAuthorizationResponse == null) {
+            AuthorizationException ex = AuthorizationException.fromTemplate(
+                        AuthorizationException.DeviceCodeRequestErrors.CLIENT_ERROR,
+                        new IllegalStateException("No device authorization available"));
+            callback.onTokenRequestCompleted(null, ex);
+            return;
+        }
+
+        mCancelTokenPollingTask = service.performTokenPollRequest(
+            mLastDeviceAuthorizationResponse.createTokenExchangeRequest(additionalParameters),
+            clientAuth,
+            mLastDeviceAuthorizationResponse.tokenPollingIntervalTime,
+            mLastDeviceAuthorizationResponse.codeExpirationTime,
+            callback);
+    }
+
+    public void cancelTokenPoll() {
+        if (mCancelTokenPollingTask == null) {
+            return;
+        }
+
+        mCancelTokenPollingTask.run();
     }
 
     /**
@@ -668,6 +891,13 @@ public class AuthState {
                     json,
                     KEY_LAST_AUTHORIZATION_RESPONSE,
                     mLastAuthorizationResponse.jsonSerialize());
+        }
+
+        if (mLastDeviceAuthorizationResponse != null) {
+            JsonUtil.put(
+                    json,
+                    KEY_LAST_DEVICE_AUTHORIZATION_RESPONSE,
+                    mLastDeviceAuthorizationResponse.jsonSerialize());
         }
 
         if (mLastTokenResponse != null) {
@@ -721,6 +951,11 @@ public class AuthState {
         if (json.has(KEY_LAST_AUTHORIZATION_RESPONSE)) {
             state.mLastAuthorizationResponse = AuthorizationResponse.jsonDeserialize(
                     json.getJSONObject(KEY_LAST_AUTHORIZATION_RESPONSE));
+        }
+
+        if (json.has(KEY_LAST_DEVICE_AUTHORIZATION_RESPONSE)) {
+            state.mLastDeviceAuthorizationResponse = DeviceAuthorizationResponse.jsonDeserialize(
+                json.getJSONObject(KEY_LAST_DEVICE_AUTHORIZATION_RESPONSE));
         }
 
         if (json.has(KEY_LAST_TOKEN_RESPONSE)) {

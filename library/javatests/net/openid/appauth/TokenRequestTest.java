@@ -35,6 +35,7 @@ public class TokenRequestTest {
 
     private static final String TEST_AUTHORIZATION_CODE = "ABCDEFGH";
     private static final String TEST_REFRESH_TOKEN = "IJKLMNOP";
+    private static final String TEST_DEVICE_CODE = "QRSTUVWX";
 
     private TokenRequest.Builder mMinimalBuilder;
     private TokenRequest.Builder mAuthorizationCodeRequestBuilder;
@@ -76,6 +77,13 @@ public class TokenRequestTest {
         mMinimalBuilder
                 .setAuthorizationCode("")
                 .build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuild_emptyDeviceCode() {
+        mMinimalBuilder
+            .setDeviceCode("")
+            .build();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -129,6 +137,21 @@ public class TokenRequestTest {
         assertThat(params).containsEntry(
                 TokenRequest.PARAM_REDIRECT_URI,
                 TEST_APP_REDIRECT_URI.toString());
+    }
+
+    @Test
+    public void testGetRequestParameters_forDeviceCode() {
+        TokenRequest request = mMinimalBuilder
+            .setDeviceCode(TEST_DEVICE_CODE)
+            .build();
+
+        Map<String, String> params = request.getRequestParameters();
+        assertThat(params).containsEntry(
+            TokenRequest.PARAM_GRANT_TYPE,
+            GrantTypeValues.DEVICE_CODE);
+        assertThat(params).containsEntry(
+            TokenRequest.PARAM_DEVICE_CODE,
+            TEST_DEVICE_CODE);
     }
 
     @Test

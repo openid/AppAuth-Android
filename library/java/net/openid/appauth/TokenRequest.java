@@ -61,6 +61,8 @@ public class TokenRequest {
     @VisibleForTesting
     static final String KEY_AUTHORIZATION_CODE = "authorizationCode";
     @VisibleForTesting
+    static final String KEY_DEVICE_CODE = "deviceCode";
+    @VisibleForTesting
     static final String KEY_REFRESH_TOKEN = "refreshToken";
     @VisibleForTesting
     static final String KEY_CODE_VERIFIER = "codeVerifier";
@@ -71,6 +73,9 @@ public class TokenRequest {
 
     @VisibleForTesting
     static final String PARAM_CODE = "code";
+
+    @VisibleForTesting
+    static final String PARAM_DEVICE_CODE = "device_code";
 
     @VisibleForTesting
     static final String PARAM_CODE_VERIFIER = "code_verifier";
@@ -179,6 +184,15 @@ public class TokenRequest {
     public final String authorizationCode;
 
     /**
+     * A device code to be exchanged for one or more tokens.
+     *
+     * @see "OAuth 2.0 Device Grant (RFC 8628), Section 3.4
+     * <https://tools.ietf.org/html/rfc8628#section-3.4>"
+     */
+    @Nullable
+    public final String deviceCode;
+
+    /**
      * A space-delimited set of scopes used to determine the scope of any returned tokens.
      *
      * @see "The OAuth 2.0 Authorization Framework (RFC 6749), Section 3.3
@@ -239,6 +253,9 @@ public class TokenRequest {
 
         @Nullable
         private String mAuthorizationCode;
+
+        @Nullable
+        private String mDeviceCode;
 
         @Nullable
         private String mRefreshToken;
@@ -388,6 +405,21 @@ public class TokenRequest {
         }
 
         /**
+         * Specifies the device code for the request. If provided, the device code must not be
+         * empty.
+         *
+         * Specifying a device code normally implies that this is a request to exchange this
+         * device code for one or more tokens. If this is not intended, the grant type should
+         * be explicitly set.
+         */
+        @NonNull
+        public Builder setDeviceCode(@Nullable String deviceCode) {
+            checkNullOrNotEmpty(deviceCode, "device code must not be empty");
+            mDeviceCode = deviceCode;
+            return this;
+        }
+
+        /**
          * Specifies the refresh token for the request. If a non-null value is provided, it must
          * not be empty.
          *
@@ -440,6 +472,12 @@ public class TokenRequest {
                                 + GrantTypeValues.AUTHORIZATION_CODE);
             }
 
+            if (GrantTypeValues.DEVICE_CODE.equals(grantType)) {
+                checkNotNull(mDeviceCode,
+                        "device code must be specified for grant_type = "
+                                + GrantTypeValues.DEVICE_CODE);
+            }
+
             if (GrantTypeValues.REFRESH_TOKEN.equals(grantType)) {
                 checkNotNull(mRefreshToken,
                         "refresh token must be specified for grant_type = "
@@ -460,6 +498,7 @@ public class TokenRequest {
                     mRedirectUri,
                     mScope,
                     mAuthorizationCode,
+                    mDeviceCode,
                     mRefreshToken,
                     mCodeVerifier,
                     Collections.unmodifiableMap(mAdditionalParameters));
@@ -470,6 +509,8 @@ public class TokenRequest {
                 return mGrantType;
             } else if (mAuthorizationCode != null) {
                 return GrantTypeValues.AUTHORIZATION_CODE;
+            } else if (mDeviceCode != null) {
+                return GrantTypeValues.DEVICE_CODE;
             } else if (mRefreshToken != null) {
                 return GrantTypeValues.REFRESH_TOKEN;
             } else {
@@ -486,6 +527,7 @@ public class TokenRequest {
             @Nullable Uri redirectUri,
             @Nullable String scope,
             @Nullable String authorizationCode,
+            @Nullable String deviceCode,
             @Nullable String refreshToken,
             @Nullable String codeVerifier,
             @NonNull Map<String, String> additionalParameters) {
@@ -496,6 +538,7 @@ public class TokenRequest {
         this.redirectUri = redirectUri;
         this.scope = scope;
         this.authorizationCode = authorizationCode;
+        this.deviceCode = deviceCode;
         this.refreshToken = refreshToken;
         this.codeVerifier = codeVerifier;
         this.additionalParameters = additionalParameters;
@@ -521,6 +564,7 @@ public class TokenRequest {
         params.put(PARAM_GRANT_TYPE, grantType);
         putIfNotNull(params, PARAM_REDIRECT_URI, redirectUri);
         putIfNotNull(params, PARAM_CODE, authorizationCode);
+        putIfNotNull(params, PARAM_DEVICE_CODE, deviceCode);
         putIfNotNull(params, PARAM_REFRESH_TOKEN, refreshToken);
         putIfNotNull(params, PARAM_CODE_VERIFIER, codeVerifier);
         putIfNotNull(params, PARAM_SCOPE, scope);
@@ -552,6 +596,7 @@ public class TokenRequest {
         JsonUtil.putIfNotNull(json, KEY_REDIRECT_URI, redirectUri);
         JsonUtil.putIfNotNull(json, KEY_SCOPE, scope);
         JsonUtil.putIfNotNull(json, KEY_AUTHORIZATION_CODE, authorizationCode);
+        JsonUtil.putIfNotNull(json, KEY_DEVICE_CODE, deviceCode);
         JsonUtil.putIfNotNull(json, KEY_REFRESH_TOKEN, refreshToken);
         JsonUtil.putIfNotNull(json, KEY_CODE_VERIFIER, codeVerifier);
         JsonUtil.put(json, KEY_ADDITIONAL_PARAMETERS,
@@ -586,6 +631,7 @@ public class TokenRequest {
                 JsonUtil.getUriIfDefined(json, KEY_REDIRECT_URI),
                 JsonUtil.getStringIfDefined(json, KEY_SCOPE),
                 JsonUtil.getStringIfDefined(json, KEY_AUTHORIZATION_CODE),
+                JsonUtil.getStringIfDefined(json, KEY_DEVICE_CODE),
                 JsonUtil.getStringIfDefined(json, KEY_REFRESH_TOKEN),
                 JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER),
                 JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));

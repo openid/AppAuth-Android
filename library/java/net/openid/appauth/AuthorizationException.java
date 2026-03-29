@@ -125,6 +125,15 @@ public final class AuthorizationException extends Exception {
      */
     public static final int TYPE_OAUTH_REGISTRATION_ERROR = 4;
 
+    /**
+     * The error type for OAuth specific errors on the token endpoint while using the
+     * {@link GrantTypeValues#DEVICE_CODE} grant type.
+     *
+     * @see "OAuth 2.0 Device Grant" (RFC 8628), Section 3.5
+     * <https://tools.ietf.org/html/rfc8628#section-3.5>"
+     */
+    public static final int TYPE_OAUTH_TOKEN_DEVICE_CODE_ERROR = 5;
+
     @VisibleForTesting
     static final String KEY_TYPE = "type";
 
@@ -462,6 +471,78 @@ public final class AuthorizationException extends Exception {
         }
     }
 
+    /**
+     * Error codes related to failed token requests with the {@link GrantTypeValues#DEVICE_CODE}
+     * grant type.
+     *
+     * @see "OAuth 2.0 Device Grant" (RFC 8628), Section 3.5
+     * <https://tools.ietf.org/html/rfc8628#section-3.5>"
+     */
+    public static final class DeviceCodeRequestErrors {
+        // codes in this group should be between 5000-5999
+
+        /**
+         * An `authorization_pending` OAuth2 error response.
+         */
+        public static final AuthorizationException AUTHORIZATION_PENDING =
+                tokenDeviceCodeEx(5000, "authorization_pending");
+
+        /**
+         * A `slow_down` OAuth2 error response.
+         */
+        public static final AuthorizationException SLOW_DOWN =
+                tokenDeviceCodeEx(5001, "slow_down");
+
+        /**
+         * An `access_denied` OAuth2 error response.
+         */
+        public static final AuthorizationException ACCESS_DENIED =
+                tokenDeviceCodeEx(5002, "access_denied");
+
+        /**
+         * An `expired_token` OAuth2 error response.
+         */
+        public static final AuthorizationException EXPIRED_TOKEN =
+                tokenDeviceCodeEx(5003, "expired_token");
+
+        /**
+         * An authorization error occurring on the client rather than the server. For example,
+         * due to client misconfiguration. This error should be treated as unrecoverable.
+         */
+        public static final AuthorizationException CLIENT_ERROR =
+                tokenDeviceCodeEx(5004, null);
+
+        /**
+         * Indicates an OAuth error as per RFC 6749, but the error code is not known to the
+         * AppAuth for Android library. It could be a custom error or code, or one from an
+         * OAuth extension. The {@link #error} field provides the exact error string returned by
+         * the server.
+         */
+        public static final AuthorizationException OTHER =
+                tokenDeviceCodeEx(5005, null);
+
+        private static final Map<String, AuthorizationException> STRING_TO_EXCEPTION =
+                exceptionMapByString(
+                        AUTHORIZATION_PENDING,
+                        SLOW_DOWN,
+                        ACCESS_DENIED,
+                        EXPIRED_TOKEN,
+                        CLIENT_ERROR,
+                        OTHER);
+
+        /**
+         * Returns the matching exception type for the provided OAuth2 error string, or
+         * {@link #OTHER} if unknown.
+         */
+        public static AuthorizationException byString(String error) {
+            AuthorizationException ex = STRING_TO_EXCEPTION.get(error);
+            if (ex != null) {
+                return ex;
+            }
+            return OTHER;
+        }
+    }
+
     private static AuthorizationException generalEx(int code, @Nullable String errorDescription) {
         return new AuthorizationException(
                 TYPE_GENERAL_ERROR, code, null, errorDescription, null, null);
@@ -482,10 +563,15 @@ public final class AuthorizationException extends Exception {
                 TYPE_OAUTH_REGISTRATION_ERROR, code, error, null, null, null);
     }
 
+    private static AuthorizationException tokenDeviceCodeEx(int code, @Nullable String error) {
+        return new AuthorizationException(
+                TYPE_OAUTH_TOKEN_DEVICE_CODE_ERROR, code, error, null, null, null);
+    }
+
     /**
-     * Creates an exception based on one of the existing values defined in
-     * {@link GeneralErrors}, {@link AuthorizationRequestErrors} or {@link TokenRequestErrors},
-     * providing a root cause.
+     * Creates an exception based on one of the existing values defined in {@link GeneralErrors},
+     * {@link AuthorizationRequestErrors}, {@link TokenRequestErrors} or
+     * {@link DeviceCodeRequestErrors} providing a root cause.
      */
     public static AuthorizationException fromTemplate(
             @NonNull AuthorizationException ex,
@@ -501,8 +587,8 @@ public final class AuthorizationException extends Exception {
 
     /**
      * Creates an exception based on one of the existing values defined in
-     * {@link AuthorizationRequestErrors} or {@link TokenRequestErrors}, adding information
-     * retrieved from OAuth error response.
+     * {@link AuthorizationRequestErrors}, {@link TokenRequestErrors} or
+     * {@link DeviceCodeRequestErrors}, adding information retrieved from OAuth error response.
      */
     public static AuthorizationException fromOAuthTemplate(
             @NonNull AuthorizationException ex,
@@ -604,6 +690,7 @@ public final class AuthorizationException extends Exception {
      * @see #TYPE_OAUTH_AUTHORIZATION_ERROR
      * @see #TYPE_OAUTH_TOKEN_ERROR
      * @see #TYPE_RESOURCE_SERVER_AUTHORIZATION_ERROR
+     * @see #TYPE_OAUTH_TOKEN_DEVICE_CODE_ERROR
      */
     public final int type;
 

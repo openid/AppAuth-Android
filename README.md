@@ -21,11 +21,16 @@ including using
 for authorization requests. For this reason,
 `WebView` is explicitly *not* supported due to usability and security reasons.
 
-The library also supports the [PKCE](https://tools.ietf.org/html/rfc7636)
+The library supports the [PKCE](https://tools.ietf.org/html/rfc7636)
 extension to OAuth which was created to secure authorization codes in public
 clients when custom URI scheme redirects are used. The library is friendly to
 other extensions (standard or otherwise) with the ability to handle additional
 parameters in all protocol requests and responses.
+
+The library also offers device flow support as described in
+[RFC 8628 - Device Authorization Grant](https://tools.ietf.org/html/rfc8628)
+for authenticating devices that either lack a browser or have limited
+input capabilities to fully perform the traditional authentication flow.
 
 A talk providing an overview of using the library for enterprise single sign-on (produced by
 Google) can be found here:
@@ -48,7 +53,9 @@ be used with the library.
 
 In general, AppAuth can work with any Authorization Server (AS) that supports
 native apps as documented in [RFC 8252](https://tools.ietf.org/html/rfc8252),
-either through custom URI scheme redirects, or App Links.
+either through custom URI scheme redirects, or App Links. For the device flow,
+the AS would need to properly support the device authorization grant as
+documented in [RFC 8628](https://tools.ietf.org/html/rfc8628).
 AS's that assume all clients are web-based or require clients to maintain
 confidentiality of the client secrets may not work well.
 
@@ -512,6 +519,125 @@ public void writeAuthState(@NonNull AuthState state) {
 
 The demo app has an [AuthStateManager](https://github.com/openid/AppAuth-Android/blob/master/app/java/net/openid/appauthdemo/AuthStateManager.java)
 type which demonstrates this in more detail.
+
+## Implementing the device flow
+
+Native apps that run on devices that lack a suitable browser integration or
+have limited input capabilities should use the
+[device flow](https://datatracker.ietf.org/doc/html/rfc8628#section-1)
+to authorize the limited device through another, fully capable, device.
+
+This flow is effectively composed of 4 stages:
+
+1. Discovering or specifying the endpoints to interact with the provider.
+2. Exchanging the client identifier to the authorization server to obtain a
+   device code, an end-user code and the end-user verification URI.
+3. The end-user enters the code provided by the authorization server at the
+   verification URI on a fully capable device, proceeds through the
+   authentication flow and reviews the authorization request associated to the
+   code.
+4. While the end-user completes the authorization process on the other device,
+   polling on the authorization server most be performed with the device code
+   and client identifier to obtain a refresh token and/or ID token.
+
+### Authorization service configuration
+
+The authorization service configuration construction is the same as for the
+regular authorization flow.
+
+Refer to the authorization code flow
+[authorization service configuration](#authorization-service-configuration)
+and use the according constructor to build a configuration with a device
+authorization endpoint in case of manual creation, otherwise, verify that your
+authorization server exposes a device authorization endpoint through the OpenID
+Connect discovery document.
+
+### Obtaining an end-user code
+
+A device authorization request can be performed to obtain the device
+verification URI and the end-user code by constructing a
+`DeviceAuthorizationRequest`, using its Builder:
+
+```java
+DeviceAuthorizationRequest deviceAuthRequest =
+    new DeviceAuthorizationRequest.Builder(authorizationServiceConfiguration, clientId)
+        .setScope("openid email profile")
+        .build();
+```
+
+The request can then be executed through the `AuthorizationService`:
+
+```java
+authService.performDeviceAuthorizationRequest(
+    deviceAuthRequest,
+    new AuthorizationService.DeviceAuthorizationResponseCallback() {
+      @Override public void onDeviceAuthorizationRequestCompleted(
+            DeviceAuthorizationResponse resp, AuthorizationException ex) {
+          if (resp != null) {
+            // device authorization succeeded
+          } else {
+            // authorization failed, check ex for more details
+          }
+        }
+    });
+```
+
+The response can be provided to the `AuthState` instance for easy persistence
+and further processing:
+
+```java
+authState.update(resp, ex);
+```
+
+### Exchanging the end-user code
+
+Given a successful device authorization response carrying an end-user code,
+a token request can be made to exchange the code for a refresh token:
+
+```java
+authService.performTokenPollRequestRequest(
+    resp.createTokenExchangeRequest(),
+    resp.tokenPollingIntervalTime,
+    resp.codeExpirationTime,
+    new AuthorizationService.TokenResponseCallback() {
+      @Override public void onTokenRequestCompleted(
+            TokenResponse resp, AuthorizationException ex) {
+          if (resp != null) {
+            // exchange succeeded
+          } else {
+            // authorization failed, check ex for more details
+          }
+        }
+    });
+```
+
+Alternatively, the `AuthState` exposes a helper method to perform the polling
+after a successful device authorization request has been completed:
+
+```java
+authState.performTokenPollRequest(authService,
+    new AuthorizationService.TokenResponseCallback() {
+      @Override public void onTokenRequestCompleted(
+            TokenResponse resp, AuthorizationException ex) {
+          if (resp != null) {
+            // exchange succeeded
+          } else {
+            // authorization failed, check ex for more details
+          }
+        }
+    });
+```
+
+In both use cases, the token response can then be used to update an `AuthState`
+instance:
+
+```java
+authState.update(resp, ex);
+```
+
+### Ending current session
+
+Revoking ID tokens and refresh tokens is currently not supported.
 
 ## Advanced configuration
 

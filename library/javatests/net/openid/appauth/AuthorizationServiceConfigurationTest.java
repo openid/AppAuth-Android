@@ -60,6 +60,7 @@ public class AuthorizationServiceConfigurationTest {
     private static final String TEST_TOKEN_ENDPOINT = "https://test.openid.com/o/oauth/token";
     private static final String TEST_END_SESSION_ENDPOINT = "https://test.openid.com/o/oauth/logout";
     private static final String TEST_REGISTRATION_ENDPOINT = "https://test.openid.com/o/oauth/registration";
+    private static final String TEST_DEVICE_AUTH_ENDPOINT = "https://test.openid.com/o/oauth/device";
     private static final String TEST_USERINFO_ENDPOINT = "https://test.openid.com/o/oauth/userinfo";
     private static final String TEST_JWKS_URI = "https://test.openid.com/o/oauth/jwks";
     private static final List<String> TEST_RESPONSE_TYPE_SUPPORTED = Arrays.asList("code", "token");
@@ -77,6 +78,7 @@ public class AuthorizationServiceConfigurationTest {
             + " \"token_endpoint\": \"" + TEST_TOKEN_ENDPOINT + "\",\n"
             + " \"registration_endpoint\": \"" + TEST_REGISTRATION_ENDPOINT + "\",\n"
             + " \"end_session_endpoint\": \"" + TEST_END_SESSION_ENDPOINT + "\",\n"
+            + " \"device_authorization_endpoint\": \"" + TEST_DEVICE_AUTH_ENDPOINT + "\",\n"
             + " \"userinfo_endpoint\": \"" + TEST_USERINFO_ENDPOINT + "\",\n"
             + " \"jwks_uri\": \"" + TEST_JWKS_URI + "\",\n"
             + " \"response_types_supported\": " + toJson(TEST_RESPONSE_TYPE_SUPPORTED) + ",\n"
@@ -127,7 +129,8 @@ public class AuthorizationServiceConfigurationTest {
                 Uri.parse(TEST_AUTH_ENDPOINT),
                 Uri.parse(TEST_TOKEN_ENDPOINT),
                 Uri.parse(TEST_REGISTRATION_ENDPOINT),
-                Uri.parse(TEST_END_SESSION_ENDPOINT));
+                Uri.parse(TEST_END_SESSION_ENDPOINT),
+                Uri.parse(TEST_DEVICE_AUTH_ENDPOINT));
         when(mConnectionBuilder.openConnection(any(Uri.class))).thenReturn(mHttpConnection);
 
         mPausedExecutorService = new PausedExecutorService();
@@ -201,6 +204,7 @@ public class AuthorizationServiceConfigurationTest {
         assertEquals(TEST_AUTH_ENDPOINT, config.authorizationEndpoint.toString());
         assertEquals(TEST_TOKEN_ENDPOINT, config.tokenEndpoint.toString());
         assertEquals(TEST_REGISTRATION_ENDPOINT, config.registrationEndpoint.toString());
+        assertEquals(TEST_DEVICE_AUTH_ENDPOINT, config.deviceAuthorizationEndpoint.toString());
         assertEquals(TEST_END_SESSION_ENDPOINT, config.endSessionEndpoint.toString());
     }
 

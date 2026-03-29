@@ -48,6 +48,9 @@ public class AuthorizationServiceDiscovery {
     static final UriField AUTHORIZATION_ENDPOINT = uri("authorization_endpoint");
 
     @VisibleForTesting
+    static final UriField DEVICE_AUTHORIZATION_ENDPOINT = uri("device_authorization_endpoint");
+
+    @VisibleForTesting
     static final UriField TOKEN_ENDPOINT = uri("token_endpoint");
 
     @VisibleForTesting
@@ -266,6 +269,13 @@ public class AuthorizationServiceDiscovery {
      */
     public Uri getEndSessionEndpoint() {
         return get(END_SESSION_ENDPOINT);
+    }
+
+    /**
+     * The OAuth 2 device authorization endpoint URI.
+     */
+    public Uri getDeviceAuthorizationEndpoint() {
+        return get(DEVICE_AUTHORIZATION_ENDPOINT);
     }
 
     /**
