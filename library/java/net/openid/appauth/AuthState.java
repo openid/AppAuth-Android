@@ -127,7 +127,8 @@ public class AuthState {
     /**
      * The most recent refresh token received from the server, if available. Rather than using
      * this property directly as part of any request depending on authorization state, it is
-     * recommended to call {@link #performActionWithFreshTokens(AuthorizationService,
+     * recommended to 
+     {@link #performActionWithFreshTokens(AuthorizationService,
      * AuthStateAction) performActionWithFreshTokens} to ensure that fresh tokens are available.
      */
     @Nullable
