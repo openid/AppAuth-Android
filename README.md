@@ -543,12 +543,12 @@ provided, such as:
 
 - [Browsers](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/browser/Browsers.java):
   contains a set of constants for the official package names and signatures
-  of Chrome, Firefox and Samsung SBrowser.
+  of Chrome, Firefox, Microsoft Edge and Samsung SBrowser.
 - [VersionedBrowserMatcher](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/browser/VersionedBrowserMatcher.java):
   will match a browser if it has a matching package name and signature, and
   a version number within a defined
   [VersionRange](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/browser/VersionRange.java). This class also provides some static instances for matching
-  Chrome, Firefox and Samsung SBrowser.
+  Chrome, Firefox, Microsoft Edge and Samsung SBrowser.
 - [BrowserAllowList](https://github.com/openid/AppAuth-Android/blob/master/library/java/net/openid/appauth/browser/BrowserAllowList.java):
   takes a list of BrowserMatcher instances, and will match a browser if any
   of these child BrowserMatcher instances signals a match.
@@ -582,6 +582,40 @@ AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
             true, // when this browser is used via a custom tab
             VersionRange.atMost("5.3")
         )))
+    .build();
+AuthorizationService authService =
+        new AuthorizationService(context, appAuthConfig);
+```
+
+### Excluding Microsoft Edge to avoid redirect interception
+
+Microsoft Edge on Android may intercept the authorization redirect and show
+a "Stay in Microsoft Edge" prompt instead of seamlessly returning control to
+your app ([#1151](https://github.com/openid/AppAuth-Android/issues/1151)).
+This can leave users stuck on the login page if they tap the primary button.
+
+To work around this, you can exclude Edge from the authorization flow using
+a `BrowserDenyList`:
+
+```java
+AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
+    .setBrowserMatcher(new BrowserDenyList(
+        VersionedBrowserMatcher.EDGE_CUSTOM_TAB,
+        VersionedBrowserMatcher.EDGE_BROWSER))
+    .build();
+AuthorizationService authService =
+        new AuthorizationService(context, appAuthConfig);
+```
+
+Alternatively, you can use a `BrowserAllowList` to explicitly permit only
+browsers known to handle redirects correctly:
+
+```java
+AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
+    .setBrowserMatcher(new BrowserAllowList(
+        VersionedBrowserMatcher.CHROME_CUSTOM_TAB,
+        VersionedBrowserMatcher.FIREFOX_CUSTOM_TAB,
+        VersionedBrowserMatcher.SAMSUNG_CUSTOM_TAB))
     .build();
 AuthorizationService authService =
         new AuthorizationService(context, appAuthConfig);
