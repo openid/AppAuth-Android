@@ -62,6 +62,24 @@ public class VersionedBrowserMatcher implements BrowserMatcher {
             VersionRange.ANY_VERSION);
 
     /**
+     * Matches any version of Microsoft Edge for use as a custom tab.
+     */
+    public static final VersionedBrowserMatcher EDGE_CUSTOM_TAB = new VersionedBrowserMatcher(
+            Browsers.Edge.PACKAGE_NAME,
+            Browsers.Edge.SIGNATURE_SET,
+            true,
+            VersionRange.atLeast(Browsers.Edge.MINIMUM_VERSION_FOR_CUSTOM_TAB));
+
+    /**
+     * Matches any version of Microsoft Edge for use as a standalone browser.
+     */
+    public static final VersionedBrowserMatcher EDGE_BROWSER = new VersionedBrowserMatcher(
+            Browsers.Edge.PACKAGE_NAME,
+            Browsers.Edge.SIGNATURE_SET,
+            false,
+            VersionRange.ANY_VERSION);
+
+    /**
      * Matches any version of SBrowser for use as a standalone browser.
      */
     public static final VersionedBrowserMatcher SAMSUNG_BROWSER = new VersionedBrowserMatcher(
